@@ -1,0 +1,234 @@
+.list {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.empty {
+  margin: 0;
+  width: min(100%, 1100px);
+  padding: 28px 24px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  text-align: center;
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.card {
+  overflow: hidden;
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  box-shadow: var(--corp-shadow-sm);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    border-color var(--corp-transition);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--corp-accent-border);
+  box-shadow: var(--corp-shadow-md);
+}
+
+.cardInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.cardHeader {
+  padding: 12px 14px 10px;
+  background: var(--corp-surface-muted);
+  border-bottom: 1px solid var(--corp-line);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardTitle {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--corp-text);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardHeader span {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary-hover);
+  border: 1px solid var(--corp-accent-border);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.cardVisual {
+  min-height: 180px;
+  padding: 14px;
+  background: var(--corp-panel);
+  overflow: hidden;
+}
+
+.cardVisualBadge {
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--corp-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--corp-surface-muted);
+  color: var(--corp-primary);
+  font-size: 2.2rem;
+  font-weight: 800;
+  transition: transform 0.25s ease;
+}
+
+.cardVisualText {
+  margin: 10px 0 0;
+  color: var(--corp-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cardBody {
+  padding: 10px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.price {
+  color: #d32f2f;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.support {
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summary {
+  margin: 0;
+  color: var(--corp-table-header-text);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.action {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: 1px solid var(--corp-accent-border);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary-hover);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--corp-transition),
+    border-color var(--corp-transition),
+    color var(--corp-transition);
+}
+
+.action:hover {
+  background: var(--corp-primary-hover-bg);
+  border-color: var(--corp-accent-border-strong);
+  color: var(--corp-primary-hover);
+}
+
+.action:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.card:hover .cardVisualBadge {
+  transform: scale(1.05);
+}
+
+@media (max-width: 960px) {
+  .list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .list {
+    gap: 10px;
+  }
+
+  .cardVisual {
+    min-height: auto;
+    padding: 10px 10px 8px;
+  }
+
+  .cardVisualBadge {
+    height: 130px;
+    font-size: 1.7rem;
+  }
+
+  .cardHeader {
+    padding: 10px 10px 8px;
+    gap: 6px;
+  }
+
+  .cardTitle {
+    font-size: 12px;
+  }
+
+  .cardHeader span {
+    padding: 2px 6px;
+    font-size: 10px;
+    max-width: 60px;
+  }
+
+  .cardBody {
+    padding: 8px 10px 10px;
+    gap: 6px;
+  }
+
+  .price,
+  .support {
+    font-size: 12px;
+  }
+
+  .summary {
+    font-size: 11px;
+  }
+
+  .action {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+react-app/node_modules/
+
+dist/
+react-app/dist/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+Thumbs.db
+
+.claude/settings.local.json
