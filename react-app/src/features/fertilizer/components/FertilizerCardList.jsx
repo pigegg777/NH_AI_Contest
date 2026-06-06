@@ -3,34 +3,29 @@ import styles from './FertilizerCardList.module.css';
 function FertilizerCard({ item }) {
   return (
     <li className={styles.card}>
-      <article className={styles.cardInner}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle} title={item.productName}>
-            {item.productName}
-          </h3>
-          <span title={item.fertilizerType}>{item.fertilizerType}</span>
+      <div className={styles.cardHead}>
+        <span className={styles.typeTag}>{item.fertilizerType}</span>
+        <h3 className={styles.cardTitle} title={item.productName}>
+          {item.productName}
+        </h3>
+      </div>
+
+      <div className={styles.cardBody}>
+        <div className={styles.infoRow}>
+          <span className={styles.infoKey}>가격</span>
+          <span className={styles.price}>{item.priceLabel}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.infoKey}>지원</span>
+          <span className={styles.support}>{item.supportLabel}</span>
+        </div>
+        <div className={styles.infoRow}>
+          <span className={styles.infoKey}>사용</span>
+          <span className={styles.infoVal}>{item.usageLabel}</span>
         </div>
 
-        <div className={styles.cardVisual}>
-          <div className={styles.cardVisualBadge} aria-hidden="true">
-            {item.fertilizerType.slice(0, 1)}
-          </div>
-          <p className={styles.cardVisualText}>{item.usageLabel}</p>
-        </div>
-
-        <div className={styles.cardBody}>
-          <div className={styles.meta}>
-            <span className={styles.price}>{item.priceLabel}</span>
-            <span className={styles.support}>{item.supportLabel}</span>
-          </div>
-
-          <p className={styles.summary}>{item.featureSummary}</p>
-
-          <button type="button" className={styles.action}>
-            상세 보기
-          </button>
-        </div>
-      </article>
+        <p className={styles.summary}>{item.featureSummary}</p>
+      </div>
     </li>
   );
 }

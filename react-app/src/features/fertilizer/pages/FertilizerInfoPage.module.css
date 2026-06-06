@@ -1,219 +1,145 @@
 .page {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 28px 20px 60px;
+  padding: 24px 20px 60px;
 }
 
-.title {
+/* ── 툴바 (검색 + 탭) ── */
+.toolbar {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto 22px;
-  color: var(--corp-text);
-}
-
-.titleIconBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--corp-primary);
-  font-size: 1.5rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.titleText {
-  display: block;
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.15;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--corp-line);
 }
 
 .searchWrap {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
 }
 
 .searchLabel {
-  width: min(520px, 100%);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--corp-table-header-text);
+  color: var(--corp-muted);
+  white-space: nowrap;
 }
 
 .searchInput {
-  width: min(520px, 100%);
-  min-height: 48px;
-  padding: 0 18px;
-  border: 1px solid var(--corp-line);
-  border-radius: 999px;
+  flex: 1;
+  max-width: 400px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
-  box-shadow: var(--corp-shadow-sm);
+  font-size: 0.9rem;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--corp-accent-border-strong);
+  border-color: var(--corp-primary);
   box-shadow: var(--corp-focus-ring);
 }
 
+/* ── 카테고리 탭 ── */
 .categoryWrap {
   display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
 }
 
 .categoryList {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  width: min(100%, 980px);
+  gap: 4px;
 }
 
 .categoryItem {
-  min-height: 44px;
-  padding: 0 22px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--corp-radius-sm);
   background: transparent;
   color: var(--corp-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  font-weight: 500;
+  font-size: 13.5px;
+  font-weight: 400;
   cursor: pointer;
-  box-shadow: none;
-  transition:
-    color var(--corp-transition),
-    border-color var(--corp-transition);
+  transition: color var(--corp-transition), background var(--corp-transition), border-color var(--corp-transition);
 }
 
 .categoryItem:hover {
-  border-bottom-color: var(--corp-line-strong);
-  color: var(--corp-table-header-text);
+  background: var(--corp-surface-muted);
+  color: var(--corp-text);
 }
 
 .categoryItemActive {
-  color: var(--corp-primary-hover);
-  border-bottom-color: var(--corp-primary);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  border-color: var(--corp-accent-border);
   font-weight: 700;
 }
 
-.listSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
+/* ── 목록 헤더 ── */
 .listHeader {
-  width: min(100%, 1100px);
-  margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .listTitle {
   margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--corp-text);
-  font-size: 1.25rem;
 }
 
 .listCount {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: var(--corp-primary-soft);
-  color: var(--corp-primary-hover);
-  border: 1px solid var(--corp-accent-border);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--corp-muted);
 }
 
+/* ── 로딩/에러 상태 ── */
 .state {
   width: min(560px, 100%);
-  margin: 96px auto 0;
-  padding: 24px;
+  margin: 80px auto 0;
+  padding: 20px 24px;
   border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius-lg);
+  border-radius: var(--corp-radius);
   background: var(--corp-panel);
-  color: var(--corp-table-header-text);
+  color: var(--corp-muted);
   text-align: center;
-  box-shadow: var(--corp-shadow-sm);
 }
 
-@media (max-width: 780px) {
+@media (max-width: 680px) {
   .page {
-    padding: 18px 14px 40px;
-  }
-
-  .title {
-    gap: 12px;
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  .titleIconBadge {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
-  }
-
-  .titleText {
-    font-size: 26px;
-    letter-spacing: 0.06em;
+    padding: 16px 14px 40px;
   }
 
   .searchWrap {
-    align-items: stretch;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .searchLabel,
   .searchInput {
+    max-width: 100%;
     width: 100%;
-  }
-
-  .categoryWrap {
-    justify-content: stretch;
   }
 
   .categoryList {
-    width: 100%;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
+    gap: 4px;
+    width: 100%;
   }
 
   .categoryItem {
-    min-height: 32px;
-    padding: 4px 1px;
+    height: 30px;
+    padding: 0 4px;
     font-size: 12px;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
     text-align: center;
-    white-space: normal;
     word-break: keep-all;
-    overflow-wrap: anywhere;
-  }
-
-  .listHeader {
-    align-items: flex-start;
-    flex-direction: column;
   }
 }

@@ -12,3 +12,4 @@ react-app/dist/
 Thumbs.db
 
 .claude/settings.local.json
+.gstack/
