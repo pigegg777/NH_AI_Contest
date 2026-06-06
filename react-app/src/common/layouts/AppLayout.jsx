@@ -2,7 +2,7 @@ import styles from './AppLayout.module.css';
 
 const PAGE_LABELS = {
   fertilizer: '비료 정보',
-  'excel-extract': '판매단가 분석',
+  'excel-extract': '데이터 설정/수정',
 };
 
 function BackArrow() {

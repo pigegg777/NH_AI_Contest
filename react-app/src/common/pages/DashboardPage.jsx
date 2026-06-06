@@ -37,8 +37,8 @@ const FEATURES = [
   {
     key: 'excel-extract',
     Icon: ChartIcon,
-    title: '판매단가 분석',
-    description: '엑셀 파일에서 판매단가를 자동으로 추출하고 분석하세요.',
+    title: '데이터 설정/수정',
+    description: '엑셀 파일에서 판매단가를 자동으로 추출하고 데이터를 설정·수정하세요.',
   },
 ];
 
