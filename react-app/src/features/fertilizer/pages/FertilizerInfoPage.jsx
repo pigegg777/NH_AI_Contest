@@ -26,7 +26,7 @@ function SearchIcon() {
 
 function CategoryTabs({ items, activeItem, onSelect }) {
   return (
-    <div className={styles.categoryList} role="tablist" aria-label="비료 유형">
+    <div className={styles.categoryList} role="tablist" aria-label="자재 유형">
       {items.map((item) => {
         const isActive = item === activeItem;
         return (
@@ -64,7 +64,7 @@ export default function FertilizerInfoPage() {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <p className={styles.state}>비료 데이터를 불러오는 중…</p>
+        <p className={styles.state}>농자재 데이터를 불러오는 중…</p>
       </div>
     );
   }
@@ -93,15 +93,15 @@ export default function FertilizerInfoPage() {
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="상품명, 비료 유형, 특징 검색…"
-            aria-label="비료 검색"
+            placeholder="상품명, 자재 유형, 특징 검색…"
+            aria-label="농자재 검색"
           />
         </div>
         <CategoryTabs items={categoryItems} activeItem={category} onSelect={setCategory} />
       </div>
 
       <div className={styles.listHeader}>
-        <h2 className={styles.listTitle}>비료 목록</h2>
+        <h2 className={styles.listTitle}>농자재 목록</h2>
         <span className={styles.listCount}>{filteredItems.length}건</span>
       </div>
 
