@@ -1,0 +1,145 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #e8f5ed 0%, #f4f2ef 55%, #eef4f0 100%);
+  padding: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 2.75rem 2.5rem 2.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--corp-line, #e2ddd8);
+  box-shadow: 0 8px 32px rgba(17, 24, 39, 0.1), 0 2px 8px rgba(17, 24, 39, 0.06);
+  width: 100%;
+  max-width: 400px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.badge {
+  width: 36px;
+  height: 36px;
+  background: #1d4a2e;
+  color: #f5c842;
+  font-size: 0.72rem;
+  font-weight: 900;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #ede9e4;
+  margin: 0 0 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 1.1rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #555;
+}
+
+.input {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #ddd9d4;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #111;
+  outline: none;
+  background: #faf9f7;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.input:focus {
+  border-color: #1d4a2e;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(29, 74, 46, 0.12);
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  background: #1d4a2e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.button:hover {
+  background: #163622;
+  box-shadow: 0 4px 12px rgba(29, 74, 46, 0.3);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.linkButton {
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.4rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.83rem;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.linkButton:hover {
+  color: #1d4a2e;
+}
+
+.error {
+  margin-top: 0.65rem;
+  font-size: 0.83rem;
+  color: #b91c1c;
+  padding: 0.55rem 0.75rem;
+  background: #fef2f2;
+  border-radius: 6px;
+  border: 1px solid rgba(185, 28, 28, 0.14);
+}
+
+.success {
+  margin-top: 0.65rem;
+  font-size: 0.83rem;
+  color: #166534;
+  padding: 0.55rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: 6px;
+  border: 1px solid rgba(22, 101, 52, 0.14);
+}
