@@ -1,0 +1,151 @@
+.page {
+  min-height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 80px;
+}
+
+/* ── 환영 섹션 ── */
+.welcome {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.greeting {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  color: var(--corp-muted);
+  font-weight: 400;
+}
+
+.greeting strong {
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.org {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--corp-muted);
+}
+
+.systemTitle {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--corp-text);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+/* ── 기능 카드 그리드 ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 720px;
+}
+
+/* ── 카드 ── */
+.card {
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  box-shadow: var(--corp-shadow-sm);
+  padding: 28px 28px 22px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color var(--corp-transition), box-shadow var(--corp-transition),
+    transform var(--corp-transition);
+}
+
+.card:hover {
+  border-color: var(--corp-accent-border-strong);
+  box-shadow: var(--corp-shadow-card-hover);
+  transform: translateY(-4px);
+}
+
+.card:active {
+  transform: translateY(-1px);
+}
+
+/* ── 카드 아이콘 ── */
+.cardIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--corp-primary-soft);
+  border: 1px solid var(--corp-accent-border);
+  border-radius: var(--corp-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--corp-primary);
+  flex-shrink: 0;
+}
+
+.cardIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ── 카드 내용 ── */
+.cardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--corp-text);
+  letter-spacing: -0.02em;
+}
+
+.cardDesc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--corp-muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* ── 바로가기 ── */
+.cardAction {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--corp-primary);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 560px) {
+  .page {
+    padding: 32px 16px 60px;
+    justify-content: flex-start;
+    padding-top: 48px;
+  }
+
+  .systemTitle {
+    font-size: 1.5rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .welcome {
+    margin-bottom: 32px;
+  }
+}

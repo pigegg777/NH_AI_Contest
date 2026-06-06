@@ -4,18 +4,39 @@ import RegisterPage from './features/auth/pages/RegisterPage';
 import ExcelExtractWorkbookReviewPage from './features/excel-extract/pages/ExcelExtractWorkbookReviewPage';
 import FertilizerInfoPage from './features/fertilizer/pages/FertilizerInfoPage';
 import AppLayout from './common/layouts/AppLayout';
+import DashboardPage from './common/pages/DashboardPage';
 
-function getInitialPage() {
-  if (typeof window === 'undefined') return 'fertilizer';
-  return new URLSearchParams(window.location.search).get('tool') === 'excel-extract'
-    ? 'excel-extract'
-    : 'fertilizer';
+const PUBLIC_TOOL_USER = {
+  nh_name: 'NH',
+  office_name: '비료정보 시스템',
+};
+
+function isDirectExcelExtractEntry() {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('tool') === 'excel-extract';
 }
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [page, setPage] = useState('login');
-  const [activePage, setActivePage] = useState(getInitialPage);
+  const [isPublicToolMode] = useState(isDirectExcelExtractEntry);
+  const [activePage, setActivePage] = useState(isPublicToolMode ? 'excel-extract' : 'dashboard');
+
+  if (isPublicToolMode) {
+    return (
+      <AppLayout
+        user={PUBLIC_TOOL_USER}
+        activePage={activePage}
+        onNavigate={setActivePage}
+      >
+        {activePage === 'excel-extract' ? (
+          <ExcelExtractWorkbookReviewPage onGoHome={() => setActivePage('dashboard')} />
+        ) : (
+          <FertilizerInfoPage />
+        )}
+      </AppLayout>
+    );
+  }
 
   if (!user) {
     if (page === 'register') {
@@ -29,9 +50,13 @@ export default function App() {
       user={user}
       activePage={activePage}
       onNavigate={setActivePage}
-      onLogout={() => setUser(null)}
+      onLogout={() => { setUser(null); setActivePage('dashboard'); }}
     >
-      {activePage === 'excel-extract' ? <ExcelExtractWorkbookReviewPage /> : <FertilizerInfoPage />}
+      {activePage === 'dashboard' && <DashboardPage user={user} onNavigate={setActivePage} />}
+      {activePage === 'fertilizer' && <FertilizerInfoPage />}
+      {activePage === 'excel-extract' && (
+        <ExcelExtractWorkbookReviewPage onGoHome={() => setActivePage('dashboard')} />
+      )}
     </AppLayout>
   );
 }

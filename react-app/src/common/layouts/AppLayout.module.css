@@ -8,7 +8,7 @@
 
 .main {
   flex: 1;
-  max-width: 1600px;
+  max-width: 1640px;
   width: 100%;
   margin: 0 auto;
   padding: 0;
@@ -24,7 +24,7 @@
 }
 
 .headerInner {
-  max-width: 1600px;
+  max-width: 1640px;
   margin: 0 auto;
   padding: 0 24px;
   height: 56px;
@@ -32,6 +32,42 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+
+/* ── Back button (기능 페이지에서만) ── */
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: all 150ms ease;
+}
+
+.backButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── 기능 페이지 제목 ── */
+.pageLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
 }
 
 /* ── Logo 영역 (농협명 + 사무소명) ── */
