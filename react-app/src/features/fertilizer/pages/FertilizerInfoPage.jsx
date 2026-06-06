@@ -85,24 +85,22 @@ export default function FertilizerInfoPage() {
       </div>
 
       <div className={styles.toolbar}>
-        <div className={styles.searchWrap}>
-          <SearchIcon />
-          <input
-            id="fertilizer-search"
-            className={styles.searchInput}
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="상품명, 자재 유형, 특징 검색…"
-            aria-label="농자재 검색"
-          />
+        <div className={styles.toolbarRow}>
+          <div className={styles.searchWrap}>
+            <SearchIcon />
+            <input
+              id="fertilizer-search"
+              className={styles.searchInput}
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="상품명, 자재 유형, 특징 검색…"
+              aria-label="농자재 검색"
+            />
+          </div>
+          <span className={styles.listCount}>{filteredItems.length}건</span>
         </div>
         <CategoryTabs items={categoryItems} activeItem={category} onSelect={setCategory} />
-      </div>
-
-      <div className={styles.listHeader}>
-        <h2 className={styles.listTitle}>농자재 목록</h2>
-        <span className={styles.listCount}>{filteredItems.length}건</span>
       </div>
 
       <div className={styles.listWrap}>

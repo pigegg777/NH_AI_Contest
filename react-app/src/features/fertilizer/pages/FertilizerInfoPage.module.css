@@ -38,10 +38,17 @@
   gap: 10px;
 }
 
+/* ── 툴바 행 (검색 + 건수) ── */
+.toolbarRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* ── 검색 ── */
 .searchWrap {
   position: relative;
-  max-width: 520px;
+  flex: 1;
 }
 
 .searchIcon {
@@ -114,21 +121,7 @@
   color: #fff;
 }
 
-/* ── 목록 헤더 ── */
-.listHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 24px 10px;
-}
-
-.listTitle {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--corp-text);
-}
-
+/* ── 결과 건수 배지 ── */
 .listCount {
   display: inline-flex;
   align-items: center;
@@ -178,10 +171,6 @@
 
   .searchWrap {
     max-width: 100%;
-  }
-
-  .listHeader {
-    padding: 12px 16px 8px;
   }
 
   .listWrap {
