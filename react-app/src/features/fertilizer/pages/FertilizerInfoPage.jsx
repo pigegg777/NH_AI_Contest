@@ -8,6 +8,22 @@ import {
 } from '../utils/fertilizerSelectors';
 import styles from './FertilizerInfoPage.module.css';
 
+function SearchIcon() {
+  return (
+    <svg
+      className={styles.searchIcon}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
+      <circle cx="8.5" cy="8.5" r="5.5" />
+      <path d="M14.5 14.5L18 18" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function CategoryTabs({ items, activeItem, onSelect }) {
   return (
     <div className={styles.categoryList} role="tablist" aria-label="비료 유형">
@@ -46,22 +62,31 @@ export default function FertilizerInfoPage() {
   );
 
   if (isLoading) {
-    return <main className={styles.page}><p className={styles.state}>비료 데이터를 불러오는 중…</p></main>;
+    return (
+      <div className={styles.page}>
+        <p className={styles.state}>비료 데이터를 불러오는 중…</p>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <main className={styles.page}>
+      <div className={styles.page}>
         <p className={styles.state}>데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
+      <div className={styles.hero}>
+        <h1 className={styles.pageTitle}>비료 정보</h1>
+        <p className={styles.pageSubtitle}>비료 종류·가격·지원 정보를 검색하고 비교하세요</p>
+      </div>
+
       <div className={styles.toolbar}>
         <div className={styles.searchWrap}>
-          <label className={styles.searchLabel} htmlFor="fertilizer-search">상품명 검색</label>
+          <SearchIcon />
           <input
             id="fertilizer-search"
             className={styles.searchInput}
@@ -69,12 +94,10 @@ export default function FertilizerInfoPage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="상품명, 비료 유형, 특징 검색…"
+            aria-label="비료 검색"
           />
         </div>
-
-        <div className={styles.categoryWrap}>
-          <CategoryTabs items={categoryItems} activeItem={category} onSelect={setCategory} />
-        </div>
+        <CategoryTabs items={categoryItems} activeItem={category} onSelect={setCategory} />
       </div>
 
       <div className={styles.listHeader}>
@@ -82,7 +105,9 @@ export default function FertilizerInfoPage() {
         <span className={styles.listCount}>{filteredItems.length}건</span>
       </div>
 
-      <FertilizerCardList items={filteredItems} />
-    </main>
+      <div className={styles.listWrap}>
+        <FertilizerCardList items={filteredItems} />
+      </div>
+    </div>
   );
 }
