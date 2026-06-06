@@ -335,23 +335,23 @@
 }
 
 .tableWrap {
-  overflow-x: auto;
+  overflow-x: hidden;
   content-visibility: auto;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 2400px;
+  table-layout: fixed;
 }
 
 .table th,
 .table td {
-  padding: 14px 18px;
+  padding: 7px 6px;
   border-bottom: 1px solid var(--corp-line);
   vertical-align: top;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.72rem;
 }
 
 .table th {
@@ -383,8 +383,8 @@
 
 .selectionHeader,
 .noteHeader {
-  padding: 14px 18px !important;
-  font-size: 0.78rem;
+  padding: 8px 6px !important;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -404,7 +404,7 @@
 }
 
 .selectionCell {
-  width: 108px;
+  width: 72px;
   text-align: center !important;
 }
 
@@ -415,18 +415,18 @@
 }
 
 .noteCell {
-  min-width: 240px;
+  width: 120px;
 }
 
 .noteButton {
   width: 100%;
-  min-height: 40px;
-  padding: 9px 12px;
+  min-height: 28px;
+  padding: 4px 6px;
   border: 1px dashed var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: transparent;
   color: inherit;
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   text-align: left;
   cursor: pointer;
   overflow: visible;
@@ -439,12 +439,12 @@
 
 .noteInput {
   width: 100%;
-  min-height: 40px;
-  padding: 9px 12px;
+  min-height: 28px;
+  padding: 4px 6px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
-  font-size: 0.82rem;
+  font-size: 0.7rem;
 }
 
 .noteInput:focus {
@@ -458,12 +458,12 @@
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 52px;
-  padding: 14px 18px;
+  min-height: 40px;
+  padding: 8px 6px;
   border: none;
   background: transparent;
   color: inherit;
-  font-size: 0.78rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
