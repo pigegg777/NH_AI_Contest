@@ -1,28 +1,50 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
 import App from './App';
 
-describe('App', () => {
-  it('renders the fertilizer information heading', async () => {
-    render(<App />);
+vi.mock('./features/auth/pages/LoginPage', () => ({
+  default: () => <div>login-page</div>,
+}));
 
-    expect(
-      await screen.findByRole('heading', { name: '발안농협 비료정보' }),
-    ).toBeInTheDocument();
+vi.mock('./features/auth/pages/RegisterPage', () => ({
+  default: () => <div>register-page</div>,
+}));
+
+vi.mock('./features/excel-extract/pages/ExcelExtractWorkbookReviewPage', () => ({
+  default: () => <div>excel-review-page</div>,
+}));
+
+vi.mock('./features/fertilizer/pages/FertilizerInfoPage', () => ({
+  default: () => <div>fertilizer-page</div>,
+}));
+
+vi.mock('./common/layouts/AppLayout', () => ({
+  default: ({ children }) => <div data-testid="app-layout">{children}</div>,
+}));
+
+describe('App', () => {
+  beforeEach(() => {
+    window.history.replaceState({}, '', '/');
   });
 
-  it('filters cards based on the search input', async () => {
-    const user = userEvent.setup();
+  afterEach(() => {
+    cleanup();
+    window.history.replaceState({}, '', '/');
+  });
+
+  it('renders the login page by default', () => {
+    render(<App />);
+
+    expect(screen.getByText('login-page')).toBeInTheDocument();
+    expect(screen.queryByText('excel-review-page')).not.toBeInTheDocument();
+  });
+
+  it('renders the excel review page when tool=excel-extract is set', () => {
+    window.history.replaceState({}, '', '/?tool=excel-extract');
 
     render(<App />);
 
-    const searchInput = await screen.findByRole('searchbox', { name: '상품명 검색' });
-
-    await user.type(searchInput, '유기질');
-
-    expect(await screen.findByRole('heading', { name: '유기질 비료' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: '요소 비료' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: '복합 비료' })).not.toBeInTheDocument();
+    expect(screen.getByText('excel-review-page')).toBeInTheDocument();
+    expect(screen.queryByText('login-page')).not.toBeInTheDocument();
   });
 });
