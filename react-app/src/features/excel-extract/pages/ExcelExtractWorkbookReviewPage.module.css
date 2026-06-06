@@ -295,16 +295,16 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1880px;
+  min-width: 2400px;
 }
 
 .table th,
 .table td {
-  padding: 12px 14px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--corp-line);
   vertical-align: top;
   text-align: left;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 
@@ -318,7 +318,7 @@
 
 .selectionHeader,
 .noteHeader {
-  padding: 12px 14px !important;
+  padding: 14px 18px !important;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -326,7 +326,7 @@
 }
 
 .selectionCell {
-  width: 72px;
+  width: 88px;
   text-align: center !important;
 }
 
@@ -337,13 +337,13 @@
 }
 
 .noteCell {
-  min-width: 180px;
+  min-width: 240px;
 }
 
 .noteButton {
   width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
+  min-height: 40px;
+  padding: 9px 12px;
   border: 1px dashed var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: transparent;
@@ -354,8 +354,8 @@
 
 .noteInput {
   width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
+  min-height: 40px;
+  padding: 9px 12px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
@@ -372,8 +372,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
+  min-height: 52px;
+  padding: 14px 18px;
   border: none;
   background: transparent;
   color: inherit;
