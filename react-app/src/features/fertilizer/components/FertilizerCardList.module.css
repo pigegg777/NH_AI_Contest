@@ -4,48 +4,62 @@
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
+/* ── 빈 결과 ── */
 .empty {
   margin: 0;
-  padding: 24px;
-  border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius);
+  padding: 40px 24px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
   background: var(--corp-panel);
   color: var(--corp-muted);
   text-align: center;
   font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.emptyIcon {
+  display: block;
+  margin: 0 auto 12px;
+  width: 36px;
+  height: 36px;
+  color: var(--corp-line-strong);
 }
 
 /* ── 카드 ── */
 .card {
   background: var(--corp-panel);
   border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius);
-  transition: border-color var(--corp-transition);
+  border-radius: var(--corp-radius-lg);
+  box-shadow: var(--corp-shadow-sm);
+  transition: border-color var(--corp-transition), box-shadow var(--corp-transition),
+    transform var(--corp-transition);
   display: flex;
   flex-direction: column;
 }
 
 .card:hover {
   border-color: var(--corp-accent-border-strong);
+  box-shadow: var(--corp-shadow-card-hover);
+  transform: translateY(-2px);
 }
 
 /* ── 카드 헤더 ── */
 .cardHead {
-  padding: 10px 12px 8px;
+  padding: 14px 16px 10px;
   border-bottom: 1px solid var(--corp-line);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .typeTag {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 3px;
+  padding: 3px 8px;
+  border-radius: var(--corp-radius-sm);
   background: var(--corp-primary-soft);
   color: var(--corp-primary);
   border: 1px solid var(--corp-accent-border);
@@ -60,82 +74,81 @@
 
 .cardTitle {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--corp-text);
   line-height: 1.4;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: keep-all;
 }
 
 /* ── 카드 바디 ── */
 .cardBody {
-  padding: 10px 12px 12px;
+  padding: 12px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   flex: 1;
 }
 
 .infoRow {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 
 .infoKey {
   flex-shrink: 0;
   width: 28px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--corp-muted);
+  letter-spacing: 0.01em;
 }
 
 .infoVal {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--corp-table-header-text);
+  word-break: keep-all;
 }
 
 .price {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
-  color: #b91c1c;
+  color: var(--corp-danger);
 }
 
 .support {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #15803d;
+  color: var(--corp-success);
 }
 
 .summary {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--corp-muted);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: keep-all;
 }
 
 /* ── 반응형 ── */
 @media (max-width: 1100px) {
   .list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 760px) {
-  .list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 600px) {
   .list {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 }

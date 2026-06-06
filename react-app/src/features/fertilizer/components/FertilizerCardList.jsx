@@ -30,9 +30,23 @@ function FertilizerCard({ item }) {
   );
 }
 
+function EmptyState() {
+  return (
+    <div className={styles.empty}>
+      <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+        <path d="M11 8v6M11 16h.01" strokeLinecap="round" />
+      </svg>
+      검색 결과가 없습니다.<br />
+      다른 검색어나 카테고리를 시도해 보세요.
+    </div>
+  );
+}
+
 export default function FertilizerCardList({ items }) {
   if (!items.length) {
-    return <p className={styles.empty}>검색 결과가 없습니다.</p>;
+    return <EmptyState />;
   }
 
   return (
