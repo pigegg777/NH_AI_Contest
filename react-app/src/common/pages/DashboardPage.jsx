@@ -31,8 +31,8 @@ const FEATURES = [
   {
     key: 'fertilizer',
     Icon: LeafIcon,
-    title: '비료 정보',
-    description: '비료 종류·가격·지원 정보를 검색하고 비교하세요.',
+    title: '농자재 정보',
+    description: '비료·농약·기타자재의 종류·가격·지원 정보를 검색하고 비교하세요.',
   },
   {
     key: 'excel-extract',

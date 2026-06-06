@@ -80,8 +80,8 @@ export default function FertilizerInfoPage() {
   return (
     <div className={styles.page}>
       <div className={styles.hero}>
-        <h1 className={styles.pageTitle}>비료 정보</h1>
-        <p className={styles.pageSubtitle}>비료 종류·가격·지원 정보를 검색하고 비교하세요</p>
+        <h1 className={styles.pageTitle}>농자재 정보</h1>
+        <p className={styles.pageSubtitle}>비료·농약·기타자재의 가격·지원 정보를 검색하고 비교하세요</p>
       </div>
 
       <div className={styles.toolbar}>

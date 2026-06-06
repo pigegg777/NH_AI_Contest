@@ -1,7 +1,7 @@
 import styles from './AppLayout.module.css';
 
 const PAGE_LABELS = {
-  fertilizer: '비료 정보',
+  fertilizer: '농자재 정보',
   'excel-extract': '데이터 설정/수정',
 };
 
