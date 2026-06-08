@@ -1,0 +1,50 @@
+export const EMPTY_FILTER_VALUE = '__empty__';
+export const MAX_WARNING_ROW_COUNT = 30;
+export const SORT_DIRECTION = {
+  ascending: 'asc',
+  descending: 'desc',
+};
+
+export const TABLE_COLUMNS = [
+  { key: 'product_code', label: '상품코드' },
+  { key: 'product_name', label: '상품명' },
+  { key: 'nutrient', label: '성분' },
+  { key: 'price_subsidy', label: '보조금' },
+  { key: 'img_url', label: '이미지 URL' },
+  { key: 'product_url', label: '상품 URL' },
+  { key: 'sale_price_type_code', label: '유형코드' },
+  { key: 'sale_price_type_name', label: '단가유형' },
+  { key: 'large_category', label: '대분류' },
+  { key: 'medium_category', label: '중분류' },
+  { key: 'small_category', label: '소분류' },
+  { key: 'detail_category', label: '세분류' },
+  { key: 'tax_price', label: '과세단가' },
+  { key: 'zero_tax_price', label: '영세단가' },
+  { key: 'spec', label: '규격' },
+  { key: 'manufacturer_list', label: '제조업체' },
+];
+
+export const FILTER_FIELDS = [
+  { key: 'sale_price_type_name', id: 'filter-sale-price-type', label: '단가유형' },
+  { key: 'large_category', id: 'filter-large-category', label: '대분류' },
+  { key: 'medium_category', id: 'filter-medium-category', label: '중분류' },
+  { key: 'small_category', id: 'filter-small-category', label: '소분류' },
+  { key: 'detail_category', id: 'filter-detail-category', label: '세분류' },
+];
+
+export function createInitialFilters() {
+  return {
+    sale_price_type_name: '',
+    large_category: '',
+    medium_category: '',
+    small_category: '',
+    detail_category: '',
+  };
+}
+
+export function createInitialSortState() {
+  return {
+    key: 'product_code',
+    direction: SORT_DIRECTION.ascending,
+  };
+}
