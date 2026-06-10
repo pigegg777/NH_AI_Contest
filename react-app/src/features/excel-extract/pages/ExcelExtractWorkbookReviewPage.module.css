@@ -61,6 +61,54 @@
   border-color: var(--corp-line-strong);
 }
 
+/* ─── Current data banner ─────────────────────────────── */
+.dataNameBanner {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+}
+
+.dataNameLabel {
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dataNameTitle {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.dataNameStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 12px;
+  border-radius: var(--corp-radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dataNameStatusRegistered {
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+}
+
+.dataNameStatusNew {
+  background: rgba(185, 28, 28, 0.08);
+  color: var(--corp-danger);
+}
+
 /* ─── Two-column layout ───────────────────────────────── */
 .layout {
   display: grid;
@@ -224,67 +272,9 @@
   color: var(--corp-muted);
 }
 
-/* Sidebar stats (현재 상태) */
-.sidebarStats {
-  display: grid;
-  gap: 8px;
-  margin: 10px 0 0;
-}
-
-.sidebarStatRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.sidebarStatLabel {
-  margin: 0;
-  color: var(--corp-muted);
-  font-size: 0.78rem;
-}
-
-.sidebarStatValue {
-  margin: 0;
-  max-width: 60%;
-  overflow: hidden;
-  color: var(--corp-text);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sidebarStatValueWarning {
-  color: var(--corp-danger);
-}
-
-.catalogInlinePanel {
-  margin-top: 8px;
-  padding: 10px 10px 12px;
-  border-radius: var(--corp-radius-sm);
-  background: rgba(29, 74, 46, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(29, 74, 46, 0.12);
-}
-
-.catalogInlinePanelHeader {
-  display: grid;
-  gap: 4px;
-}
-
-.catalogInlinePanelTitle {
-  margin: 0;
-  color: var(--corp-text);
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.catalogInlinePanelDescription {
-  margin: 0;
-  color: var(--corp-muted);
-  font-size: 0.74rem;
-  line-height: 1.4;
+.catalogListStatusActive {
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
 }
 
 .catalogInlineField {
@@ -502,6 +492,205 @@
 .fileName {
   color: var(--corp-muted);
   font-size: 0.84rem;
+}
+
+/* ─── Empty selection state ───────────────────────────── */
+.emptySelectionState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 320px;
+  padding: 40px 24px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  text-align: center;
+}
+
+.emptySelectionTitle {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.emptySelectionHint {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.84rem;
+}
+
+/* ─── Registered data view toolbar ────────────────────── */
+.viewToolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.viewToolbarFile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewToolbarHint {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+}
+
+/* ─── Upload workspace (dropzone + table name card) ───── */
+.uploadWorkspace {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.uploadMain {
+  min-width: 0;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 280px;
+  padding: 32px 24px;
+  border: 2px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  text-align: center;
+  transition: border-color var(--corp-transition), background var(--corp-transition);
+}
+
+.dropzoneActive {
+  border-color: var(--corp-primary);
+  background: var(--corp-primary-soft);
+}
+
+.dropzoneDisabled {
+  border-color: var(--corp-line);
+  background: var(--corp-surface-muted);
+  opacity: 0.7;
+}
+
+.dropzoneIcon {
+  margin: 0;
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.dropzoneTitle {
+  margin: 4px 0 0;
+  color: var(--corp-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dropzoneHint {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+}
+
+.dropzone .uploadButton {
+  margin-top: 10px;
+}
+
+.uploadButtonDisabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.dropzoneFileName {
+  margin: 8px 0 0;
+  color: var(--corp-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.dropzoneStatus {
+  margin: 4px 0 0;
+  color: var(--corp-primary);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.dropzoneDisabledHint {
+  margin: 8px 0 0;
+  color: var(--corp-danger);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ─── Table name card (right side, required) ──────────── */
+.tableNameCard {
+  align-self: start;
+  padding: 16px;
+  border: 1px solid var(--corp-accent-border-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.tableNameCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tableNameCardTitle {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tableNameRequiredBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 9px;
+  border-radius: var(--corp-radius-pill);
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--corp-danger);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tableNameCardDescription {
+  margin: 0 0 10px;
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.tableNameFixedValue {
+  padding: 10px 12px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  color: var(--corp-text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 /* ─── Status / Error / Success ────────────────────────── */

@@ -9,7 +9,9 @@ let mockCatalogState = {
   errorMessage: '',
 };
 const handleWorkbookChange = vi.fn();
+const processFile = vi.fn();
 const saveOfficeProductData = vi.fn();
+const fetchOfficeProductData = vi.fn();
 const fetchStaticFertilizerLookup = vi.fn();
 
 vi.mock('../hooks/useWorkbookExtraction', () => ({
@@ -20,11 +22,13 @@ vi.mock('../hooks/useWorkbookExtraction', () => ({
     errorMessage: '',
     result: mockResult,
     handleWorkbookChange,
+    processFile,
   }),
 }));
 
 vi.mock('../services/officeProductDataService', () => ({
   saveOfficeProductData: (...args) => saveOfficeProductData(...args),
+  fetchOfficeProductData: (...args) => fetchOfficeProductData(...args),
 }));
 
 vi.mock('../services/staticFertilizerLookupService', () => ({
@@ -66,6 +70,7 @@ describe('ExcelExtractWorkbookReviewPage', () => {
       errorMessage: '',
     };
     fetchStaticFertilizerLookup.mockResolvedValue({});
+    fetchOfficeProductData.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -89,7 +94,7 @@ describe('ExcelExtractWorkbookReviewPage', () => {
 
     expect(screen.getByText('새 테이블 이름')).toBeInTheDocument();
     expect(
-      screen.getByText('추가할 테이블 이름을 입력한 뒤 저장하세요'),
+      screen.getByText('추가할 테이블 이름을 입력한 뒤 업로드하세요'),
     ).toBeInTheDocument();
     expect(input).toBeInTheDocument();
     expect(input.tagName.toLowerCase()).toBe('input');
@@ -252,5 +257,79 @@ describe('ExcelExtractWorkbookReviewPage', () => {
 
     expect(screen.getByText('등록 데이터 불러오는 중...')).toBeInTheDocument();
     expect(screen.getByText('등록 데이터를 불러오지 못했습니다.')).toBeInTheDocument();
+  });
+
+  it('shows an empty-selection prompt before a category is chosen', () => {
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    expect(screen.getByText('왼쪽에서 데이터를 선택하세요')).toBeInTheDocument();
+    expect(screen.getByText('등록 데이터를 선택하거나 추가하세요')).toBeInTheDocument();
+  });
+
+  it('renders saved rows and a 편집 중 status when a registered category is selected', async () => {
+    const user = userEvent.setup();
+
+    mockCatalogState = {
+      items: [
+        {
+          id: 1,
+          categoryName: '비료',
+          rowCount: 1,
+          sourceFileName: 'fertilizer.xlsx',
+          updatedAt: '2026-06-07T00:00:00Z',
+        },
+      ],
+      isLoading: false,
+      errorMessage: '',
+    };
+    fetchOfficeProductData.mockResolvedValue({
+      rows: sampleRows,
+      sourceFileName: 'fertilizer.xlsx',
+      updatedAt: '2026-06-07T00:00:00Z',
+      rowCount: 1,
+    });
+
+    render(
+      <ExcelExtractWorkbookReviewPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /비료/i }));
+
+    expect(screen.getByRole('heading', { name: '비료' })).toBeInTheDocument();
+    expect(screen.getByText('등록됨 · 편집 중')).toBeInTheDocument();
+
+    const cardList = screen.getByRole('list', { name: '등록 데이터 목록' });
+    expect(within(cardList).getByText('편집 중')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha')).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByText('새 엑셀 파일을 선택하면 이 데이터를 신규로 등록(덮어쓰기)합니다.'),
+    ).toBeInTheDocument();
+    expect(fetchOfficeProductData).toHaveBeenCalledWith({
+      officeCode: 'OFF-1',
+      categoryName: '비료',
+    });
+  });
+
+  it('shows the upload dropzone for an unregistered category and gates it on the table name', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.getByText('엑셀 파일을 끌어다 놓거나 선택하세요')).toBeInTheDocument();
+    expect(screen.getByText('테이블 이름을 입력하면 업로드할 수 있습니다.')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+
+    expect(
+      screen.queryByText('테이블 이름을 입력하면 업로드할 수 있습니다.'),
+    ).not.toBeInTheDocument();
   });
 });

@@ -39,6 +39,37 @@ export async function fetchOfficeProductDataCatalog({ officeCode }) {
   return Array.isArray(data) ? data.map(normalizeCatalogItem) : [];
 }
 
+export async function fetchOfficeProductData({ officeCode, categoryName }) {
+  const normalizedOfficeCode = toTrimmedString(officeCode);
+  const normalizedCategoryName = toTrimmedString(categoryName);
+
+  if (!normalizedOfficeCode || !normalizedCategoryName) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('office_product_datas')
+    .select('product_data, source_file_name, updated_at, row_count')
+    .eq('office_code', normalizedOfficeCode)
+    .eq('product_data_category_name', normalizedCategoryName)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message || '등록 데이터를 불러오지 못했습니다.');
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    rows: Array.isArray(data.product_data) ? data.product_data : [],
+    sourceFileName: toNullableTrimmedString(data.source_file_name),
+    updatedAt: toNullableTrimmedString(data.updated_at),
+    rowCount: Number.isFinite(data.row_count) ? data.row_count : 0,
+  };
+}
+
 export async function saveOfficeProductData({ user, rows, categoryName, sourceFileName }) {
   const officeCode = toTrimmedString(user?.office_code);
   const officeName = toTrimmedString(user?.office_name);

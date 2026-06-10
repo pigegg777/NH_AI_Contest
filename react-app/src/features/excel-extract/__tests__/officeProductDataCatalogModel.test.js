@@ -50,7 +50,7 @@ describe('buildOfficeProductDataCatalogModel', () => {
         categoryName: '종자',
         variant: 'registered',
         isEmpty: false,
-        isSelectable: false,
+        isSelectable: true,
         selectionMode: null,
         statusLabel: '등록됨',
       }),

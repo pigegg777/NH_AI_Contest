@@ -51,7 +51,8 @@ function createAddCard() {
 
 function createCatalogCard(categoryName, item, variant) {
   const isEmpty = !item;
-  const isSelectable = variant === CATALOG_CARD_VARIANT.default;
+  const isSelectable =
+    variant === CATALOG_CARD_VARIANT.default || variant === CATALOG_CARD_VARIANT.registered;
   const selectionMode = isSelectable ? resolveTableNameModeFromCategoryName(categoryName) : null;
 
   if (isEmpty) {

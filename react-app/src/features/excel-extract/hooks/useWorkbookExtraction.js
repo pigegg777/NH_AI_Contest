@@ -12,9 +12,7 @@ export function useWorkbookExtraction() {
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState(null);
 
-  async function handleWorkbookChange(event) {
-    const [file] = event.target.files ?? [];
-
+  async function processFile(file) {
     if (!file) {
       return;
     }
@@ -39,6 +37,11 @@ export function useWorkbookExtraction() {
     }
   }
 
+  async function handleWorkbookChange(event) {
+    const [file] = event.target.files ?? [];
+    await processFile(file);
+  }
+
   return {
     selectedFileName,
     workbookFingerprint,
@@ -46,6 +49,7 @@ export function useWorkbookExtraction() {
     errorMessage,
     result,
     handleWorkbookChange,
+    processFile,
   };
 }
 
