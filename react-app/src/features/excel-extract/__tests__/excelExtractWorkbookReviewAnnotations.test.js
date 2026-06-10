@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
-import { mergeRowsWithAnnotations } from '../model/workbook-review/annotations/annotationModel';
+import { mergeRowsWithAnnotations } from '../model/annotations/annotationModel';
 
 const sampleRows = [
   {
@@ -35,3 +35,4 @@ describe('excel extract workbook review annotations', () => {
     ]);
   });
 });
+

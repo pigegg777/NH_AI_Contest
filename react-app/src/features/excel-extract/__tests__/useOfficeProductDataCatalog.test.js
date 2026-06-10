@@ -1,7 +1,7 @@
-import { renderHook, waitFor } from '@testing-library/react';
+﻿import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useOfficeProductDataCatalog } from '../hooks/workbook-review/useOfficeProductDataCatalog';
+import { useOfficeProductDataCatalog } from '../hooks/useOfficeProductDataCatalog';
 import { fetchOfficeProductDataCatalog } from '../services/officeProductDataService';
 
 vi.mock('../services/officeProductDataService', async (importOriginal) => {
@@ -71,3 +71,4 @@ describe('useOfficeProductDataCatalog', () => {
     expect(result.current.errorMessage).toBe('등록 데이터를 불러오지 못했습니다.');
   });
 });
+

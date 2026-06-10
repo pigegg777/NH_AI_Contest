@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
 import {
   getStaticFertilizerProductCodes,
   mergeRowsWithStaticFertilizer,
-} from '../model/workbook-review/enrichment/staticFertilizerMergeModel';
+} from '../model/enrichment/staticFertilizerMergeModel';
 
 describe('static fertilizer merge model', () => {
   it('dedupes normalized product codes and merges lookup fields into rows', () => {
@@ -47,3 +47,4 @@ describe('static fertilizer merge model', () => {
     ]);
   });
 });
+

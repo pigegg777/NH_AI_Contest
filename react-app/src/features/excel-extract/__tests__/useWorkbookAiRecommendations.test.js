@@ -1,10 +1,10 @@
-import { act, renderHook } from '@testing-library/react';
+﻿import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useWorkbookAiRecommendations } from '../hooks/workbook-review/useWorkbookAiRecommendations';
-import { analyzeWorkbookAiRecommendations } from '../services/workbookAiRecommendationService';
+import { useWorkbookAiRecommendations } from '../hooks/useWorkbookAiRecommendations';
+import { analyzeWorkbookAiRecommendations } from '../services/workbook-ai-recommendation/workbookAiRecommendationService';
 
-vi.mock('../services/workbookAiRecommendationService', async (importOriginal) => {
+vi.mock('../services/workbook-ai-recommendation/workbookAiRecommendationService', async (importOriginal) => {
   const actual = await importOriginal();
 
   return {
@@ -20,11 +20,9 @@ const mergedRows = [
 
 const mockRecommendation = {
   id: 'rec-1',
-  kind: 'price-anomaly',
   severity: 'medium',
   title: '가격 확인',
   reason: '세전가가 세후가보다 낮습니다',
-  actionText: '확인하세요',
   relatedRowIds: ['B200__02'],
 };
 
@@ -35,7 +33,7 @@ afterEach(() => {
 describe('useWorkbookAiRecommendations', () => {
   it('analyzes exactly the merged rows it was given', async () => {
     analyzeWorkbookAiRecommendations.mockResolvedValue({
-      mode: 'mock',
+      mode: 'openai',
       recommendations: [mockRecommendation],
     });
 
@@ -46,13 +44,13 @@ describe('useWorkbookAiRecommendations', () => {
     });
 
     expect(analyzeWorkbookAiRecommendations).toHaveBeenCalledWith(mergedRows);
-    expect(result.current.analysisMode).toBe('mock');
+    expect(result.current.analysisMode).toBe('openai');
     expect(result.current.recommendations).toEqual([mockRecommendation]);
   });
 
   it('toggles the active recommendation and derives highlighted row ids', async () => {
     analyzeWorkbookAiRecommendations.mockResolvedValue({
-      mode: 'mock',
+      mode: 'openai',
       recommendations: [mockRecommendation],
     });
 
@@ -79,7 +77,7 @@ describe('useWorkbookAiRecommendations', () => {
 
   it('resets state when the workbook fingerprint changes', async () => {
     analyzeWorkbookAiRecommendations.mockResolvedValue({
-      mode: 'mock',
+      mode: 'openai',
       recommendations: [mockRecommendation],
     });
 
@@ -101,8 +99,54 @@ describe('useWorkbookAiRecommendations', () => {
     rerender({ workbookFingerprint: 'workbook-b' });
 
     expect(result.current.recommendations).toEqual([]);
-    expect(result.current.analysisMode).toBe('mock');
+    expect(result.current.analysisMode).toBe('idle');
     expect(result.current.activeRecommendationId).toBe(null);
     expect(result.current.highlightedRowIds).toEqual([]);
   });
+
+  it('surfaces a non-fatal notice when only local recommendations are available', async () => {
+    analyzeWorkbookAiRecommendations.mockResolvedValue({
+      mode: 'local-only',
+      recommendations: [mockRecommendation],
+      message: 'OpenAI 보조 분석에 실패하여 로컬 검사 결과만 표시합니다.',
+    });
+
+    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+
+    await act(async () => {
+      await result.current.handleAnalyze();
+    });
+
+    expect(result.current.analysisMode).toBe('local-only');
+    expect(result.current.recommendations).toEqual([mockRecommendation]);
+    expect(result.current.errorMessage).toBe(
+      'OpenAI 보조 분석에 실패하여 로컬 검사 결과만 표시합니다.',
+    );
+  });
+
+  it('clears recommendations and exposes the error when analysis fails', async () => {
+    analyzeWorkbookAiRecommendations
+      .mockResolvedValueOnce({
+        mode: 'openai',
+        recommendations: [mockRecommendation],
+      })
+      .mockRejectedValueOnce(new Error('OpenAI API request failed.'));
+
+    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+
+    await act(async () => {
+      await result.current.handleAnalyze();
+    });
+
+    expect(result.current.recommendations).toEqual([mockRecommendation]);
+
+    await act(async () => {
+      await result.current.handleAnalyze();
+    });
+
+    expect(result.current.recommendations).toEqual([]);
+    expect(result.current.activeRecommendationId).toBe(null);
+    expect(result.current.errorMessage).toBe('OpenAI API request failed.');
+  });
 });
+

@@ -23,6 +23,12 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
+.headerDashboard {
+  position: static;
+  background: transparent;
+  box-shadow: none;
+}
+
 .headerInner {
   max-width: 1640px;
   margin: 0 auto;
@@ -32,6 +38,12 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+}
+
+.headerInnerDashboard {
+  height: auto;
+  padding: 20px 24px 0;
+  justify-content: flex-end;
 }
 
 /* ── Back button (기능 페이지에서만) ── */
@@ -48,7 +60,11 @@
   font-weight: 500;
   cursor: pointer;
   margin-right: 8px;
-  transition: all 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .backButton svg {
@@ -60,6 +76,11 @@
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.35);
+}
+
+.backButton:focus-visible {
+  outline: 2px solid #f5c842;
+  outline-offset: 2px;
 }
 
 /* ── 기능 페이지 제목 ── */
@@ -131,7 +152,11 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  transition: all 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .navLink:hover {
@@ -158,7 +183,11 @@
   font-size: 13px;
   font-weight: 400;
   cursor: pointer;
-  transition: all 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .lockButton:hover {
@@ -167,11 +196,21 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+.lockButton:focus-visible {
+  outline: 2px solid #f5c842;
+  outline-offset: 2px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 680px) {
   .headerInner {
     height: 50px;
     padding: 0 12px;
+  }
+
+  .headerInnerDashboard {
+    height: auto;
+    padding: 16px 12px 0;
   }
 
   .logoDivider {

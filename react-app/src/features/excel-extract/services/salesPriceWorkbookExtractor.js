@@ -1,4 +1,4 @@
-import { extractSalesPriceSheetData } from '../model/workbook-review/extraction/workbookExtractionModel';
+﻿import { extractSalesPriceSheetData } from '../model/extraction/workbookExtractionModel';
 import { readWorkbookSheet } from './workbookSheetReader';
 
 export async function extractSalesPriceWorkbook(input) {
@@ -9,3 +9,4 @@ export async function extractSalesPriceWorkbook(input) {
     ...extractSalesPriceSheetData(sheetRows),
   };
 }
+

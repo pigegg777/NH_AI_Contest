@@ -1,6 +1,6 @@
-import supabase from '../../../lib/supabaseClient';
+﻿import supabase from '../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../common/utils/text';
-import { getStaticFertilizerProductCodes } from '../model/workbook-review/enrichment/staticFertilizerMergeModel';
+import { getStaticFertilizerProductCodes } from '../model/enrichment/staticFertilizerMergeModel';
 
 const STATIC_FERTILIZER_SELECT =
   'product_code,img_url,product_url,nutrient,price_subsidy';
@@ -56,3 +56,4 @@ export async function fetchStaticFertilizerLookup(productCodes) {
     };
   }, {});
 }
+

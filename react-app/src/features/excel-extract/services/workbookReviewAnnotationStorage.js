@@ -1,7 +1,7 @@
-import {
+﻿import {
   createWorkbookReviewStorageKey,
   sanitizeAnnotationsForRows,
-} from '../model/workbook-review/annotations/annotationModel';
+} from '../model/annotations/annotationModel';
 
 export function readStoredAnnotations(storage, workbookFingerprint, rows) {
   if (!storage || !workbookFingerprint) {
@@ -31,3 +31,4 @@ export function writeStoredAnnotations(storage, workbookFingerprint, annotations
     JSON.stringify(annotations),
   );
 }
+

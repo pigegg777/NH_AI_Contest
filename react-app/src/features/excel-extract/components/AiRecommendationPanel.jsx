@@ -30,7 +30,7 @@ export function AiRecommendationPanel({
       <div className={styles.panelHeader}>
         <div className={styles.aiPanelHeader}>
           <h2 className={styles.panelTitle}>AI 추천</h2>
-          {analysisMode === 'mock' ? <span className={styles.aiBadge}>mock 분석</span> : null}
+          {analysisMode === 'unavailable' ? <span className={styles.aiBadge}>AI off</span> : null}
         </div>
         <span className={styles.panelMeta}>{recommendations.length}건 추천</span>
       </div>

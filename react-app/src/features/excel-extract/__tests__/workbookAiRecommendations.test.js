@@ -1,10 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  buildRuleBasedAiRecommendations,
-  createAiRecommendation,
-} from '../model/workbook-review/recommendations';
-import { analyzeWorkbookAiRecommendations } from '../services/workbookAiRecommendationService';
+import { createAiRecommendation } from '../model/recommendations/core/aiRecommendationModel';
+import { buildRuleBasedAiRecommendations } from '../model/recommendations/rules/ruleBasedRecommendationModel';
+import { analyzeWorkbookAiRecommendations } from '../services/workbook-ai-recommendation/workbookAiRecommendationService';
 
 const sampleRows = [
   {
@@ -35,61 +33,49 @@ afterEach(() => {
 });
 
 describe('workbook AI recommendations', () => {
-  it('creates a normalized recommendation schema', () => {
+  it('creates a minimal recommendation model', () => {
     expect(
       createAiRecommendation({
         id: 'rec-1',
-        kind: 'zero-tax-higher-than-tax',
+        severity: 'high',
+        title: '가격 확인',
+        reason: '행 검토 필요',
+        relatedRowIds: ['A100__01', 'A100__01'],
       }),
     ).toEqual(
-      expect.objectContaining({
+      {
         id: 'rec-1',
-        kind: 'zero-tax-higher-than-tax',
-        severity: 'medium',
-        title: '',
-        reason: '',
-        actionText: '',
-        relatedRowIds: [],
-      }),
+        severity: 'high',
+        title: '가격 확인',
+        reason: '행 검토 필요',
+        relatedRowIds: ['A100__01'],
+      },
     );
   });
 
-  it('creates a rule-based recommendation when zero tax price exceeds tax price', () => {
+  it('creates a local recommendation when tax price exceeds zero tax price', () => {
     const recommendations = buildRuleBasedAiRecommendations(sampleRows);
 
     expect(recommendations).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: 'zero-tax-higher-than-tax',
           severity: 'high',
-          relatedRowIds: ['A100__01'],
+          title: '과세단가가 영세단가보다 높습니다',
+          relatedRowIds: ['B200__01'],
         }),
       ]),
     );
   });
 
-  it('creates a same-product-different-code recommendation for likely same products', () => {
+  it('creates a local recommendation for rows that look like the same product under different codes', () => {
     const recommendations = buildRuleBasedAiRecommendations(sampleRows);
 
     expect(recommendations).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: 'same-product-different-code',
-          relatedRowIds: expect.arrayContaining(['A100__01', 'B200__01']),
-        }),
-      ]),
-    );
-  });
-
-  it('creates a same-product-price-mismatch recommendation for similar products with different prices', () => {
-    const recommendations = buildRuleBasedAiRecommendations(sampleRows);
-
-    expect(recommendations).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: 'same-product-price-mismatch',
           severity: 'medium',
-          relatedRowIds: expect.arrayContaining(['A100__01', 'B200__01']),
+          title: '동일 상품으로 보이나 상품코드가 다릅니다',
+          relatedRowIds: ['A100__01', 'B200__01'],
         }),
       ]),
     );
@@ -99,18 +85,26 @@ describe('workbook AI recommendations', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        output_text: JSON.stringify({
-          recommendations: [
-            {
-              kind: 'same-product-different-code',
-              severity: 'medium',
-              title: 'Same product, different code',
-              reason: 'The name, nutrient, spec, and manufacturer match closely.',
-              actionText: 'Compare the source workbook before editing.',
-              relatedRowIds: ['A100__01', 'B200__01'],
-            },
-          ],
-        }),
+        output: [
+          {
+            type: 'message',
+            content: [
+              {
+                type: 'output_text',
+                text: JSON.stringify({
+                  recommendations: [
+                    {
+                      severity: 'medium',
+                      title: '같은 상품처럼 보이는데 코드가 다릅니다',
+                      reason: '상품명과 규격이 유사한데 코드가 나뉘어 있습니다.',
+                      relatedRowIds: ['A100__01', 'B200__01'],
+                    },
+                  ],
+                }),
+              },
+            ],
+          },
+        ],
       }),
     });
 
@@ -143,38 +137,53 @@ describe('workbook AI recommendations', () => {
     });
     expect(requestBody.input[0].content).toContain('Do not modify the workbook data.');
     expect(requestBody.input[1].content).toContain('"analysis_scope": "all_rows"');
+    expect(requestBody.input[1].content).not.toContain('rule_based_findings');
     expect(result.recommendations).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: 'same-product-different-code',
-          title: 'Same product, different code',
+          title: '같은 상품처럼 보이는데 코드가 다릅니다',
           relatedRowIds: ['A100__01', 'B200__01'],
-        }),
-        expect.objectContaining({
-          kind: 'zero-tax-higher-than-tax',
-          relatedRowIds: ['A100__01'],
         }),
       ]),
     );
   });
 
-  it('returns mock provider recommendations when the key is empty', async () => {
+  it('returns local recommendations when the key is empty', async () => {
     const result = await analyzeWorkbookAiRecommendations(sampleRows, {
       openAiApiKey: '',
       openAiModel: '',
     });
 
-    expect(result.mode).toBe('mock');
-    expect(result.recommendations.length).toBeGreaterThan(0);
+    expect(result.mode).toBe('unavailable');
+    expect(result.recommendations).toEqual(buildRuleBasedAiRecommendations(sampleRows));
   });
 
-  it('falls back to mock mode when the row list is empty', async () => {
+  it('falls back to local recommendations when the OpenAI response cannot be parsed', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ output: [] }),
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await analyzeWorkbookAiRecommendations(sampleRows, {
+      openAiApiKey: 'sk-test',
+      openAiModel: 'gpt-4.1-mini',
+    });
+
+    expect(result.mode).toBe('local-only');
+    expect(result.recommendations).toEqual(buildRuleBasedAiRecommendations(sampleRows));
+    expect(result.message).toBe('OpenAI 보조 분석에 실패하여 로컬 검사 결과만 표시합니다.');
+  });
+
+  it('returns an idle result when the row list is empty', async () => {
     const result = await analyzeWorkbookAiRecommendations([], {
       openAiApiKey: 'sk-test',
       openAiModel: 'gpt-4.1-mini',
     });
 
-    expect(result.mode).toBe('mock');
+    expect(result.mode).toBe('idle');
     expect(result.recommendations).toEqual([]);
   });
 });
+

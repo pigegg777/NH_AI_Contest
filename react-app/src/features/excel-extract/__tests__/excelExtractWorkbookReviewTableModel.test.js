@@ -1,17 +1,17 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
 import {
   EMPTY_FILTER_VALUE,
   SORT_DIRECTION,
   createInitialFilters,
-} from '../model/workbook-review/table';
+} from '../model/table';
 import {
   buildFilterOptions,
   buildTableModel,
   formatManufacturerList,
   getWarningRows,
   sortRows,
-} from '../model/workbook-review/table';
+} from '../model/table';
 
 const sampleRows = [
   {
@@ -91,3 +91,4 @@ describe('excel extract workbook review table model', () => {
     expect(formatManufacturerList([])).toBe('-');
   });
 });
+

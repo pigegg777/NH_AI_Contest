@@ -103,8 +103,20 @@
   box-shadow: 0 4px 12px rgba(29, 74, 46, 0.3);
 }
 
+.button:focus-visible,
+.linkButton:focus-visible {
+  outline: 2px solid #f5c842;
+  outline-offset: 3px;
+}
+
 .button:active {
   transform: translateY(1px);
+}
+
+.button:disabled {
+  cursor: wait;
+  background: #6a8571;
+  box-shadow: none;
 }
 
 .linkButton {

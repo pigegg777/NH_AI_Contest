@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AiRecommendationPanel } from '../components/AiRecommendationPanel';
 import { ResultTableSection } from '../components/ResultTableSection';
-import { createInitialFilters, createInitialSortState } from '../model/workbook-review/table';
+import { createInitialFilters, createInitialSortState } from '../model/table';
 
 const rows = [
   {
@@ -55,11 +55,9 @@ const rows = [
 const recommendations = [
   {
     id: 'rec-1',
-    kind: 'zero-tax-higher-than-tax',
     severity: 'high',
     title: '영세단가가 과세단가보다 높습니다',
     reason: '행 검토 필요',
-    actionText: '행 보기',
     relatedRowIds: ['A100__01'],
   },
 ];
@@ -120,3 +118,4 @@ describe('workbook AI review panel', () => {
     expect(screen.getByTestId('row-A100__01')).toHaveClass(/rowHighlighted/);
   });
 });
+

@@ -1,3 +1,5 @@
+import { toLowerTrimmedString, toTrimmedString } from '../../../common/utils/text';
+
 const FERTILIZER_CATEGORY_ORDER = Object.freeze([
   '질소',
   '복합',
@@ -10,7 +12,7 @@ const FERTILIZER_CATEGORY_RANK = new Map(
 );
 
 function getCategoryRank(category) {
-  return FERTILIZER_CATEGORY_RANK.get(String(category || '').trim()) ?? Number.MAX_SAFE_INTEGER;
+  return FERTILIZER_CATEGORY_RANK.get(toTrimmedString(category)) ?? Number.MAX_SAFE_INTEGER;
 }
 
 function sortCategories(categories) {
@@ -44,16 +46,16 @@ export function getFertilizerListViewModel(data = []) {
 }
 
 export function filterFertilizerItems(items, category, query) {
-  const keyword = String(query || '').trim().toLowerCase();
+  const keyword = toLowerTrimmedString(query);
 
   return sortItemsByCategoryOrder(
     items.filter((item) => {
       const categoryMatch = category === '전체' || item?.fertilizerType === category;
       const queryMatch =
         !keyword ||
-        `${item?.productName || ''} ${item?.fertilizerType || ''} ${item?.featureSummary || ''}`
-          .toLowerCase()
-          .includes(keyword);
+        toLowerTrimmedString(
+          `${item?.productName || ''} ${item?.fertilizerType || ''} ${item?.featureSummary || ''}`,
+        ).includes(keyword);
 
       return categoryMatch && queryMatch;
     }),

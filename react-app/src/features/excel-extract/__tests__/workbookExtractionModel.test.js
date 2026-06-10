@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
-import { extractSalesPriceSheetData } from '../model/workbook-review/extraction/workbookExtractionModel';
+import { extractSalesPriceSheetData } from '../model/extraction/workbookExtractionModel';
 
 describe('workbook extraction model', () => {
   it('extracts aggregated workbook rows from plain sheet rows', () => {
@@ -75,3 +75,4 @@ describe('workbook extraction model', () => {
     ]);
   });
 });
+

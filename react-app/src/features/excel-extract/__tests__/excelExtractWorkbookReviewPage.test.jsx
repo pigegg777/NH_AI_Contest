@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+﻿import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,8 +10,9 @@ let mockCatalogState = {
 };
 const handleWorkbookChange = vi.fn();
 const saveOfficeProductData = vi.fn();
+const fetchStaticFertilizerLookup = vi.fn();
 
-vi.mock('../hooks/workbook-review/useWorkbookExtraction', () => ({
+vi.mock('../hooks/useWorkbookExtraction', () => ({
   useWorkbookExtraction: () => ({
     selectedFileName: 'demo.xlsx',
     workbookFingerprint: 'workbook-fingerprint',
@@ -26,7 +27,11 @@ vi.mock('../services/officeProductDataService', () => ({
   saveOfficeProductData: (...args) => saveOfficeProductData(...args),
 }));
 
-vi.mock('../hooks/workbook-review/useOfficeProductDataCatalog', () => ({
+vi.mock('../services/staticFertilizerLookupService', () => ({
+  fetchStaticFertilizerLookup: (...args) => fetchStaticFertilizerLookup(...args),
+}));
+
+vi.mock('../hooks/useOfficeProductDataCatalog', () => ({
   useOfficeProductDataCatalog: () => mockCatalogState,
 }));
 
@@ -60,48 +65,57 @@ describe('ExcelExtractWorkbookReviewPage', () => {
       isLoading: false,
       errorMessage: '',
     };
+    fetchStaticFertilizerLookup.mockResolvedValue({});
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it('shows the custom input only when custom is selected', async () => {
+  it('hides the custom table name input until add is selected', () => {
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    expect(screen.queryByLabelText('테이블 이름')).not.toBeInTheDocument();
+  });
+
+  it('shows the custom table name input when add is selected', async () => {
     const user = userEvent.setup();
 
     render(<ExcelExtractWorkbookReviewPage />);
 
-    const select = screen.getByLabelText('테이블 이름');
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
 
-    expect(select).toBeInTheDocument();
-    expect(screen.queryByLabelText('직접 입력')).not.toBeInTheDocument();
+    const input = screen.getByLabelText('테이블 이름');
 
-    await user.selectOptions(select, 'fertilizer');
-    expect(screen.queryByLabelText('직접 입력')).not.toBeInTheDocument();
-
-    await user.selectOptions(select, 'pesticide');
-    expect(screen.queryByLabelText('직접 입력')).not.toBeInTheDocument();
-
-    await user.selectOptions(select, 'custom');
-    expect(screen.getByLabelText('직접 입력')).toBeInTheDocument();
+    expect(screen.getByText('새 테이블 이름')).toBeInTheDocument();
+    expect(
+      screen.getByText('추가할 테이블 이름을 입력한 뒤 저장하세요'),
+    ).toBeInTheDocument();
+    expect(input).toBeInTheDocument();
+    expect(input.tagName.toLowerCase()).toBe('input');
+    expect(input).toHaveAttribute('type', 'text');
+    expect(input).toHaveFocus();
   });
 
-  it('preserves custom input text when switching away and back', async () => {
+  it('preserves typed custom table name when switching between default and add', async () => {
     const user = userEvent.setup();
 
     render(<ExcelExtractWorkbookReviewPage />);
 
-    const select = screen.getByLabelText('테이블 이름');
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
 
-    await user.selectOptions(select, 'custom');
-    await user.type(screen.getByLabelText('직접 입력'), '자재');
-    await user.selectOptions(select, 'fertilizer');
-    await user.selectOptions(select, 'custom');
+    const input = screen.getByLabelText('테이블 이름');
+    await user.type(input, '자재');
+    await user.click(screen.getByRole('button', { name: /비료/i }));
 
-    expect(screen.getByLabelText('직접 입력')).toHaveValue('자재');
+    expect(screen.queryByLabelText('테이블 이름')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.getByLabelText('테이블 이름')).toHaveValue('자재');
   });
 
-  it('saves with the custom category name', async () => {
+  it('saves with the table name entered after add is selected', async () => {
     const user = userEvent.setup();
 
     mockResult = { warnings: [], rows: sampleRows };
@@ -117,8 +131,8 @@ describe('ExcelExtractWorkbookReviewPage', () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText('테이블 이름'), 'custom');
-    await user.type(screen.getByLabelText('직접 입력'), '자재');
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
     await user.click(screen.getByRole('button', { name: '저장하기' }));
 
     await waitFor(() => {
@@ -135,6 +149,60 @@ describe('ExcelExtractWorkbookReviewPage', () => {
         }),
       );
     });
+  });
+
+  it('keeps save disabled when add is selected without a custom table name', async () => {
+    const user = userEvent.setup();
+
+    mockResult = { warnings: [], rows: sampleRows };
+
+    render(
+      <ExcelExtractWorkbookReviewPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.getByText('저장 전에 테이블 이름을 입력하세요')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '저장하기' })).toBeDisabled();
+  });
+
+  it('saves with the selected default category name', async () => {
+    const user = userEvent.setup();
+
+    mockResult = { warnings: [], rows: sampleRows };
+    saveOfficeProductData.mockResolvedValue({
+      id: 1,
+      row_count: 1,
+      updated_at: '2026-06-07T00:00:00Z',
+    });
+
+    render(
+      <ExcelExtractWorkbookReviewPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /비료/i }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '저장하기' })).toBeEnabled();
+    });
+    await user.click(screen.getByRole('button', { name: '저장하기' }));
+
+    await waitFor(() => {
+      expect(saveOfficeProductData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryName: '비료',
+        }),
+      );
+    });
+  });
+
+  it('does not render a manual merge button', () => {
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    expect(screen.queryByRole('button', { name: '병합하기' })).not.toBeInTheDocument();
   });
 
   it('renders default cards, extra saved categories, and the add card', () => {

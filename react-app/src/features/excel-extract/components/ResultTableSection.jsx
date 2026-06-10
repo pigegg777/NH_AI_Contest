@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 
 import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
 import {
@@ -7,7 +7,7 @@ import {
   formatManufacturerList,
   SORT_DIRECTION,
   TABLE_COLUMNS,
-} from '../model/workbook-review/table';
+} from '../model/table';
 
 const NOTE_COLUMN = {
   key: 'note',
@@ -368,3 +368,4 @@ export function ResultTableSection({
     </section>
   );
 }
+

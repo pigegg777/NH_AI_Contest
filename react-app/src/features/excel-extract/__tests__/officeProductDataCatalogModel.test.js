@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+﻿import { describe, expect, it } from 'vitest';
 
-import { buildOfficeProductDataCatalogModel } from '../model/workbook-review/catalog/officeProductDataCatalogModel';
+import { buildOfficeProductDataCatalogModel } from '../model/catalog/officeProductDataCatalogModel';
 
 describe('buildOfficeProductDataCatalogModel', () => {
   it('builds default cards, extra registered cards, and the add card', () => {
@@ -28,6 +28,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
         categoryName: '비료',
         variant: 'default',
         isEmpty: false,
+        isSelectable: true,
+        selectionMode: 'fertilizer',
         statusLabel: '등록됨',
       }),
     );
@@ -37,6 +39,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
         categoryName: '농약',
         variant: 'default',
         isEmpty: true,
+        isSelectable: true,
+        selectionMode: 'pesticide',
         statusLabel: '미등록',
         description: '아직 저장된 데이터가 없습니다.',
       }),
@@ -46,6 +50,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
         categoryName: '종자',
         variant: 'registered',
         isEmpty: false,
+        isSelectable: false,
+        selectionMode: null,
         statusLabel: '등록됨',
       }),
     );
@@ -58,8 +64,11 @@ describe('buildOfficeProductDataCatalogModel', () => {
       expect.objectContaining({
         categoryName: '+ 추가',
         variant: 'add',
+        isSelectable: true,
+        selectionMode: 'custom',
         statusLabel: '준비 중',
       }),
     );
   });
 });
+

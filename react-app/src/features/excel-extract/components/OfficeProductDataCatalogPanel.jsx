@@ -1,5 +1,5 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
-import { buildOfficeProductDataCatalogModel } from '../model/workbook-review/catalog/officeProductDataCatalogModel';
+﻿import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import { buildOfficeProductDataCatalogModel } from '../model/catalog/officeProductDataCatalogModel';
 
 function CatalogMeta({ card }) {
   if (card.isEmpty) {
@@ -61,3 +61,4 @@ export function OfficeProductDataCatalogPanel({ items, isLoading, errorMessage }
     </section>
   );
 }
+

@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
+﻿import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ResultTableSection } from '../components/ResultTableSection';
-import { createInitialFilters, createInitialSortState } from '../model/workbook-review/table';
+import { createInitialFilters, createInitialSortState } from '../model/table';
 
 const rows = [
   {
@@ -153,3 +153,4 @@ describe('excel extract workbook review table', () => {
     expect(screen.getAllByText('-').length).toBeGreaterThan(0);
   });
 });
+

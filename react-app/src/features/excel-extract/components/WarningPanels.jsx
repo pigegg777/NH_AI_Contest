@@ -1,5 +1,5 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
-import { MAX_WARNING_ROW_COUNT } from '../model/workbook-review/table';
+﻿import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import { MAX_WARNING_ROW_COUNT } from '../model/table';
 
 export function FileWarningsPanel({ warnings }) {
   if (!warnings || warnings.length === 0) {
@@ -66,3 +66,4 @@ export function WarningRowsPanel({ rows }) {
     </section>
   );
 }
+
