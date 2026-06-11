@@ -26,7 +26,7 @@ export function AiRecommendationPanel({
   const severityCounts = countRecommendationsBySeverity(recommendations);
 
   return (
-    <section className={styles.panel}>
+    <section className={`${styles.panel} ${styles.aiCompactPanel}`}>
       <div className={styles.panelHeader}>
         <div className={styles.aiPanelHeader}>
           <h2 className={styles.panelTitle}>AI 추천</h2>

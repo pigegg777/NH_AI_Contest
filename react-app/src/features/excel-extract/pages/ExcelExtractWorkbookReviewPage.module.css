@@ -431,7 +431,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
+  min-height: 30px;
   padding: 0 11px;
   border: 1px solid rgba(29, 74, 46, 0.22);
   border-radius: var(--corp-radius-sm);
@@ -439,6 +439,7 @@
   color: var(--corp-primary);
   font-size: 0.76rem;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--corp-transition);
 }
@@ -811,6 +812,36 @@
 }
 
 /* ─── AI recommendation panel ─────────────────────────── */
+.aiCompactPanel {
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  box-shadow: none;
+}
+
+.aiCompactPanel .panelHeader {
+  margin-bottom: 6px;
+}
+
+.aiCompactPanel .panelTitle {
+  font-size: 0.74rem;
+}
+
+.aiCompactPanel .panelMeta {
+  min-height: 18px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.aiCompactPanel .statusMessage,
+.aiCompactPanel .errorBox,
+.aiCompactPanel .aiEmptyState {
+  margin-top: 6px;
+  padding: 5px 8px;
+  font-size: 0.72rem;
+}
+
 .aiPanelHeader {
   display: flex;
   align-items: center;
@@ -833,31 +864,33 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .recommendationStat {
   display: inline-flex;
   align-items: center;
-  min-height: 22px;
-  padding: 0 9px;
+  min-height: 18px;
+  padding: 0 7px;
   border-radius: 999px;
-  background: var(--corp-surface-muted);
+  background: var(--corp-panel);
   color: var(--corp-muted);
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
 .recommendationGrid {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .recommendationCard {
-  width: 100%;
-  padding: 11px 13px;
+  flex: 1 1 220px;
+  max-width: 320px;
+  padding: 6px 9px;
   border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius);
+  border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
   color: inherit;
   text-align: left;
@@ -879,28 +912,32 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
+}
+
+.recommendationCardHeader strong {
+  font-size: 0.74rem;
 }
 
 .recommendationSeverity {
   color: var(--corp-primary);
-  font-size: 0.73rem;
+  font-size: 0.64rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .recommendationReason {
-  margin: 7px 0 0;
+  margin: 3px 0 0;
   color: var(--corp-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: 0.7rem;
+  line-height: 1.35;
 }
 
 .recommendationFooter {
   display: inline-block;
-  margin-top: 9px;
+  margin-top: 4px;
   color: var(--corp-text);
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   font-weight: 700;
 }
 
@@ -931,35 +968,24 @@
   border-top: 1px solid var(--corp-line);
 }
 
-/* ─── AI group (AI analyze button + recommendations) ─── */
-.aiGroup {
-  border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius-lg);
-  background: var(--corp-panel);
-  box-shadow: var(--corp-shadow-sm);
-  overflow: hidden;
-}
-
-.aiGroupHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-}
-
-.aiGroup > .panel {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  border-top: 1px solid var(--corp-line);
-}
-
 /* ─── Filter toolbar ──────────────────────────────────── */
 .filterToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filterTopRow {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.filterBottomRow {
   display: grid;
-  grid-template-columns: minmax(200px, 1.5fr) repeat(3, minmax(0, 1fr));
-  gap: 10px 12px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
   align-items: end;
 }
 
@@ -970,6 +996,7 @@
 }
 
 .filterFieldWide {
+  flex: 1;
   min-width: 0;
 }
 
@@ -984,12 +1011,12 @@
 .filterInput,
 .filterSelect {
   width: 100%;
-  min-height: 32px;
-  padding: 0 10px;
+  min-height: 30px;
+  padding: 0 9px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .filterInput:focus,
@@ -1002,13 +1029,13 @@
 }
 
 .resetButton {
-  min-height: 32px;
+  min-height: 30px;
   padding: 0 12px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-surface-muted);
   color: var(--corp-text);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   transition: background var(--corp-transition);

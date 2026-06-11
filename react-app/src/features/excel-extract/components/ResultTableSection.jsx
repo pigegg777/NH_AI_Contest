@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { AiRecommendationPanel } from './AiRecommendationPanel';
 import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
 import {
   EMPTY_FILTER_VALUE,
@@ -478,8 +479,18 @@ export function ResultTableSection({
   onPriceChange,
   tableNameMode,
   highlightedRowIds = [],
+  aiRecommendations = [],
+  aiAnalysisMode = 'idle',
+  aiIsAnalyzing = false,
+  aiErrorMessage = '',
+  aiActiveRecommendationId = null,
+  onAiAnalyze,
+  onAiRecommendationSelect,
+  aiDisabled = false,
 }) {
   const columns = getTableColumnsByMode(tableNameMode);
+  const showAiPanel =
+    aiAnalysisMode !== 'idle' || aiIsAnalyzing || Boolean(aiErrorMessage) || aiRecommendations.length > 0;
 
   return (
     <section className={styles.panel}>
@@ -488,32 +499,56 @@ export function ResultTableSection({
         <span className={styles.panelMeta}>{rows.length}건 표시</span>
       </div>
 
+      {showAiPanel ? (
+        <AiRecommendationPanel
+          recommendations={aiRecommendations}
+          analysisMode={aiAnalysisMode}
+          activeRecommendationId={aiActiveRecommendationId}
+          isAnalyzing={aiIsAnalyzing}
+          errorMessage={aiErrorMessage}
+          onRecommendationSelect={onAiRecommendationSelect}
+        />
+      ) : null}
+
       <div className={styles.filterToolbar}>
-        <label className={`${styles.filterField} ${styles.filterFieldWide}`} htmlFor="row-search">
-          <span className={styles.filterLabel}>검색</span>
-          <input
-            id="row-search"
-            className={styles.filterInput}
-            type="search"
-            value={searchQuery}
-            onChange={(event) => onSearchQueryChange(event.target.value)}
-            placeholder="상품코드, 상품명, 분류명 검색"
-          />
-        </label>
+        <div className={styles.filterTopRow}>
+          <label className={`${styles.filterField} ${styles.filterFieldWide}`} htmlFor="row-search">
+            <span className={styles.filterLabel}>검색</span>
+            <input
+              id="row-search"
+              className={styles.filterInput}
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange(event.target.value)}
+              placeholder="상품코드, 상품명, 분류명 검색"
+            />
+          </label>
 
-        {FILTER_FIELDS.map((field) => (
-          <FilterSelect
-            key={field.key}
-            field={field}
-            value={filters[field.key]}
-            options={filterOptions[field.key] ?? []}
-            onChange={onFilterChange}
-          />
-        ))}
+          <button
+            type="button"
+            className={styles.aiButton}
+            onClick={onAiAnalyze}
+            disabled={aiDisabled || aiIsAnalyzing || rows.length === 0}
+          >
+            {aiIsAnalyzing ? 'AI 분석 중...' : 'AI 분석하기'}
+          </button>
+        </div>
 
-        <button type="button" className={styles.resetButton} onClick={onResetFilters}>
-          필터 초기화
-        </button>
+        <div className={styles.filterBottomRow}>
+          {FILTER_FIELDS.map((field) => (
+            <FilterSelect
+              key={field.key}
+              field={field}
+              value={filters[field.key]}
+              options={filterOptions[field.key] ?? []}
+              onChange={onFilterChange}
+            />
+          ))}
+
+          <button type="button" className={styles.resetButton} onClick={onResetFilters}>
+            필터 초기화
+          </button>
+        </div>
       </div>
 
       <ResultTable

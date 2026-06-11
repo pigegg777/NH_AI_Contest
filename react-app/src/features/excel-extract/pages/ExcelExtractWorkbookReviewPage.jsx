@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { AiRecommendationPanel } from '../components/AiRecommendationPanel';
 import { ResultTableSection, WorkbookDropzone } from '../components/ResultTableSection';
 import { FileWarningsPanel, WarningRowsPanel } from '../components/WarningPanels';
 import { useWorkbookAiRecommendations } from '../hooks/useWorkbookAiRecommendations';
@@ -489,6 +488,14 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
                   onPriceChange={updatePrice}
                   tableNameMode={tableNameMode}
                   highlightedRowIds={aiHighlightedRowIds}
+                  aiRecommendations={aiRecommendations}
+                  aiAnalysisMode={aiAnalysisMode}
+                  aiIsAnalyzing={aiIsAnalyzing}
+                  aiErrorMessage={aiErrorMessage}
+                  aiActiveRecommendationId={aiActiveRecommendationId}
+                  onAiAnalyze={handleAiAnalyze}
+                  onAiRecommendationSelect={handleAiRecommendationSelect}
+                  aiDisabled={isExtracting || isMerging}
                 />
               </div>
             </>
@@ -572,50 +579,33 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
               {!result && errorMessage ? <div className={styles.errorBox}>{errorMessage}</div> : null}
 
               {result ? (
-                <>
-                  <div className={styles.aiGroup} id="section-ai">
-                    <div className={styles.aiGroupHeader}>
-                      <h2 className={styles.panelTitle}>AI 분석</h2>
-                      <button
-                        type="button"
-                        className={styles.aiButton}
-                        onClick={handleAiAnalyze}
-                        disabled={!result || isExtracting || isMerging || aiIsAnalyzing}
-                      >
-                        {aiIsAnalyzing ? 'AI 분석 중...' : 'AI 분석하기'}
-                      </button>
-                    </div>
-
-                    <AiRecommendationPanel
-                      recommendations={aiRecommendations}
-                      analysisMode={aiAnalysisMode}
-                      activeRecommendationId={aiActiveRecommendationId}
-                      isAnalyzing={aiIsAnalyzing}
-                      errorMessage={aiErrorMessage}
-                      onRecommendationSelect={handleAiRecommendationSelect}
-                    />
-                  </div>
-
-                  <div id="section-result" className={styles.resultSection}>
-                    <ResultTableSection
-                      rows={rows}
-                      searchQuery={searchQuery}
-                      onSearchQueryChange={setSearchQuery}
-                      filters={filters}
-                      filterOptions={filterOptions}
-                      onFilterChange={handleFilterChange}
-                      onResetFilters={resetFilters}
-                      sortState={sortState}
-                      onSortChange={setSortState}
-                      onShadowToggle={toggleShadow}
-                      onVisibleRowsShadowChange={setShadowForRows}
-                      onNoteChange={updateNote}
-                      onPriceChange={updatePrice}
-                      tableNameMode={tableNameMode}
-                      highlightedRowIds={aiHighlightedRowIds}
-                    />
-                  </div>
-                </>
+                <div id="section-result" className={styles.resultSection}>
+                  <ResultTableSection
+                    rows={rows}
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
+                    filters={filters}
+                    filterOptions={filterOptions}
+                    onFilterChange={handleFilterChange}
+                    onResetFilters={resetFilters}
+                    sortState={sortState}
+                    onSortChange={setSortState}
+                    onShadowToggle={toggleShadow}
+                    onVisibleRowsShadowChange={setShadowForRows}
+                    onNoteChange={updateNote}
+                    onPriceChange={updatePrice}
+                    tableNameMode={tableNameMode}
+                    highlightedRowIds={aiHighlightedRowIds}
+                    aiRecommendations={aiRecommendations}
+                    aiAnalysisMode={aiAnalysisMode}
+                    aiIsAnalyzing={aiIsAnalyzing}
+                    aiErrorMessage={aiErrorMessage}
+                    aiActiveRecommendationId={aiActiveRecommendationId}
+                    onAiAnalyze={handleAiAnalyze}
+                    onAiRecommendationSelect={handleAiRecommendationSelect}
+                    aiDisabled={isExtracting || isMerging}
+                  />
+                </div>
               ) : null}
             </>
           )}
