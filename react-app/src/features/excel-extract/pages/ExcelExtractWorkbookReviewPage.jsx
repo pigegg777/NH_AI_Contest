@@ -415,7 +415,8 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
             aria-label={isSidebarCollapsed ? '등록 데이터 펼치기' : '등록 데이터 접기'}
             title={isSidebarCollapsed ? '등록 데이터 펼치기' : '등록 데이터 접기'}
           >
-            {isSidebarCollapsed ? '»' : '«'}
+            <span aria-hidden="true">{isSidebarCollapsed ? '»' : '«'}</span>
+            <span>{isSidebarCollapsed ? '펼치기' : '접기'}</span>
           </button>
 
           <div className={styles.sidebarCard}>
