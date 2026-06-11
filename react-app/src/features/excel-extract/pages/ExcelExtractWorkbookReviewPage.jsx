@@ -188,6 +188,7 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
   const [customTableName, setCustomTableName] = useState('');
   const [pendingCustomCategories, setPendingCustomCategories] = useState([]);
   const [selectedCustomCategoryName, setSelectedCustomCategoryName] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const customTableNameInputRef = useRef(null);
 
   const {
@@ -402,8 +403,21 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
         statusVariant={bannerStatusVariant}
       />
 
-      <div className={styles.layout}>
-        <aside className={styles.sidebar} aria-label="등록 데이터 현황">
+      <div className={`${styles.layout} ${isSidebarCollapsed ? styles.layoutCollapsed : ''}`.trim()}>
+        <aside
+          className={`${styles.sidebar} ${isSidebarCollapsed ? styles.sidebarCollapsed : ''}`.trim()}
+          aria-label="등록 데이터 현황"
+        >
+          <button
+            type="button"
+            className={styles.sidebarToggle}
+            onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
+            aria-label={isSidebarCollapsed ? '등록 데이터 펼치기' : '등록 데이터 접기'}
+            title={isSidebarCollapsed ? '등록 데이터 펼치기' : '등록 데이터 접기'}
+          >
+            {isSidebarCollapsed ? '»' : '«'}
+          </button>
+
           <div className={styles.sidebarCard}>
             <div className={styles.sidebarCardHeader}>
               <h2 className={styles.sidebarTitle}>등록 데이터</h2>

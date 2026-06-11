@@ -115,6 +115,11 @@
   grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
   min-height: calc(100vh - 56px);
+  transition: grid-template-columns var(--corp-transition);
+}
+
+.layoutCollapsed {
+  grid-template-columns: 36px minmax(0, 1fr);
 }
 
 .sidebar {
@@ -127,6 +132,36 @@
   gap: 0;
   border-right: 1px solid var(--corp-line);
   background: var(--corp-panel);
+}
+
+.sidebarCollapsed {
+  overflow: hidden;
+}
+
+.sidebarCollapsed .sidebarCard {
+  display: none;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-bottom: 1px solid var(--corp-line);
+  background: var(--corp-surface-muted);
+  color: var(--corp-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.sidebarToggle:hover {
+  background: #ece8e3;
 }
 
 .sidebarCard {
@@ -1059,7 +1094,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 1890px;
+  min-width: 1830px;
 }
 
 .table th:nth-child(2) { width: 130px; }
@@ -1157,7 +1192,7 @@
 }
 
 .noteHeader,
-.noteCell { width: 220px; }
+.noteCell { width: 160px; }
 
 .noteButton {
   width: 100%;
