@@ -1020,7 +1020,7 @@
 
 /* ─── Data table ──────────────────────────────────────── */
 .tableWrap {
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: auto;
   max-height: clamp(420px, 60vh, 640px);
   border: 1px solid var(--corp-line);
@@ -1032,11 +1032,13 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 1100px;
+  min-width: 1500px;
 }
 
 .table th:nth-child(2) { width: 130px; }
 .table th:nth-child(3) { width: 220px; }
+.table th:nth-child(7) { width: 140px; }
+.table th:nth-child(8) { width: 140px; }
 .table th:nth-last-child(1) { width: 160px; }
 
 .table th,
@@ -1116,7 +1118,8 @@
   cursor: pointer;
 }
 
-.noteCell { width: 120px; }
+.noteHeader,
+.noteCell { width: 220px; }
 
 .noteButton {
   width: 100%;
