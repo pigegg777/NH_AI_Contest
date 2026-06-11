@@ -120,26 +120,42 @@ describe('excel extract workbook review table', () => {
     expect(onNoteChange).toHaveBeenCalledWith('A100__01', 'memo');
   });
 
-  it('places note and static fertilizer columns before the sale price columns', () => {
+  it('orders columns per the requested layout for fertilizer mode', () => {
     renderTable({ tableNameMode: 'fertilizer' });
 
     const columnHeaders = screen.getAllByRole('columnheader').map((header) =>
-      header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase(),
+      header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase().replace(/[v^]/g, ''),
     );
 
-    expect(columnHeaders).toContain('상품명');
-    expect(columnHeaders).toContain('비고');
-    expect(columnHeaders).toContain('성분');
-    expect(columnHeaders).toContain('보조금');
-    expect(columnHeaders).toContain('이미지 url');
-    expect(columnHeaders).toContain('상품 url');
-    expect(columnHeaders).toContain('유형코드');
-    expect(columnHeaders.indexOf('비고')).toBe(columnHeaders.indexOf('상품명') + 1);
-    expect(columnHeaders.indexOf('성분')).toBe(columnHeaders.indexOf('비고') + 1);
-    expect(columnHeaders.indexOf('보조금')).toBe(columnHeaders.indexOf('성분') + 1);
-    expect(columnHeaders.indexOf('이미지 url')).toBe(columnHeaders.indexOf('보조금') + 1);
-    expect(columnHeaders.indexOf('상품 url')).toBe(columnHeaders.indexOf('이미지 url') + 1);
-    expect(columnHeaders.indexOf('유형코드')).toBe(columnHeaders.indexOf('상품 url') + 1);
+    const expectedOrder = [
+      '상품코드',
+      '상품명',
+      '규격',
+      '유형코드',
+      '단가유형',
+      '과세단가',
+      '영세단가',
+      '보조금',
+      '비고',
+      '성분',
+      '이미지 url',
+      '상품 url',
+      '대분류',
+      '중분류',
+      '소분류',
+      '세분류',
+      '제조업체',
+    ];
+
+    expectedOrder.forEach((label) => {
+      expect(columnHeaders).toContain(label);
+    });
+
+    for (let i = 1; i < expectedOrder.length; i += 1) {
+      expect(columnHeaders.indexOf(expectedOrder[i])).toBe(
+        columnHeaders.indexOf(expectedOrder[i - 1]) + 1,
+      );
+    }
   });
 
   it('renders static fertilizer URLs as links and shows dashes for empty values', () => {
@@ -154,19 +170,43 @@ describe('excel extract workbook review table', () => {
     expect(screen.getAllByText('-').length).toBeGreaterThan(0);
   });
 
-  it('hides nutrient, subsidy, and url columns for the default table mode', () => {
+  it('hides nutrient, subsidy, and url columns and orders the rest for the default table mode', () => {
     renderTable({ tableNameMode: 'custom' });
 
     const columnHeaders = screen.getAllByRole('columnheader').map((header) =>
-      header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase(),
+      header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase().replace(/[v^]/g, ''),
     );
 
-    expect(columnHeaders).toContain('상품명');
-    expect(columnHeaders).toContain('과세단가');
     expect(columnHeaders).not.toContain('성분');
     expect(columnHeaders).not.toContain('보조금');
     expect(columnHeaders).not.toContain('이미지 url');
     expect(columnHeaders).not.toContain('상품 url');
+
+    const expectedOrder = [
+      '상품코드',
+      '상품명',
+      '규격',
+      '유형코드',
+      '단가유형',
+      '과세단가',
+      '영세단가',
+      '비고',
+      '대분류',
+      '중분류',
+      '소분류',
+      '세분류',
+      '제조업체',
+    ];
+
+    expectedOrder.forEach((label) => {
+      expect(columnHeaders).toContain(label);
+    });
+
+    for (let i = 1; i < expectedOrder.length; i += 1) {
+      expect(columnHeaders.indexOf(expectedOrder[i])).toBe(
+        columnHeaders.indexOf(expectedOrder[i - 1]) + 1,
+      );
+    }
   });
 
   it('opens a price input on tax_price cell click and saves the numeric value on blur', async () => {

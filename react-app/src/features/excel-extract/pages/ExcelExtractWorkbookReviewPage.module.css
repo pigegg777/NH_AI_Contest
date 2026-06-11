@@ -1036,6 +1036,7 @@
 }
 
 .table th:nth-child(2) { width: 130px; }
+.table th:nth-child(3) { width: 220px; }
 .table th:nth-last-child(1) { width: 160px; }
 
 .table th,

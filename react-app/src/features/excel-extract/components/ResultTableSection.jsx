@@ -9,12 +9,6 @@ import {
   SORT_DIRECTION,
 } from '../model/table';
 
-const NOTE_COLUMN = {
-  key: 'note',
-  label: '비고',
-};
-
-const LEADING_COLUMN_KEYS = new Set(['product_code', 'product_name']);
 const PRICE_COLUMN_KEYS = new Set(['tax_price', 'zero_tax_price']);
 
 function FilterSelect({ field, value, options, onChange }) {
@@ -272,8 +266,6 @@ function ResultTable({
   onPriceChange,
   highlightedRowIds,
 }) {
-  const leadingColumns = columns.filter((column) => LEADING_COLUMN_KEYS.has(column.key));
-  const trailingColumns = columns.filter((column) => !LEADING_COLUMN_KEYS.has(column.key));
   const visibleRowIds = useMemo(() => rows.map((row) => row.row_id).filter(Boolean), [rows]);
   const selectedCount = useMemo(() => rows.filter((row) => row.shadow === true).length, [rows]);
   const highlightedRowIdSet = useMemo(
@@ -302,37 +294,26 @@ function ResultTable({
               />
             </th>
 
-            {leadingColumns.map((column) => (
-              <th
-                key={column.key}
-                aria-sort={
-                  sortState?.key !== column.key
-                    ? 'none'
-                    : sortState.direction === SORT_DIRECTION.ascending
-                      ? 'ascending'
-                      : 'descending'
-                }
-              >
-                <SortButton column={column} sortState={sortState} onSortChange={onSortChange} />
-              </th>
-            ))}
-
-            <th className={styles.noteHeader}>{NOTE_COLUMN.label}</th>
-
-            {trailingColumns.map((column) => (
-              <th
-                key={column.key}
-                aria-sort={
-                  sortState?.key !== column.key
-                    ? 'none'
-                    : sortState.direction === SORT_DIRECTION.ascending
-                      ? 'ascending'
-                      : 'descending'
-                }
-              >
-                <SortButton column={column} sortState={sortState} onSortChange={onSortChange} />
-              </th>
-            ))}
+            {columns.map((column) =>
+              column.key === 'note' ? (
+                <th key={column.key} className={styles.noteHeader}>
+                  {column.label}
+                </th>
+              ) : (
+                <th
+                  key={column.key}
+                  aria-sort={
+                    sortState?.key !== column.key
+                      ? 'none'
+                      : sortState.direction === SORT_DIRECTION.ascending
+                        ? 'ascending'
+                        : 'descending'
+                  }
+                >
+                  <SortButton column={column} sortState={sortState} onSortChange={onSortChange} />
+                </th>
+              ),
+            )}
           </tr>
         </thead>
         <tbody>
@@ -359,21 +340,20 @@ function ResultTable({
                 />
               </td>
 
-              {leadingColumns.map((column) => (
-                <td key={`${row.row_id}-${column.key}`} title={String(getCellTextValue(row, column.key))}>
-                  {renderCellContent(row, column.key, onPriceChange)}
-                </td>
-              ))}
-
-              <td className={styles.noteCell}>
-                <NoteCell row={row} onNoteChange={onNoteChange} />
-              </td>
-
-              {trailingColumns.map((column) => (
-                <td key={`${row.row_id}-${column.key}`} title={String(getCellTextValue(row, column.key))}>
-                  {renderCellContent(row, column.key, onPriceChange)}
-                </td>
-              ))}
+              {columns.map((column) =>
+                column.key === 'note' ? (
+                  <td key={`${row.row_id}-note`} className={styles.noteCell}>
+                    <NoteCell row={row} onNoteChange={onNoteChange} />
+                  </td>
+                ) : (
+                  <td
+                    key={`${row.row_id}-${column.key}`}
+                    title={String(getCellTextValue(row, column.key))}
+                  >
+                    {renderCellContent(row, column.key, onPriceChange)}
+                  </td>
+                ),
+              )}
             </tr>
           ))}
         </tbody>
