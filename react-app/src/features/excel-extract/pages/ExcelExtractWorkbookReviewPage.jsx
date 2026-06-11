@@ -11,7 +11,10 @@ import { useWorkbookExtraction } from '../hooks/useWorkbookExtraction';
 import { useWorkbookSave } from '../hooks/useWorkbookSave';
 import { useWorkbookStaticMergeTrigger } from '../hooks/useWorkbookStaticMergeTrigger';
 import { useWorkbookReviewTableState } from '../hooks/useWorkbookReviewTableState';
-import { buildOfficeProductDataCatalogModel } from '../model/catalog/officeProductDataCatalogModel';
+import {
+  buildOfficeProductDataCatalogModel,
+  validateCustomCategoryName,
+} from '../model/catalog/officeProductDataCatalogModel';
 import {
   resolveTableNameModeFromCategoryName,
   shouldUseStaticDataMerge,
@@ -106,24 +109,36 @@ function SidebarCatalogItem({ card, isSelected, onSelect }) {
   );
 }
 
-function TableNameCard({ tableNameMode, customTableName, inputRef, onTableNameChange, fixedCategoryName }) {
-  const isCustom = tableNameMode === 'custom';
+function TableNameCard({
+  tableNameMode,
+  customTableName,
+  inputRef,
+  onTableNameChange,
+  fixedCategoryName,
+  showsTableNameInput,
+  validationError,
+  canCreateTable,
+  onCreateTable,
+}) {
   const isCustomTableNameEmpty = customTableName.trim().length === 0;
 
-  return (
-    <aside className={styles.tableNameCard} aria-label="테이블 이름 설정">
-      <div className={styles.tableNameCardHeader}>
-        <h3 className={styles.tableNameCardTitle}>{isCustom ? '새 테이블 이름' : '테이블 이름'}</h3>
-        <span className={styles.tableNameRequiredBadge}>필수</span>
-      </div>
+  if (showsTableNameInput) {
+    return (
+      <aside className={styles.tableNameCard} aria-label="테이블 이름 설정">
+        <div className={styles.tableNameCardHeader}>
+          <h3 className={styles.tableNameCardTitle}>새 테이블 이름</h3>
+          <span className={styles.tableNameRequiredBadge}>필수</span>
+        </div>
 
-      {isCustom ? (
-        <>
-          <p className={styles.tableNameCardDescription}>
-            추가할 테이블 이름을 입력한 뒤 업로드하세요
-          </p>
+        <p className={styles.tableNameCardDescription}>
+          추가할 테이블 이름을 입력한 뒤 업로드하세요
+        </p>
 
-          <label className={styles.catalogInlineField} htmlFor="table-name-input">
+        <div className={styles.tableNameRow}>
+          <label
+            className={`${styles.catalogInlineField} ${styles.tableNameRowField}`}
+            htmlFor="table-name-input"
+          >
             <span className={styles.catalogInlineLabel}>테이블 이름</span>
             <input
               ref={inputRef}
@@ -136,16 +151,35 @@ function TableNameCard({ tableNameMode, customTableName, inputRef, onTableNameCh
             />
           </label>
 
-          {isCustomTableNameEmpty ? (
-            <p className={styles.catalogInlineHint}>저장 전에 테이블 이름을 입력하세요</p>
-          ) : null}
-        </>
-      ) : (
-        <>
-          <p className={styles.tableNameCardDescription}>자동으로 지정된 테이블 이름입니다</p>
-          <div className={styles.tableNameFixedValue}>{fixedCategoryName}</div>
-        </>
-      )}
+          <button
+            type="button"
+            className={styles.createTableButton}
+            onClick={onCreateTable}
+            disabled={!canCreateTable}
+          >
+            만들기
+          </button>
+        </div>
+
+        {isCustomTableNameEmpty ? (
+          <p className={styles.catalogInlineHint}>저장 전에 테이블 이름을 입력하세요</p>
+        ) : validationError ? (
+          <p className={styles.tableNameError}>{validationError}</p>
+        ) : null}
+      </aside>
+    );
+  }
+
+  return (
+    <aside className={styles.tableNameCard} aria-label="테이블 이름 설정">
+      <div className={styles.tableNameCardHeader}>
+        <h3 className={styles.tableNameCardTitle}>테이블 이름</h3>
+        <span className={styles.tableNameRequiredBadge}>필수</span>
+      </div>
+      <p className={styles.tableNameCardDescription}>
+        {tableNameMode === 'custom' ? '직접 추가한 테이블 이름입니다' : '자동으로 지정된 테이블 이름입니다'}
+      </p>
+      <div className={styles.tableNameFixedValue}>{fixedCategoryName}</div>
     </aside>
   );
 }
@@ -153,6 +187,8 @@ function TableNameCard({ tableNameMode, customTableName, inputRef, onTableNameCh
 export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
   const [tableNameMode, setTableNameMode] = useState('');
   const [customTableName, setCustomTableName] = useState('');
+  const [pendingCustomCategories, setPendingCustomCategories] = useState([]);
+  const [selectedCustomCategoryName, setSelectedCustomCategoryName] = useState('');
   const customTableNameInputRef = useRef(null);
 
   const {
@@ -165,16 +201,21 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
     processFile,
   } = useWorkbookExtraction();
 
-  const isCustomTableNameMode = tableNameMode === 'custom';
+  const isShowingExistingCustomCategory =
+    tableNameMode === 'custom' && selectedCustomCategoryName !== '';
+  const showsCustomTableNameInput = tableNameMode === 'custom' && !isShowingExistingCustomCategory;
+  const effectiveCustomTableName = isShowingExistingCustomCategory
+    ? selectedCustomCategoryName
+    : customTableName;
   const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
 
   useEffect(() => {
-    if (!isCustomTableNameMode) {
+    if (!showsCustomTableNameInput) {
       return;
     }
 
     customTableNameInputRef.current?.focus();
-  }, [isCustomTableNameMode]);
+  }, [showsCustomTableNameInput]);
 
   const {
     items: officeProductCatalogItems,
@@ -188,7 +229,7 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
       : tableNameMode === 'pesticide'
         ? '농약'
         : tableNameMode === 'custom'
-          ? toTrimmedString(customTableName)
+          ? toTrimmedString(effectiveCustomTableName)
           : '';
 
   const registeredCatalogItem =
@@ -228,6 +269,7 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
     toggleShadow,
     setShadowForRows,
     updateNote,
+    updatePrice,
     isMerging,
     isMerged,
     mergeError,
@@ -271,14 +313,27 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
     selectedFileName,
     workbookFingerprint,
     tableNameMode,
-    customTableName,
+    customTableName: effectiveCustomTableName,
   });
 
   const { cards: catalogCards, registeredCount } = buildOfficeProductDataCatalogModel(
     officeProductCatalogItems,
+    pendingCustomCategories,
   );
 
   const canUploadFile = toTrimmedString(resolvedCategoryName).length > 0;
+
+  const trimmedCustomTableName = toTrimmedString(customTableName);
+  const existingCategoryNames = [
+    ...officeProductCatalogItems.map((item) => item.categoryName),
+    ...pendingCustomCategories,
+  ];
+  const tableNameValidationError =
+    showsCustomTableNameInput && trimmedCustomTableName.length > 0
+      ? validateCustomCategoryName(trimmedCustomTableName, existingCategoryNames)
+      : null;
+  const canCreateTable =
+    showsCustomTableNameInput && trimmedCustomTableName.length > 0 && !tableNameValidationError;
 
   const bannerStatusLabel = result
     ? '신규 데이터 검토 중'
@@ -291,21 +346,32 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
     setCustomTableName(event.target.value);
   }
 
+  function handleCreateCustomTable() {
+    if (!canCreateTable) {
+      return;
+    }
+
+    setPendingCustomCategories((previous) => [...previous, trimmedCustomTableName]);
+    setSelectedCustomCategoryName(trimmedCustomTableName);
+    setCustomTableName('');
+  }
+
   function isCardSelected(card) {
     if (card.variant === 'add') {
-      return tableNameMode === 'custom' && toTrimmedString(customTableName).length === 0;
+      return tableNameMode === 'custom' && !isShowingExistingCustomCategory;
     }
 
     if (card.variant === 'default') {
       return resolveTableNameModeFromCategoryName(card.categoryName) === tableNameMode;
     }
 
-    return tableNameMode === 'custom' && toTrimmedString(customTableName) === card.categoryName;
+    return isShowingExistingCustomCategory && selectedCustomCategoryName === card.categoryName;
   }
 
   function handleCatalogSelect(card) {
     if (card.variant === 'add') {
       setTableNameMode('custom');
+      setSelectedCustomCategoryName('');
       return;
     }
 
@@ -313,11 +379,12 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
 
     if (mode) {
       setTableNameMode(mode);
+      setSelectedCustomCategoryName('');
       return;
     }
 
     setTableNameMode('custom');
-    setCustomTableName(card.categoryName);
+    setSelectedCustomCategoryName(card.categoryName);
   }
 
   return (
@@ -419,6 +486,8 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
                   onShadowToggle={toggleShadow}
                   onVisibleRowsShadowChange={setShadowForRows}
                   onNoteChange={updateNote}
+                  onPriceChange={updatePrice}
+                  tableNameMode={tableNameMode}
                   highlightedRowIds={aiHighlightedRowIds}
                 />
               </div>
@@ -426,6 +495,18 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
           ) : (
             <>
               <div className={styles.uploadWorkspace}>
+                <TableNameCard
+                  tableNameMode={tableNameMode}
+                  customTableName={customTableName}
+                  inputRef={customTableNameInputRef}
+                  onTableNameChange={handleCustomTableNameChange}
+                  fixedCategoryName={activeCategoryName}
+                  showsTableNameInput={showsCustomTableNameInput}
+                  validationError={tableNameValidationError}
+                  canCreateTable={canCreateTable}
+                  onCreateTable={handleCreateCustomTable}
+                />
+
                 <div className={styles.uploadMain}>
                   {result ? (
                     <div className={styles.uploadGroup}>
@@ -486,14 +567,6 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
                     />
                   )}
                 </div>
-
-                <TableNameCard
-                  tableNameMode={tableNameMode}
-                  customTableName={customTableName}
-                  inputRef={customTableNameInputRef}
-                  onTableNameChange={handleCustomTableNameChange}
-                  fixedCategoryName={activeCategoryName}
-                />
               </div>
 
               {!result && errorMessage ? <div className={styles.errorBox}>{errorMessage}</div> : null}
@@ -537,6 +610,8 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
                       onShadowToggle={toggleShadow}
                       onVisibleRowsShadowChange={setShadowForRows}
                       onNoteChange={updateNote}
+                      onPriceChange={updatePrice}
+                      tableNameMode={tableNameMode}
                       highlightedRowIds={aiHighlightedRowIds}
                     />
                   </div>

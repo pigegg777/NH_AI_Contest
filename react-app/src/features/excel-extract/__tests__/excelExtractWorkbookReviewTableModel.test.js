@@ -1,9 +1,12 @@
 ﻿import { describe, expect, it } from 'vitest';
 
 import {
+  DEFAULT_TABLE_COLUMNS,
   EMPTY_FILTER_VALUE,
+  FERTILIZER_PESTICIDE_TABLE_COLUMNS,
   SORT_DIRECTION,
   createInitialFilters,
+  getTableColumnsByMode,
 } from '../model/table';
 import {
   buildFilterOptions,
@@ -89,6 +92,30 @@ describe('excel extract workbook review table model', () => {
     expect(getWarningRows(sampleRows)).toHaveLength(1);
     expect(formatManufacturerList(sampleRows[0].manufacturer_list)).toBe('제조사B / M02');
     expect(formatManufacturerList([])).toBe('-');
+  });
+
+  it('returns the extended fertilizer/pesticide column set for fertilizer and pesticide modes', () => {
+    const extendedKeys = FERTILIZER_PESTICIDE_TABLE_COLUMNS.map((column) => column.key);
+
+    expect(extendedKeys).toContain('nutrient');
+    expect(extendedKeys).toContain('price_subsidy');
+    expect(extendedKeys).toContain('img_url');
+    expect(extendedKeys).toContain('product_url');
+    expect(getTableColumnsByMode('fertilizer')).toBe(FERTILIZER_PESTICIDE_TABLE_COLUMNS);
+    expect(getTableColumnsByMode('pesticide')).toBe(FERTILIZER_PESTICIDE_TABLE_COLUMNS);
+  });
+
+  it('returns the default column set without nutrient/subsidy/url columns for custom and unset modes', () => {
+    const defaultKeys = DEFAULT_TABLE_COLUMNS.map((column) => column.key);
+
+    expect(defaultKeys).not.toContain('nutrient');
+    expect(defaultKeys).not.toContain('price_subsidy');
+    expect(defaultKeys).not.toContain('img_url');
+    expect(defaultKeys).not.toContain('product_url');
+    expect(defaultKeys).toHaveLength(FERTILIZER_PESTICIDE_TABLE_COLUMNS.length - 4);
+    expect(getTableColumnsByMode('custom')).toBe(DEFAULT_TABLE_COLUMNS);
+    expect(getTableColumnsByMode('')).toBe(DEFAULT_TABLE_COLUMNS);
+    expect(getTableColumnsByMode(undefined)).toBe(DEFAULT_TABLE_COLUMNS);
   });
 });
 

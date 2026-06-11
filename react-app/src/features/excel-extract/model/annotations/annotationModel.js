@@ -4,10 +4,20 @@ const DEFAULT_ANNOTATION = Object.freeze({
 });
 
 function normalizeAnnotation(annotation) {
-  return {
+  const normalized = {
     shadow: annotation?.shadow === true,
     note: typeof annotation?.note === 'string' ? annotation.note : '',
   };
+
+  if (Number.isFinite(annotation?.tax_price)) {
+    normalized.tax_price = annotation.tax_price;
+  }
+
+  if (Number.isFinite(annotation?.zero_tax_price)) {
+    normalized.zero_tax_price = annotation.zero_tax_price;
+  }
+
+  return normalized;
 }
 
 function hasRowId(row) {
@@ -61,6 +71,8 @@ export function mergeRowsWithAnnotations(rows, annotations) {
       ...row,
       shadow: annotation.shadow,
       note: annotation.note,
+      tax_price: annotation.tax_price ?? row.tax_price,
+      zero_tax_price: annotation.zero_tax_price ?? row.zero_tax_price,
     };
   });
 }

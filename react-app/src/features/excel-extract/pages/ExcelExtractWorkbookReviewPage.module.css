@@ -549,13 +549,12 @@
   font-size: 0.8rem;
 }
 
-/* ─── Upload workspace (dropzone + table name card) ───── */
+/* ─── Upload workspace (table name card + dropzone) ───── */
 .uploadWorkspace {
   grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: stretch;
 }
 
 .uploadMain {
@@ -637,9 +636,8 @@
   font-weight: 600;
 }
 
-/* ─── Table name card (right side, required) ──────────── */
+/* ─── Table name card (full-width row, required) ──────── */
 .tableNameCard {
-  align-self: start;
   padding: 16px;
   border: 1px solid var(--corp-accent-border-strong);
   border-radius: var(--corp-radius-lg);
@@ -691,6 +689,53 @@
   font-size: 1rem;
   font-weight: 700;
   text-align: center;
+}
+
+.tableNameRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tableNameRowField {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.createTableButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 16px;
+  border: 1px solid rgba(29, 74, 46, 0.28);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--corp-transition), opacity var(--corp-transition);
+}
+
+.createTableButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover);
+}
+
+.createTableButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tableNameError {
+  margin: 8px 0 0;
+  color: var(--corp-danger);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 /* ─── Status / Error / Success ────────────────────────── */
@@ -1297,5 +1342,14 @@
 
   .tableNameControls {
     grid-template-columns: 1fr;
+  }
+
+  .tableNameRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createTableButton {
+    width: 100%;
   }
 }

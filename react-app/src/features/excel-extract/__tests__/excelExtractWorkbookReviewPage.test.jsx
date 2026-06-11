@@ -332,4 +332,77 @@ describe('ExcelExtractWorkbookReviewPage', () => {
       screen.queryByText('테이블 이름을 입력하면 업로드할 수 있습니다.'),
     ).not.toBeInTheDocument();
   });
+
+  it('disables the 만들기 button until a valid table name is entered', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.getByRole('button', { name: '만들기' })).toBeDisabled();
+
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+
+    expect(screen.getByRole('button', { name: '만들기' })).toBeEnabled();
+  });
+
+  it('adds a sidebar entry for the new table name when 만들기 is clicked', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+
+    const cardList = screen.getByRole('list', { name: '등록 데이터 목록' });
+    expect(within(cardList).getByText('자재')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '만들기' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('테이블 이름')).not.toBeInTheDocument();
+  });
+
+  it('shows an empty table name input when + 추가 is clicked again after creating a table', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '일반자재');
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.getByLabelText('테이블 이름')).toHaveValue('');
+  });
+
+  it('rejects 비료 and 농약 as custom table names', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '비료');
+
+    expect(
+      screen.getByText("'비료', '농약'은(는) 테이블 이름으로 사용할 수 없습니다."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '만들기' })).toBeDisabled();
+  });
+
+  it('rejects a duplicate table name', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+
+    expect(screen.getByText('이미 사용 중인 테이블 이름입니다.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '만들기' })).toBeDisabled();
+  });
 });

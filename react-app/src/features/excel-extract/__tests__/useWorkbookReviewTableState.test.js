@@ -107,6 +107,27 @@ describe('useWorkbookReviewTableState', () => {
       expect(result.current.mergedRows[0].note).toBe('');
     });
 
+    it('applies a price override via updatePrice and persists it to sessionStorage', () => {
+      const storageKey = createWorkbookReviewStorageKey('workbook-a');
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(sampleRows, 'workbook-a'),
+      );
+
+      act(() => {
+        result.current.updatePrice('A100__01', 'tax_price', 1500);
+      });
+
+      expect(result.current.mergedRows[0]).toEqual(
+        expect.objectContaining({ row_id: 'A100__01', tax_price: 1500, zero_tax_price: 900 }),
+      );
+      expect(JSON.parse(sessionStorage.getItem(storageKey))).toEqual(
+        expect.objectContaining({
+          A100__01: { shadow: false, note: '', tax_price: 1500 },
+        }),
+      );
+    });
+
     it('returns a stable empty row set without entering a render loop', () => {
       const { result, rerender } = renderHook(
         ({ fingerprint }) => useWorkbookReviewTableState([], fingerprint),

@@ -1,6 +1,7 @@
+import { toTrimmedString } from '../../../../common/utils/text';
 import { resolveTableNameModeFromCategoryName } from '../save/workbookSaveModel';
 
-const DEFAULT_CATEGORY_NAMES = ['비료', '농약'];
+export const DEFAULT_CATEGORY_NAMES = ['비료', '농약'];
 const CATALOG_CARD_VARIANT = {
   add: 'add',
   default: 'default',
@@ -84,7 +85,21 @@ function createCatalogCard(categoryName, item, variant) {
   };
 }
 
-export function buildOfficeProductDataCatalogModel(inputItems) {
+export function validateCustomCategoryName(categoryName, existingCategoryNames = []) {
+  const trimmedName = toTrimmedString(categoryName);
+
+  if (DEFAULT_CATEGORY_NAMES.includes(trimmedName)) {
+    return `'${DEFAULT_CATEGORY_NAMES.join("', '")}'은(는) 테이블 이름으로 사용할 수 없습니다.`;
+  }
+
+  if (existingCategoryNames.includes(trimmedName)) {
+    return '이미 사용 중인 테이블 이름입니다.';
+  }
+
+  return null;
+}
+
+export function buildOfficeProductDataCatalogModel(inputItems, pendingCategoryNames = []) {
   const items = Array.isArray(inputItems) ? inputItems : [];
   const registeredItemsByCategory = buildRegisteredItemsByCategory(items);
 
@@ -104,8 +119,12 @@ export function buildOfficeProductDataCatalogModel(inputItems) {
       createCatalogCard(item.categoryName, item, CATALOG_CARD_VARIANT.registered),
     );
 
+  const pendingCards = pendingCategoryNames
+    .filter((categoryName) => !registeredItemsByCategory.has(categoryName))
+    .map((categoryName) => createCatalogCard(categoryName, null, CATALOG_CARD_VARIANT.registered));
+
   return {
     registeredCount: items.length,
-    cards: [...defaultCards, ...extraCards, createAddCard()],
+    cards: [...defaultCards, ...extraCards, ...pendingCards, createAddCard()],
   };
 }

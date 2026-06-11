@@ -71,6 +71,7 @@ function renderTable(overrides = {}) {
       onShadowToggle={vi.fn()}
       onVisibleRowsShadowChange={vi.fn()}
       onNoteChange={vi.fn()}
+      onPriceChange={vi.fn()}
       {...overrides}
     />,
   );
@@ -120,7 +121,7 @@ describe('excel extract workbook review table', () => {
   });
 
   it('places note and static fertilizer columns before the sale price columns', () => {
-    renderTable();
+    renderTable({ tableNameMode: 'fertilizer' });
 
     const columnHeaders = screen.getAllByRole('columnheader').map((header) =>
       header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase(),
@@ -142,7 +143,7 @@ describe('excel extract workbook review table', () => {
   });
 
   it('renders static fertilizer URLs as links and shows dashes for empty values', () => {
-    renderTable();
+    renderTable({ tableNameMode: 'fertilizer' });
 
     const imgLink = screen.getByRole('link', { name: 'img-A100__01' });
     const productLink = screen.getByRole('link', { name: 'product-A100__01' });
@@ -151,6 +152,37 @@ describe('excel extract workbook review table', () => {
     expect(productLink).toHaveAttribute('href', 'https://example.com/a100');
     expect(screen.queryByRole('link', { name: 'img-B200__02' })).not.toBeInTheDocument();
     expect(screen.getAllByText('-').length).toBeGreaterThan(0);
+  });
+
+  it('hides nutrient, subsidy, and url columns for the default table mode', () => {
+    renderTable({ tableNameMode: 'custom' });
+
+    const columnHeaders = screen.getAllByRole('columnheader').map((header) =>
+      header.textContent?.replace(/\s+/g, ' ').trim().toLowerCase(),
+    );
+
+    expect(columnHeaders).toContain('상품명');
+    expect(columnHeaders).toContain('과세단가');
+    expect(columnHeaders).not.toContain('성분');
+    expect(columnHeaders).not.toContain('보조금');
+    expect(columnHeaders).not.toContain('이미지 url');
+    expect(columnHeaders).not.toContain('상품 url');
+  });
+
+  it('opens a price input on tax_price cell click and saves the numeric value on blur', async () => {
+    const user = userEvent.setup();
+    const onPriceChange = vi.fn();
+
+    renderTable({ onPriceChange });
+
+    await user.click(screen.getByRole('button', { name: 'price-cell-tax_price-A100__01' }));
+
+    const input = screen.getByRole('spinbutton', { name: 'price-input-tax_price-A100__01' });
+    await user.clear(input);
+    await user.type(input, '1500');
+    await user.tab();
+
+    expect(onPriceChange).toHaveBeenCalledWith('A100__01', 'tax_price', 1500);
   });
 });
 

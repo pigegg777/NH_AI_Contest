@@ -5,7 +5,9 @@ export const SORT_DIRECTION = {
   descending: 'desc',
 };
 
-export const TABLE_COLUMNS = [
+const EXTENDED_ONLY_COLUMN_KEYS = new Set(['nutrient', 'price_subsidy', 'img_url', 'product_url']);
+
+export const FERTILIZER_PESTICIDE_TABLE_COLUMNS = [
   { key: 'product_code', label: '상품코드' },
   { key: 'product_name', label: '상품명' },
   { key: 'nutrient', label: '성분' },
@@ -23,6 +25,18 @@ export const TABLE_COLUMNS = [
   { key: 'spec', label: '규격' },
   { key: 'manufacturer_list', label: '제조업체' },
 ];
+
+export const DEFAULT_TABLE_COLUMNS = FERTILIZER_PESTICIDE_TABLE_COLUMNS.filter(
+  (column) => !EXTENDED_ONLY_COLUMN_KEYS.has(column.key),
+);
+
+export function getTableColumnsByMode(tableNameMode) {
+  if (tableNameMode === 'fertilizer' || tableNameMode === 'pesticide') {
+    return FERTILIZER_PESTICIDE_TABLE_COLUMNS;
+  }
+
+  return DEFAULT_TABLE_COLUMNS;
+}
 
 export const FILTER_FIELDS = [
   { key: 'sale_price_type_name', id: 'filter-sale-price-type', label: '단가유형' },

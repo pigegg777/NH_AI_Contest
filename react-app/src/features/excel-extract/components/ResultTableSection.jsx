@@ -5,8 +5,8 @@ import {
   EMPTY_FILTER_VALUE,
   FILTER_FIELDS,
   formatManufacturerList,
+  getTableColumnsByMode,
   SORT_DIRECTION,
-  TABLE_COLUMNS,
 } from '../model/table';
 
 const NOTE_COLUMN = {
@@ -15,8 +15,7 @@ const NOTE_COLUMN = {
 };
 
 const LEADING_COLUMN_KEYS = new Set(['product_code', 'product_name']);
-const LEADING_COLUMNS = TABLE_COLUMNS.filter((column) => LEADING_COLUMN_KEYS.has(column.key));
-const TRAILING_COLUMNS = TABLE_COLUMNS.filter((column) => !LEADING_COLUMN_KEYS.has(column.key));
+const PRICE_COLUMN_KEYS = new Set(['tax_price', 'zero_tax_price']);
 
 function FilterSelect({ field, value, options, onChange }) {
   return (
@@ -143,6 +142,75 @@ function NoteCell({ row, onNoteChange }) {
   );
 }
 
+function PriceCell({ row, columnKey, onPriceChange }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftValue, setDraftValue] = useState(row[columnKey] ?? '');
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftValue(row[columnKey] ?? '');
+    }
+  }, [isEditing, row, columnKey]);
+
+  function closeEditor() {
+    setIsEditing(false);
+  }
+
+  function commitPrice() {
+    const trimmed = String(draftValue).trim();
+
+    if (trimmed === '') {
+      onPriceChange(row.row_id, columnKey, null);
+      closeEditor();
+      return;
+    }
+
+    const numericValue = Number(trimmed);
+
+    if (Number.isNaN(numericValue)) {
+      return;
+    }
+
+    onPriceChange(row.row_id, columnKey, numericValue);
+    closeEditor();
+  }
+
+  if (isEditing) {
+    return (
+      <input
+        aria-label={`price-input-${columnKey}-${row.row_id}`}
+        autoFocus
+        className={styles.noteInput}
+        type="number"
+        value={draftValue}
+        onBlur={commitPrice}
+        onChange={(event) => setDraftValue(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            commitPrice();
+          }
+
+          if (event.key === 'Escape') {
+            setDraftValue(row[columnKey] ?? '');
+            closeEditor();
+          }
+        }}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={`price-cell-${columnKey}-${row.row_id}`}
+      className={styles.noteButton}
+      onClick={() => setIsEditing(true)}
+    >
+      {typeof row[columnKey] === 'number' ? row[columnKey] : '-'}
+    </button>
+  );
+}
+
 function getCellTextValue(row, key) {
   if (key === 'manufacturer_list') {
     return formatManufacturerList(row.manufacturer_list);
@@ -173,7 +241,7 @@ function LinkCell({ href, ariaLabel }) {
   );
 }
 
-function renderCellContent(row, key) {
+function renderCellContent(row, key, onPriceChange) {
   if (key === 'manufacturer_list') {
     return formatManufacturerList(row.manufacturer_list);
   }
@@ -186,18 +254,26 @@ function renderCellContent(row, key) {
     return <LinkCell href={row.product_url} ariaLabel={`product-${row.row_id}`} />;
   }
 
+  if (PRICE_COLUMN_KEYS.has(key)) {
+    return <PriceCell row={row} columnKey={key} onPriceChange={onPriceChange} />;
+  }
+
   return row[key] || row[key] === 0 ? row[key] : '-';
 }
 
 function ResultTable({
   rows,
+  columns,
   sortState,
   onSortChange,
   onShadowToggle,
   onVisibleRowsShadowChange,
   onNoteChange,
+  onPriceChange,
   highlightedRowIds,
 }) {
+  const leadingColumns = columns.filter((column) => LEADING_COLUMN_KEYS.has(column.key));
+  const trailingColumns = columns.filter((column) => !LEADING_COLUMN_KEYS.has(column.key));
   const visibleRowIds = useMemo(() => rows.map((row) => row.row_id).filter(Boolean), [rows]);
   const selectedCount = useMemo(() => rows.filter((row) => row.shadow === true).length, [rows]);
   const highlightedRowIdSet = useMemo(
@@ -226,7 +302,7 @@ function ResultTable({
               />
             </th>
 
-            {LEADING_COLUMNS.map((column) => (
+            {leadingColumns.map((column) => (
               <th
                 key={column.key}
                 aria-sort={
@@ -243,7 +319,7 @@ function ResultTable({
 
             <th className={styles.noteHeader}>{NOTE_COLUMN.label}</th>
 
-            {TRAILING_COLUMNS.map((column) => (
+            {trailingColumns.map((column) => (
               <th
                 key={column.key}
                 aria-sort={
@@ -283,9 +359,9 @@ function ResultTable({
                 />
               </td>
 
-              {LEADING_COLUMNS.map((column) => (
+              {leadingColumns.map((column) => (
                 <td key={`${row.row_id}-${column.key}`} title={String(getCellTextValue(row, column.key))}>
-                  {renderCellContent(row, column.key)}
+                  {renderCellContent(row, column.key, onPriceChange)}
                 </td>
               ))}
 
@@ -293,9 +369,9 @@ function ResultTable({
                 <NoteCell row={row} onNoteChange={onNoteChange} />
               </td>
 
-              {TRAILING_COLUMNS.map((column) => (
+              {trailingColumns.map((column) => (
                 <td key={`${row.row_id}-${column.key}`} title={String(getCellTextValue(row, column.key))}>
-                  {renderCellContent(row, column.key)}
+                  {renderCellContent(row, column.key, onPriceChange)}
                 </td>
               ))}
             </tr>
@@ -417,8 +493,12 @@ export function ResultTableSection({
   onShadowToggle,
   onVisibleRowsShadowChange,
   onNoteChange,
+  onPriceChange,
+  tableNameMode,
   highlightedRowIds = [],
 }) {
+  const columns = getTableColumnsByMode(tableNameMode);
+
   return (
     <section className={styles.panel}>
       <div className={styles.panelHeader}>
@@ -456,11 +536,13 @@ export function ResultTableSection({
 
       <ResultTable
         rows={rows}
+        columns={columns}
         sortState={sortState}
         onSortChange={onSortChange}
         onShadowToggle={onShadowToggle}
         onVisibleRowsShadowChange={onVisibleRowsShadowChange}
         onNoteChange={onNoteChange}
+        onPriceChange={onPriceChange}
         highlightedRowIds={highlightedRowIds}
       />
     </section>

@@ -115,6 +115,13 @@ export function useWorkbookReviewTableState(
     }));
   }
 
+  function updatePrice(rowId, key, value) {
+    updateAnnotation(rowId, (currentValue) => ({
+      ...currentValue,
+      [key]: value,
+    }));
+  }
+
   const annotatedRows = useMemo(
     () => mergeRowsWithAnnotations(extractedRows, annotations),
     [extractedRows, annotations],
@@ -214,6 +221,7 @@ export function useWorkbookReviewTableState(
     toggleShadow,
     setShadowForRows,
     updateNote,
+    updatePrice,
 
     isMerging,
     isMerged,
