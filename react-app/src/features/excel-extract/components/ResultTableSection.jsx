@@ -296,12 +296,13 @@ function ResultTable({
 
             {columns.map((column) =>
               column.key === 'note' ? (
-                <th key={column.key} className={styles.noteHeader}>
+                <th key={column.key} data-col={column.key} className={styles.noteHeader}>
                   {column.label}
                 </th>
               ) : (
                 <th
                   key={column.key}
+                  data-col={column.key}
                   aria-sort={
                     sortState?.key !== column.key
                       ? 'none'
@@ -342,12 +343,13 @@ function ResultTable({
 
               {columns.map((column) =>
                 column.key === 'note' ? (
-                  <td key={`${row.row_id}-note`} className={styles.noteCell}>
+                  <td key={`${row.row_id}-note`} data-col={column.key} className={styles.noteCell}>
                     <NoteCell row={row} onNoteChange={onNoteChange} />
                   </td>
                 ) : (
                   <td
                     key={`${row.row_id}-${column.key}`}
+                    data-col={column.key}
                     title={String(getCellTextValue(row, column.key))}
                   >
                     {renderCellContent(row, column.key, onPriceChange)}
