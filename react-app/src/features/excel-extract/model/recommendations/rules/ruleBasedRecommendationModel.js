@@ -29,7 +29,11 @@ function normalizeManufacturerList(manufacturerList) {
   }
 
   return manufacturerList
-    .map((manufacturer) => toTrimmedString(manufacturer?.manufacturer_code) || toTrimmedString(manufacturer?.manufacturer_name))
+    .map(
+      (manufacturer) =>
+        toTrimmedString(manufacturer?.manufacturer_code) ||
+        toTrimmedString(manufacturer?.manufacturer_name),
+    )
     .filter(Boolean);
 }
 

@@ -10,6 +10,7 @@ let mockCatalogState = {
 };
 const handleWorkbookChange = vi.fn();
 const processFile = vi.fn();
+const resetWorkbook = vi.fn();
 const saveOfficeProductData = vi.fn();
 const fetchOfficeProductData = vi.fn();
 const fetchStaticFertilizerLookup = vi.fn();
@@ -23,6 +24,7 @@ vi.mock('../hooks/useWorkbookExtraction', () => ({
     result: mockResult,
     handleWorkbookChange,
     processFile,
+    resetWorkbook,
   }),
 }));
 
@@ -360,6 +362,41 @@ describe('ExcelExtractWorkbookReviewPage', () => {
     expect(within(cardList).getByText('자재')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '만들기' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('테이블 이름')).not.toBeInTheDocument();
+  });
+
+  it('hides the current-data banner while typing a new custom table name', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    expect(screen.getByText('현재 작업')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+
+    expect(screen.queryByText('현재 작업')).not.toBeInTheDocument();
+    expect(screen.queryByText('현재 등록/편집 데이터')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+
+    expect(screen.queryByText('현재 등록/편집 데이터')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: '자재' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+
+    expect(screen.getByText('현재 등록/편집 데이터')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '자재' })).toBeInTheDocument();
+    expect(screen.getByText('신규 등록')).toBeInTheDocument();
+  });
+
+  it('does not render a fixed table-name card once a category is selected', async () => {
+    const user = userEvent.setup();
+
+    render(<ExcelExtractWorkbookReviewPage />);
+
+    await user.click(screen.getByRole('button', { name: /비료/i }));
+
+    expect(screen.queryByText('자동으로 지정된 테이블 이름입니다')).not.toBeInTheDocument();
+    expect(screen.queryByText('직접 추가한 테이블 이름입니다')).not.toBeInTheDocument();
   });
 
   it('shows an empty table name input when + 추가 is clicked again after creating a table', async () => {

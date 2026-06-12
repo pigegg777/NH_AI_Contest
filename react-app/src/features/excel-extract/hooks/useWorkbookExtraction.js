@@ -42,6 +42,14 @@ export function useWorkbookExtraction() {
     await processFile(file);
   }
 
+  function resetWorkbook() {
+    setSelectedFileName('');
+    setWorkbookFingerprint(null);
+    setIsExtracting(false);
+    setErrorMessage('');
+    setResult(null);
+  }
+
   return {
     selectedFileName,
     workbookFingerprint,
@@ -50,6 +58,7 @@ export function useWorkbookExtraction() {
     result,
     handleWorkbookChange,
     processFile,
+    resetWorkbook,
   };
 }
 

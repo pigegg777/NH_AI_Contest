@@ -1,5 +1,5 @@
-﻿import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
-import { MAX_WARNING_ROW_COUNT } from '../model/table';
+﻿import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
+import { MAX_WARNING_ROW_COUNT } from '../../model/table';
 
 export function FileWarningsPanel({ warnings }) {
   if (!warnings || warnings.length === 0) {
@@ -7,7 +7,7 @@ export function FileWarningsPanel({ warnings }) {
   }
 
   return (
-    <section className={styles.panel}>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
       <div className={styles.panelHeader}>
         <h2 className={styles.panelTitle}>파일 경고</h2>
       </div>
@@ -30,7 +30,7 @@ export function WarningRowsPanel({ rows }) {
   const visibleRows = rows.slice(0, MAX_WARNING_ROW_COUNT);
 
   return (
-    <section className={styles.panel}>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
       <div className={styles.panelHeader}>
         <h2 className={styles.panelTitle}>행 경고</h2>
         <span className={styles.panelMeta}>{visibleRows.length}건</span>

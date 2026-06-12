@@ -1,4 +1,4 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 
 function SidebarCatalogItem({ card, isSelected, onSelect }) {
   const isEditingRegistered = isSelected && !card.isEmpty && card.variant !== 'add';

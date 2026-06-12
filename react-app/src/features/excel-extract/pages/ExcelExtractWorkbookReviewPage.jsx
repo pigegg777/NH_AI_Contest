@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { CatalogSidebar } from '../components/CatalogSidebar';
-import { HomeLink, CurrentDataBanner } from '../components/PageBanner';
+import { CatalogSidebar } from '../components/catalog-sidebar/CatalogSidebar';
+import { HomeLink, CurrentDataBanner } from '../components/page-header/PageBanner';
 import {
   EmptySelectionState,
   RegisteredDataReviewSection,
   UploadWorkspaceSection,
-} from '../components/WorkbookReviewContent';
+} from '../components/upload-workspace/WorkbookReviewContent';
 import { useOfficeProductDataCatalog } from '../hooks/useOfficeProductDataCatalog';
 import { useRegisteredProductData } from '../hooks/useRegisteredProductData';
 import { useWorkbookAiRecommendations } from '../hooks/useWorkbookAiRecommendations';
@@ -33,6 +33,7 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
     result,
     handleWorkbookChange,
     processFile,
+    resetWorkbook,
   } = useWorkbookExtraction();
 
   const {
@@ -157,6 +158,14 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
 
   const canUploadFile = toTrimmedString(resolvedCategoryName).length > 0;
 
+  function handleCatalogCardSelect(card) {
+    if (!isCardSelected(card)) {
+      resetWorkbook();
+    }
+
+    handleCatalogSelect(card);
+  }
+
   const bannerStatusLabel = result
     ? '신규 데이터 검토 중'
     : registeredCatalogItem
@@ -165,11 +174,9 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
   const bannerStatusVariant = result || registeredCatalogItem ? 'registered' : 'new';
 
   const tableNameCardProps = {
-    tableNameMode,
     customTableName,
     inputRef: customTableNameInputRef,
     onTableNameChange: handleCustomTableNameChange,
-    fixedCategoryName: activeCategoryName,
     showsTableNameInput: showsCustomTableNameInput,
     validationError: tableNameValidationError,
     canCreateTable,
@@ -212,11 +219,13 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
         <HomeLink onGoHome={onGoHome} />
       </header>
 
-      <CurrentDataBanner
-        categoryName={activeCategoryName}
-        statusLabel={bannerStatusLabel}
-        statusVariant={bannerStatusVariant}
-      />
+      {!showsCustomTableNameInput ? (
+        <CurrentDataBanner
+          categoryName={activeCategoryName}
+          statusLabel={bannerStatusLabel}
+          statusVariant={bannerStatusVariant}
+        />
+      ) : null}
 
       <div className={`${styles.layout} ${isSidebarCollapsed ? styles.layoutCollapsed : ''}`.trim()}>
         <CatalogSidebar
@@ -227,7 +236,7 @@ export default function ExcelExtractWorkbookReviewPage({ onGoHome, user }) {
           errorMessage={officeProductCatalogErrorMessage}
           cards={catalogCards}
           isCardSelected={isCardSelected}
-          onCardSelect={handleCatalogSelect}
+          onCardSelect={handleCatalogCardSelect}
         />
 
         <div className={styles.content}>

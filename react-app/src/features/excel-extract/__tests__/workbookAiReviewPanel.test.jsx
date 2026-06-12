@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AiRecommendationPanel } from '../components/AiRecommendationPanel';
-import { ResultTableSection } from '../components/ResultTableSection';
+import { AiRecommendationPanel } from '../components/result-table/AiRecommendationPanel';
+import { ResultTableSection } from '../components/result-table/ResultTableSection';
 import { createInitialFilters, createInitialSortState } from '../model/table';
 
 const rows = [

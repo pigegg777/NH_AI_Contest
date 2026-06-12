@@ -1,4 +1,4 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 
 function countRecommendationsBySeverity(recommendations) {
   return recommendations.reduce(
@@ -26,7 +26,7 @@ export function AiRecommendationPanel({
   const severityCounts = countRecommendationsBySeverity(recommendations);
 
   return (
-    <section className={`${styles.panel} ${styles.aiCompactPanel}`}>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
       <div className={styles.panelHeader}>
         <div className={styles.aiPanelHeader}>
           <h2 className={styles.panelTitle}>AI 추천</h2>

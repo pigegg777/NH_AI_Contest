@@ -1,4 +1,4 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 
 export function HomeLink({ onGoHome }) {
   if (typeof onGoHome === 'function') {

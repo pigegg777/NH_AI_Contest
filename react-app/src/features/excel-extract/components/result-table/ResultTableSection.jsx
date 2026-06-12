@@ -1,14 +1,14 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { AiRecommendationPanel } from './AiRecommendationPanel';
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 import {
   EMPTY_FILTER_VALUE,
   FILTER_FIELDS,
   formatManufacturerList,
   getTableColumnsByMode,
   SORT_DIRECTION,
-} from '../model/table';
+} from '../../model/table';
 
 const PRICE_COLUMN_KEYS = new Set(['tax_price', 'zero_tax_price']);
 

@@ -1,4 +1,4 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 import { ResultTableSection } from './ResultTableSection';
 
 export function WorkbookReviewResultSection({

@@ -1,8 +1,8 @@
-import styles from '../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
 import { TableNameCard } from './TableNameCard';
-import { WorkbookReviewResultSection } from './WorkbookReviewResultSection';
-import { WorkbookDropzone } from './ResultTableSection';
-import { FileWarningsPanel, WarningRowsPanel } from './WarningPanels';
+import { WorkbookReviewResultSection } from '../result-table/WorkbookReviewResultSection';
+import { WorkbookDropzone } from '../result-table/ResultTableSection';
+import { FileWarningsPanel, WarningRowsPanel } from '../result-table/WarningPanels';
 
 export function EmptySelectionState() {
   return (

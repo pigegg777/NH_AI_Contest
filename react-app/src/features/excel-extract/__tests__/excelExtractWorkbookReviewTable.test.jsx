@@ -2,7 +2,7 @@
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ResultTableSection } from '../components/ResultTableSection';
+import { ResultTableSection } from '../components/result-table/ResultTableSection';
 import { createInitialFilters, createInitialSortState } from '../model/table';
 
 const rows = [

@@ -724,17 +724,6 @@
   line-height: 1.4;
 }
 
-.tableNameFixedValue {
-  padding: 10px 12px;
-  border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius-sm);
-  background: var(--corp-surface-muted);
-  color: var(--corp-text);
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
-}
-
 .tableNameRow {
   display: flex;
   align-items: flex-end;
@@ -818,7 +807,9 @@
 /* ─── Warning panels ──────────────────────────────────── */
 .warningList {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 16px;
+  font-size: 0.7rem;
+  line-height: 1.35;
 }
 
 .warningItem {
@@ -826,18 +817,18 @@
 }
 
 .warningItem + .warningItem {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .warningRows {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .warningRowCard {
-  padding: 12px 14px;
+  padding: 6px 9px;
   border: 1px solid rgba(154, 52, 18, 0.14);
-  border-radius: var(--corp-radius);
+  border-radius: var(--corp-radius-sm);
   background: #fff8f3;
 }
 
@@ -845,17 +836,21 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.warningRowHeader strong {
+  font-size: 0.74rem;
 }
 
 .warningRowMeta {
   color: var(--corp-muted);
-  font-size: 0.8rem;
+  font-size: 0.68rem;
 }
 
-/* ─── AI recommendation panel ─────────────────────────── */
-.aiCompactPanel {
+/* ─── Compact panel (AI recommendations, warnings) ────── */
+.compactPanel {
   padding: 8px 10px;
   border: none;
   border-radius: var(--corp-radius-sm);
@@ -863,23 +858,23 @@
   box-shadow: none;
 }
 
-.aiCompactPanel .panelHeader {
+.compactPanel .panelHeader {
   margin-bottom: 6px;
 }
 
-.aiCompactPanel .panelTitle {
+.compactPanel .panelTitle {
   font-size: 0.74rem;
 }
 
-.aiCompactPanel .panelMeta {
+.compactPanel .panelMeta {
   min-height: 18px;
   padding: 0 8px;
   font-size: 0.68rem;
 }
 
-.aiCompactPanel .statusMessage,
-.aiCompactPanel .errorBox,
-.aiCompactPanel .aiEmptyState {
+.compactPanel .statusMessage,
+.compactPanel .errorBox,
+.compactPanel .aiEmptyState {
   margin-top: 6px;
   padding: 5px 8px;
   font-size: 0.72rem;

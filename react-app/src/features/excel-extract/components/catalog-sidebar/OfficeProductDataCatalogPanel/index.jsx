@@ -1,6 +1,6 @@
-import styles from '../../pages/ExcelExtractWorkbookReviewPage.module.css';
+import styles from '../../../pages/ExcelExtractWorkbookReviewPage.module.css';
 import { OfficeProductCatalogCard } from './OfficeProductCatalogCard';
-import { useOfficeProductDataCatalogPanel } from '../../hooks/useOfficeProductDataCatalogPanel';
+import { useOfficeProductDataCatalogPanel } from '../../../hooks/useOfficeProductDataCatalogPanel';
 
 export function OfficeProductDataCatalogPanel({ items, isLoading, errorMessage }) {
   const { cards, registeredCount } = useOfficeProductDataCatalogPanel(items);
