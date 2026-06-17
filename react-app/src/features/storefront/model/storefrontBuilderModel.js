@@ -16,22 +16,22 @@ export const STOREFRONT_FIELD_OPTIONS = [
 ];
 
 export const STOREFRONT_FIELD_LABELS = {
-  product_name: 'Product',
-  spec: 'Spec',
-  large_category: 'Main category',
-  medium_category: 'Medium category',
-  small_category: 'Detail group',
-  detail_category: 'Detail',
-  nutrient: 'Nutrient',
-  product_url: 'Link',
-  tax_price: 'Price',
+  product_name: '상품명',
+  spec: '규격',
+  large_category: '대분류',
+  medium_category: '중분류',
+  small_category: '소분류',
+  detail_category: '세부 분류',
+  nutrient: '주요 성분',
+  product_url: '상품 링크',
+  tax_price: '가격',
 };
 
 export const DEFAULT_NAV_CONFIG = {
   title: '',
   subtitle: '',
   brandColor: DEFAULT_CARD_STYLE.accentColor,
-  searchPlaceholder: 'Search products',
+  searchPlaceholder: '상품 검색',
   logoUrl: '',
   searchVariant: 'pill',
   categoryChipVariant: 'soft',

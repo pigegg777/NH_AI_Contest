@@ -64,6 +64,24 @@ function buildMediumCategoryItems(products) {
   return items;
 }
 
+function buildUniqueMediumCategories(products) {
+  const seen = new Set();
+  const values = [];
+
+  for (const product of Array.isArray(products) ? products : []) {
+    const value = typeof product?.medium_category === 'string' ? product.medium_category.trim() : '';
+
+    if (!value || seen.has(value)) {
+      continue;
+    }
+
+    seen.add(value);
+    values.push(value);
+  }
+
+  return values;
+}
+
 function matchesMediumCategory(product, activeMediumCategory) {
   if (!activeMediumCategory || activeMediumCategory === '전체') {
     return true;
@@ -90,15 +108,16 @@ export default function StorefrontView({ config, productRows }) {
     section,
     sectionId: `${sectionIdPrefix}-${index}`,
   }));
+  const primarySection = sectionEntries[0]?.section ?? null;
+  const primarySectionTitle = primarySection?.productCategoryName || primarySection?.title || '';
+  const primarySectionMediumCategories = buildUniqueMediumCategories(primarySection?.products);
   const designDirection = resolvedPageConfig.designDirection;
   const brandColor = config?.navConfig?.brandColor || resolvedPageConfig.theme.brandColor || '#1d4a2e';
-  const title = config?.navConfig?.title || resolvedPageConfig.nav.title || 'Office product page';
+  const title = config?.navConfig?.title || resolvedPageConfig.nav.title || '상품 안내';
   const subtitle =
-    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || 'Review the products prepared for customers.';
+    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '고객에게 안내할 상품을 살펴보세요.';
   const searchPlaceholder =
-    config?.navConfig?.searchPlaceholder ||
-    resolvedPageConfig.searchSection.placeholder ||
-    'Search products';
+    config?.navConfig?.searchPlaceholder || resolvedPageConfig.searchSection.placeholder || '상품 검색';
   const isSearchEnabled = resolvedPageConfig.searchSection.enabled !== false;
   const areCategoryChipsEnabled = resolvedPageConfig.categoryChips.enabled !== false && mediumCategoryItems.length > 1;
   const searchVariant =
@@ -148,15 +167,31 @@ export default function StorefrontView({ config, productRows }) {
         <div className={styles.heroTop}>
           <div className={styles.brandBlock}>
             {config?.navConfig?.logoUrl ? (
-              <img className={styles.logo} src={config.navConfig.logoUrl} alt="logo" />
+              <img className={styles.logo} src={config.navConfig.logoUrl} alt="로고" />
             ) : null}
             <div>
-              <p className={styles.eyebrow}>Storefront</p>
+              <p className={styles.eyebrow}>스토어프론트</p>
               <h1 className={styles.title}>{title}</h1>
               <p className={styles.subtitle}>{subtitle}</p>
             </div>
           </div>
         </div>
+
+        {primarySectionTitle ? (
+          <div className={styles.mobileCategoryBar} data-testid="storefront-mobile-category-bar">
+            <p className={styles.mobileCategoryLabel}>현재 상품 분류</p>
+            <strong className={styles.mobileCategoryTitle}>{primarySectionTitle}</strong>
+            {primarySectionMediumCategories.length > 0 ? (
+              <div className={styles.mobileCategoryMeta}>
+                {primarySectionMediumCategories.map((item) => (
+                  <span key={item} className={styles.mobileCategoryMetaItem}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         {isSearchEnabled ? (
           <div className={styles.searchRow}>
@@ -175,7 +210,7 @@ export default function StorefrontView({ config, productRows }) {
               />
               <span className={styles.searchIcon} aria-hidden="true" />
             </label>
-            <span className={styles.searchHint}>검색창은 고정되고, AI는 문구와 카드 분위기를 다듬습니다.</span>
+            <span className={styles.searchHint}>검색어와 중분류를 기준으로 상품을 빠르게 찾아보세요.</span>
           </div>
         ) : null}
 
@@ -184,6 +219,7 @@ export default function StorefrontView({ config, productRows }) {
             className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[categoryChipVariant] || ''}`}
             data-testid="storefront-category-chips"
             data-chip-variant={categoryChipVariant}
+            data-chip-size="compact"
           >
             {mediumCategoryItems.map((item) => (
               <button

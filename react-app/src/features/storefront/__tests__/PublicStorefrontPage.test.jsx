@@ -138,7 +138,7 @@ describe('PublicStorefrontPage', () => {
 
     const cards = screen.getAllByRole('article');
     expect(within(cards[0]).getByText('Premium')).toBeInTheDocument();
-    expect(within(cards[0]).getByText('1,000 won')).toBeInTheDocument();
+    expect(within(cards[0]).getByText('1,000원')).toBeInTheDocument();
 
     const searchInput = screen.getByPlaceholderText('Search products');
     await user.type(searchInput, 'Beta');
@@ -268,6 +268,64 @@ describe('PublicStorefrontPage', () => {
     expect(sectionEl).toHaveAttribute('data-card-radius', 'xl');
     expect(sectionEl).toHaveAttribute('data-card-shadow', 'strong');
     expect(sectionEl).toHaveAttribute('data-card-spacing', 'relaxed');
+  });
+
+  it('renders a mobile category info bar from the first visible section and uses Korean fallback copy', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: {
+        schemaVersion: 1,
+        designDirection: 'trust',
+        theme: { brandColor: '#2563eb', backgroundTone: 'sky' },
+        nav: { title: '', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: '', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+      },
+      navConfig: {
+        title: '',
+        subtitle: '',
+        brandColor: '#2563eb',
+        searchPlaceholder: '',
+        logoUrl: '',
+        searchVariant: 'pill',
+        categoryChipVariant: 'soft',
+      },
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: '비료',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: '비료',
+            sourceCategoryName: '비료',
+            selectedMediumCategories: ['복합비료', '유기질비료'],
+            representativeMediumCategory: '복합비료',
+            layoutStyle: { variant: 'card-grid' },
+            cardDesign: {
+              visibleFields: ['product_name', 'tax_price'],
+              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 2 },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      { product_category_name: '비료', product_name: '알파', medium_category: '복합비료', tax_price: 1000 },
+      { product_category_name: '비료', product_name: '베타', medium_category: '유기질비료', tax_price: 2000 },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    expect(await screen.findByText('상품 안내')).toBeInTheDocument();
+    expect(screen.getByText('고객에게 안내할 상품을 살펴보세요.')).toBeInTheDocument();
+    const mobileCategoryBar = screen.getByTestId('storefront-mobile-category-bar');
+    expect(mobileCategoryBar).toBeInTheDocument();
+    expect(within(mobileCategoryBar).getByText('비료')).toBeInTheDocument();
+    expect(within(mobileCategoryBar).getByText('복합비료')).toBeInTheDocument();
+    expect(within(mobileCategoryBar).getByText('유기질비료')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('상품 검색')).toBeInTheDocument();
+    expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-size', 'compact');
   });
 
   it('filters rows by medium-category chip and keeps search filtering combined', async () => {

@@ -10,7 +10,7 @@ function formatFieldValue(field, value) {
   if (field === 'tax_price') {
     const numericValue = Number(value);
 
-    return Number.isFinite(numericValue) ? `${numericValue.toLocaleString()} won` : '';
+    return Number.isFinite(numericValue) ? `${numericValue.toLocaleString()}원` : '';
   }
 
   return String(value);
@@ -23,7 +23,7 @@ function buildBadgeText(product) {
 export default function CardGridSection({ section, fields, style, sectionId }) {
   const products = Array.isArray(section?.products) ? section.products : [];
   const displayFields = Array.isArray(fields) && fields.length > 0 ? fields : ['product_name'];
-  const title = section?.title || section?.productCategoryName || 'Products';
+  const title = section?.title || section?.productCategoryName || '상품';
   const resolvedStyle = normalizeCardStyle(style);
   const cssVars = {
     '--card-accent': resolvedStyle.accentColor,
