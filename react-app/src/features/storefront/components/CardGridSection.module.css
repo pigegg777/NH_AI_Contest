@@ -1,0 +1,229 @@
+.section {
+  margin-bottom: 24px;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
+}
+
+.title {
+  margin: 0 0 14px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #16311b;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--card-columns, 2), minmax(0, 1fr));
+  gap: 14px;
+}
+
+.layout-grid .card {
+  min-height: 100%;
+}
+
+.layout-compact .cardBody {
+  gap: 6px;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--corp-line);
+  border-radius: 18px;
+  background: var(--corp-panel);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  background: color-mix(in srgb, var(--card-accent, var(--corp-primary)) 8%, #ffffff);
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.cardName {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--card-font-size, 0.85rem);
+  font-weight: 700;
+  color: var(--corp-text);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardBadge {
+  flex: 0 0 auto;
+  max-width: 88px;
+  padding: 3px 9px;
+  border-radius: var(--corp-radius-pill);
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--corp-primary)) 24%, #d5e3cf);
+  background: #eef6ea;
+  color: #46603f;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardImageWrap {
+  padding: 14px 14px 0;
+}
+
+.cardImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center 42%;
+  border-radius: 10px;
+  border: 1px solid #eef0f2;
+  background: var(--corp-panel);
+  display: block;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 14px;
+}
+
+.section[data-card-radius='md'] .card {
+  border-radius: 14px;
+}
+
+.section[data-card-radius='lg'] .card {
+  border-radius: 18px;
+}
+
+.section[data-card-radius='xl'] .card {
+  border-radius: 24px;
+}
+
+.section[data-card-shadow='none'] .card {
+  box-shadow: none;
+}
+
+.section[data-card-shadow='soft'] .card {
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
+}
+
+.section[data-card-shadow='strong'] .card {
+  box-shadow: 0 18px 36px rgba(17, 24, 39, 0.14);
+}
+
+.section[data-card-spacing='tight'] .grid {
+  gap: 10px;
+}
+
+.section[data-card-spacing='tight'] .cardHeader {
+  padding: 10px 12px 8px;
+}
+
+.section[data-card-spacing='tight'] .cardBody {
+  gap: 6px;
+  padding: 8px 12px 12px;
+}
+
+.section[data-card-spacing='normal'] .grid {
+  gap: 14px;
+}
+
+.section[data-card-spacing='relaxed'] .grid {
+  gap: 18px;
+}
+
+.section[data-card-spacing='relaxed'] .cardHeader {
+  padding: 14px 16px 12px;
+}
+
+.section[data-card-spacing='relaxed'] .cardImageWrap {
+  padding: 16px 16px 0;
+}
+
+.section[data-card-spacing='relaxed'] .cardBody {
+  gap: 10px;
+  padding: 12px 16px 16px;
+}
+
+.section[data-image-fit='contain'] .cardImage {
+  object-fit: contain;
+  background: linear-gradient(180deg, #fbfcfd 0%, #f1f4f7 100%);
+}
+
+.section[data-image-size='sm'] .cardImage {
+  aspect-ratio: 4 / 3;
+}
+
+.section[data-image-size='md'] .cardImage {
+  aspect-ratio: 1 / 1;
+}
+
+.section[data-image-size='lg'] .cardImage {
+  aspect-ratio: 5 / 4;
+}
+
+.field,
+.priceField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.priceField .fieldValue {
+  color: #d32f2f;
+  font-size: calc(var(--card-font-size, 0.85rem) + 0.02rem);
+  font-weight: 700;
+}
+
+.fieldLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--corp-muted);
+}
+
+.fieldValue {
+  font-size: var(--card-font-size, 0.85rem);
+  color: var(--corp-text);
+  font-weight: 600;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    margin-bottom: 12px;
+  }
+
+  .cardHeader {
+    padding: 10px 12px 8px;
+  }
+
+  .cardBadge {
+    max-width: 72px;
+    font-size: 0.62rem;
+  }
+
+  .cardImageWrap {
+    padding: 12px 12px 0;
+  }
+
+  .cardBody {
+    padding: 8px 12px 12px;
+  }
+}

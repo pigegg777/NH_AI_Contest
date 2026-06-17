@@ -265,6 +265,134 @@ function detectCardsPerRow(prompt) {
   return 2;
 }
 
+function detectImageSize(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (
+    text.includes('hide image') ||
+    text.includes('without image') ||
+    text.includes('이미지 없이') ||
+    text.includes('이미지 숨')
+  ) {
+    return 'hidden';
+  }
+
+  if (
+    text.includes('large image') ||
+    text.includes('big image') ||
+    text.includes('hero image') ||
+    text.includes('큰 이미지')
+  ) {
+    return 'lg';
+  }
+
+  if (text.includes('small image') || text.includes('작은 이미지')) {
+    return 'sm';
+  }
+
+  return DEFAULT_CARD_STYLE.imageSize;
+}
+
+function detectImageFit(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (
+    text.includes('contain') ||
+    text.includes('uncropped') ||
+    text.includes('잘림 없이') ||
+    text.includes('이미지 전체')
+  ) {
+    return 'contain';
+  }
+
+  return DEFAULT_CARD_STYLE.imageFit;
+}
+
+function detectCardRadius(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('sharp') || text.includes('square') || text.includes('각진')) {
+    return 'md';
+  }
+
+  if (text.includes('rounded') || text.includes('round') || text.includes('둥글')) {
+    return 'xl';
+  }
+
+  return DEFAULT_CARD_STYLE.cardRadius;
+}
+
+function detectCardShadow(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('flat') || text.includes('shadowless') || text.includes('그림자 없이')) {
+    return 'none';
+  }
+
+  if (text.includes('strong shadow') || text.includes('deep shadow') || text.includes('강한 그림자')) {
+    return 'strong';
+  }
+
+  return DEFAULT_CARD_STYLE.cardShadow;
+}
+
+function detectCardSpacing(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('dense') || text.includes('tight') || text.includes('촘촘')) {
+    return 'tight';
+  }
+
+  if (text.includes('airy') || text.includes('spacious') || text.includes('여백 크게')) {
+    return 'relaxed';
+  }
+
+  return DEFAULT_CARD_STYLE.cardSpacing;
+}
+
+function detectSearchVariant(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (
+    text.includes('outlined search') ||
+    text.includes('outline search') ||
+    text.includes('search outline') ||
+    text.includes('검색창 테두리')
+  ) {
+    return 'outlined';
+  }
+
+  if (text.includes('soft search') || text.includes('검색창 부드')) {
+    return 'soft';
+  }
+
+  return DEFAULT_NAV_CONFIG.searchVariant;
+}
+
+function detectCategoryChipVariant(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (
+    text.includes('filled chip') ||
+    text.includes('filled tabs') ||
+    text.includes('채워진 칩') ||
+    text.includes('채운 칩')
+  ) {
+    return 'filled';
+  }
+
+  if (
+    text.includes('outline chip') ||
+    text.includes('outlined chip') ||
+    text.includes('chip outline') ||
+    text.includes('칩 테두리')
+  ) {
+    return 'outline';
+  }
+
+  return DEFAULT_NAV_CONFIG.categoryChipVariant;
+}
+
 function detectFields(prompt) {
   const text = prompt.toLowerCase();
   const fields = ['product_name'];
@@ -320,11 +448,11 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft 
         accentColor,
         fontSize: detectFontSize(prompt),
         cardsPerRow: detectCardsPerRow(prompt),
-        imageSize: DEFAULT_CARD_STYLE.imageSize,
-        imageFit: DEFAULT_CARD_STYLE.imageFit,
-        cardRadius: DEFAULT_CARD_STYLE.cardRadius,
-        cardShadow: DEFAULT_CARD_STYLE.cardShadow,
-        cardSpacing: DEFAULT_CARD_STYLE.cardSpacing,
+        imageSize: detectImageSize(prompt),
+        imageFit: detectImageFit(prompt),
+        cardRadius: detectCardRadius(prompt),
+        cardShadow: detectCardShadow(prompt),
+        cardSpacing: detectCardSpacing(prompt),
       }),
       navConfig: normalizeNavConfig({
         title: `${primaryLabel} Guide`,
@@ -332,8 +460,8 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft 
         brandColor: accentColor,
         searchPlaceholder: `Search ${String(primaryLabel).toLowerCase()}`,
         logoUrl: currentDraft?.navConfig?.logoUrl ?? '',
-        searchVariant: currentDraft?.navConfig?.searchVariant,
-        categoryChipVariant: currentDraft?.navConfig?.categoryChipVariant,
+        searchVariant: detectSearchVariant(prompt),
+        categoryChipVariant: detectCategoryChipVariant(prompt),
       }),
     },
   };
