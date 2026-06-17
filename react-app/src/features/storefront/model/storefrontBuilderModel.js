@@ -355,6 +355,11 @@ export function buildStorefrontSavePayload({
     searchSection: {
       ...basePageConfig.searchSection,
       placeholder: resolvedNavConfig.searchPlaceholder,
+      variant: resolvedNavConfig.searchVariant,
+    },
+    categoryChips: {
+      ...basePageConfig.categoryChips,
+      variant: resolvedNavConfig.categoryChipVariant,
     },
   });
   const nextCategoryRow = buildCategoryConfigRow({
