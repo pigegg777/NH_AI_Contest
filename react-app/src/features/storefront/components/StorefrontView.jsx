@@ -187,6 +187,7 @@ export default function StorefrontView({ config, productRows }) {
                   section={section}
                   fields={section?.fields}
                   style={section?.style}
+                  cardTemplate={section?.cardTemplate}
                   sectionHeaderContent={view.sectionHeaderBlocks.map((block) => (
                     <HelperBlock key={`${sectionId}-${block.id}`} block={block} />
                   ))}

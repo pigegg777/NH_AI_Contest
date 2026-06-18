@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchAllOfficeProductRows } from '../../office-product-editor/services/officeProductDataService';
-import { CARD_STYLE_FONT_SIZE_REM } from '../model/cardStyleModel';
+import { CARD_STYLE_FONT_SIZE_REM, CARD_STYLE_PRICE_TEXT_COLOR_VALUES } from '../model/cardStyleModel';
+import { TITLE_TEXT_COLOR_VALUES, TYPOGRAPHY_TONE_VALUES } from '../model/storefrontBuilderModel';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
@@ -630,5 +631,94 @@ describe('PublicStorefrontPage', () => {
 
     await user.click(within(rail).getByRole('button', { name: 'Show category navigation' }));
     expect(within(rail).getByRole('button', { name: 'Control' })).toBeInTheDocument();
+  });
+
+  it('renders an image-left card template with muted price color and bold typography', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: {
+        schemaVersion: 2,
+        designDirection: 'trust',
+        theme: { brandColor: '#2563eb', backgroundTone: 'sky', titleTextColor: 'ink', typographyTone: 'bold' },
+        nav: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true },
+      },
+      navConfig: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', brandColor: '#2563eb', searchPlaceholder: 'Search products', logoUrl: '' },
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            schemaVersion: 2,
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'image-left' },
+            cardDesign: {
+              visibleFields: ['product_name', 'tax_price'],
+              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 2, priceTextColor: 'muted' },
+            },
+          },
+          updatedAt: '2026-06-18T00:00:00Z',
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-18T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      { product_category_name: 'Fertilizer Upload', product_name: 'Alpha', img_url: 'https://example.com/a.png', medium_category: 'Premium', tax_price: 1000 },
+    ]);
+
+    const { container } = render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    expect(await screen.findByText('Alpha')).toBeInTheDocument();
+
+    const sectionEl = container.querySelector('section[id]');
+    expect(sectionEl.dataset.cardTemplate).toBe('image-left');
+    expect(sectionEl.style.getPropertyValue('--price-text-color')).toBe(CARD_STYLE_PRICE_TEXT_COLOR_VALUES.muted);
+
+    const cardEl = screen.getByRole('article');
+    expect(cardEl.className).toMatch(/cardImageLeft/);
+
+    const pageEl = container.querySelector('[data-design-direction]');
+    expect(pageEl.style.getPropertyValue('--title-text-color')).toBe(TITLE_TEXT_COLOR_VALUES.ink);
+    expect(pageEl.style.getPropertyValue('--typography-heading-weight')).toBe(String(TYPOGRAPHY_TONE_VALUES.bold.headingWeight));
+  });
+
+  it('reorders fields price-first under the price-focus template', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
+      navConfig: {},
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'price-focus' },
+            cardDesign: { visibleFields: ['product_name', 'spec', 'tax_price'], style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 } },
+          },
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-18T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      { product_category_name: 'Fertilizer Upload', product_name: 'Alpha', spec: '20kg', medium_category: 'Premium', tax_price: 1000 },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    const card = await screen.findByRole('article');
+    const labels = within(card).getAllByText(/규격|과세가격/).map((el) => el.textContent);
+    expect(labels[0]).toBe('과세가격');
   });
 });
