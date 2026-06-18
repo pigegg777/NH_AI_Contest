@@ -81,7 +81,7 @@ export function buildSections(categoryConfigs, productRows) {
       return {
         title: categoryConfig.displayName || categoryConfigRow?.productCategoryName || 'Products',
         productCategoryName: categoryConfigRow?.productCategoryName || '',
-        displayVariant: categoryConfig.layoutStyle?.variant || 'card-grid',
+        cardTemplate: categoryConfig.layoutStyle?.variant || 'card-grid',
         fields: categoryConfig.cardDesign?.visibleFields,
         style: categoryConfig.cardDesign?.style,
         elementConfig: categoryConfig.cardDesign?.elementConfig,
