@@ -171,12 +171,42 @@ export const STOREFRONT_DESIGN_ACCENT_COLORS = {
   white: '#52525b',
 };
 
+export const TITLE_TEXT_COLOR_OPTIONS = ['default', 'ink', 'charcoal', 'brand'];
+
+export const TITLE_TEXT_COLOR_VALUES = {
+  default: '#173223',
+  ink: '#0f172a',
+  charcoal: '#27272a',
+};
+
+export function resolveTitleTextColor(titleTextColor, brandColor) {
+  if (titleTextColor === 'brand') {
+    return brandColor || TITLE_TEXT_COLOR_VALUES.default;
+  }
+
+  return TITLE_TEXT_COLOR_VALUES[titleTextColor] || TITLE_TEXT_COLOR_VALUES.default;
+}
+
+export const TYPOGRAPHY_TONE_OPTIONS = ['standard', 'clean', 'soft', 'bold', 'official'];
+
+export const TYPOGRAPHY_TONE_VALUES = {
+  standard: { headingWeight: 800, bodyWeight: 600, letterSpacing: 'normal' },
+  clean: { headingWeight: 700, bodyWeight: 500, letterSpacing: '0.01em' },
+  soft: { headingWeight: 600, bodyWeight: 500, letterSpacing: 'normal' },
+  bold: { headingWeight: 800, bodyWeight: 700, letterSpacing: '-0.01em' },
+  official: { headingWeight: 700, bodyWeight: 600, letterSpacing: '0.02em' },
+};
+
+export const CARD_TEMPLATE_OPTIONS = ['card-grid', 'image-left', 'price-focus', 'compact-list', 'detail-first'];
+
 export const DEFAULT_PAGE_CONFIG = {
   schemaVersion: 1,
   designDirection: 'friendly',
   theme: {
     brandColor: DEFAULT_CARD_STYLE.accentColor,
     backgroundTone: STOREFRONT_BACKGROUND_TONES.friendly,
+    titleTextColor: 'default',
+    typographyTone: 'standard',
   },
   nav: {
     title: '',
@@ -271,6 +301,12 @@ export function normalizePageConfig(pageConfig) {
       brandColor: toTrimmedString(sourceTheme.brandColor) || DEFAULT_PAGE_CONFIG.theme.brandColor,
       backgroundTone:
         toTrimmedString(sourceTheme.backgroundTone) || STOREFRONT_BACKGROUND_TONES[designDirection],
+      titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(sourceTheme.titleTextColor)
+        ? sourceTheme.titleTextColor
+        : DEFAULT_PAGE_CONFIG.theme.titleTextColor,
+      typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(sourceTheme.typographyTone)
+        ? sourceTheme.typographyTone
+        : DEFAULT_PAGE_CONFIG.theme.typographyTone,
     },
     nav: {
       title: toTrimmedString(sourceNav.title),
@@ -319,7 +355,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
         ? representativeMediumCategory
         : selectedMediumCategories[0] || '',
     layoutStyle: {
-      variant: toTrimmedString(source.layoutStyle?.variant) || 'card-grid',
+      variant: CARD_TEMPLATE_OPTIONS.includes(source.layoutStyle?.variant) ? source.layoutStyle.variant : 'card-grid',
     },
     cardDesign: {
       visibleFields: normalizedCardFields,

@@ -105,7 +105,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
       pageConfig: {
         schemaVersion: 1,
         designDirection: 'green',
-        theme: { brandColor: '#1d4a2e', backgroundTone: 'forest' },
+        theme: { brandColor: '#1d4a2e', backgroundTone: 'forest', titleTextColor: 'default', typographyTone: 'standard' },
         nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
         categoryChips: { enabled: true, sticky: true, variant: 'soft' },
@@ -152,6 +152,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
                 cardRadius: 'lg',
                 cardShadow: 'soft',
                 cardSpacing: 'relaxed',
+                priceTextColor: 'default',
               },
               elementConfig: {
                 showImage: true,
@@ -279,7 +280,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
         page_config: {
           schemaVersion: 1,
           designDirection: 'warm',
-          theme: { brandColor: '#1d4a2e', backgroundTone: 'apricot' },
+          theme: { brandColor: '#1d4a2e', backgroundTone: 'apricot', titleTextColor: 'default', typographyTone: 'standard' },
           nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
           searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
           categoryChips: { enabled: true, sticky: true, variant: 'soft' },
@@ -322,6 +323,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
                 cardRadius: 'lg',
                 cardShadow: 'soft',
                 cardSpacing: 'normal',
+                priceTextColor: 'default',
               },
               elementConfig: {
                 showImage: true,

@@ -112,6 +112,7 @@ describe('normalizeStorefrontAiSuggestion', () => {
           cardRadius: 'xl',
           cardShadow: 'strong',
           cardSpacing: 'relaxed',
+          priceTextColor: 'default',
         },
         navConfig: {
           title: 'Premium Fertilizer Guide',
