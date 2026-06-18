@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { STOREFRONT_AI_SCHEMA, normalizeStorefrontAiSuggestion } from '../services/storefrontAiService';
+import {
+  STOREFRONT_AI_SCHEMA,
+  buildHeuristicSuggestion,
+  normalizeStorefrontAiSuggestion,
+} from '../services/storefrontAiService';
 
 function collectStrictModeViolations(schema, path = []) {
   if (!schema || typeof schema !== 'object') {
@@ -99,9 +103,12 @@ describe('normalizeStorefrontAiSuggestion', () => {
       summary: 'updated',
       patch: {
         designDirection: 'warm',
+        titleTextColor: 'default',
+        typographyTone: 'standard',
         selectedMediumCategories: ['Premium'],
         representativeMediumCategory: 'Premium',
         cardFields: ['product_name', 'tax_price'],
+        cardTemplate: 'card-grid',
         cardStyle: {
           layout: 'compact',
           accentColor: '#2563eb',
@@ -149,5 +156,113 @@ describe('normalizeStorefrontAiSuggestion', () => {
         uiChangeSummary: ['Hide search box', 'Add notice banner above product list'],
       },
     });
+  });
+});
+
+describe('normalizeStorefrontAiSuggestion new tokens', () => {
+  it('normalizes titleTextColor, typographyTone, cardTemplate, and cardStyle.priceTextColor', () => {
+    const result = normalizeStorefrontAiSuggestion(
+      {
+        summary: 'updated',
+        patch: {
+          designDirection: 'warm',
+          selectedMediumCategories: ['Premium'],
+          representativeMediumCategory: 'Premium',
+          cardFields: ['product_name'],
+          cardStyle: { priceTextColor: 'muted' },
+          navConfig: {},
+          mobileUiTree: [],
+          cardElementConfig: {},
+          uiChangeSummary: [],
+          titleTextColor: 'ink',
+          typographyTone: 'bold',
+          cardTemplate: 'price-focus',
+        },
+      },
+      ['Premium'],
+    );
+
+    expect(result.patch.titleTextColor).toBe('ink');
+    expect(result.patch.typographyTone).toBe('bold');
+    expect(result.patch.cardTemplate).toBe('price-focus');
+    expect(result.patch.cardStyle.priceTextColor).toBe('muted');
+  });
+
+  it('falls back to defaults for unapproved values', () => {
+    const result = normalizeStorefrontAiSuggestion(
+      {
+        summary: 'updated',
+        patch: {
+          titleTextColor: 'neon-pink',
+          typographyTone: 'screamy',
+          cardTemplate: 'free-form-html',
+          cardStyle: {},
+          selectedMediumCategories: [],
+          cardFields: [],
+          navConfig: {},
+          mobileUiTree: [],
+          cardElementConfig: {},
+          uiChangeSummary: [],
+        },
+      },
+      ['Premium'],
+    );
+
+    expect(result.patch.titleTextColor).toBe('default');
+    expect(result.patch.typographyTone).toBe('standard');
+    expect(result.patch.cardTemplate).toBe('card-grid');
+  });
+});
+
+describe('STOREFRONT_AI_SCHEMA new fields', () => {
+  it('declares titleTextColor, typographyTone, and cardTemplate as required enums on patch', () => {
+    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.titleTextColor.enum).toContain('ink');
+    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.typographyTone.enum).toContain('bold');
+    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.cardTemplate.enum).toContain('price-focus');
+    expect(STOREFRONT_AI_SCHEMA.properties.patch.required).toEqual(
+      expect.arrayContaining(['titleTextColor', 'typographyTone', 'cardTemplate']),
+    );
+    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.cardStyle.properties.priceTextColor.enum).toContain('brand');
+  });
+});
+
+describe('buildHeuristicSuggestion new tokens', () => {
+  it('detects darker title text, a cleaner font, and an image-left template from the prompt', () => {
+    const result = buildHeuristicSuggestion({
+      prompt: 'make the title darker, use a cleaner font, and put the image on the left',
+      mediumCategoryOptions: ['Premium'],
+      currentDraft: {},
+      allowedScalarKeys: undefined,
+    });
+
+    expect(result.patch.titleTextColor).toBe('ink');
+    expect(result.patch.typographyTone).toBe('clean');
+    expect(result.patch.cardTemplate).toBe('image-left');
+  });
+
+  it('detects bold/official typography and a price-focus template', () => {
+    const result = buildHeuristicSuggestion({
+      prompt: 'make it bolder and more official-looking, focus on price first',
+      mediumCategoryOptions: ['Premium'],
+      currentDraft: {},
+      allowedScalarKeys: undefined,
+    });
+
+    expect(result.patch.typographyTone).toBe('bold');
+    expect(result.patch.cardTemplate).toBe('price-focus');
+  });
+
+  it('defaults to standard/card-grid/default when nothing matches', () => {
+    const result = buildHeuristicSuggestion({
+      prompt: 'just refresh the page',
+      mediumCategoryOptions: ['Premium'],
+      currentDraft: {},
+      allowedScalarKeys: undefined,
+    });
+
+    expect(result.patch.titleTextColor).toBe('default');
+    expect(result.patch.typographyTone).toBe('standard');
+    expect(result.patch.cardTemplate).toBe('card-grid');
+    expect(result.patch.cardStyle.priceTextColor).toBe('default');
   });
 });

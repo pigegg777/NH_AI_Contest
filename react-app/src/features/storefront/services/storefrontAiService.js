@@ -1,9 +1,12 @@
 import { toTrimmedString } from '../../../common/utils/text';
 import {
+  CARD_TEMPLATE_OPTIONS,
   DEFAULT_CARD_FIELDS,
   DEFAULT_NAV_CONFIG,
   STOREFRONT_DESIGN_DIRECTIONS,
   STOREFRONT_FIELD_OPTIONS,
+  TITLE_TEXT_COLOR_OPTIONS,
+  TYPOGRAPHY_TONE_OPTIONS,
   normalizeCardFields,
   normalizeNavConfig,
 } from '../model/storefrontBuilderModel';
@@ -33,6 +36,9 @@ export const STOREFRONT_AI_SCHEMA = {
           type: 'string',
           enum: STOREFRONT_DESIGN_DIRECTIONS.map((option) => option.id),
         },
+        titleTextColor: { type: 'string', enum: TITLE_TEXT_COLOR_OPTIONS },
+        typographyTone: { type: 'string', enum: TYPOGRAPHY_TONE_OPTIONS },
+        cardTemplate: { type: 'string', enum: CARD_TEMPLATE_OPTIONS },
         selectedMediumCategories: {
           type: 'array',
           items: { type: 'string' },
@@ -55,6 +61,7 @@ export const STOREFRONT_AI_SCHEMA = {
             cardRadius: { type: 'string', enum: ['md', 'lg', 'xl'] },
             cardShadow: { type: 'string', enum: ['none', 'soft', 'strong'] },
             cardSpacing: { type: 'string', enum: ['tight', 'normal', 'relaxed'] },
+            priceTextColor: { type: 'string', enum: ['default', 'brand', 'muted'] },
           },
           required: [
             'layout',
@@ -66,6 +73,7 @@ export const STOREFRONT_AI_SCHEMA = {
             'cardRadius',
             'cardShadow',
             'cardSpacing',
+            'priceTextColor',
           ],
         },
         navConfig: {
@@ -138,6 +146,8 @@ export const STOREFRONT_AI_SCHEMA = {
       },
       required: [
         'designDirection',
+        'titleTextColor',
+        'typographyTone',
         'selectedMediumCategories',
         'representativeMediumCategory',
         'cardFields',
@@ -145,6 +155,7 @@ export const STOREFRONT_AI_SCHEMA = {
         'navConfig',
         'mobileUiTree',
         'cardElementConfig',
+        'cardTemplate',
         'uiChangeSummary',
       ],
     },
@@ -432,6 +443,82 @@ function detectCardSpacing(prompt) {
   return DEFAULT_CARD_STYLE.cardSpacing;
 }
 
+function detectTitleTextColor(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('darker') || text.includes('진하게') || text.includes('어둡게')) {
+    return 'ink';
+  }
+
+  if (text.includes('official') || text.includes('공식적') || text.includes('단정')) {
+    return 'charcoal';
+  }
+
+  if (text.includes('brand color') || text.includes('브랜드 색') || text.includes('브랜드색')) {
+    return 'brand';
+  }
+
+  return 'default';
+}
+
+function detectTypographyTone(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('bold') || text.includes('굵게') || text.includes('강하게')) {
+    return 'bold';
+  }
+
+  if (text.includes('official') || text.includes('공식적') || text.includes('격식')) {
+    return 'official';
+  }
+
+  if (text.includes('soft') || text.includes('부드럽')) {
+    return 'soft';
+  }
+
+  if (text.includes('clean') || text.includes('깔끔')) {
+    return 'clean';
+  }
+
+  return 'standard';
+}
+
+function detectCardTemplate(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('image left') || text.includes('image on the left') || text.includes('이미지 왼쪽')) {
+    return 'image-left';
+  }
+
+  if (text.includes('price first') || text.includes('price focus') || text.includes('가격 우선') || text.includes('가격 강조')) {
+    return 'price-focus';
+  }
+
+  if (text.includes('compact list') || text.includes('list layout') || text.includes('목록형') || text.includes('리스트형')) {
+    return 'compact-list';
+  }
+
+  if (text.includes('detail first') || text.includes('details first') || text.includes('정보 먼저')) {
+    return 'detail-first';
+  }
+
+  return 'card-grid';
+}
+
+function detectPriceTextColor(prompt) {
+  const text = prompt.toLowerCase();
+
+  if (text.includes('muted price') || text.includes('가격 흐리게') || text.includes('가격 톤다운')) {
+    return 'muted';
+  }
+
+  if (text.includes('brand price') || text.includes('price brand') || text.includes('가격 브랜드')) {
+    return 'brand';
+  }
+
+  return 'default';
+}
+
 function detectSearchVariant(prompt) {
   const text = prompt.toLowerCase();
 
@@ -514,7 +601,7 @@ function normalizeUiChangeSummary(uiChangeSummary) {
     .filter(Boolean);
 }
 
-function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft, allowedScalarKeys }) {
+export function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft, allowedScalarKeys }) {
   const designDirection = detectDesignDirection(prompt);
   const accentColor = detectAccentColor(prompt, designDirection);
   const selectedMediumCategories = normalizeSelectedMediumCategories(
@@ -528,9 +615,12 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft,
     summary: `${primaryLabel} draft updated for a ${designDirection} web page.`,
     patch: {
       designDirection,
+      titleTextColor: detectTitleTextColor(prompt),
+      typographyTone: detectTypographyTone(prompt),
       selectedMediumCategories,
       representativeMediumCategory,
       cardFields: detectFields(prompt, allowedScalarKeys),
+      cardTemplate: detectCardTemplate(prompt),
       cardStyle: normalizeCardStyle({
         layout: detectLayout(prompt),
         accentColor,
@@ -541,6 +631,7 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft,
         cardRadius: detectCardRadius(prompt),
         cardShadow: detectCardShadow(prompt),
         cardSpacing: detectCardSpacing(prompt),
+        priceTextColor: detectPriceTextColor(prompt),
       }),
       navConfig: normalizeNavConfig({
         title: `${primaryLabel} Guide`,
@@ -630,9 +721,12 @@ export function normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions, 
     summary: toTrimmedString(payload?.summary) || 'AI draft applied.',
     patch: {
       designDirection: toTrimmedString(patch.designDirection) || 'friendly',
+      titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(patch.titleTextColor) ? patch.titleTextColor : 'default',
+      typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(patch.typographyTone) ? patch.typographyTone : 'standard',
       selectedMediumCategories: normalizedSelectedMediumCategories,
       representativeMediumCategory,
       cardFields: normalizeCardFields(patch.cardFields, allowedScalarKeys),
+      cardTemplate: CARD_TEMPLATE_OPTIONS.includes(patch.cardTemplate) ? patch.cardTemplate : 'card-grid',
       cardStyle: normalizeCardStyle(patch.cardStyle),
       navConfig: normalizeNavConfig(patch.navConfig),
       mobileUiTree: normalizeMobileUiTree(patch.mobileUiTree),
