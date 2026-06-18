@@ -1,0 +1,242 @@
+.tableWrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: clamp(420px, 60vh, 640px);
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  content-visibility: auto;
+  overscroll-behavior-x: contain;
+}
+
+.table {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table[data-mode='fertilizer'] {
+  width: max(100%, 1360px);
+}
+
+.table[data-mode='pesticide'] {
+  width: max(100%, 1400px);
+}
+
+.table[data-mode='default'] {
+  width: max(100%, 1200px);
+}
+
+.table th[data-col='product_code'],
+.table td[data-col='product_code'] {
+  width: 100px;
+}
+
+.table th[data-col='product_name'],
+.table td[data-col='product_name'] {
+  width: 210px;
+}
+
+.table th[data-col='spec'],
+.table td[data-col='spec'] {
+  width: 92px;
+}
+
+.table th[data-col='sale_price_type_code'],
+.table td[data-col='sale_price_type_code'] {
+  width: 76px;
+  text-align: center;
+}
+
+.table th[data-col='sale_price_type_name'],
+.table td[data-col='sale_price_type_name'] {
+  width: 96px;
+  text-align: center;
+}
+
+.table th[data-col='zero_tax_price'],
+.table td[data-col='zero_tax_price'],
+.table th[data-col='tax_price'],
+.table td[data-col='tax_price'],
+.table th[data-col='exempt_tax_price'],
+.table td[data-col='exempt_tax_price'] {
+  width: 80px;
+}
+
+.table th[data-col='price_subsidy'],
+.table td[data-col='price_subsidy'] {
+  width: 70px;
+}
+
+.table th[data-col='note'],
+.table td[data-col='note'] {
+  width: 130px;
+}
+
+.table th[data-col='nutrient'],
+.table td[data-col='nutrient'] {
+  width: 132px;
+}
+
+.table th[data-col='img_url'],
+.table td[data-col='img_url'],
+.table th[data-col='product_url'],
+.table td[data-col='product_url'] {
+  width: 76px;
+}
+
+.table th[data-col='medium_category'],
+.table td[data-col='medium_category'],
+.table th[data-col='small_category'],
+.table td[data-col='small_category'],
+.table th[data-col='detail_category'],
+.table td[data-col='detail_category'] {
+  width: 80px;
+}
+
+.table th[data-col='manufacturer_list'],
+.table td[data-col='manufacturer_list'] {
+  width: 90px;
+}
+
+.table th[data-col='product_nutirent'],
+.table td[data-col='product_nutirent'] {
+  width: 144px;
+}
+
+.table th[data-col='product_category'],
+.table td[data-col='product_category'] {
+  width: 92px;
+}
+
+.table th[data-col='product_usage'],
+.table td[data-col='product_usage'] {
+  width: 80px;
+}
+
+.table th[data-col='indict_symbl'],
+.table td[data-col='indict_symbl'] {
+  width: 80px;
+}
+
+.table th,
+.table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--corp-line);
+  vertical-align: top;
+  text-align: left;
+  font-size: 0.74rem;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  padding: 0;
+  background: var(--corp-table-header-bg);
+  color: var(--corp-table-header-text);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table td {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+.table tbody tr:hover td {
+  background: var(--corp-surface-muted);
+}
+
+.selectionHeader,
+.noteHeader {
+  padding: 8px 6px !important;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.selectionHeader {
+  width: 96px;
+}
+
+.selectionCell {
+  width: 96px;
+  text-align: center !important;
+}
+
+.noteHeader,
+.noteCell {
+  width: 148px;
+}
+
+.sortButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.sortButton > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sortButton:hover {
+  background: #f0ece6;
+}
+
+.sortButton:focus-visible {
+  outline: none;
+  border-color: var(--corp-primary);
+  box-shadow: var(--corp-focus-ring);
+}
+
+.sortButtonActive {
+  color: var(--corp-primary);
+}
+
+.sortIndicator {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  font-size: 0.78rem;
+}
+
+.sortIndicatorDesc {
+  transform: translateY(-50%) scale(0.84);
+  transform-origin: center;
+}
+
+.emptyState {
+  padding: 14px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  text-align: center;
+  color: var(--corp-muted);
+  font-size: 0.82rem;
+}

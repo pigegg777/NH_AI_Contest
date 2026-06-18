@@ -1,0 +1,94 @@
+/* ─── Empty selection state ───────────────────────────── */
+.emptySelectionState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 320px;
+  padding: 40px 24px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  text-align: center;
+}
+
+.emptySelectionTitle {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.emptySelectionHint {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.84rem;
+}
+
+/* ─── Registered data view toolbar ────────────────────── */
+.viewToolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.viewToolbarFile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewToolbarHint {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+}
+
+.fileName {
+  color: var(--corp-muted);
+  font-size: 0.84rem;
+}
+
+/* ─── Upload workspace (table name card + dropzone) ───── */
+.uploadWorkspace {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.uploadMain {
+  min-width: 0;
+}
+
+.uploadRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.mergeActionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--corp-line);
+}
+
+.mergeMeta {
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}

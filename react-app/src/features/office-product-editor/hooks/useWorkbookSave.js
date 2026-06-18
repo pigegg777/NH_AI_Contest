@@ -1,0 +1,80 @@
+import { useEffect, useState } from 'react';
+
+import { toNullableTrimmedString, toTrimmedString } from '../../../common/utils/text';
+import {
+  canSaveWorkbookData,
+  resolveSaveCategoryName,
+} from '../model/workbookSaveModel';
+import { saveOfficeProductData } from '../services/officeProductDataService';
+
+const SAVE_ERROR_MESSAGE = '검토 데이터를 저장하지 못했습니다.';
+
+export function useWorkbookSave({
+  user,
+  rowsToSave,
+  selectedFileName,
+  workbookFingerprint,
+  tableNameMode,
+  customTableName,
+  onSaved,
+}) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveErrorMessage, setSaveErrorMessage] = useState('');
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState('');
+
+  const resolvedCategoryName = resolveSaveCategoryName(tableNameMode, customTableName);
+  const canSave = canSaveWorkbookData({
+    user,
+    rows: rowsToSave,
+    categoryName: resolvedCategoryName,
+  });
+
+  useEffect(() => {
+    setSaveErrorMessage('');
+    setSaveSuccessMessage('');
+    setIsSaving(false);
+  }, [workbookFingerprint]);
+
+  async function handleSave() {
+    if (!canSave || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveErrorMessage('');
+    setSaveSuccessMessage('');
+
+    try {
+      const savedData = await saveOfficeProductData({
+        user,
+        rows: rowsToSave,
+        categoryName: resolvedCategoryName,
+        sourceFileName: selectedFileName,
+      });
+      const savedRowCount = savedData?.row_count ?? rowsToSave.length;
+      setSaveSuccessMessage(`${resolvedCategoryName} 데이터 ${savedRowCount}건을 저장했습니다.`);
+      onSaved?.({
+        id: savedData?.id ?? null,
+        officeCode: toTrimmedString(user?.office_code),
+        officeName: toTrimmedString(user?.office_name),
+        categoryName: resolvedCategoryName,
+        rowCount: savedRowCount,
+        sourceFileName: toNullableTrimmedString(selectedFileName),
+        updatedAt: savedData?.updated_at ?? new Date().toISOString(),
+      });
+    } catch (error) {
+      setSaveErrorMessage(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return {
+    resolvedCategoryName,
+    canSave,
+    isSaving,
+    saveErrorMessage,
+    saveSuccessMessage,
+    handleSave,
+  };
+}

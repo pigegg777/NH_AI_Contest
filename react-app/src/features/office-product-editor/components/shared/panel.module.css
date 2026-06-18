@@ -1,0 +1,139 @@
+/* ─── Panel (generic card) ────────────────────────────── */
+.panel {
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.panelMeta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─── Status / Error / Success messages ───────────────── */
+.statusMessage {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(185, 28, 28, 0.16);
+  border-radius: var(--corp-radius);
+  background: rgba(185, 28, 28, 0.07);
+  color: var(--corp-danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.successBox {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(29, 74, 46, 0.18);
+  border-radius: var(--corp-radius);
+  background: rgba(29, 74, 46, 0.07);
+  color: var(--corp-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+/* ─── Compact panel (AI recommendations, warnings) ────── */
+.compactPanel {
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  box-shadow: none;
+}
+
+.compactPanel .panelHeader {
+  margin-bottom: 6px;
+}
+
+.compactPanel .panelTitle {
+  font-size: 0.74rem;
+}
+
+.compactPanel .panelMeta {
+  min-height: 18px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.compactPanel .statusMessage,
+.compactPanel .errorBox,
+.compactPanel .aiEmptyState {
+  margin-top: 6px;
+  padding: 5px 8px;
+  font-size: 0.72rem;
+}
+
+.aiEmptyState {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.82rem;
+}
+
+/* ─── Upload group (stacks panels, shares borders) ────── */
+.uploadGroup {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+  overflow: hidden;
+}
+
+.uploadGroup > .panel {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.uploadGroup > .panel + .panel {
+  border-top: 1px solid var(--corp-line);
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 760px) {
+  .panel {
+    padding: 10px 12px;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

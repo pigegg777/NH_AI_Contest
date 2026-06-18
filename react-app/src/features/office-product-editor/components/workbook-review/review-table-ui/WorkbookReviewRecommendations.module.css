@@ -1,0 +1,98 @@
+.aiPanelHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(29, 74, 46, 0.09);
+  color: var(--corp-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.recommendationSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.recommendationStat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.recommendationGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recommendationCard {
+  flex: 1 1 220px;
+  max-width: 320px;
+  padding: 6px 9px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--corp-transition), border-color var(--corp-transition);
+}
+
+.recommendationCard:hover {
+  background: var(--corp-surface-muted);
+}
+
+.recommendationCardActive {
+  border-color: rgba(29, 74, 46, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(29, 74, 46, 0.15);
+  background: rgba(29, 74, 46, 0.04);
+}
+
+.recommendationCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.recommendationCardHeader strong {
+  font-size: 0.74rem;
+}
+
+.recommendationSeverity {
+  color: var(--corp-primary);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.recommendationReason {
+  margin: 3px 0 0;
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.recommendationFooter {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--corp-text);
+  font-size: 0.68rem;
+  font-weight: 700;
+}

@@ -1,0 +1,139 @@
+/* ─── Table name card (full-width row, required) ──────── */
+.tableNameCard {
+  padding: 16px;
+  border: 1px solid var(--corp-accent-border-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.tableNameCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tableNameCardTitle {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.tableNameRequiredBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 9px;
+  border-radius: var(--corp-radius-pill);
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--corp-danger);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tableNameCardDescription {
+  margin: 0 0 10px;
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.tableNameRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tableNameRowField {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.catalogInlineField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.catalogInlineLabel {
+  color: var(--corp-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.catalogInlineInput {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid rgba(29, 74, 46, 0.18);
+  border-radius: var(--corp-radius-sm, 4px);
+  background: var(--corp-bg, #fff);
+  color: var(--corp-text);
+  font-size: 0.82rem;
+  box-sizing: border-box;
+}
+
+.catalogInlineInput:focus {
+  outline: none;
+  border-color: var(--corp-primary, #1d6fbb);
+  box-shadow: var(--corp-focus-ring);
+}
+
+.catalogInlineHint {
+  margin: 8px 0 0;
+  color: var(--corp-muted);
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.createTableButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 16px;
+  border: 1px solid rgba(29, 74, 46, 0.28);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--corp-transition), opacity var(--corp-transition);
+}
+
+.createTableButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover);
+}
+
+.createTableButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tableNameError {
+  margin: 8px 0 0;
+  color: var(--corp-danger);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 760px) {
+  .tableNameRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .createTableButton {
+    width: 100%;
+  }
+}

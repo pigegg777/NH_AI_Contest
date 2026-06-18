@@ -1,0 +1,85 @@
+/* ─── Page shell ──────────────────────────────────────── */
+.page {
+  max-width: 100%;
+  min-height: 100%;
+  margin: 0 auto;
+  background: var(--corp-surface-muted);
+  overflow-x: hidden;
+}
+
+/* ─── Top bar (replaces hero) ─────────────────────────── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  height: 56px;
+  border-bottom: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+}
+
+.topbarLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.topbarLabel {
+  color: var(--corp-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topbarTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+/* ─── Two-column layout ───────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
+  min-height: calc(100vh - 56px);
+  transition: grid-template-columns var(--corp-transition);
+  overflow-x: hidden;
+}
+
+.layoutCollapsed {
+  grid-template-columns: 36px minmax(0, 1fr);
+}
+
+/* ─── Main content area (2-column grid) ──────────────── */
+.content {
+  min-width: 0;
+  width: 100%;
+  padding: 14px 18px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+  overflow-x: hidden;
+}
+
+.content > * {
+  min-width: 0;
+  max-width: 100%;
+  scroll-margin-top: 72px;
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    padding: 12px 10px 32px;
+    grid-template-columns: 1fr;
+  }
+}
