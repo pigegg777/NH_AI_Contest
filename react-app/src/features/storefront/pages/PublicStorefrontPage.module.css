@@ -1,0 +1,16 @@
+.page {
+  min-height: 100vh;
+  padding: 16px;
+  background: var(--corp-bg);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.logo {
+  height: 40px;
+  object-fit: contain;
+}

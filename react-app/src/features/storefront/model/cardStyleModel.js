@@ -3,11 +3,11 @@ export const DEFAULT_CARD_STYLE = {
   accentColor: '#1d4a2e',
   fontSize: 'medium',
   cardsPerRow: 2,
-  imageSize: 'md',
-  imageFit: 'cover',
+  imageSize: 'sm',
+  imageFit: 'contain',
   cardRadius: 'lg',
   cardShadow: 'soft',
-  cardSpacing: 'normal',
+  cardSpacing: 'relaxed',
 };
 
 export const CARD_STYLE_LAYOUT_OPTIONS = ['grid', 'compact'];

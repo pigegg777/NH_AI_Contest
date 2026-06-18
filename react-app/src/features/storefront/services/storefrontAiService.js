@@ -8,11 +8,19 @@ import {
   normalizeNavConfig,
 } from '../model/storefrontBuilderModel';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
+import {
+  DEFAULT_CARD_ELEMENT_CONFIG,
+  DEFAULT_MOBILE_UI_TREE,
+  MOBILE_UI_BLOCK_TYPES,
+  MOBILE_UI_SLOTS,
+  normalizeCardElementConfig,
+  normalizeMobileUiTree,
+} from '../model/storefrontUiModel';
 
 const OPENAI_RESPONSES_API_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
 
-const STOREFRONT_AI_SCHEMA = {
+export const STOREFRONT_AI_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   properties: {
@@ -32,7 +40,7 @@ const STOREFRONT_AI_SCHEMA = {
         representativeMediumCategory: { type: 'string' },
         cardFields: {
           type: 'array',
-          items: { type: 'string', enum: STOREFRONT_FIELD_OPTIONS },
+          items: { type: 'string' },
         },
         cardStyle: {
           type: 'object',
@@ -82,6 +90,51 @@ const STOREFRONT_AI_SCHEMA = {
             'categoryChipVariant',
           ],
         },
+        mobileUiTree: {
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              id: { type: 'string' },
+              type: { type: 'string', enum: MOBILE_UI_BLOCK_TYPES },
+              slot: { type: 'string', enum: MOBILE_UI_SLOTS },
+              enabled: { type: 'boolean' },
+              props: {
+                type: 'object',
+                additionalProperties: false,
+                properties: {
+                  title: { type: 'string' },
+                  text: { type: 'string' },
+                  label: { type: 'string' },
+                  href: { type: 'string' },
+                },
+                required: ['title', 'text', 'label', 'href'],
+              },
+            },
+            required: ['id', 'type', 'slot', 'enabled', 'props'],
+          },
+        },
+        cardElementConfig: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            showImage: { type: 'boolean' },
+            showProductName: { type: 'boolean' },
+            showSpec: { type: 'boolean' },
+            showNutrient: { type: 'boolean' },
+            showPrice: { type: 'boolean' },
+            showBadge: { type: 'boolean' },
+            imageSize: { type: 'string', enum: ['hidden', 'sm', 'md', 'lg'] },
+            imageFit: { type: 'string', enum: ['cover', 'contain'] },
+            metaDensity: { type: 'string', enum: ['compact', 'comfortable'] },
+          },
+          required: Object.keys(DEFAULT_CARD_ELEMENT_CONFIG),
+        },
+        uiChangeSummary: {
+          type: 'array',
+          items: { type: 'string' },
+        },
       },
       required: [
         'designDirection',
@@ -90,6 +143,9 @@ const STOREFRONT_AI_SCHEMA = {
         'cardFields',
         'cardStyle',
         'navConfig',
+        'mobileUiTree',
+        'cardElementConfig',
+        'uiChangeSummary',
       ],
     },
   },
@@ -154,6 +210,27 @@ function extractStructuredPayload(responseBody) {
   return null;
 }
 
+async function readOpenAiError(response) {
+  try {
+    const errorBody = await response.json();
+    const message = toTrimmedString(errorBody?.error?.message);
+
+    if (message) {
+      return message;
+    }
+  } catch {
+    // Ignore JSON parsing errors and try plain text next.
+  }
+
+  try {
+    const text = await response.text();
+
+    return toTrimmedString(text);
+  } catch {
+    return '';
+  }
+}
+
 async function requestOpenAiSuggestion(requestBody, openAiApiKey) {
   const response = await fetch(OPENAI_RESPONSES_API_URL, {
     method: 'POST',
@@ -165,7 +242,12 @@ async function requestOpenAiSuggestion(requestBody, openAiApiKey) {
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API request failed with status ${response.status}.`);
+    const openAiErrorMessage = await readOpenAiError(response);
+    throw new Error(
+      openAiErrorMessage
+        ? `OpenAI API request failed: ${openAiErrorMessage}`
+        : `OpenAI API request failed with status ${response.status}.`,
+    );
   }
 
   const responseBody = await response.json();
@@ -393,7 +475,7 @@ function detectCategoryChipVariant(prompt) {
   return DEFAULT_NAV_CONFIG.categoryChipVariant;
 }
 
-function detectFields(prompt) {
+function detectFields(prompt, allowedScalarKeys) {
   const text = prompt.toLowerCase();
   const fields = ['product_name'];
 
@@ -413,7 +495,7 @@ function detectFields(prompt) {
     fields.push('product_url');
   }
 
-  return normalizeCardFields(fields.length > 1 ? fields : DEFAULT_CARD_FIELDS);
+  return normalizeCardFields(fields.length > 1 ? fields : DEFAULT_CARD_FIELDS, allowedScalarKeys);
 }
 
 function normalizeSelectedMediumCategories(selectedMediumCategories, mediumCategoryOptions) {
@@ -426,7 +508,13 @@ function normalizeSelectedMediumCategories(selectedMediumCategories, mediumCateg
   return normalized.length > 0 ? normalized : options;
 }
 
-function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft }) {
+function normalizeUiChangeSummary(uiChangeSummary) {
+  return (Array.isArray(uiChangeSummary) ? uiChangeSummary : [])
+    .map((item) => toTrimmedString(item))
+    .filter(Boolean);
+}
+
+function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft, allowedScalarKeys }) {
   const designDirection = detectDesignDirection(prompt);
   const accentColor = detectAccentColor(prompt, designDirection);
   const selectedMediumCategories = normalizeSelectedMediumCategories(
@@ -442,7 +530,7 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft 
       designDirection,
       selectedMediumCategories,
       representativeMediumCategory,
-      cardFields: detectFields(prompt),
+      cardFields: detectFields(prompt, allowedScalarKeys),
       cardStyle: normalizeCardStyle({
         layout: detectLayout(prompt),
         accentColor,
@@ -463,6 +551,21 @@ function buildHeuristicSuggestion({ prompt, mediumCategoryOptions, currentDraft 
         searchVariant: detectSearchVariant(prompt),
         categoryChipVariant: detectCategoryChipVariant(prompt),
       }),
+      mobileUiTree: normalizeMobileUiTree(currentDraft?.mobileUiTree ?? DEFAULT_MOBILE_UI_TREE),
+      cardElementConfig: normalizeCardElementConfig(
+        currentDraft?.cardElementConfig ?? {
+          showImage: detectImageSize(prompt) !== 'hidden',
+          showProductName: true,
+          showSpec: true,
+          showNutrient: true,
+          showPrice: true,
+          showBadge: true,
+          imageSize: detectImageSize(prompt),
+          imageFit: detectImageFit(prompt),
+          metaDensity: detectLayout(prompt) === 'compact' ? 'compact' : 'comfortable',
+        },
+      ),
+      uiChangeSummary: [`Apply ${designDirection} storefront presentation update`],
     },
   };
 }
@@ -490,6 +593,10 @@ function buildOpenAiRequestBody({ prompt, mediumCategoryOptions, currentDraft, o
             designDirectionOptions: STOREFRONT_DESIGN_DIRECTIONS.map((option) => option.id),
             allowedFields: STOREFRONT_FIELD_OPTIONS,
             defaultNavConfig: DEFAULT_NAV_CONFIG,
+            allowedMobileUiBlockTypes: MOBILE_UI_BLOCK_TYPES,
+            allowedMobileUiSlots: MOBILE_UI_SLOTS,
+            defaultMobileUiTree: DEFAULT_MOBILE_UI_TREE,
+            defaultCardElementConfig: DEFAULT_CARD_ELEMENT_CONFIG,
           },
           null,
           2,
@@ -508,7 +615,7 @@ function buildOpenAiRequestBody({ prompt, mediumCategoryOptions, currentDraft, o
   };
 }
 
-export function normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions) {
+export function normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions, allowedScalarKeys) {
   const patch = payload?.patch ?? {};
   const normalizedSelectedMediumCategories = normalizeSelectedMediumCategories(
     patch.selectedMediumCategories,
@@ -525,14 +632,17 @@ export function normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions) 
       designDirection: toTrimmedString(patch.designDirection) || 'friendly',
       selectedMediumCategories: normalizedSelectedMediumCategories,
       representativeMediumCategory,
-      cardFields: normalizeCardFields(patch.cardFields),
+      cardFields: normalizeCardFields(patch.cardFields, allowedScalarKeys),
       cardStyle: normalizeCardStyle(patch.cardStyle),
       navConfig: normalizeNavConfig(patch.navConfig),
+      mobileUiTree: normalizeMobileUiTree(patch.mobileUiTree),
+      cardElementConfig: normalizeCardElementConfig(patch.cardElementConfig),
+      uiChangeSummary: normalizeUiChangeSummary(patch.uiChangeSummary),
     },
   };
 }
 
-export async function requestStorefrontAiSuggestion({ prompt, mediumCategoryOptions, currentDraft }) {
+export async function requestStorefrontAiSuggestion({ prompt, mediumCategoryOptions, currentDraft, allowedScalarKeys }) {
   const normalizedPrompt = toTrimmedString(prompt);
 
   if (!normalizedPrompt) {
@@ -546,6 +656,7 @@ export async function requestStorefrontAiSuggestion({ prompt, mediumCategoryOpti
       prompt: normalizedPrompt,
       mediumCategoryOptions,
       currentDraft,
+      allowedScalarKeys,
     });
   }
 
@@ -560,5 +671,5 @@ export async function requestStorefrontAiSuggestion({ prompt, mediumCategoryOpti
     openAiApiKey,
   );
 
-  return normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions);
+  return normalizeStorefrontAiSuggestion(payload, mediumCategoryOptions, allowedScalarKeys);
 }

@@ -1,47 +1,191 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
   min-height: 100%;
-  padding: 14px 12px 20px;
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 32%),
-    linear-gradient(180deg, #f8fbf8 0%, #f3f1ec 100%);
+  padding: 18px 16px 32px;
+  background: #f3f1ec;
 }
 
 .theme-friendly {
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 32%),
-    linear-gradient(180deg, #f8fbf8 0%, #f3f1ec 100%);
+  background: #f0f5f0;
 }
 
 .theme-warm {
-  background:
-    radial-gradient(circle at top right, rgba(234, 88, 12, 0.18), transparent 30%),
-    linear-gradient(180deg, #fff9f2 0%, #f6eee4 100%);
+  background: #fbf1e6;
 }
 
 .theme-green {
-  background:
-    radial-gradient(circle at top right, rgba(29, 74, 46, 0.18), transparent 32%),
-    linear-gradient(180deg, #f5fbf4 0%, #edf5ea 100%);
+  background: #eef5ea;
 }
 
 .theme-trust {
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.16), transparent 30%),
-    linear-gradient(180deg, #f6faff 0%, #eef4fb 100%);
+  background: #eef3fb;
+}
+
+.theme-white {
+  background: #ffffff;
 }
 
 .hero {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  padding: 22px 20px 20px;
+}
+
+.bodyShell {
+  display: grid;
+  grid-template-columns: minmax(220px, 256px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.bodyShellSolo {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.categoryRail {
+  position: sticky;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  padding: 18px 16px 16px;
+  padding: 16px 14px;
+  border: 1px solid rgba(29, 74, 46, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 251, 245, 0.96) 100%);
+  box-shadow: 0 16px 32px rgba(22, 34, 24, 0.08);
+}
+
+.categoryRailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.categoryRailSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.categoryRailTitle {
+  font-size: 0.9rem;
+  line-height: 1.3;
+  color: #173223;
+}
+
+.categoryRailHint {
+  font-size: 0.72rem;
+  color: #6a7c70;
+}
+
+.categoryRailToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
   border: 1px solid rgba(29, 74, 46, 0.12);
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 14px 28px rgba(22, 34, 24, 0.08);
+  border-radius: 12px;
+  background: #ffffff;
+  color: #355a30;
+  cursor: pointer;
+  transition:
+    border-color var(--corp-transition),
+    transform var(--corp-transition),
+    box-shadow var(--corp-transition);
+}
+
+.categoryRailToggle:hover {
+  border-color: rgba(29, 74, 46, 0.24);
+  box-shadow: 0 8px 16px rgba(20, 33, 25, 0.08);
+}
+
+.categoryRailToggleIcon {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--corp-transition);
+}
+
+.categoryRailToggleIconCollapsed {
+  transform: rotate(180deg);
+}
+
+.categoryRailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.categoryRailSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryRailSectionButton,
+.categoryRailChip {
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color var(--corp-transition),
+    background-color var(--corp-transition),
+    color var(--corp-transition),
+    box-shadow var(--corp-transition);
+}
+
+.categoryRailSectionButton {
+  padding: 9px 10px;
+  border: 1px solid rgba(29, 74, 46, 0.12);
+  background: rgba(247, 250, 247, 0.92);
+  color: #173223;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.categoryRailSectionButtonActive {
+  border-color: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 34%, rgba(29, 74, 46, 0.12));
+  background: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 10%, #ffffff);
+  box-shadow: 0 10px 18px rgba(20, 33, 25, 0.06);
+}
+
+.categoryRailChipList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.categoryRailChip {
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #5f6d5b;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.categoryRailChip:hover {
+  color: #355a30;
+  background: rgba(29, 74, 46, 0.05);
+}
+
+.categoryRailChipActive {
+  border-color: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 24%, rgba(29, 74, 46, 0.12));
+  background: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 10%, #ffffff);
+  color: #173223;
 }
 
 .heroTop {
@@ -76,8 +220,9 @@
 
 .title {
   margin: 4px 0 0;
-  font-size: 1.28rem;
-  line-height: 1.15;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.12;
   color: #173223;
 }
 
@@ -88,14 +233,53 @@
   color: #51635a;
 }
 
-.mobileCategoryBar {
+.categoryNav {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 10px 12px;
   border: 1px solid rgba(29, 74, 46, 0.1);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(247, 250, 247, 0.92);
+}
+
+.categoryNavLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6a7c70;
+}
+
+.categoryNavTitle {
+  font-size: 0.94rem;
+  line-height: 1.3;
+  color: #173223;
+}
+
+.categoryNavMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.categoryNavMetaItem {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(29, 74, 46, 0.08);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #355a30;
+}
+
+.mobileCategoryBar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid rgba(29, 74, 46, 0.12);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 250, 244, 0.96) 100%);
+  box-shadow: 0 8px 18px rgba(22, 34, 24, 0.05);
 }
 
 .mobileCategoryLabel {
@@ -106,7 +290,8 @@
 }
 
 .mobileCategoryTitle {
-  font-size: 0.94rem;
+  font-size: 1rem;
+  font-weight: 700;
   line-height: 1.3;
   color: #173223;
 }
@@ -136,10 +321,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  min-height: 40px;
+  padding: 7px 12px;
   border: 1px solid rgba(29, 74, 46, 0.18);
   border-radius: var(--corp-radius);
-  background: var(--corp-panel);
+  background: #ffffff;
   transition:
     border-color var(--corp-transition),
     box-shadow var(--corp-transition);
@@ -151,13 +337,10 @@
 
 .searchBoxOutlined {
   border-color: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 34%, rgba(29, 74, 46, 0.18));
-  background: #ffffff;
-  box-shadow: 0 10px 18px rgba(20, 33, 25, 0.06);
 }
 
 .searchBoxSoft {
-  border-color: transparent;
-  background: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 10%, #ffffff);
+  border-color: rgba(29, 74, 46, 0.18);
 }
 
 .searchBox:focus-within {
@@ -218,22 +401,50 @@
   color: #64786a;
 }
 
+.categoryChipsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.categoryChipsToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 0;
+  border: 1px solid rgba(29, 74, 46, 0.16);
+  border-radius: 10px;
+  background: rgba(29, 74, 46, 0.06);
+  color: #355a30;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--corp-transition), border-color var(--corp-transition);
+}
+
+.categoryChipsToggle:hover {
+  background: rgba(29, 74, 46, 0.12);
+  border-color: rgba(29, 74, 46, 0.28);
+}
+
 .categoryWrap {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
+  justify-content: flex-start;
+  gap: 8px;
   margin-top: -2px;
 }
 
 .categoryChip {
-  min-height: 28px;
-  padding: 0 10px;
-  border: 1px solid transparent;
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid rgba(29, 74, 46, 0.16);
   border-radius: 999px;
-  background: transparent;
+  background: #ffffff;
   color: #5f6d5b;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -245,42 +456,50 @@
 
 .categoryChip:hover {
   color: #355a30;
+  border-color: rgba(29, 74, 46, 0.28);
+  box-shadow: 0 3px 8px rgba(20, 33, 25, 0.1);
 }
 
 .categoryChipActive {
-  color: #355a30;
+  color: #173223;
   font-weight: 700;
 }
 
 .categoryWrapSoft .categoryChip {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(29, 74, 46, 0.08);
+  background: #ffffff;
+  border-color: rgba(29, 74, 46, 0.14);
+}
+
+.categoryWrapSoft .categoryChip:hover {
+  border-color: rgba(29, 74, 46, 0.28);
+  box-shadow: 0 3px 10px rgba(20, 33, 25, 0.11);
 }
 
 .categoryWrapSoft .categoryChipActive {
-  background: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 12%, #ffffff);
-  border-color: color-mix(in srgb, var(--brand-color, var(--corp-primary)) 28%, #dfe9dc);
+  background: color-mix(in srgb, var(--chip-accent, var(--corp-primary)) 14%, #ffffff);
+  border-color: color-mix(in srgb, var(--chip-accent, var(--corp-primary)) 40%, #dfe9dc);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--chip-accent, var(--corp-primary)) 22%, transparent);
 }
 
 .categoryWrapOutline .categoryChip {
-  background: transparent;
+  background: #ffffff;
   border-color: rgba(29, 74, 46, 0.16);
 }
 
 .categoryWrapOutline .categoryChipActive {
-  border-color: var(--brand-color, var(--corp-primary));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-color, var(--corp-primary)) 24%, transparent);
+  border-color: var(--chip-accent, var(--corp-primary));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chip-accent, var(--corp-primary)) 24%, transparent);
 }
 
 .categoryWrapFilled .categoryChip {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: transparent;
+  background: #ffffff;
+  border-color: rgba(29, 74, 46, 0.16);
 }
 
 .categoryWrapFilled .categoryChipActive {
-  background: var(--brand-color, var(--corp-primary));
+  background: var(--chip-accent, var(--corp-primary));
   color: #ffffff;
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--brand-color, var(--corp-primary)) 30%, transparent);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--chip-accent, var(--corp-primary)) 30%, transparent);
 }
 
 .emptyState {
@@ -292,9 +511,84 @@
   text-align: center;
 }
 
+.noticeBanner,
+.highlightBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(29, 74, 46, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 10px 18px rgba(20, 33, 25, 0.06);
+}
+
+.highlightBox {
+  background: color-mix(in srgb, var(--brand-color, #1d4a2e) 10%, #ffffff);
+}
+
+.helperTitle {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #173223;
+}
+
+.helperText {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #51635a;
+}
+
+.ctaButton {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--brand-color, #1d4a2e);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  box-shadow: 0 12px 22px color-mix(in srgb, var(--brand-color, #1d4a2e) 24%, transparent);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6a7c70;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(29, 74, 46, 0.12);
+}
+
+.dividerLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
+  .bodyShell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .categoryRail {
+    display: none;
+  }
+
+  .page {
+    padding: 14px 12px 24px;
+    gap: 16px;
+  }
+
   .hero {
-    padding: 16px 14px 14px;
+    padding: 18px 16px 16px;
+    border-radius: 18px;
   }
 
   .brandBlock {
@@ -307,21 +601,29 @@
   }
 
   .title {
-    font-size: 1.12rem;
+    font-size: 1.3rem;
   }
 
   .subtitle {
-    font-size: 0.82rem;
+    font-size: 0.84rem;
   }
 
   .categoryWrap {
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
   }
 
   .categoryChip {
-    min-height: 28px;
-    padding: 0 10px;
-    font-size: 0.76rem;
+    min-height: 30px;
+    padding: 0 6px;
+    overflow: hidden;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .searchBox {
+    min-height: 38px;
   }
 }

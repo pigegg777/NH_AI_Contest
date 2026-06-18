@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/officeProductDataService';
+import StorefrontBuilderPage from '../pages/StorefrontBuilderPage';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 import { requestStorefrontAiSuggestion } from '../services/storefrontAiService';
-import StorefrontBuilderPage from '../pages/StorefrontBuilderPage';
 
 vi.mock('../../office-product-editor/services/officeProductDataService', () => ({
   fetchOfficeProductDataEntries: vi.fn(),
@@ -51,7 +51,7 @@ const PRODUCT_ENTRIES = [
     ],
   },
   {
-    id: 11,
+    id: 12,
     officeCode: 'OFF-1',
     officeName: 'Demo Office',
     categoryName: 'Pesticide Upload',
@@ -79,7 +79,7 @@ const EXISTING_CONFIG = {
     theme: { brandColor: '#1d4a2e', backgroundTone: 'mint' },
     nav: { title: 'Existing guide', subtitle: 'Existing subtitle', logoUrl: '' },
     searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
-    categoryChips: { enabled: true, sticky: true },
+    categoryChips: { enabled: true, sticky: true, variant: 'soft' },
   },
   navConfig: {
     title: 'Existing guide',
@@ -87,6 +87,8 @@ const EXISTING_CONFIG = {
     brandColor: '#1d4a2e',
     searchPlaceholder: 'Search products',
     logoUrl: '',
+    searchVariant: 'pill',
+    categoryChipVariant: 'soft',
   },
   categoryConfigs: [
     {
@@ -135,7 +137,38 @@ describe('StorefrontBuilderPage', () => {
     expect(await screen.findByText('스토어프론트 빌더를 불러오지 못했습니다.')).toBeInTheDocument();
   });
 
-  it('runs the two-step AI studio flow, keeps a phone preview visible, and saves the AI-updated draft', async () => {
+  it('shows the card field table and syncs preview visibility with the selected fields', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+
+    const table = screen.getByTestId('card-field-table');
+    const preview = screen.getByTestId('mobile-preview-device');
+
+    expect(within(table).getByTestId('card-field-example-product_name')).toHaveTextContent('Alpha');
+    expect(within(table).getByTestId('card-field-example-nutrient')).toHaveTextContent('18-18-18');
+    expect(within(preview).queryByText('18-18-18')).not.toBeInTheDocument();
+
+    await user.click(within(table).getByTestId('card-field-toggle-nutrient'));
+
+    await waitFor(() => {
+      expect(within(preview).getByText('18-18-18')).toBeInTheDocument();
+    });
+
+    await user.click(within(table).getByTestId('card-field-toggle-nutrient'));
+
+    await waitFor(() => {
+      expect(within(preview).queryByText('18-18-18')).not.toBeInTheDocument();
+    });
+  });
+
+  it('runs the simplified two-step flow, keeps preview visible, and saves without category-nav blocks', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestStorefrontAiSuggestion.mockResolvedValue({
@@ -152,9 +185,40 @@ describe('StorefrontBuilderPage', () => {
           categoryChipVariant: 'filled',
         },
         cardFields: ['product_name', 'nutrient', 'tax_price'],
-        cardStyle: { layout: 'compact', accentColor: '#2563eb', fontSize: 'large', cardsPerRow: 1 },
+        cardStyle: {
+          layout: 'compact',
+          accentColor: '#2563eb',
+          fontSize: 'large',
+          cardsPerRow: 1,
+          imageSize: 'lg',
+          imageFit: 'contain',
+          cardRadius: 'xl',
+          cardShadow: 'strong',
+          cardSpacing: 'relaxed',
+        },
         selectedMediumCategories: ['Premium', 'Starter'],
         representativeMediumCategory: 'Premium',
+        mobileUiTree: [
+          { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
+          { id: 'product-category-nav', type: 'productCategoryNav', slot: 'top', enabled: true, props: {} },
+          { id: 'mobile-category-bar', type: 'mobileCategoryBar', slot: 'top', enabled: true, props: {} },
+          { id: 'search-box', type: 'searchBox', slot: 'top', enabled: true, props: {} },
+          { id: 'category-chips', type: 'categoryChips', slot: 'afterSearch', enabled: true, props: {} },
+          { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
+          { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
+        ],
+        cardElementConfig: {
+          showImage: true,
+          showProductName: true,
+          showSpec: false,
+          showNutrient: true,
+          showPrice: true,
+          showBadge: true,
+          imageSize: 'lg',
+          imageFit: 'contain',
+          metaDensity: 'comfortable',
+        },
+        uiChangeSummary: ['Emphasize price', 'Use a one-card mobile layout'],
       },
     });
     upsertStorefrontConfig.mockResolvedValue(undefined);
@@ -162,114 +226,131 @@ describe('StorefrontBuilderPage', () => {
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    expect(await screen.findByText('AI로 스토어프론트 만들기')).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: '시작하기' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '제작 시작' }));
+    await user.click(screen.getByTestId('start-storefront-builder'));
 
-    expect(screen.getByRole('heading', { name: '상품 카테고리 페이지 선택' })).toBeInTheDocument();
-    expect(screen.queryByLabelText('Page title')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Page subtitle')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '페이지 기본 설정' })).toBeInTheDocument();
     expect(screen.getByTestId('mobile-preview-device')).toBeInTheDocument();
+    expect(screen.queryByTestId('page-design-editor')).not.toBeInTheDocument();
 
-    const fertilizerCard = screen.getByTestId('product-category-card-Fertilizer Upload');
-    const pesticideCard = screen.getByTestId('product-category-card-Pesticide Upload');
+    await user.click(screen.getByTestId('toggle-page-design-settings'));
+    expect(screen.getByTestId('page-design-editor')).toBeInTheDocument();
 
-    expect(within(fertilizerCard).getByRole('button', { name: '페이지 수정' })).toBeInTheDocument();
-    expect(within(pesticideCard).getByRole('button', { name: '페이지 추가' })).toBeInTheDocument();
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
-    await user.click(within(fertilizerCard).getByRole('button', { name: '페이지 수정' }));
-    await user.click(screen.getByRole('button', { name: '다음' }));
+    expect(screen.getByRole('heading', { name: 'AI 페이지 초안 생성' })).toBeInTheDocument();
+    expect(screen.getByTestId('card-field-table')).toBeInTheDocument();
+    expect(screen.queryByTestId('page-design-editor')).not.toBeInTheDocument();
+    expect(screen.queryByText('추천 시작 옵션')).not.toBeInTheDocument();
 
-    expect(screen.getByRole('heading', { name: 'AI 추천으로 다듬기' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Choose medium categories' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Pick the first representative card' })).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Page title')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Page subtitle')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '따뜻한 모바일 톤' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '가격 강조' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '한 줄에 카드 1개' })).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: '한 줄에 카드 1개' }));
-    expect(screen.getByLabelText('AI로 다듬기')).toHaveValue('한 줄에 카드 1개씩 배치하고 페이지를 쉽게 훑어볼 수 있게 해줘.');
-
-    await user.type(
-      screen.getByLabelText('AI로 다듬기'),
-      ' Make the fertilizer page warmer and highlight price',
-    );
-    await user.click(screen.getByRole('button', { name: 'AI 초안 적용' }));
+    await user.type(screen.getByLabelText('AI로 다듬기'), '가격을 강조하고 모바일에서 읽기 쉽게 정리해줘.');
+    await user.click(screen.getByTestId('apply-ai-suggestion'));
 
     expect(await screen.findByText('Warm fertilizer draft applied.')).toBeInTheDocument();
-    expect(screen.getByText('Premium Fertilizer Guide')).toBeInTheDocument();
-    expect(screen.getByText('Fast answers for customers')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Search fertilizer')).toBeInTheDocument();
-    expect(screen.getByText('Alpha')).toBeInTheDocument();
-    expect(screen.getByText('Beta')).toBeInTheDocument();
-    expect(screen.queryByText('Gamma')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '초안 저장' }));
+    await user.click(screen.getByTestId('save-storefront-draft'));
 
-    expect(upsertStorefrontConfig).toHaveBeenCalledWith({
-      officeCode: 'OFF-1',
-      navConfig: {
-        title: 'Premium Fertilizer Guide',
-        subtitle: 'Fast answers for customers',
-        brandColor: '#2563eb',
-        searchPlaceholder: 'Search fertilizer',
-        logoUrl: '',
-        searchVariant: 'outlined',
-        categoryChipVariant: 'filled',
-      },
-      pageConfig: {
-        schemaVersion: 1,
+    expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
+
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+    expect(savedPayload.pageConfig.mobileUiTree.map((block) => block.type)).toEqual([
+      'hero',
+      'searchBox',
+      'categoryChips',
+      'productSections',
+      'emptyState',
+    ]);
+    expect(savedPayload.categoryConfigs[0].categoryConfig.selectedMediumCategories).toEqual(['Premium', 'Starter']);
+  }, 10000);
+
+  it('shows AI change summary and lets users undo the AI update in step 2', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    requestStorefrontAiSuggestion.mockResolvedValue({
+      summary: 'AI updated the storefront.',
+      patch: {
         designDirection: 'warm',
-        theme: { brandColor: '#2563eb', backgroundTone: 'apricot' },
-        nav: {
+        navConfig: {
           title: 'Premium Fertilizer Guide',
           subtitle: 'Fast answers for customers',
+          brandColor: '#2563eb',
+          searchPlaceholder: 'Search fertilizer',
           logoUrl: '',
+          searchVariant: 'outlined',
+          categoryChipVariant: 'filled',
         },
-        searchSection: {
-          enabled: true,
-          placeholder: 'Search fertilizer',
-          variant: 'outlined',
+        cardFields: ['product_name', 'spec', 'tax_price'],
+        cardStyle: {
+          layout: 'compact',
+          accentColor: '#2563eb',
+          fontSize: 'large',
+          cardsPerRow: 1,
+          imageSize: 'sm',
+          imageFit: 'contain',
+          cardRadius: 'lg',
+          cardShadow: 'soft',
+          cardSpacing: 'normal',
         },
-        categoryChips: {
-          enabled: true,
-          sticky: true,
-          variant: 'filled',
-        },
-      },
-      categoryConfigs: [
-        {
-          productCategoryName: 'Fertilizer Upload',
-          sortOrder: 0,
-          categoryConfig: {
-            schemaVersion: 1,
-            displayName: 'Fertilizer Upload',
-            sourceCategoryName: 'Fertilizer Upload',
-            selectedMediumCategories: ['Premium', 'Starter'],
-            representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
-            cardDesign: {
-              visibleFields: ['product_name', 'nutrient', 'tax_price'],
-              style: {
-                layout: 'compact',
-                accentColor: '#2563eb',
-                fontSize: 'large',
-                cardsPerRow: 1,
-                imageSize: 'md',
-                imageFit: 'cover',
-                cardRadius: 'lg',
-                cardShadow: 'soft',
-                cardSpacing: 'normal',
-              },
-            },
+        selectedMediumCategories: ['Premium', 'Starter'],
+        representativeMediumCategory: 'Premium',
+        mobileUiTree: [
+          { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
+          { id: 'product-category-nav', type: 'productCategoryNav', slot: 'top', enabled: true, props: {} },
+          { id: 'mobile-category-bar', type: 'mobileCategoryBar', slot: 'top', enabled: true, props: {} },
+          { id: 'search-box', type: 'searchBox', slot: 'top', enabled: false, props: {} },
+          { id: 'category-chips', type: 'categoryChips', slot: 'afterSearch', enabled: true, props: {} },
+          {
+            id: 'notice-1',
+            type: 'noticeBanner',
+            slot: 'beforeProducts',
+            enabled: true,
+            props: { title: '공지', text: 'AI 추천 안내' },
           },
+          { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
+          { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
+        ],
+        cardElementConfig: {
+          showImage: false,
+          showProductName: true,
+          showSpec: true,
+          showNutrient: false,
+          showPrice: true,
+          showBadge: true,
+          imageSize: 'sm',
+          imageFit: 'contain',
+          metaDensity: 'comfortable',
         },
-      ],
-      hiddenProducts: [],
+        uiChangeSummary: ['Hide search box', 'Add notice banner above product list'],
+      },
     });
-    expect(PRODUCT_ENTRIES[0].rows[0].product_name).toBe('Alpha');
-    expect(PRODUCT_ENTRIES[0].rows[0].medium_category).toBe('Premium');
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    expect(await screen.findByRole('button', { name: '시작하기' })).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+
+    expect(screen.queryByTestId('add-block-noticeBanner')).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('AI로 다듬기'), '검색창은 숨기고 공지 배너를 추가해줘.');
+    await user.click(screen.getByTestId('apply-ai-suggestion'));
+
+    expect(await screen.findByText('AI updated the storefront.')).toBeInTheDocument();
+    expect(screen.getByTestId('ai-change-summary')).toBeInTheDocument();
+    expect(screen.getByText('AI 추천 안내')).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Search fertilizer')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('undo-ai-changes'));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search products')).toBeInTheDocument();
+      expect(screen.queryByText('AI 추천 안내')).not.toBeInTheDocument();
+    });
   }, 10000);
 });

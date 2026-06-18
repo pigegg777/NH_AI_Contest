@@ -1,8 +1,8 @@
-import { useDeferredValue, useEffect, useId, useState } from 'react';
-
-import { buildSections, filterHiddenProducts } from '../model/sectionMatching';
-import { normalizePageConfig } from '../model/storefrontBuilderModel';
+import { MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
+import { useStorefrontView } from '../hooks/useStorefrontView';
 import CardGridSection from './CardGridSection';
+import DesktopCategoryRail from './storefront-view/DesktopCategoryRail';
+import HelperBlock from './storefront-view/HelperBlock';
 import styles from './StorefrontView.module.css';
 
 const SEARCH_VARIANT_CLASS_NAMES = {
@@ -17,237 +17,183 @@ const CHIP_VARIANT_CLASS_NAMES = {
   soft: styles.categoryWrapSoft,
 };
 
-function matchesSearch(product, query) {
-  if (!query) {
-    return true;
-  }
-
-  const haystack = [
-    product?.product_name,
-    product?.spec,
-    product?.large_category,
-    product?.medium_category,
-    product?.small_category,
-    product?.detail_category,
-    product?.nutrient,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  return haystack.includes(query);
-}
-
-function scrollToSection(sectionId) {
-  if (typeof document === 'undefined') {
-    return;
-  }
-
-  document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function buildMediumCategoryItems(products) {
-  const seen = new Set();
-  const items = ['전체'];
-
-  for (const product of Array.isArray(products) ? products : []) {
-    const value = typeof product?.medium_category === 'string' ? product.medium_category.trim() : '';
-
-    if (!value || seen.has(value)) {
-      continue;
-    }
-
-    seen.add(value);
-    items.push(value);
-  }
-
-  return items;
-}
-
-function buildUniqueMediumCategories(products) {
-  const seen = new Set();
-  const values = [];
-
-  for (const product of Array.isArray(products) ? products : []) {
-    const value = typeof product?.medium_category === 'string' ? product.medium_category.trim() : '';
-
-    if (!value || seen.has(value)) {
-      continue;
-    }
-
-    seen.add(value);
-    values.push(value);
-  }
-
-  return values;
-}
-
-function matchesMediumCategory(product, activeMediumCategory) {
-  if (!activeMediumCategory || activeMediumCategory === '전체') {
-    return true;
-  }
-
-  return (product?.medium_category ?? '') === activeMediumCategory;
-}
+const HEADER_SLOT_ORDER = ['top', 'afterSearch', 'beforeChips', 'afterChips'];
+const BODY_SLOT_ORDER = ['beforeProducts', 'bottom'];
 
 export default function StorefrontView({ config, productRows }) {
-  const [searchText, setSearchText] = useState('');
-  const [activeMediumCategory, setActiveMediumCategory] = useState('전체');
-  const [pendingScrollCategory, setPendingScrollCategory] = useState('');
-  const deferredSearchText = useDeferredValue(searchText);
-  const searchQuery = deferredSearchText.trim().toLowerCase();
-  const sectionIdPrefix = useId().replace(/:/g, '-');
-  const resolvedPageConfig = normalizePageConfig(config?.pageConfig);
-  const baseVisibleProducts = filterHiddenProducts(productRows, config?.hiddenProducts);
-  const mediumCategoryItems = buildMediumCategoryItems(baseVisibleProducts);
-  const visibleProducts = baseVisibleProducts.filter(
-    (product) => matchesSearch(product, searchQuery) && matchesMediumCategory(product, activeMediumCategory),
-  );
-  const sections = buildSections(config?.categoryConfigs, visibleProducts);
-  const sectionEntries = sections.map((section, index) => ({
-    section,
-    sectionId: `${sectionIdPrefix}-${index}`,
-  }));
-  const primarySection = sectionEntries[0]?.section ?? null;
-  const primarySectionTitle = primarySection?.productCategoryName || primarySection?.title || '';
-  const primarySectionMediumCategories = buildUniqueMediumCategories(primarySection?.products);
-  const designDirection = resolvedPageConfig.designDirection;
-  const brandColor = config?.navConfig?.brandColor || resolvedPageConfig.theme.brandColor || '#1d4a2e';
-  const title = config?.navConfig?.title || resolvedPageConfig.nav.title || '상품 안내';
-  const subtitle =
-    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '고객에게 안내할 상품을 살펴보세요.';
-  const searchPlaceholder =
-    config?.navConfig?.searchPlaceholder || resolvedPageConfig.searchSection.placeholder || '상품 검색';
-  const isSearchEnabled = resolvedPageConfig.searchSection.enabled !== false;
-  const areCategoryChipsEnabled = resolvedPageConfig.categoryChips.enabled !== false && mediumCategoryItems.length > 1;
-  const searchVariant =
-    config?.navConfig?.searchVariant || resolvedPageConfig.searchSection.variant || 'pill';
-  const categoryChipVariant =
-    config?.navConfig?.categoryChipVariant || resolvedPageConfig.categoryChips.variant || 'soft';
+  const view = useStorefrontView({ config, productRows });
 
-  useEffect(() => {
-    if (activeMediumCategory === '전체') {
-      return;
+  function renderBlock(block, keyPrefix = '') {
+    if (!block || block.enabled === false) {
+      return null;
     }
 
-    if (!mediumCategoryItems.includes(activeMediumCategory)) {
-      setActiveMediumCategory('전체');
-    }
-  }, [activeMediumCategory, mediumCategoryItems]);
+    const elementKey = keyPrefix ? `${keyPrefix}-${block.id}` : block.id;
 
-  useEffect(() => {
-    if (!pendingScrollCategory) {
-      return;
+    if (MOBILE_UI_HELPER_TYPES.includes(block.type)) {
+      return <HelperBlock key={elementKey} block={block} />;
     }
 
-    const target = sectionEntries.find(({ section }) =>
-      Array.isArray(section?.products) &&
-      section.products.some((product) => (product?.medium_category ?? '') === pendingScrollCategory),
-    );
-
-    if (target) {
-      scrollToSection(target.sectionId);
-    }
-
-    setPendingScrollCategory('');
-  }, [pendingScrollCategory, sectionEntries]);
-
-  function handleMediumCategorySelect(item) {
-    setActiveMediumCategory(item);
-    setPendingScrollCategory(item === '전체' ? '' : item);
-  }
-
-  return (
-    <div
-      className={`${styles.page} ${styles[`theme-${designDirection}`] || ''}`}
-      data-design-direction={designDirection}
-      style={{ '--brand-color': brandColor }}
-    >
-      <header className={styles.hero}>
-        <div className={styles.heroTop}>
-          <div className={styles.brandBlock}>
-            {config?.navConfig?.logoUrl ? (
-              <img className={styles.logo} src={config.navConfig.logoUrl} alt="로고" />
-            ) : null}
-            <div>
-              <p className={styles.eyebrow}>스토어프론트</p>
-              <h1 className={styles.title}>{title}</h1>
-              <p className={styles.subtitle}>{subtitle}</p>
+    switch (block.type) {
+      case 'hero':
+        return (
+          <div key={elementKey} className={styles.heroTop}>
+            <div className={styles.brandBlock}>
+              {config?.navConfig?.logoUrl ? (
+                <img className={styles.logo} src={config.navConfig.logoUrl} alt="로고" />
+              ) : null}
+              <div>
+                <h1 className={styles.title}>{view.activeSectionTitle || view.title}</h1>
+              </div>
             </div>
           </div>
-        </div>
+        );
+      case 'productCategoryNav':
+        return null;
+      case 'mobileCategoryBar':
+        if (!view.activeSectionTitle) {
+          return null;
+        }
 
-        {primarySectionTitle ? (
-          <div className={styles.mobileCategoryBar} data-testid="storefront-mobile-category-bar">
-            <p className={styles.mobileCategoryLabel}>현재 상품 분류</p>
-            <strong className={styles.mobileCategoryTitle}>{primarySectionTitle}</strong>
-            {primarySectionMediumCategories.length > 0 ? (
+        return (
+          <div key={elementKey} className={styles.mobileCategoryBar} data-testid="storefront-mobile-category-bar">
+            <strong className={styles.mobileCategoryTitle}>{view.activeSectionTitle}</strong>
+            {view.activeSectionMediumCategories.length > 0 ? (
               <div className={styles.mobileCategoryMeta}>
-                {primarySectionMediumCategories.map((item) => (
-                  <span key={item} className={styles.mobileCategoryMetaItem}>
+                {view.activeSectionMediumCategories.map((item) => (
+                  <span key={`${elementKey}-${item}`} className={styles.mobileCategoryMetaItem}>
                     {item}
                   </span>
                 ))}
               </div>
             ) : null}
           </div>
-        ) : null}
-
-        {isSearchEnabled ? (
-          <div className={styles.searchRow}>
+        );
+      case 'searchBox':
+        return (
+          <div key={elementKey} className={styles.searchRow}>
             <label
-              className={`${styles.searchBox} ${SEARCH_VARIANT_CLASS_NAMES[searchVariant] || ''}`}
+              className={`${styles.searchBox} ${SEARCH_VARIANT_CLASS_NAMES[view.searchVariant] || ''}`}
               data-testid="storefront-search"
-              data-search-variant={searchVariant}
+              data-search-variant={view.searchVariant}
             >
               <input
                 type="search"
                 className={styles.searchInput}
-                aria-label={searchPlaceholder}
-                placeholder={searchPlaceholder}
-                value={searchText}
-                onChange={(event) => setSearchText(event.target.value)}
+                aria-label={view.searchPlaceholder}
+                placeholder={view.searchPlaceholder}
+                value={view.searchText}
+                onChange={(event) => view.setSearchText(event.target.value)}
               />
               <span className={styles.searchIcon} aria-hidden="true" />
             </label>
-            <span className={styles.searchHint}>검색어와 중분류를 기준으로 상품을 빠르게 찾아보세요.</span>
           </div>
-        ) : null}
+        );
+      case 'categoryChips': {
+        if (view.mediumCategoryItems.length <= 1) {
+          return null;
+        }
 
-        {areCategoryChipsEnabled ? (
-          <div
-            className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[categoryChipVariant] || ''}`}
-            data-testid="storefront-category-chips"
-            data-chip-variant={categoryChipVariant}
-            data-chip-size="compact"
-          >
-            {mediumCategoryItems.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={`${styles.categoryChip} ${activeMediumCategory === item ? styles.categoryChipActive : ''}`}
-                onClick={() => handleMediumCategorySelect(item)}
-              >
-                {item}
-              </button>
-            ))}
+        return (
+          <div key={elementKey} className={styles.categoryChipsSection}>
+            <button
+              type="button"
+              className={styles.categoryChipsToggle}
+              data-testid="storefront-category-chips-toggle"
+              aria-expanded={view.isCategoryChipsExpanded}
+              onClick={() => view.setIsCategoryChipsExpanded((current) => !current)}
+            >
+              {view.isCategoryChipsExpanded ? '카테고리 접기' : '카테고리 펼치기'}
+            </button>
+            <div
+              className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[view.categoryChipVariant] || ''}`}
+              data-testid="storefront-category-chips"
+              data-chip-variant={view.categoryChipVariant}
+              data-chip-size="compact"
+              style={view.isCategoryChipsExpanded ? undefined : { display: 'none' }}
+            >
+              {view.isCategoryChipsExpanded
+                ? view.mediumCategoryItems.map((item) => (
+                    <button
+                      key={`${elementKey}-${item}`}
+                      type="button"
+                      className={`${styles.categoryChip} ${view.activeMediumCategory === item ? styles.categoryChipActive : ''}`}
+                      onClick={() => view.handleMediumCategorySelect(item)}
+                    >
+                      {item}
+                    </button>
+                  ))
+                : null}
+            </div>
           </div>
-        ) : null}
+        );
+      }
+      default:
+        return null;
+    }
+  }
+
+  function renderSlot(slot) {
+    return view.mobileUiTree
+      .filter((block) => block.slot === slot && block.type !== 'productSections' && block.type !== 'emptyState')
+      .map((block) => renderBlock(block, slot));
+  }
+
+  return (
+    <div
+      className={`${styles.page} ${styles[`theme-${view.designDirection}`] || ''}`}
+      data-design-direction={view.designDirection}
+      style={{ '--brand-color': view.brandColor, '--chip-accent': view.chipAccentColor }}
+    >
+      <header className={styles.hero}>
+        {HEADER_SLOT_ORDER.map((slot) => renderSlot(slot))}
       </header>
 
-      {sections.length === 0 ? (
-        <div className={styles.emptyState}>표시할 상품이 없습니다. 검색어나 중분류를 다시 확인해 주세요.</div>
-      ) : (
-        sectionEntries.map(({ section, sectionId }) => (
-          <CardGridSection
-            key={sectionId}
-            sectionId={sectionId}
-            section={section}
-            fields={section?.fields}
-            style={section?.style}
+      <div className={`${styles.bodyShell} ${!view.canRenderDesktopCategoryRail ? styles.bodyShellSolo : ''}`}>
+        {view.canRenderDesktopCategoryRail ? (
+          <DesktopCategoryRail
+            catalogSectionEntries={view.catalogSectionEntries}
+            activeSectionTitle={view.activeSectionTitle}
+            title={view.title}
+            isOpen={view.isDesktopCategoryNavOpen}
+            onToggle={() => view.setIsDesktopCategoryNavOpen((current) => !current)}
+            activeMediumCategory={view.activeMediumCategory}
+            onSectionSelect={view.handleCategoryRailSectionSelect}
+            onMediumSelect={view.handleCategoryRailMediumSelect}
           />
-        ))
-      )}
+        ) : null}
+
+        <div className={styles.contentColumn}>
+          {BODY_SLOT_ORDER.map((slot) => {
+            if (slot === 'bottom') {
+              return null;
+            }
+
+            return renderSlot(slot);
+          })}
+
+          {view.hasRenderableSections
+            ? view.sectionEntries.map(({ section, sectionId }) => (
+                <CardGridSection
+                  key={sectionId}
+                  sectionId={sectionId}
+                  section={section}
+                  fields={section?.fields}
+                  style={section?.style}
+                  sectionHeaderContent={view.sectionHeaderBlocks.map((block) => (
+                    <HelperBlock key={`${sectionId}-${block.id}`} block={block} />
+                  ))}
+                />
+              ))
+            : null}
+
+          {view.canRenderEmptyState ? (
+            <div className={styles.emptyState}>표시할 상품이 없습니다. 검색어와 중분류를 다시 확인해 주세요.</div>
+          ) : null}
+
+          {renderSlot('bottom')}
+        </div>
+      </div>
     </div>
   );
 }

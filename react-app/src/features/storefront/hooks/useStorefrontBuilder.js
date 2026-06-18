@@ -7,6 +7,7 @@ import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
   buildStorefrontSavePayload,
+  deriveAvailableCategoryFields,
   deriveMediumCategoryOptions,
   deriveProductCategoryOptions,
   findCategoryConfigRow,
@@ -16,12 +17,23 @@ import {
   normalizePageConfig,
   resolveCategoryDraft,
 } from '../model/storefrontBuilderModel';
+import {
+  DEFAULT_CARD_ELEMENT_CONFIG,
+  normalizeCardElementConfig,
+  sanitizeMobileUiTree,
+} from '../model/storefrontUiModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 import { requestStorefrontAiSuggestion } from '../services/storefrontAiService';
 
 const FETCH_ERROR_MESSAGE = 'We could not load the storefront builder.';
 const SAVE_ERROR_MESSAGE = 'We could not save the storefront draft.';
 const FINAL_STEP_INDEX = 1;
+const CARD_ELEMENT_FIELD_MAP = {
+  showProductName: 'product_name',
+  showSpec: 'spec',
+  showNutrient: 'nutrient',
+  showPrice: 'tax_price',
+};
 
 function getInitialCategoryName(productEntries, existingConfig) {
   const existingCategoryName = findCategoryConfigRow(
@@ -50,18 +62,23 @@ export function useStorefrontBuilder({ officeCode }) {
   const [designDirection, setDesignDirectionState] = useState(DEFAULT_PAGE_CONFIG.designDirection);
   const [cardStyle, setCardStyleState] = useState(() => normalizeCardStyle());
   const [cardFields, setCardFields] = useState(DEFAULT_CARD_FIELDS);
+  const [cardElementConfig, setCardElementConfig] = useState(DEFAULT_CARD_ELEMENT_CONFIG);
   const [navConfig, setNavConfig] = useState(DEFAULT_NAV_CONFIG);
+  const [mobileUiTree, setMobileUiTree] = useState(() => sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree));
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiSummary, setAiSummary] = useState('');
+  const [aiChangeSummary, setAiChangeSummary] = useState([]);
   const [aiErrorMessage, setAiErrorMessage] = useState('');
   const [isAiApplying, setIsAiApplying] = useState(false);
+  const [lastAiSnapshot, setLastAiSnapshot] = useState(null);
 
   const allProductRows = flattenProductEntries(productEntries);
-  const currentEntry = productEntries.find(
-    (entry) => entry?.categoryName === selectedProductCategoryName,
-  ) ?? null;
+  const currentEntry = productEntries.find((entry) => entry?.categoryName === selectedProductCategoryName) ?? null;
   const mediumCategoryOptions = deriveMediumCategoryOptions(currentEntry?.rows);
   const productCategoryOptions = deriveProductCategoryOptions(productEntries, existingConfig);
+  const availableCategoryFields = deriveAvailableCategoryFields(currentEntry?.rows);
+  const availableScalarKeys = availableCategoryFields.filter((f) => f.isSelectable).map((f) => f.key);
+  const effectiveScalarKeys = availableScalarKeys.length > 0 ? availableScalarKeys : undefined;
 
   function markDirty() {
     setStatus((current) => (current === 'saved' ? 'ready' : current));
@@ -80,6 +97,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setRepresentativeMediumCategory(resolvedDraft.representativeMediumCategory);
     setCardFields(resolvedDraft.cardFields);
     setCardStyleState(resolvedDraft.cardStyle);
+    setCardElementConfig(resolvedDraft.cardElementConfig);
   }
 
   useEffect(() => {
@@ -103,6 +121,7 @@ export function useStorefrontBuilder({ officeCode }) {
         setExistingConfig(config);
         setHiddenProducts(config?.hiddenProducts ?? []);
         setDesignDirectionState(normalizedPageConfig.designDirection);
+        setMobileUiTree(sanitizeMobileUiTree(normalizedPageConfig.mobileUiTree));
         setNavConfig(
           normalizeNavConfig({
             title: config?.navConfig?.title ?? normalizedPageConfig.nav.title,
@@ -111,8 +130,7 @@ export function useStorefrontBuilder({ officeCode }) {
             searchPlaceholder:
               config?.navConfig?.searchPlaceholder ?? normalizedPageConfig.searchSection.placeholder,
             logoUrl: config?.navConfig?.logoUrl ?? normalizedPageConfig.nav.logoUrl,
-            searchVariant:
-              config?.navConfig?.searchVariant ?? normalizedPageConfig.searchSection.variant,
+            searchVariant: config?.navConfig?.searchVariant ?? normalizedPageConfig.searchSection.variant,
             categoryChipVariant:
               config?.navConfig?.categoryChipVariant ?? normalizedPageConfig.categoryChips.variant,
           }),
@@ -120,7 +138,9 @@ export function useStorefrontBuilder({ officeCode }) {
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
         setAiPrompt('');
         setAiSummary('');
+        setAiChangeSummary([]);
         setAiErrorMessage('');
+        setLastAiSnapshot(null);
         setStatus('ready');
       })
       .catch((error) => {
@@ -147,73 +167,48 @@ export function useStorefrontBuilder({ officeCode }) {
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
   }
 
-  function toggleMediumCategory(mediumCategory) {
-    markDirty();
-    setSelectedMediumCategories((current) => {
-      const alreadySelected = current.includes(mediumCategory);
-      const nextMediumCategories = alreadySelected
-        ? current.filter((value) => value !== mediumCategory)
-        : [...current, mediumCategory];
-
-      if (!nextMediumCategories.includes(representativeMediumCategory)) {
-        setRepresentativeMediumCategory(nextMediumCategories[0] || '');
-      }
-
-      return nextMediumCategories;
-    });
-  }
-
-  function selectRepresentativeMediumCategory(mediumCategory) {
-    markDirty();
-    setRepresentativeMediumCategory(mediumCategory);
-    setSelectedMediumCategories((current) =>
-      current.includes(mediumCategory) ? current : [mediumCategory, ...current],
-    );
-  }
-
   function setDesignDirection(value) {
     markDirty();
     setDesignDirectionState(value);
-  }
-
-  function setCardStyle(key, value) {
-    markDirty();
-    setCardStyleState((current) => normalizeCardStyle({ ...current, [key]: value }));
   }
 
   function toggleCardField(field) {
     markDirty();
     setCardFields((current) => {
       const nextFields = current.includes(field) ? current.filter((value) => value !== field) : [...current, field];
-      return normalizeCardFields(nextFields);
+      const normalizedFields = normalizeCardFields(nextFields, effectiveScalarKeys);
+      const cardElementKey = Object.keys(CARD_ELEMENT_FIELD_MAP).find((key) => CARD_ELEMENT_FIELD_MAP[key] === field);
+
+      if (cardElementKey) {
+        setCardElementConfig((currentConfig) =>
+          normalizeCardElementConfig({
+            ...currentConfig,
+            [cardElementKey]: normalizedFields.includes(field),
+          }),
+        );
+      }
+
+      return normalizedFields;
     });
   }
 
-  function updateNavField(key, value) {
-    markDirty();
-    setNavConfig((current) => normalizeNavConfig({ ...current, [key]: value }));
-  }
-
-  function applyPromptSuggestion(promptSuggestion) {
-    const nextSuggestion = String(promptSuggestion || '').trim();
-
-    if (!nextSuggestion) {
+  function undoAiChanges() {
+    if (!lastAiSnapshot) {
       return;
     }
 
-    setAiPrompt((current) => {
-      const trimmedCurrent = current.trim();
-
-      if (!trimmedCurrent) {
-        return nextSuggestion;
-      }
-
-      if (trimmedCurrent.toLowerCase().includes(nextSuggestion.toLowerCase())) {
-        return current;
-      }
-
-      return `${trimmedCurrent} ${nextSuggestion}`;
-    });
+    markDirty();
+    setDesignDirectionState(lastAiSnapshot.designDirection);
+    setSelectedMediumCategories(lastAiSnapshot.selectedMediumCategories);
+    setRepresentativeMediumCategory(lastAiSnapshot.representativeMediumCategory);
+    setCardFields(lastAiSnapshot.cardFields);
+    setCardStyleState(lastAiSnapshot.cardStyle);
+    setCardElementConfig(lastAiSnapshot.cardElementConfig);
+    setNavConfig(lastAiSnapshot.navConfig);
+    setMobileUiTree(lastAiSnapshot.mobileUiTree);
+    setAiSummary(lastAiSnapshot.aiSummary);
+    setAiChangeSummary(lastAiSnapshot.aiChangeSummary);
+    setLastAiSnapshot(null);
   }
 
   function goNext() {
@@ -239,9 +234,25 @@ export function useStorefrontBuilder({ officeCode }) {
           designDirection,
           cardFields,
           cardStyle,
+          cardElementConfig,
           navConfig,
+          mobileUiTree,
         },
+        allowedScalarKeys: effectiveScalarKeys,
       });
+
+      const snapshot = {
+        selectedMediumCategories,
+        representativeMediumCategory,
+        designDirection,
+        cardFields,
+        cardStyle,
+        cardElementConfig,
+        navConfig,
+        mobileUiTree,
+        aiSummary,
+        aiChangeSummary,
+      };
 
       startTransition(() => {
         const nextMediumCategories =
@@ -251,15 +262,19 @@ export function useStorefrontBuilder({ officeCode }) {
 
         setHasStarted(true);
         setCurrentStep(FINAL_STEP_INDEX);
+        setLastAiSnapshot(snapshot);
         setDesignDirectionState(suggestion.patch.designDirection || designDirection);
         setSelectedMediumCategories(nextMediumCategories);
         setRepresentativeMediumCategory(
           suggestion.patch.representativeMediumCategory || nextMediumCategories[0] || representativeMediumCategory,
         );
-        setCardFields(normalizeCardFields(suggestion.patch.cardFields));
+        setCardFields(normalizeCardFields(suggestion.patch.cardFields, effectiveScalarKeys));
         setCardStyleState(normalizeCardStyle(suggestion.patch.cardStyle));
+        setCardElementConfig(normalizeCardElementConfig(suggestion.patch.cardElementConfig));
         setNavConfig(normalizeNavConfig({ ...navConfig, ...suggestion.patch.navConfig }));
+        setMobileUiTree(sanitizeMobileUiTree(suggestion.patch.mobileUiTree));
         setAiSummary(suggestion.summary);
+        setAiChangeSummary(suggestion.patch.uiChangeSummary ?? []);
       });
     } catch (error) {
       setAiErrorMessage(error instanceof Error ? error.message : 'We could not apply the AI draft.');
@@ -282,8 +297,11 @@ export function useStorefrontBuilder({ officeCode }) {
         representativeMediumCategory,
         cardStyle,
         cardFields,
+        cardElementConfig,
         navConfig,
         designDirection,
+        mobileUiTree,
+        allowedScalarKeys: effectiveScalarKeys,
       });
 
       await upsertStorefrontConfig(payload);
@@ -307,8 +325,11 @@ export function useStorefrontBuilder({ officeCode }) {
           representativeMediumCategory,
           cardStyle,
           cardFields,
+          cardElementConfig,
           navConfig,
           designDirection,
+          mobileUiTree,
+          allowedScalarKeys: effectiveScalarKeys,
         })
       : {
           officeCode,
@@ -323,19 +344,17 @@ export function useStorefrontBuilder({ officeCode }) {
     errorMessage,
     hasStarted,
     currentStep,
-    productEntries,
     productCategoryOptions,
     selectedProductCategoryName,
     currentEntry,
-    mediumCategoryOptions,
+    availableCategoryFields,
     selectedMediumCategories,
     representativeMediumCategory,
     designDirection,
-    cardStyle,
     cardFields,
-    navConfig,
     aiPrompt,
     aiSummary,
+    aiChangeSummary,
     aiErrorMessage,
     isAiApplying,
     previewConfig,
@@ -343,13 +362,9 @@ export function useStorefrontBuilder({ officeCode }) {
     setAiPrompt,
     startSession,
     selectProductCategory,
-    toggleMediumCategory,
-    selectRepresentativeMediumCategory,
     setDesignDirection,
-    setCardStyle,
     toggleCardField,
-    updateNavField,
-    applyPromptSuggestion,
+    undoAiChanges,
     goNext,
     goPrevious,
     applyAiSuggestion,

@@ -11,6 +11,13 @@
   color: #16311b;
 }
 
+.sectionHeaderContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--card-columns, 2), minmax(0, 1fr));
@@ -53,13 +60,17 @@
 .cardName {
   flex: 1;
   min-width: 0;
-  font-size: var(--card-font-size, 0.85rem);
+  font-size: calc(var(--card-font-size, 0.85rem) - 0.07rem);
   font-weight: 700;
   color: var(--corp-text);
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.cardNamePlaceholder {
+  flex: 1;
+  min-width: 0;
 }
 
 .cardBadge {
@@ -97,6 +108,10 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px 14px 14px;
+}
+
+.section[data-meta-density='compact'] .cardBody {
+  gap: 6px;
 }
 
 .section[data-card-radius='md'] .card {
@@ -199,6 +214,14 @@
   font-weight: 600;
   line-height: 1.45;
   word-break: break-word;
+}
+
+.fieldValueLink {
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--corp-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 720px) {
