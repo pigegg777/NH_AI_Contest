@@ -221,9 +221,10 @@
 .title {
   margin: 4px 0 0;
   font-size: 1.6rem;
-  font-weight: 800;
+  font-weight: var(--typography-heading-weight, 800);
+  letter-spacing: var(--typography-letter-spacing, normal);
   line-height: 1.12;
-  color: #173223;
+  color: var(--title-text-color, #173223);
 }
 
 .subtitle {

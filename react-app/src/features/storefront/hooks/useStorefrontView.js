@@ -1,7 +1,7 @@
 import { startTransition, useDeferredValue, useEffect, useId, useState } from 'react';
 
 import { buildSections, buildUniqueMediumCategories, filterHiddenProducts } from '../model/sectionMatching';
-import { normalizePageConfig, STOREFRONT_DESIGN_ACCENT_COLORS } from '../model/storefrontBuilderModel';
+import { normalizePageConfig, STOREFRONT_DESIGN_ACCENT_COLORS, TYPOGRAPHY_TONE_VALUES, resolveTitleTextColor } from '../model/storefrontBuilderModel';
 import { MOBILE_UI_HELPER_TYPES, normalizeMobileUiTree } from '../model/storefrontUiModel';
 
 const ALL_MEDIUM_CATEGORY_LABEL = '전체';
@@ -101,6 +101,8 @@ export function useStorefrontView({ config, productRows }) {
   const designDirection = resolvedPageConfig.designDirection;
   const brandColor = config?.navConfig?.brandColor || resolvedPageConfig.theme.brandColor || '#1d4a2e';
   const chipAccentColor = STOREFRONT_DESIGN_ACCENT_COLORS[designDirection] || brandColor;
+  const titleTextColorValue = resolveTitleTextColor(resolvedPageConfig.theme.titleTextColor, brandColor);
+  const typographyToneValue = TYPOGRAPHY_TONE_VALUES[resolvedPageConfig.theme.typographyTone] || TYPOGRAPHY_TONE_VALUES.standard;
   const title = config?.navConfig?.title || resolvedPageConfig.nav.title || '상품 안내';
   const subtitle =
     config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '고객에게 안내할 상품을 살펴보세요.';
@@ -193,6 +195,8 @@ export function useStorefrontView({ config, productRows }) {
     designDirection,
     brandColor,
     chipAccentColor,
+    titleTextColorValue,
+    typographyToneValue,
     title,
     subtitle,
     searchPlaceholder,

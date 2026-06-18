@@ -143,7 +143,14 @@ export default function StorefrontView({ config, productRows }) {
     <div
       className={`${styles.page} ${styles[`theme-${view.designDirection}`] || ''}`}
       data-design-direction={view.designDirection}
-      style={{ '--brand-color': view.brandColor, '--chip-accent': view.chipAccentColor }}
+      style={{
+        '--brand-color': view.brandColor,
+        '--chip-accent': view.chipAccentColor,
+        '--title-text-color': view.titleTextColorValue,
+        '--typography-heading-weight': view.typographyToneValue.headingWeight,
+        '--typography-body-weight': view.typographyToneValue.bodyWeight,
+        '--typography-letter-spacing': view.typographyToneValue.letterSpacing,
+      }}
     >
       <header className={styles.hero}>
         {HEADER_SLOT_ORDER.map((slot) => renderSlot(slot))}
