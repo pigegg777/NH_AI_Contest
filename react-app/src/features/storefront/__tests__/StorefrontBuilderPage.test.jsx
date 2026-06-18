@@ -266,6 +266,98 @@ describe('StorefrontBuilderPage', () => {
     expect(savedPayload.categoryConfigs[0].categoryConfig.selectedMediumCategories).toEqual(['Premium', 'Starter']);
   }, 10000);
 
+  it('applies AI titleTextColor/typographyTone/cardTemplate/priceTextColor, previews, saves, and undoes them', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    requestStorefrontAiSuggestion.mockResolvedValue({
+      summary: 'Bold price-focus draft applied.',
+      patch: {
+        designDirection: 'warm',
+        titleTextColor: 'ink',
+        typographyTone: 'bold',
+        navConfig: {
+          title: 'Premium Fertilizer Guide',
+          subtitle: 'Fast answers for customers',
+          brandColor: '#2563eb',
+          searchPlaceholder: 'Search fertilizer',
+          logoUrl: '',
+          searchVariant: 'outlined',
+          categoryChipVariant: 'filled',
+        },
+        cardFields: ['product_name', 'tax_price'],
+        cardStyle: {
+          layout: 'compact',
+          accentColor: '#2563eb',
+          fontSize: 'large',
+          cardsPerRow: 1,
+          imageSize: 'lg',
+          imageFit: 'contain',
+          cardRadius: 'xl',
+          cardShadow: 'strong',
+          cardSpacing: 'relaxed',
+          priceTextColor: 'muted',
+        },
+        cardTemplate: 'price-focus',
+        selectedMediumCategories: ['Premium'],
+        representativeMediumCategory: 'Premium',
+        mobileUiTree: [
+          { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
+          { id: 'search-box', type: 'searchBox', slot: 'top', enabled: true, props: {} },
+          { id: 'category-chips', type: 'categoryChips', slot: 'afterSearch', enabled: true, props: {} },
+          { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
+          { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
+        ],
+        cardElementConfig: {
+          showImage: true,
+          showProductName: true,
+          showSpec: false,
+          showNutrient: true,
+          showPrice: true,
+          showBadge: true,
+          imageSize: 'lg',
+          imageFit: 'contain',
+          metaDensity: 'comfortable',
+        },
+        uiChangeSummary: ['Switch to a price-focus card template', 'Mute the price color', 'Use bold, dark titles'],
+      },
+    });
+    upsertStorefrontConfig.mockResolvedValue(undefined);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+
+    await user.type(screen.getByLabelText('AI로 다듬기'), '가격 중심으로, 진하고 굵게 보여줘.');
+    await user.click(screen.getByTestId('apply-ai-suggestion'));
+
+    expect(await screen.findByText('Bold price-focus draft applied.')).toBeInTheDocument();
+
+    const previewDevice = screen.getByTestId('mobile-preview-device');
+    const sectionEl = within(previewDevice).getByRole('heading', { level: 2 }).closest('section');
+    expect(sectionEl.dataset.cardTemplate).toBe('price-focus');
+
+    await user.click(screen.getByTestId('save-storefront-draft'));
+
+    expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+    expect(savedPayload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('price-focus');
+    expect(savedPayload.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('muted');
+    expect(savedPayload.pageConfig.theme.titleTextColor).toBe('ink');
+    expect(savedPayload.pageConfig.theme.typographyTone).toBe('bold');
+
+    await user.click(screen.getByTestId('undo-ai-changes'));
+
+    await waitFor(() => {
+      const restoredSectionEl = within(screen.getByTestId('mobile-preview-device'))
+        .getByRole('heading', { level: 2 })
+        .closest('section');
+      expect(restoredSectionEl.dataset.cardTemplate).toBe('card-grid');
+    });
+  }, 10000);
+
   it('shows AI change summary and lets users undo the AI update in step 2', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
