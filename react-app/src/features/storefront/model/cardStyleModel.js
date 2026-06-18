@@ -8,6 +8,7 @@ export const DEFAULT_CARD_STYLE = {
   cardRadius: 'lg',
   cardShadow: 'soft',
   cardSpacing: 'relaxed',
+  priceTextColor: 'default',
 };
 
 export const CARD_STYLE_LAYOUT_OPTIONS = ['grid', 'compact'];
@@ -27,6 +28,21 @@ export const CARD_STYLE_RADIUS_OPTIONS = ['md', 'lg', 'xl'];
 export const CARD_STYLE_SHADOW_OPTIONS = ['none', 'soft', 'strong'];
 
 export const CARD_STYLE_SPACING_OPTIONS = ['tight', 'normal', 'relaxed'];
+
+export const CARD_STYLE_PRICE_TEXT_COLOR_OPTIONS = ['default', 'brand', 'muted'];
+
+export const CARD_STYLE_PRICE_TEXT_COLOR_VALUES = {
+  default: '#d32f2f',
+  muted: '#6b7280',
+};
+
+export function resolveCardPriceTextColor(priceTextColor, accentColor) {
+  if (priceTextColor === 'brand') {
+    return accentColor || DEFAULT_CARD_STYLE.accentColor;
+  }
+
+  return CARD_STYLE_PRICE_TEXT_COLOR_VALUES[priceTextColor] || CARD_STYLE_PRICE_TEXT_COLOR_VALUES.default;
+}
 
 export const CARD_STYLE_FONT_SIZE_REM = {
   small: '0.75rem',
@@ -50,5 +66,8 @@ export function normalizeCardStyle(style) {
     cardRadius: CARD_STYLE_RADIUS_OPTIONS.includes(source.cardRadius) ? source.cardRadius : DEFAULT_CARD_STYLE.cardRadius,
     cardShadow: CARD_STYLE_SHADOW_OPTIONS.includes(source.cardShadow) ? source.cardShadow : DEFAULT_CARD_STYLE.cardShadow,
     cardSpacing: CARD_STYLE_SPACING_OPTIONS.includes(source.cardSpacing) ? source.cardSpacing : DEFAULT_CARD_STYLE.cardSpacing,
+    priceTextColor: CARD_STYLE_PRICE_TEXT_COLOR_OPTIONS.includes(source.priceTextColor)
+      ? source.priceTextColor
+      : DEFAULT_CARD_STYLE.priceTextColor,
   };
 }
