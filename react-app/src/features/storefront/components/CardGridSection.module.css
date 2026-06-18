@@ -7,8 +7,9 @@
 .title {
   margin: 0 0 14px;
   font-size: 1.02rem;
-  font-weight: 700;
-  color: #16311b;
+  font-weight: var(--typography-heading-weight, 700);
+  letter-spacing: var(--typography-letter-spacing, normal);
+  color: var(--title-text-color, #16311b);
 }
 
 .sectionHeaderContent {
@@ -30,6 +31,57 @@
 
 .layout-compact .cardBody {
   gap: 6px;
+}
+
+.cardImageLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.cardImageLeft .cardImageWrap {
+  flex: 0 0 96px;
+  padding: 12px 0 12px 12px;
+}
+
+.cardImageLeft .cardImage {
+  height: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.cardMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.section[data-card-template='compact-list'] .cardImageWrap {
+  display: none;
+}
+
+.section[data-card-template='compact-list'] .grid {
+  grid-template-columns: 1fr;
+}
+
+.section[data-card-template='compact-list'] .card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+}
+
+.section[data-card-template='compact-list'] .cardHeader {
+  flex: 0 0 auto;
+  padding: 0;
+  background: none;
+  border-bottom: none;
+}
+
+.section[data-card-template='compact-list'] .cardBody {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0;
 }
 
 .card {
@@ -197,7 +249,7 @@
 }
 
 .priceField .fieldValue {
-  color: #d32f2f;
+  color: var(--price-text-color, #d32f2f);
   font-size: calc(var(--card-font-size, 0.85rem) + 0.02rem);
   font-weight: 700;
 }
@@ -211,7 +263,7 @@
 .fieldValue {
   font-size: var(--card-font-size, 0.85rem);
   color: var(--corp-text);
-  font-weight: 600;
+  font-weight: var(--typography-body-weight, 600);
   line-height: 1.45;
   word-break: break-word;
 }
