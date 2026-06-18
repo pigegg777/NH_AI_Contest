@@ -531,6 +531,8 @@ export function buildStorefrontSavePayload({
   cardElementConfig,
   navConfig,
   designDirection,
+  titleTextColor,
+  typographyTone,
   mobileUiTree,
   cardTemplate,
   allowedScalarKeys,
@@ -551,6 +553,8 @@ export function buildStorefrontSavePayload({
       ...basePageConfig.theme,
       brandColor: resolvedNavConfig.brandColor,
       backgroundTone: STOREFRONT_BACKGROUND_TONES[nextDesignDirection],
+      titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(titleTextColor) ? titleTextColor : basePageConfig.theme.titleTextColor,
+      typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(typographyTone) ? typographyTone : basePageConfig.theme.typographyTone,
     },
     nav: {
       ...basePageConfig.nav,

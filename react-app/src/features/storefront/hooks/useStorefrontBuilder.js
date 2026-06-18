@@ -60,9 +60,12 @@ export function useStorefrontBuilder({ officeCode }) {
   const [selectedMediumCategories, setSelectedMediumCategories] = useState([]);
   const [representativeMediumCategory, setRepresentativeMediumCategory] = useState('');
   const [designDirection, setDesignDirectionState] = useState(DEFAULT_PAGE_CONFIG.designDirection);
+  const [titleTextColor, setTitleTextColor] = useState(DEFAULT_PAGE_CONFIG.theme.titleTextColor);
+  const [typographyTone, setTypographyTone] = useState(DEFAULT_PAGE_CONFIG.theme.typographyTone);
   const [cardStyle, setCardStyleState] = useState(() => normalizeCardStyle());
   const [cardFields, setCardFields] = useState(DEFAULT_CARD_FIELDS);
   const [cardElementConfig, setCardElementConfig] = useState(DEFAULT_CARD_ELEMENT_CONFIG);
+  const [cardTemplate, setCardTemplateState] = useState('card-grid');
   const [navConfig, setNavConfig] = useState(DEFAULT_NAV_CONFIG);
   const [mobileUiTree, setMobileUiTree] = useState(() => sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree));
   const [aiPrompt, setAiPrompt] = useState('');
@@ -98,6 +101,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setCardFields(resolvedDraft.cardFields);
     setCardStyleState(resolvedDraft.cardStyle);
     setCardElementConfig(resolvedDraft.cardElementConfig);
+    setCardTemplateState(resolvedDraft.cardTemplate);
   }
 
   useEffect(() => {
@@ -121,6 +125,8 @@ export function useStorefrontBuilder({ officeCode }) {
         setExistingConfig(config);
         setHiddenProducts(config?.hiddenProducts ?? []);
         setDesignDirectionState(normalizedPageConfig.designDirection);
+        setTitleTextColor(normalizedPageConfig.theme.titleTextColor);
+        setTypographyTone(normalizedPageConfig.theme.typographyTone);
         setMobileUiTree(sanitizeMobileUiTree(normalizedPageConfig.mobileUiTree));
         setNavConfig(
           normalizeNavConfig({
@@ -199,9 +205,12 @@ export function useStorefrontBuilder({ officeCode }) {
 
     markDirty();
     setDesignDirectionState(lastAiSnapshot.designDirection);
+    setTitleTextColor(lastAiSnapshot.titleTextColor);
+    setTypographyTone(lastAiSnapshot.typographyTone);
     setSelectedMediumCategories(lastAiSnapshot.selectedMediumCategories);
     setRepresentativeMediumCategory(lastAiSnapshot.representativeMediumCategory);
     setCardFields(lastAiSnapshot.cardFields);
+    setCardTemplateState(lastAiSnapshot.cardTemplate);
     setCardStyleState(lastAiSnapshot.cardStyle);
     setCardElementConfig(lastAiSnapshot.cardElementConfig);
     setNavConfig(lastAiSnapshot.navConfig);
@@ -232,9 +241,12 @@ export function useStorefrontBuilder({ officeCode }) {
           selectedMediumCategories,
           representativeMediumCategory,
           designDirection,
+          titleTextColor,
+          typographyTone,
           cardFields,
           cardStyle,
           cardElementConfig,
+          cardTemplate,
           navConfig,
           mobileUiTree,
         },
@@ -245,9 +257,12 @@ export function useStorefrontBuilder({ officeCode }) {
         selectedMediumCategories,
         representativeMediumCategory,
         designDirection,
+        titleTextColor,
+        typographyTone,
         cardFields,
         cardStyle,
         cardElementConfig,
+        cardTemplate,
         navConfig,
         mobileUiTree,
         aiSummary,
@@ -264,11 +279,14 @@ export function useStorefrontBuilder({ officeCode }) {
         setCurrentStep(FINAL_STEP_INDEX);
         setLastAiSnapshot(snapshot);
         setDesignDirectionState(suggestion.patch.designDirection || designDirection);
+        setTitleTextColor(suggestion.patch.titleTextColor);
+        setTypographyTone(suggestion.patch.typographyTone);
         setSelectedMediumCategories(nextMediumCategories);
         setRepresentativeMediumCategory(
           suggestion.patch.representativeMediumCategory || nextMediumCategories[0] || representativeMediumCategory,
         );
         setCardFields(normalizeCardFields(suggestion.patch.cardFields, effectiveScalarKeys));
+        setCardTemplateState(suggestion.patch.cardTemplate);
         setCardStyleState(normalizeCardStyle(suggestion.patch.cardStyle));
         setCardElementConfig(normalizeCardElementConfig(suggestion.patch.cardElementConfig));
         setNavConfig(normalizeNavConfig({ ...navConfig, ...suggestion.patch.navConfig }));
@@ -300,7 +318,10 @@ export function useStorefrontBuilder({ officeCode }) {
         cardElementConfig,
         navConfig,
         designDirection,
+        titleTextColor,
+        typographyTone,
         mobileUiTree,
+        cardTemplate,
         allowedScalarKeys: effectiveScalarKeys,
       });
 
@@ -328,7 +349,10 @@ export function useStorefrontBuilder({ officeCode }) {
           cardElementConfig,
           navConfig,
           designDirection,
+          titleTextColor,
+          typographyTone,
           mobileUiTree,
+          cardTemplate,
           allowedScalarKeys: effectiveScalarKeys,
         })
       : {
