@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildCategoryConfigRow,
+  buildStorefrontSavePayload,
   CARD_TEMPLATE_OPTIONS,
+  resolveCategoryDraft,
   TITLE_TEXT_COLOR_OPTIONS,
   TYPOGRAPHY_TONE_OPTIONS,
   TYPOGRAPHY_TONE_VALUES,
@@ -58,5 +61,81 @@ describe('categoryConfig cardTemplate', () => {
 
   it('lists exactly the five approved templates', () => {
     expect(CARD_TEMPLATE_OPTIONS).toEqual(['card-grid', 'image-left', 'price-focus', 'compact-list', 'detail-first']);
+  });
+});
+
+describe('cardTemplate write path', () => {
+  it('buildCategoryConfigRow accepts an explicit cardTemplate', () => {
+    const row = buildCategoryConfigRow({
+      productCategoryName: 'Fertilizer Upload',
+      existingConfig: null,
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardFields: ['product_name'],
+      cardStyle: {},
+      cardElementConfig: {},
+      cardTemplate: 'price-focus',
+    });
+
+    expect(row.categoryConfig.layoutStyle.variant).toBe('price-focus');
+  });
+
+  it('buildCategoryConfigRow falls back to the existing saved template when none is passed', () => {
+    const existingConfig = {
+      categoryConfigs: [
+        {
+          productCategoryName: 'Fertilizer Upload',
+          categoryConfig: { layoutStyle: { variant: 'image-left' } },
+        },
+      ],
+    };
+    const row = buildCategoryConfigRow({
+      productCategoryName: 'Fertilizer Upload',
+      existingConfig,
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardFields: ['product_name'],
+      cardStyle: {},
+      cardElementConfig: {},
+    });
+
+    expect(row.categoryConfig.layoutStyle.variant).toBe('image-left');
+  });
+
+  it('resolveCategoryDraft surfaces the saved cardTemplate', () => {
+    const draft = resolveCategoryDraft({
+      productCategoryName: 'Fertilizer Upload',
+      productEntries: [{ categoryName: 'Fertilizer Upload', rows: [{ medium_category: 'Premium' }] }],
+      existingConfig: {
+        categoryConfigs: [
+          {
+            productCategoryName: 'Fertilizer Upload',
+            categoryConfig: { layoutStyle: { variant: 'compact-list' } },
+          },
+        ],
+      },
+    });
+
+    expect(draft.cardTemplate).toBe('compact-list');
+  });
+
+  it('buildStorefrontSavePayload threads cardTemplate into the saved category row', () => {
+    const payload = buildStorefrontSavePayload({
+      officeCode: 'OFF-1',
+      existingConfig: null,
+      hiddenProducts: [],
+      selectedProductCategoryName: 'Fertilizer Upload',
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardStyle: {},
+      cardFields: ['product_name'],
+      cardElementConfig: {},
+      navConfig: {},
+      designDirection: 'friendly',
+      mobileUiTree: [],
+      cardTemplate: 'detail-first',
+    });
+
+    expect(payload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('detail-first');
   });
 });

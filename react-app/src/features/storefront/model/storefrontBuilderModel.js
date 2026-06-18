@@ -442,6 +442,7 @@ export function resolveCategoryDraft({
     cardFields: normalizeCardFields(existingCategoryConfig.cardDesign.visibleFields, effectiveScalarKeys),
     cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.style),
     cardElementConfig: normalizeCardElementConfig(existingCategoryConfig.cardDesign.elementConfig),
+    cardTemplate: existingCategoryConfig.layoutStyle.variant,
   };
 }
 
@@ -453,6 +454,7 @@ export function buildCategoryConfigRow({
   cardFields,
   cardStyle,
   cardElementConfig,
+  cardTemplate,
   allowedScalarKeys,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
@@ -465,7 +467,9 @@ export function buildCategoryConfigRow({
       selectedMediumCategories,
       representativeMediumCategory,
       layoutStyle: {
-        variant: existingRow?.categoryConfig?.layoutStyle?.variant || 'card-grid',
+        variant: CARD_TEMPLATE_OPTIONS.includes(cardTemplate)
+          ? cardTemplate
+          : existingRow?.categoryConfig?.layoutStyle?.variant || 'card-grid',
       },
       cardDesign: {
         visibleFields: cardFields,
@@ -528,6 +532,7 @@ export function buildStorefrontSavePayload({
   navConfig,
   designDirection,
   mobileUiTree,
+  cardTemplate,
   allowedScalarKeys,
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
@@ -574,6 +579,7 @@ export function buildStorefrontSavePayload({
     cardFields: normalizeCardFields(cardFields, allowedScalarKeys),
     cardStyle: normalizeCardStyle(cardStyle),
     cardElementConfig: normalizeCardElementConfig(cardElementConfig),
+    cardTemplate,
     allowedScalarKeys,
   });
 
