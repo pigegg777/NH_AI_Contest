@@ -174,6 +174,72 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
       updatedAt: '2026-06-15T00:00:00Z',
     });
   });
+
+  it('normalizes a legacy pre-design-tokens row without throwing, defaulting the new tokens', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: {
+        office_code: 'OFF-1',
+        page_config: {
+          schemaVersion: 1,
+          designDirection: 'friendly',
+          theme: { brandColor: '#1d4a2e', backgroundTone: 'mint' },
+          nav: { title: 'Legacy guide', subtitle: '', logoUrl: '' },
+          searchSection: { enabled: true, placeholder: 'Search products' },
+          categoryChips: { enabled: true, sticky: true },
+        },
+        hidden_products: [],
+        updated_at: '2026-01-01T00:00:00Z',
+      },
+      error: null,
+    });
+    const officeEq = vi.fn(() => ({ maybeSingle }));
+    const officeSelect = vi.fn(() => ({ eq: officeEq }));
+
+    const categoryOrder = vi.fn().mockResolvedValue({
+      data: [
+        {
+          office_code: 'OFF-1',
+          product_category_name: 'Fertilizer Upload',
+          sort_order: 0,
+          category_config: {
+            schemaVersion: 1,
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'card-grid' },
+            cardDesign: {
+              visibleFields: ['product_name', 'tax_price'],
+              style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
+            },
+          },
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      ],
+      error: null,
+    });
+    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
+    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
+
+    supabase.from.mockImplementation((tableName) => {
+      if (tableName === 'office_page_config') {
+        return { select: officeSelect };
+      }
+
+      if (tableName === 'office_page_category_configs') {
+        return { select: categorySelect };
+      }
+
+      throw new Error(`Unexpected table: ${tableName}`);
+    });
+
+    const config = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
+
+    expect(config.pageConfig.theme.titleTextColor).toBe('default');
+    expect(config.pageConfig.theme.typographyTone).toBe('standard');
+    expect(config.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('card-grid');
+    expect(config.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('default');
+  });
 });
 
 describe('storefrontConfigService.upsertStorefrontConfig', () => {
