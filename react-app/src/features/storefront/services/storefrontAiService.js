@@ -18,7 +18,6 @@ import {
   STOREFRONT_AI_PLAN_REGION_PROPERTY_OPTIONS,
   STOREFRONT_AI_PLAN_REGION_TARGET_OPTIONS,
   STOREFRONT_AI_PLAN_TONE_OPTIONS,
-  collectStorefrontDesignPlanFieldKeys,
   compileStorefrontRenderSpec,
   normalizeStorefrontDesignPlan,
   normalizeStorefrontEditPolicy,
@@ -38,6 +37,8 @@ import {
   DEFAULT_MOBILE_UI_TREE,
   MOBILE_UI_BLOCK_TYPES,
   MOBILE_UI_SLOTS,
+  NUTRIENT_FIELD_KEYS,
+  PRICE_FIELD_KEYS,
   normalizeCardElementConfig,
   normalizeMobileUiTree,
 } from '../model/storefrontUiModel';
@@ -45,8 +46,6 @@ import { buildStorefrontAiSystemPrompt, selectStorefrontAiSkillPackIds } from '.
 
 const OPENAI_RESPONSES_API_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
-const PRICE_FIELD_SET = new Set(['zero_tax_price', 'tax_price', 'exempt_tax_price', 'price_subsidy']);
-const NUTRIENT_FIELD_SET = new Set(['nutrient', 'product_nutirent']);
 
 const DESIGN_PLAN_SCHEMA = {
   type: 'object',
@@ -637,41 +636,6 @@ function detectCategoryChipVariant(prompt) {
   return DEFAULT_NAV_CONFIG.categoryChipVariant;
 }
 
-function detectFields(prompt, allowedScalarKeys) {
-  const text = normalizePromptText(prompt);
-  const fields = ['product_name'];
-
-  if (includesAny(text, ['spec', '규격'])) {
-    fields.push('spec');
-  }
-
-  if (includesAny(text, ['nutrient', '성분'])) {
-    fields.push('nutrient');
-  }
-
-  if (includesAny(text, ['price', '가격', '과세'])) {
-    fields.push('tax_price');
-  }
-
-  if (includesAny(text, ['zero tax', '영세'])) {
-    fields.push('zero_tax_price');
-  }
-
-  if (includesAny(text, ['exempt', '면세'])) {
-    fields.push('exempt_tax_price');
-  }
-
-  if (includesAny(text, ['subsidy', '보조'])) {
-    fields.push('price_subsidy');
-  }
-
-  if (includesAny(text, ['link', 'url', '링크'])) {
-    fields.push('product_url');
-  }
-
-  return normalizeCardFields(fields.length > 1 ? fields : DEFAULT_CARD_FIELDS, allowedScalarKeys);
-}
-
 function normalizeSelectedMediumCategories(selectedMediumCategories, mediumCategoryOptions) {
   const options = Array.isArray(mediumCategoryOptions) ? mediumCategoryOptions : [];
   const candidateValues = Array.isArray(selectedMediumCategories) ? selectedMediumCategories : [];
@@ -690,24 +654,21 @@ function normalizeUiChangeSummary(uiChangeSummary) {
 
 function normalizeLegacyPatch(patch, mediumCategoryOptions, allowedScalarKeys, currentDraft) {
   const source = patch ?? {};
-  const normalizedSelectedMediumCategories = normalizeSelectedMediumCategories(
-    source.selectedMediumCategories ?? currentDraft?.selectedMediumCategories,
+  const selectedMediumCategories = normalizeSelectedMediumCategories(
+    currentDraft?.selectedMediumCategories,
     mediumCategoryOptions,
   );
-  const requestedRepresentativeMediumCategory = toTrimmedString(
-    source.representativeMediumCategory ?? currentDraft?.representativeMediumCategory,
-  );
-  const representativeMediumCategory = normalizedSelectedMediumCategories.includes(requestedRepresentativeMediumCategory)
-    ? requestedRepresentativeMediumCategory
-    : normalizedSelectedMediumCategories[0] || mediumCategoryOptions[0] || '';
+  const representativeMediumCategory = selectedMediumCategories.includes(currentDraft?.representativeMediumCategory)
+    ? currentDraft.representativeMediumCategory
+    : selectedMediumCategories[0] || mediumCategoryOptions[0] || '';
 
   return {
     designDirection: STOREFRONT_AI_PLAN_TONE_OPTIONS.includes(source.designDirection)
       ? source.designDirection
       : currentDraft?.designDirection || 'friendly',
-    selectedMediumCategories: normalizedSelectedMediumCategories,
+    selectedMediumCategories,
     representativeMediumCategory,
-    cardFields: normalizeCardFields(source.cardFields ?? currentDraft?.cardFields, allowedScalarKeys),
+    cardFields: normalizeCardFields(currentDraft?.cardFields, allowedScalarKeys),
     cardTemplate: CARD_TEMPLATE_OPTIONS.includes(source.cardTemplate)
       ? source.cardTemplate
       : currentDraft?.cardTemplate || 'card-grid',
@@ -741,7 +702,7 @@ function buildSemanticGroups({ prompt, visibleFields, editPolicy }) {
     return [];
   }
 
-  const priceFields = visibleFields.filter((field) => PRICE_FIELD_SET.has(field));
+  const priceFields = visibleFields.filter((field) => PRICE_FIELD_KEYS.includes(field));
 
   if (priceFields.length >= 2 && wantsInlineGrouping(prompt)) {
     return [
@@ -815,7 +776,7 @@ function buildDesignPlanFromLegacyPatch({ patch, prompt, allowedScalarKeys, edit
         groups,
         hideIfEmpty: [],
         formatRules: visibleFields
-          .filter((field) => PRICE_FIELD_SET.has(field))
+          .filter((field) => PRICE_FIELD_KEYS.includes(field))
           .map((field) => ({ field, format: 'currency' })),
       },
       contentPlan: {
@@ -866,14 +827,10 @@ function buildAiChangeSummary({ designPlan, fallbackPatch, compiledPatch }) {
 function compileLegacyPatchFromDesignPlan({
   designPlan,
   fallbackPatch,
-  mediumCategoryOptions,
   currentDraft,
   allowedScalarKeys,
 }) {
-  const visibleFields = normalizeCardFields(
-    collectStorefrontDesignPlanFieldKeys(designPlan),
-    allowedScalarKeys,
-  );
+  const visibleFields = fallbackPatch.cardFields;
   const accentColor =
     toTrimmedString(designPlan.stylePlan.accentColor) ||
     fallbackPatch.cardStyle.accentColor ||
@@ -892,22 +849,16 @@ function compileLegacyPatchFromDesignPlan({
     cardSpacing: designPlan.stylePlan.cardSpacing,
     priceTextColor: designPlan.stylePlan.priceTextColor,
   });
-  const selectedMediumCategories = normalizeSelectedMediumCategories(
-    fallbackPatch.selectedMediumCategories ?? currentDraft?.selectedMediumCategories,
-    mediumCategoryOptions,
-  );
-  const representativeMediumCategory =
-    selectedMediumCategories.includes(fallbackPatch.representativeMediumCategory)
-      ? fallbackPatch.representativeMediumCategory
-      : selectedMediumCategories[0] || mediumCategoryOptions[0] || '';
+  const selectedMediumCategories = fallbackPatch.selectedMediumCategories;
+  const representativeMediumCategory = fallbackPatch.representativeMediumCategory;
   const nextCardElementConfig = normalizeCardElementConfig({
     ...(currentDraft?.cardElementConfig ?? DEFAULT_CARD_ELEMENT_CONFIG),
     ...(fallbackPatch.cardElementConfig ?? {}),
     showImage: designPlan.layoutPlan.imagePosition !== 'hidden',
     showProductName: visibleFields.includes('product_name'),
     showSpec: visibleFields.includes('spec'),
-    showNutrient: visibleFields.some((field) => NUTRIENT_FIELD_SET.has(field)),
-    showPrice: visibleFields.some((field) => PRICE_FIELD_SET.has(field)),
+    showNutrient: visibleFields.some((field) => NUTRIENT_FIELD_KEYS.includes(field)),
+    showPrice: visibleFields.some((field) => PRICE_FIELD_KEYS.includes(field)),
     imageSize: baseCardStyle.imageSize,
     imageFit: baseCardStyle.imageFit,
     metaDensity: designPlan.layoutPlan.density === 'compact' ? 'compact' : 'comfortable',
@@ -962,7 +913,7 @@ export function buildHeuristicSuggestion({
       designDirection,
       selectedMediumCategories,
       representativeMediumCategory,
-      cardFields: detectFields(prompt, allowedScalarKeys),
+      cardFields: currentDraft?.cardFields,
       cardTemplate: detectCardTemplate(prompt),
       cardStyle: {
         layout: detectLayout(prompt),
@@ -1013,7 +964,6 @@ export function buildHeuristicSuggestion({
   const patch = compileLegacyPatchFromDesignPlan({
     designPlan,
     fallbackPatch,
-    mediumCategoryOptions,
     currentDraft,
     allowedScalarKeys,
   });
@@ -1122,7 +1072,6 @@ export function normalizeStorefrontAiSuggestion(
   const patch = compileLegacyPatchFromDesignPlan({
     designPlan,
     fallbackPatch: normalizedFallbackPatch,
-    mediumCategoryOptions,
     currentDraft,
     allowedScalarKeys,
   });

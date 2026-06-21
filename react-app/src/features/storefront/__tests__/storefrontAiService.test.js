@@ -100,6 +100,7 @@ describe('normalizeStorefrontAiSuggestion', () => {
         currentDraft: {
           selectedMediumCategories: ['Premium', 'Fake'],
           representativeMediumCategory: 'Fake',
+          cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
           cardStyle: { fontSize: 'large', cardsPerRow: 1, imageFit: 'contain', cardRadius: 'xl', cardShadow: 'strong' },
           navConfig: {
             title: 'Premium Fertilizer Guide',
@@ -147,7 +148,7 @@ describe('normalizeStorefrontAiSuggestion', () => {
         designDirection: 'warm',
         selectedMediumCategories: ['Premium'],
         representativeMediumCategory: 'Premium',
-        cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
+        cardFields: ['product_name', 'zero_tax_price', 'tax_price'],
         cardTemplate: 'price-focus',
         navConfig: {
           title: 'Premium Fertilizer Guide',
@@ -284,6 +285,7 @@ describe('buildHeuristicSuggestion', () => {
       prompt: '과세가격이랑 영세가격을 한 줄로 비교하고 제목은 더 진하게 보여줘',
       mediumCategoryOptions: ['Premium'],
       currentDraft: {
+        cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
         cardStyle: {},
         navConfig: {},
         mobileUiTree: [],
@@ -292,7 +294,7 @@ describe('buildHeuristicSuggestion', () => {
       allowedScalarKeys: ['product_name', 'tax_price', 'zero_tax_price'],
     });
 
-    expect(result.patch.cardFields).toEqual(['product_name', 'tax_price', 'zero_tax_price']);
+    expect(result.patch.cardFields).toEqual(['product_name', 'zero_tax_price', 'tax_price']);
     expect(result.designPlan.transformPlan.groups).toHaveLength(1);
     expect(result.designPlan.transformPlan.groups[0]).toMatchObject({
       id: 'price-compare',
@@ -319,5 +321,80 @@ describe('buildHeuristicSuggestion', () => {
 
     expect(result.patch.cardTemplate).toBe('price-focus');
     expect(result.designPlan.layoutPlan.cardVariant).toBe('price-focus');
+  });
+});
+
+describe('data-selection pinning', () => {
+  const currentDraft = {
+    cardFields: ['product_name', 'spec'],
+    selectedMediumCategories: ['Premium'],
+    representativeMediumCategory: 'Premium',
+  };
+
+  it('buildHeuristicSuggestion never adds fields the prompt asks for', () => {
+    const result = buildHeuristicSuggestion({
+      prompt: '가격과 성분을 보여주고 링크도 추가해줘',
+      mediumCategoryOptions: ['Premium', 'Starter'],
+      currentDraft,
+      allowedScalarKeys: ['product_name', 'spec', 'tax_price', 'nutrient', 'product_url'],
+    });
+
+    expect(result.patch.cardFields).toEqual(['product_name', 'spec']);
+  });
+
+  it('buildHeuristicSuggestion never changes medium-category selection', () => {
+    const result = buildHeuristicSuggestion({
+      prompt: '스타터 제품만 보여줘',
+      mediumCategoryOptions: ['Premium', 'Starter'],
+      currentDraft,
+      allowedScalarKeys: ['product_name', 'spec'],
+    });
+
+    expect(result.patch.selectedMediumCategories).toEqual(['Premium']);
+    expect(result.patch.representativeMediumCategory).toBe('Premium');
+  });
+
+  it('normalizeStorefrontAiSuggestion ignores a raw AI payload that tries to set cardFields/selectedMediumCategories', () => {
+    const result = normalizeStorefrontAiSuggestion(
+      {
+        summary: 'updated',
+        patch: {
+          cardFields: ['product_name', 'tax_price', 'product_url'],
+          selectedMediumCategories: ['Starter'],
+          representativeMediumCategory: 'Starter',
+        },
+      },
+      ['Premium', 'Starter'],
+      ['product_name', 'spec', 'tax_price', 'product_url'],
+      { currentDraft },
+    );
+
+    expect(result.patch.cardFields).toEqual(['product_name', 'spec']);
+    expect(result.patch.selectedMediumCategories).toEqual(['Premium']);
+  });
+
+  it('normalizeStorefrontAiSuggestion ignores a designPlan that references fields outside the committed selection', () => {
+    const result = normalizeStorefrontAiSuggestion(
+      {
+        summary: 'updated',
+        designPlan: {
+          designBrief: { tone: 'warm', goal: 'g', audience: 'a', priority: ['product_name', 'tax_price'] },
+          transformPlan: { groups: [], hideIfEmpty: [], formatRules: [] },
+          contentPlan: {
+            blocks: [
+              { id: 'b1', type: 'field', source: 'product_name', label: '' },
+              { id: 'b2', type: 'field', source: 'tax_price', label: '' },
+            ],
+          },
+          layoutPlan: { cardVariant: 'card-grid', density: 'comfortable', imagePosition: 'top', pricePriority: 'default' },
+          stylePlan: { priceTextColor: 'default', accentColor: '', cardSpacing: 'relaxed', fieldStyles: [], regionStyles: [] },
+        },
+      },
+      ['Premium'],
+      ['product_name', 'spec'],
+      { currentDraft: { cardFields: ['product_name', 'spec'], selectedMediumCategories: ['Premium'], representativeMediumCategory: 'Premium' } },
+    );
+
+    expect(result.patch.cardFields).toEqual(['product_name', 'spec']);
   });
 });
