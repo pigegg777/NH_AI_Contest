@@ -858,4 +858,45 @@ describe('PublicStorefrontPage', () => {
     expect(subsidyValue.style.getPropertyValue('--field-text-color')).toBe('#2563eb');
     expect(subsidyValue.style.getPropertyValue('--field-font-weight')).toBe('800');
   });
+
+  it('renders the same pageStyle-derived CSS variables on the public page as the builder preview does for an identical saved config', async () => {
+    const savedConfig = {
+      officeCode: 'OFF-1',
+      pageConfig: {
+        schemaVersion: 1,
+        pageStyle: {
+          schemaVersion: 1,
+          palette: { backgroundHex: '#fdf2e9', surfaceHex: '#ffffff', accentHex: '#ea580c', textHex: '#1f2937' },
+          header: { titleColorHex: '#1f2937', letterSpacing: 'normal', fontWeight: 800 },
+          search: { sizeToken: 'lg', borderStrengthToken: 'strong', borderColorHex: '#f3c9a4', focusBorderColorHex: '#ea580c' },
+          categoryChips: {
+            backgroundHex: '#fde8d4',
+            textHex: '#1f2937',
+            borderColorHex: '#f3c9a4',
+            activeBackgroundHex: '#ea580c',
+            activeTextHex: '#ffffff',
+          },
+        },
+        nav: { title: 'Warm Demo Storefront', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true },
+      },
+      navConfig: { title: 'Warm Demo Storefront', subtitle: '', brandColor: '#ea580c', searchPlaceholder: 'Search products', logoUrl: '' },
+      categoryConfigs: [],
+      hiddenProducts: [],
+      updatedAt: '2026-06-21T00:00:00Z',
+    };
+
+    fetchStorefrontConfig.mockResolvedValue(savedConfig);
+    fetchAllOfficeProductRows.mockResolvedValue([{ product_name: 'Alpha', product_category_name: 'Fertilizer Upload' }]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    const pageEl = await screen.findByTestId('storefront-page');
+
+    expect(pageEl.style.getPropertyValue('--brand-color')).toBe('#ea580c');
+    expect(pageEl.style.getPropertyValue('--page-bg')).toBe('#fdf2e9');
+    expect(pageEl.style.getPropertyValue('--page-search-border-width')).toBe('2.5px');
+    expect(pageEl.style.getPropertyValue('--page-chip-active-bg')).toBe('#ea580c');
+  });
 });

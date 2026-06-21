@@ -504,4 +504,55 @@ describe('StorefrontBuilderPage', () => {
       expect(screen.queryByText('AI 추천 안내')).not.toBeInTheDocument();
     });
   }, 10000);
+
+  it('applies a page-level AI prompt, previews immediately, and saves only the compiled pageStyle (discarding the prompt session)', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    upsertStorefrontConfig.mockResolvedValue(undefined);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('toggle-page-design-settings'));
+
+    const previewPageEl = screen.getByTestId('storefront-page');
+
+    await user.type(screen.getByLabelText('전체 페이지 분위기'), 'cool trustworthy blue');
+    await user.click(screen.getByTestId('apply-page-ai-design'));
+
+    await waitFor(() => {
+      expect(previewPageEl.style.getPropertyValue('--brand-color')).toBe('#2563eb');
+    });
+
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('save-storefront-draft'));
+
+    await waitFor(() => expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1));
+
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe('#2563eb');
+    expect(savedPayload.pageConfig.pageAiDesign).toBeUndefined();
+    expect(JSON.stringify(savedPayload)).not.toContain('cool trustworthy blue');
+  }, 10000);
+
+  it('keeps the last valid pageStyle and shows an error when no main prompt has been entered', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('toggle-page-design-settings'));
+
+    const previewPageEl = screen.getByTestId('storefront-page');
+    const brandColorBeforeApply = previewPageEl.style.getPropertyValue('--brand-color');
+
+    await user.click(screen.getByTestId('apply-page-ai-design'));
+
+    expect(await screen.findByText('페이지 분위기를 먼저 입력해 주세요.')).toBeInTheDocument();
+    expect(previewPageEl.style.getPropertyValue('--brand-color')).toBe(brandColorBeforeApply);
+  });
 });
