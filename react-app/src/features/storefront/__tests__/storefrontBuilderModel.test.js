@@ -12,6 +12,7 @@ import {
   normalizePageConfig,
   resolveTitleTextColor,
 } from '../model/storefrontBuilderModel';
+import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 
 describe('page theme tokens', () => {
   it('defaults titleTextColor and typographyTone, and falls back on invalid values', () => {
@@ -137,5 +138,65 @@ describe('cardTemplate write path', () => {
     });
 
     expect(payload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('detail-first');
+  });
+});
+
+describe('pageConfig.pageStyle', () => {
+  it('defaults to the white DEFAULT_PAGE_STYLE when absent', () => {
+    expect(normalizePageConfig({}).pageStyle).toEqual(DEFAULT_PAGE_STYLE);
+  });
+
+  it('passes through a valid pageStyle', () => {
+    const customPageStyle = {
+      ...DEFAULT_PAGE_STYLE,
+      palette: { ...DEFAULT_PAGE_STYLE.palette, backgroundHex: '#0f172a' },
+    };
+
+    expect(normalizePageConfig({ pageStyle: customPageStyle }).pageStyle.palette.backgroundHex).toBe('#0f172a');
+  });
+});
+
+describe('buildStorefrontSavePayload pageStyle', () => {
+  it('writes an explicitly passed pageStyle into pageConfig', () => {
+    const customPageStyle = { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#2563eb' } };
+    const payload = buildStorefrontSavePayload({
+      officeCode: 'OFF-1',
+      existingConfig: null,
+      hiddenProducts: [],
+      selectedProductCategoryName: 'Fertilizer Upload',
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardStyle: {},
+      cardFields: ['product_name'],
+      cardElementConfig: {},
+      navConfig: {},
+      mobileUiTree: undefined,
+      cardTemplate: 'card-grid',
+      pageStyle: customPageStyle,
+    });
+
+    expect(payload.pageConfig.pageStyle.palette.accentHex).toBe('#2563eb');
+  });
+
+  it('keeps the existing saved pageStyle when none is passed', () => {
+    const existingConfig = {
+      pageConfig: { ...DEFAULT_PAGE_STYLE && {}, pageStyle: { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#7c3aed' } } },
+    };
+    const payload = buildStorefrontSavePayload({
+      officeCode: 'OFF-1',
+      existingConfig,
+      hiddenProducts: [],
+      selectedProductCategoryName: 'Fertilizer Upload',
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardStyle: {},
+      cardFields: ['product_name'],
+      cardElementConfig: {},
+      navConfig: {},
+      mobileUiTree: undefined,
+      cardTemplate: 'card-grid',
+    });
+
+    expect(payload.pageConfig.pageStyle.palette.accentHex).toBe('#7c3aed');
   });
 });

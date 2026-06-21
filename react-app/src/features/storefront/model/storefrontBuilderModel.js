@@ -1,5 +1,6 @@
 import { toTrimmedString } from '../../../common/utils/text';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from './cardStyleModel';
+import { DEFAULT_PAGE_STYLE, normalizePageStyle } from './pageStyleModel';
 import {
   buildDefaultMobileUiTree,
   deriveCardElementConfig,
@@ -202,6 +203,7 @@ export const CARD_TEMPLATE_OPTIONS = ['card-grid', 'image-left', 'price-focus', 
 export const DEFAULT_PAGE_CONFIG = {
   schemaVersion: 1,
   designDirection: 'friendly',
+  pageStyle: DEFAULT_PAGE_STYLE,
   theme: {
     brandColor: DEFAULT_CARD_STYLE.accentColor,
     backgroundTone: STOREFRONT_BACKGROUND_TONES.friendly,
@@ -297,6 +299,7 @@ export function normalizePageConfig(pageConfig) {
   return {
     schemaVersion: Number.isFinite(source.schemaVersion) ? source.schemaVersion : DEFAULT_PAGE_CONFIG.schemaVersion,
     designDirection,
+    pageStyle: normalizePageStyle(source.pageStyle),
     theme: {
       brandColor: toTrimmedString(sourceTheme.brandColor) || DEFAULT_PAGE_CONFIG.theme.brandColor,
       backgroundTone:
@@ -535,6 +538,8 @@ export function buildStorefrontSavePayload({
   typographyTone,
   mobileUiTree,
   cardTemplate,
+  aiDesign,
+  pageStyle,
   allowedScalarKeys,
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
@@ -549,6 +554,7 @@ export function buildStorefrontSavePayload({
   const nextPageConfig = normalizePageConfig({
     ...basePageConfig,
     designDirection: nextDesignDirection,
+    pageStyle: pageStyle ?? basePageConfig.pageStyle,
     theme: {
       ...basePageConfig.theme,
       brandColor: resolvedNavConfig.brandColor,
