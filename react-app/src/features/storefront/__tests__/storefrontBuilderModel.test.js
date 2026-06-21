@@ -296,7 +296,7 @@ describe('normalizeCardFields', () => {
   });
 
   it('falls back to DEFAULT_CARD_FIELDS, still canonically sorted, when given nothing usable', () => {
-    expect(normalizeCardFields([])).toEqual(['product_name', 'spec', 'nutrient', 'tax_price']);
+    expect(normalizeCardFields([])).toEqual(['product_name', 'spec', 'tax_price', 'nutrient']);
   });
 
   it('places img_url right after product_name in canonical order', () => {

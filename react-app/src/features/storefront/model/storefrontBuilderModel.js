@@ -44,12 +44,11 @@ export const STOREFRONT_FIELD_LABELS = {
   product_usage: '작물별 용도',
 };
 
-// 상품명 -> 이미지 -> 규격 -> 성분 -> 가격(영세/과세/면세/보조금) -> 분류(대/중/소/세) -> 링크
+// 상품명 -> 이미지 -> 규격 -> 가격(영세/과세/면세/보조금) -> 분류(대/중/소/세) -> 성분 -> 링크
 export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'product_name',
   'img_url',
   'spec',
-  'nutrient',
   'zero_tax_price',
   'tax_price',
   'exempt_tax_price',
@@ -58,6 +57,7 @@ export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'medium_category',
   'small_category',
   'detail_category',
+  'nutrient',
   'product_nutirent',
   'product_url',
 ];
