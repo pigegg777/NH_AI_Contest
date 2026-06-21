@@ -5,6 +5,7 @@ import {
   normalizeNavConfig,
   normalizePageConfig,
 } from '../model/storefrontBuilderModel';
+import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from './pageStyleMigration';
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
@@ -15,7 +16,12 @@ function normalizeConfig(officeRow, categoryRows) {
     return null;
   }
 
-  const pageConfig = normalizePageConfig(officeRow.page_config);
+  const rawPageConfig = officeRow.page_config ?? {};
+  const pageConfig = normalizePageConfig(
+    pageConfigNeedsPageStyleMigration(rawPageConfig)
+      ? { ...rawPageConfig, pageStyle: migrateLegacyPageConfigToPageStyle(rawPageConfig) }
+      : rawPageConfig,
+  );
   const normalizedCategoryConfigs = toArray(categoryRows).map((row) => normalizeCategoryConfigRow(row));
 
   return {

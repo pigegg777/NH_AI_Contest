@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import supabase from '../../../lib/supabaseClient';
+import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 
 vi.mock('../../../lib/supabaseClient', () => ({
@@ -118,6 +119,19 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
           { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
           { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
         ],
+        pageStyle: {
+          schemaVersion: 1,
+          palette: { backgroundHex: '#f1f4f2', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' },
+          header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800 },
+          search: { sizeToken: 'md', borderStrengthToken: 'soft', borderColorHex: '#bbc9c0', focusBorderColorHex: '#1d4a2e' },
+          categoryChips: {
+            backgroundHex: '#e4e9e6',
+            textHex: '#173223',
+            borderColorHex: '#bbc9c0',
+            activeBackgroundHex: '#1d4a2e',
+            activeTextHex: '#ffffff',
+          },
+        },
       },
       navConfig: {
         title: 'Demo',
@@ -240,6 +254,42 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
     expect(config.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('card-grid');
     expect(config.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('default');
   });
+
+  it('migrates a legacy page_config with no pageStyle into a resolved pageStyle on read', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: {
+        office_code: 'OFF-1',
+        page_config: {
+          schemaVersion: 1,
+          designDirection: 'trust',
+          theme: { brandColor: '#2563eb', backgroundTone: 'sky', titleTextColor: 'ink', typographyTone: 'bold' },
+          nav: { title: 'Demo', subtitle: '', logoUrl: '' },
+          searchSection: { enabled: true, placeholder: 'Search products', variant: 'outlined' },
+          categoryChips: { enabled: true, sticky: true },
+        },
+        hidden_products: [],
+        updated_at: '2026-06-15T00:00:00Z',
+      },
+      error: null,
+    });
+    const officeEq = vi.fn(() => ({ maybeSingle }));
+    const officeSelect = vi.fn(() => ({ eq: officeEq }));
+    const categoryOrder = vi.fn().mockResolvedValue({ data: [], error: null });
+    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
+    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
+
+    supabase.from.mockImplementation((tableName) => {
+      if (tableName === 'office_page_config') return { select: officeSelect };
+      if (tableName === 'office_page_category_configs') return { select: categorySelect };
+      throw new Error(`Unexpected table: ${tableName}`);
+    });
+
+    const result = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
+
+    expect(result.pageConfig.pageStyle.palette.accentHex).toBe('#2563eb');
+    expect(result.pageConfig.pageStyle.search.borderStrengthToken).toBe('strong');
+    expect(result.pageConfig.pageStyle.schemaVersion).toBe(1);
+  });
 });
 
 describe('storefrontConfigService.upsertStorefrontConfig', () => {
@@ -359,6 +409,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
             { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
             { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
           ],
+          pageStyle: DEFAULT_PAGE_STYLE,
         },
         hidden_products: [{ product_name: 'Hidden', spec: '20kg' }],
       },
