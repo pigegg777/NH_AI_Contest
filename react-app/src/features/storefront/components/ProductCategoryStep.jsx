@@ -35,8 +35,14 @@ export default function ProductCategoryStep({ builder }) {
 
         {isDesignSettingsOpen ? (
           <PageDesignEditor
-            designDirection={builder.designDirection}
-            onSelectDesignDirection={builder.setDesignDirection}
+            pageAiDesign={builder.pageAiDesign}
+            onChangeMainPrompt={builder.setPageMainPrompt}
+            onChangeHeaderOverridePrompt={builder.setPageHeaderOverridePrompt}
+            onChangeCategoryChipsOverridePrompt={builder.setPageCategoryChipsOverridePrompt}
+            onChangeSearchOverridePrompt={builder.setPageSearchOverridePrompt}
+            onApply={builder.applyPageAiDesign}
+            isApplying={builder.isApplyingPageAiDesign}
+            errorMessage={builder.pageAiErrorMessage}
             representativeCategoryLabel={builder.selectedProductCategoryName}
           />
         ) : null}

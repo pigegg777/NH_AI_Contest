@@ -1,9 +1,18 @@
-import { STOREFRONT_DESIGN_DIRECTIONS } from '../model/storefrontBuilderModel';
+import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
+import builderStyles from '../pages/StorefrontBuilderPage.module.css';
+import PageStyleMainPromptField from './page-design/PageStyleMainPromptField';
+import PageStyleOverrideFields from './page-design/PageStyleOverrideFields';
 import styles from './PageDesignEditor.module.css';
 
 export default function PageDesignEditor({
-  designDirection,
-  onSelectDesignDirection,
+  pageAiDesign,
+  onChangeMainPrompt,
+  onChangeHeaderOverridePrompt,
+  onChangeCategoryChipsOverridePrompt,
+  onChangeSearchOverridePrompt,
+  onApply,
+  isApplying,
+  errorMessage,
   representativeCategoryLabel,
 }) {
   return (
@@ -12,10 +21,10 @@ export default function PageDesignEditor({
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.eyebrow}>페이지 디자인 설정</p>
-            <h3 className={styles.title}>모바일 스토어프론트 분위기 설정</h3>
+            <h3 className={styles.title}>AI로 페이지 분위기 만들기</h3>
           </div>
           <p className={styles.helper}>
-            해당 디자인을 바탕으로 페이지의 전반적인 분위기를 생성할 수 있습니다!
+            한 문장으로 전체 분위기를 설명하고, 필요하면 영역별로 세부 스타일을 추가로 요청할 수 있습니다.
           </p>
           {representativeCategoryLabel ? (
             <p className={styles.selectionNote}>
@@ -24,20 +33,30 @@ export default function PageDesignEditor({
           ) : null}
         </div>
 
-        <div className={styles.directionGrid}>
-          {STOREFRONT_DESIGN_DIRECTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={designDirection === option.id ? styles.directionActive : styles.directionButton}
-              aria-pressed={designDirection === option.id}
-              onClick={() => onSelectDesignDirection(option.id)}
-            >
-              <span className={styles.directionLabel}>{option.label}</span>
-              <span className={styles.directionDescription}>{option.description}</span>
-            </button>
-          ))}
+        <PageStyleMainPromptField value={pageAiDesign.mainPrompt} onChange={onChangeMainPrompt} />
+
+        <PageStyleOverrideFields
+          headerOverridePrompt={pageAiDesign.headerOverridePrompt}
+          categoryChipsOverridePrompt={pageAiDesign.categoryChipsOverridePrompt}
+          searchOverridePrompt={pageAiDesign.searchOverridePrompt}
+          onChangeHeaderOverridePrompt={onChangeHeaderOverridePrompt}
+          onChangeCategoryChipsOverridePrompt={onChangeCategoryChipsOverridePrompt}
+          onChangeSearchOverridePrompt={onChangeSearchOverridePrompt}
+        />
+
+        <div className={builderStyles.actions}>
+          <button
+            type="button"
+            className={builderStyles.primaryButton}
+            data-testid="apply-page-ai-design"
+            onClick={onApply}
+            disabled={isApplying}
+          >
+            {isApplying ? '적용 중...' : '페이지 스타일 적용'}
+          </button>
         </div>
+
+        {errorMessage ? <div className={panelStyles.errorBox}>{errorMessage}</div> : null}
       </section>
     </div>
   );
