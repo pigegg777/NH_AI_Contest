@@ -17,9 +17,7 @@ import {
   STOREFRONT_AI_PLAN_REGION_PROPERTIES_BY_TARGET,
   STOREFRONT_AI_PLAN_REGION_PROPERTY_OPTIONS,
   STOREFRONT_AI_PLAN_REGION_TARGET_OPTIONS,
-  STOREFRONT_AI_PLAN_TITLE_TEXT_COLOR_OPTIONS,
   STOREFRONT_AI_PLAN_TONE_OPTIONS,
-  STOREFRONT_AI_PLAN_TYPOGRAPHY_TONE_OPTIONS,
   collectStorefrontDesignPlanFieldKeys,
   compileStorefrontRenderSpec,
   normalizeStorefrontDesignPlan,
@@ -30,11 +28,8 @@ import {
   DEFAULT_CARD_FIELDS,
   DEFAULT_NAV_CONFIG,
   STOREFRONT_DESIGN_ACCENT_COLORS,
-  STOREFRONT_DESIGN_DIRECTIONS,
   STOREFRONT_FIELD_LABELS,
   STOREFRONT_FIELD_OPTIONS,
-  TITLE_TEXT_COLOR_OPTIONS,
-  TYPOGRAPHY_TONE_OPTIONS,
   normalizeCardFields,
   normalizeNavConfig,
 } from '../model/storefrontBuilderModel';
@@ -149,8 +144,6 @@ const DESIGN_PLAN_SCHEMA = {
       type: 'object',
       additionalProperties: false,
       properties: {
-        titleTextColor: { type: 'string', enum: STOREFRONT_AI_PLAN_TITLE_TEXT_COLOR_OPTIONS },
-        typographyTone: { type: 'string', enum: STOREFRONT_AI_PLAN_TYPOGRAPHY_TONE_OPTIONS },
         priceTextColor: { type: 'string', enum: STOREFRONT_AI_PLAN_PRICE_TEXT_COLOR_OPTIONS },
         accentColor: { type: 'string' },
         cardSpacing: { type: 'string', enum: ['tight', 'normal', 'relaxed'] },
@@ -184,8 +177,6 @@ const DESIGN_PLAN_SCHEMA = {
         },
       },
       required: [
-        'titleTextColor',
-        'typographyTone',
         'priceTextColor',
         'accentColor',
         'cardSpacing',
@@ -471,46 +462,6 @@ function detectCardSpacing(prompt) {
   return DEFAULT_CARD_STYLE.cardSpacing;
 }
 
-function detectTitleTextColor(prompt) {
-  const text = normalizePromptText(prompt);
-
-  if (includesAny(text, ['darker', 'dark title', '진하게', '짙게'])) {
-    return 'ink';
-  }
-
-  if (includesAny(text, ['official', 'formal', '공식'])) {
-    return 'charcoal';
-  }
-
-  if (includesAny(text, ['brand color', '브랜드 색'])) {
-    return 'brand';
-  }
-
-  return 'default';
-}
-
-function detectTypographyTone(prompt) {
-  const text = normalizePromptText(prompt);
-
-  if (includesAny(text, ['bold', 'bolder', '강하게', '볼드', '진하게'])) {
-    return 'bold';
-  }
-
-  if (includesAny(text, ['official', 'formal', '공식'])) {
-    return 'official';
-  }
-
-  if (includesAny(text, ['soft', '부드럽'])) {
-    return 'soft';
-  }
-
-  if (includesAny(text, ['clean', '깔끔'])) {
-    return 'clean';
-  }
-
-  return 'standard';
-}
-
 function detectCardTemplate(prompt) {
   const text = normalizePromptText(prompt);
 
@@ -751,15 +702,9 @@ function normalizeLegacyPatch(patch, mediumCategoryOptions, allowedScalarKeys, c
     : normalizedSelectedMediumCategories[0] || mediumCategoryOptions[0] || '';
 
   return {
-    designDirection: STOREFRONT_DESIGN_DIRECTIONS.some((option) => option.id === source.designDirection)
+    designDirection: STOREFRONT_AI_PLAN_TONE_OPTIONS.includes(source.designDirection)
       ? source.designDirection
       : currentDraft?.designDirection || 'friendly',
-    titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(source.titleTextColor)
-      ? source.titleTextColor
-      : currentDraft?.titleTextColor || 'default',
-    typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(source.typographyTone)
-      ? source.typographyTone
-      : currentDraft?.typographyTone || 'standard',
     selectedMediumCategories: normalizedSelectedMediumCategories,
     representativeMediumCategory,
     cardFields: normalizeCardFields(source.cardFields ?? currentDraft?.cardFields, allowedScalarKeys),
@@ -883,8 +828,6 @@ function buildDesignPlanFromLegacyPatch({ patch, prompt, allowedScalarKeys, edit
         pricePriority: patch.cardTemplate === 'price-focus' ? 'high' : 'default',
       },
       stylePlan: {
-        titleTextColor: patch.titleTextColor,
-        typographyTone: patch.typographyTone,
         priceTextColor: patch.cardStyle.priceTextColor,
         accentColor: patch.cardStyle.accentColor,
         cardSpacing: patch.cardStyle.cardSpacing,
@@ -911,10 +854,6 @@ function buildAiChangeSummary({ designPlan, fallbackPatch, compiledPatch }) {
 
   if (designPlan.transformPlan.groups.length > 0) {
     changes.push(`Group ${designPlan.transformPlan.groups[0].label} fields on one row.`);
-  }
-
-  if (compiledPatch.titleTextColor !== 'default' || compiledPatch.typographyTone !== 'standard') {
-    changes.push('Adjust title tone and typography.');
   }
 
   if (compiledPatch.cardStyle.priceTextColor !== 'default' || compiledPatch.cardTemplate === 'price-focus') {
@@ -980,8 +919,6 @@ function compileLegacyPatchFromDesignPlan({
   });
   const compiledPatch = {
     designDirection: designPlan.designBrief.tone,
-    titleTextColor: designPlan.stylePlan.titleTextColor,
-    typographyTone: designPlan.stylePlan.typographyTone,
     selectedMediumCategories,
     representativeMediumCategory,
     cardFields: visibleFields,
@@ -1023,8 +960,6 @@ export function buildHeuristicSuggestion({
   const fallbackPatch = normalizeLegacyPatch(
     {
       designDirection,
-      titleTextColor: detectTitleTextColor(prompt),
-      typographyTone: detectTypographyTone(prompt),
       selectedMediumCategories,
       representativeMediumCategory,
       cardFields: detectFields(prompt, allowedScalarKeys),
@@ -1127,15 +1062,13 @@ function buildOpenAiRequestBody({
               isSelectable: field.isSelectable,
             })),
             editPolicy: normalizeStorefrontEditPolicy(editPolicy),
-            designDirectionOptions: STOREFRONT_DESIGN_DIRECTIONS.map((option) => option.id),
+            designDirectionOptions: STOREFRONT_AI_PLAN_TONE_OPTIONS,
             allowedFields: STOREFRONT_FIELD_OPTIONS,
             fieldLabels: STOREFRONT_FIELD_LABELS,
             allowedCardVariants: STOREFRONT_AI_PLAN_CARD_VARIANT_OPTIONS,
             allowedDensities: STOREFRONT_AI_PLAN_DENSITY_OPTIONS,
             allowedImagePositions: STOREFRONT_AI_PLAN_IMAGE_POSITION_OPTIONS,
             allowedPricePriorities: STOREFRONT_AI_PLAN_PRICE_PRIORITY_OPTIONS,
-            allowedTitleTextColors: STOREFRONT_AI_PLAN_TITLE_TEXT_COLOR_OPTIONS,
-            allowedTypographyTones: STOREFRONT_AI_PLAN_TYPOGRAPHY_TONE_OPTIONS,
             allowedPriceTextColors: STOREFRONT_AI_PLAN_PRICE_TEXT_COLOR_OPTIONS,
             allowedFieldStyleOptions: {
               colorRoles: STOREFRONT_AI_PLAN_FIELD_COLOR_ROLE_OPTIONS,

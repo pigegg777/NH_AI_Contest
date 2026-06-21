@@ -47,8 +47,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
         office_code: 'OFF-1',
         page_config: {
           schemaVersion: 1,
-          designDirection: 'green',
-          theme: { brandColor: '#1d4a2e', backgroundTone: 'forest' },
+          theme: { brandColor: '#1d4a2e' },
           nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
           searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
           categoryChips: { enabled: true, sticky: true },
@@ -105,8 +104,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
       officeCode: 'OFF-1',
       pageConfig: {
         schemaVersion: 1,
-        designDirection: 'green',
-        theme: { brandColor: '#1d4a2e', backgroundTone: 'forest', titleTextColor: 'default', typographyTone: 'standard' },
+        theme: { brandColor: '#1d4a2e' },
         nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
         categoryChips: { enabled: true, sticky: true, variant: 'soft' },
@@ -195,8 +193,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
         office_code: 'OFF-1',
         page_config: {
           schemaVersion: 1,
-          designDirection: 'friendly',
-          theme: { brandColor: '#1d4a2e', backgroundTone: 'mint' },
+          theme: { brandColor: '#1d4a2e' },
           nav: { title: 'Legacy guide', subtitle: '', logoUrl: '' },
           searchSection: { enabled: true, placeholder: 'Search products' },
           categoryChips: { enabled: true, sticky: true },
@@ -249,8 +246,6 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
 
     const config = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
 
-    expect(config.pageConfig.theme.titleTextColor).toBe('default');
-    expect(config.pageConfig.theme.typographyTone).toBe('standard');
     expect(config.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('card-grid');
     expect(config.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('default');
   });
@@ -353,8 +348,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
       },
       pageConfig: {
         schemaVersion: 1,
-        designDirection: 'warm',
-        theme: { brandColor: '#1d4a2e', backgroundTone: 'apricot' },
+        theme: { brandColor: '#1d4a2e' },
         nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
         categoryChips: { enabled: true, sticky: true },
@@ -395,8 +389,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
         office_code: 'OFF-1',
         page_config: {
           schemaVersion: 1,
-          designDirection: 'warm',
-          theme: { brandColor: '#1d4a2e', backgroundTone: 'apricot', titleTextColor: 'default', typographyTone: 'standard' },
+          theme: { brandColor: '#1d4a2e' },
           nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
           searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
           categoryChips: { enabled: true, sticky: true, variant: 'soft' },

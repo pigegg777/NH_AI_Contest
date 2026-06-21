@@ -88,8 +88,6 @@ describe('normalizeStorefrontAiSuggestion', () => {
             pricePriority: 'high',
           },
           stylePlan: {
-            titleTextColor: 'ink',
-            typographyTone: 'bold',
             priceTextColor: 'muted',
             accentColor: '#2563eb',
             cardSpacing: 'tight',
@@ -147,8 +145,6 @@ describe('normalizeStorefrontAiSuggestion', () => {
       },
       patch: {
         designDirection: 'warm',
-        titleTextColor: 'ink',
-        typographyTone: 'bold',
         selectedMediumCategories: ['Premium'],
         representativeMediumCategory: 'Premium',
         cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
@@ -186,8 +182,6 @@ describe('normalizeStorefrontAiSuggestion', () => {
         summary: 'updated',
         patch: {
           designDirection: 'warm',
-          titleTextColor: 'ink',
-          typographyTone: 'clean',
           selectedMediumCategories: ['Premium'],
           representativeMediumCategory: 'Premium',
           cardFields: ['product_name', 'tax_price'],
@@ -249,8 +243,6 @@ describe('normalizeStorefrontAiSuggestion', () => {
             pricePriority: 'default',
           },
           stylePlan: {
-            titleTextColor: 'default',
-            typographyTone: 'standard',
             priceTextColor: 'default',
             accentColor: '#2563eb',
             cardSpacing: 'relaxed',
@@ -300,7 +292,6 @@ describe('buildHeuristicSuggestion', () => {
       allowedScalarKeys: ['product_name', 'tax_price', 'zero_tax_price'],
     });
 
-    expect(result.patch.titleTextColor).toBe('ink');
     expect(result.patch.cardFields).toEqual(['product_name', 'tax_price', 'zero_tax_price']);
     expect(result.designPlan.transformPlan.groups).toHaveLength(1);
     expect(result.designPlan.transformPlan.groups[0]).toMatchObject({
@@ -326,9 +317,7 @@ describe('buildHeuristicSuggestion', () => {
       allowedScalarKeys: undefined,
     });
 
-    expect(result.patch.typographyTone).toBe('bold');
     expect(result.patch.cardTemplate).toBe('price-focus');
     expect(result.designPlan.layoutPlan.cardVariant).toBe('price-focus');
-    expect(result.designPlan.stylePlan.typographyTone).toBe('bold');
   });
 });

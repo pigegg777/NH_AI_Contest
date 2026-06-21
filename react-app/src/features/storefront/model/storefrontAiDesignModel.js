@@ -13,8 +13,6 @@ export const STOREFRONT_AI_PLAN_CARD_VARIANT_OPTIONS = [
 export const STOREFRONT_AI_PLAN_DENSITY_OPTIONS = ['compact', 'comfortable'];
 export const STOREFRONT_AI_PLAN_IMAGE_POSITION_OPTIONS = ['top', 'left', 'hidden'];
 export const STOREFRONT_AI_PLAN_PRICE_PRIORITY_OPTIONS = ['default', 'high'];
-export const STOREFRONT_AI_PLAN_TITLE_TEXT_COLOR_OPTIONS = ['default', 'ink', 'charcoal', 'brand'];
-export const STOREFRONT_AI_PLAN_TYPOGRAPHY_TONE_OPTIONS = ['standard', 'clean', 'soft', 'bold', 'official'];
 export const STOREFRONT_AI_PLAN_PRICE_TEXT_COLOR_OPTIONS = ['default', 'brand', 'muted'];
 export const STOREFRONT_AI_PLAN_FORMAT_OPTIONS = ['currency', 'text', 'link'];
 export const STOREFRONT_AI_PLAN_FIELD_COLOR_ROLE_OPTIONS = [
@@ -76,8 +74,6 @@ export const DEFAULT_STOREFRONT_DESIGN_PLAN = {
     pricePriority: 'default',
   },
   stylePlan: {
-    titleTextColor: 'default',
-    typographyTone: 'standard',
     priceTextColor: 'default',
     accentColor: '',
     cardSpacing: 'relaxed',
@@ -375,12 +371,6 @@ export function normalizeStorefrontDesignPlan(plan, allowedScalarKeys) {
         : DEFAULT_STOREFRONT_DESIGN_PLAN.layoutPlan.pricePriority,
     },
     stylePlan: {
-      titleTextColor: STOREFRONT_AI_PLAN_TITLE_TEXT_COLOR_OPTIONS.includes(sourceStylePlan.titleTextColor)
-        ? sourceStylePlan.titleTextColor
-        : DEFAULT_STOREFRONT_DESIGN_PLAN.stylePlan.titleTextColor,
-      typographyTone: STOREFRONT_AI_PLAN_TYPOGRAPHY_TONE_OPTIONS.includes(sourceStylePlan.typographyTone)
-        ? sourceStylePlan.typographyTone
-        : DEFAULT_STOREFRONT_DESIGN_PLAN.stylePlan.typographyTone,
       priceTextColor: STOREFRONT_AI_PLAN_PRICE_TEXT_COLOR_OPTIONS.includes(sourceStylePlan.priceTextColor)
         ? sourceStylePlan.priceTextColor
         : DEFAULT_STOREFRONT_DESIGN_PLAN.stylePlan.priceTextColor,

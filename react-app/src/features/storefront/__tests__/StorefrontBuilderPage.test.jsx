@@ -404,8 +404,6 @@ describe('StorefrontBuilderPage', () => {
     expect(savedPayload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('price-focus');
     expect(savedPayload.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('muted');
     expect(savedPayload.categoryConfigs[0].categoryConfig.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
-    expect(savedPayload.pageConfig.theme.titleTextColor).toBe('default');
-    expect(savedPayload.pageConfig.theme.typographyTone).toBe('standard');
 
     await user.click(screen.getByTestId('undo-ai-changes'));
 

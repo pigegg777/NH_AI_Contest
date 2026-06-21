@@ -149,22 +149,6 @@ export const DEFAULT_NAV_CONFIG = {
   categoryChipVariant: 'soft',
 };
 
-export const STOREFRONT_DESIGN_DIRECTIONS = [
-  { id: 'friendly', label: '친근함', description: '처음 방문한 고객도 편하게 둘러볼 수 있는 깔끔한 분위기.' },
-  { id: 'warm', label: '따뜻함', description: '이야기가 느껴지는 부드럽고 정감 있는 분위기.' },
-  { id: 'green', label: '그린', description: '농산물·비료 등 상품 중심의 자연스러운 분위기.' },
-  { id: 'trust', label: '신뢰', description: '관공서 페이지에 어울리는 정돈되고 신뢰감 있는 분위기.' },
-  { id: 'white', label: '화이트', description: '강조 색 없이 깔끔한 기본 화이트 테마.' },
-];
-
-export const STOREFRONT_BACKGROUND_TONES = {
-  friendly: 'mint',
-  warm: 'apricot',
-  green: 'forest',
-  trust: 'sky',
-  white: 'paper',
-};
-
 export const STOREFRONT_DESIGN_ACCENT_COLORS = {
   friendly: '#2f9e6e',
   warm: '#ea580c',
@@ -173,43 +157,13 @@ export const STOREFRONT_DESIGN_ACCENT_COLORS = {
   white: '#52525b',
 };
 
-export const TITLE_TEXT_COLOR_OPTIONS = ['default', 'ink', 'charcoal', 'brand'];
-
-export const TITLE_TEXT_COLOR_VALUES = {
-  default: '#173223',
-  ink: '#0f172a',
-  charcoal: '#27272a',
-};
-
-export function resolveTitleTextColor(titleTextColor, brandColor) {
-  if (titleTextColor === 'brand') {
-    return brandColor || TITLE_TEXT_COLOR_VALUES.default;
-  }
-
-  return TITLE_TEXT_COLOR_VALUES[titleTextColor] || TITLE_TEXT_COLOR_VALUES.default;
-}
-
-export const TYPOGRAPHY_TONE_OPTIONS = ['standard', 'clean', 'soft', 'bold', 'official'];
-
-export const TYPOGRAPHY_TONE_VALUES = {
-  standard: { headingWeight: 800, bodyWeight: 600, letterSpacing: 'normal' },
-  clean: { headingWeight: 700, bodyWeight: 500, letterSpacing: '0.01em' },
-  soft: { headingWeight: 600, bodyWeight: 500, letterSpacing: 'normal' },
-  bold: { headingWeight: 800, bodyWeight: 700, letterSpacing: '-0.01em' },
-  official: { headingWeight: 700, bodyWeight: 600, letterSpacing: '0.02em' },
-};
-
 export const CARD_TEMPLATE_OPTIONS = ['card-grid', 'image-left', 'price-focus', 'compact-list', 'detail-first'];
 
 export const DEFAULT_PAGE_CONFIG = {
   schemaVersion: 1,
-  designDirection: 'friendly',
   pageStyle: DEFAULT_PAGE_STYLE,
   theme: {
     brandColor: DEFAULT_CARD_STYLE.accentColor,
-    backgroundTone: STOREFRONT_BACKGROUND_TONES.friendly,
-    titleTextColor: 'default',
-    typographyTone: 'standard',
   },
   nav: {
     title: '',
@@ -228,14 +182,6 @@ export const DEFAULT_PAGE_CONFIG = {
   },
   mobileUiTree: buildDefaultMobileUiTree(),
 };
-
-function normalizeDesignDirection(designDirection) {
-  const candidate = toTrimmedString(designDirection);
-
-  return STOREFRONT_DESIGN_DIRECTIONS.some((option) => option.id === candidate)
-    ? candidate
-    : DEFAULT_PAGE_CONFIG.designDirection;
-}
 
 function normalizeMediumCategory(value) {
   return toTrimmedString(value);
@@ -289,7 +235,6 @@ export function normalizeCardFields(fields, allowedScalarKeys) {
 
 export function normalizePageConfig(pageConfig) {
   const source = pageConfig ?? {};
-  const designDirection = normalizeDesignDirection(source.designDirection);
   const sourceTheme = source.theme ?? {};
   const sourceNav = source.nav ?? {};
   const sourceSearchSection = source.searchSection ?? {};
@@ -299,18 +244,9 @@ export function normalizePageConfig(pageConfig) {
 
   return {
     schemaVersion: Number.isFinite(source.schemaVersion) ? source.schemaVersion : DEFAULT_PAGE_CONFIG.schemaVersion,
-    designDirection,
     pageStyle: normalizePageStyle(source.pageStyle),
     theme: {
       brandColor: toTrimmedString(sourceTheme.brandColor) || DEFAULT_PAGE_CONFIG.theme.brandColor,
-      backgroundTone:
-        toTrimmedString(sourceTheme.backgroundTone) || STOREFRONT_BACKGROUND_TONES[designDirection],
-      titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(sourceTheme.titleTextColor)
-        ? sourceTheme.titleTextColor
-        : DEFAULT_PAGE_CONFIG.theme.titleTextColor,
-      typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(sourceTheme.typographyTone)
-        ? sourceTheme.typographyTone
-        : DEFAULT_PAGE_CONFIG.theme.typographyTone,
     },
     nav: {
       title: toTrimmedString(sourceNav.title),
