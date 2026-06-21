@@ -313,10 +313,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
     cardDesign: {
       visibleFields: normalizedCardFields,
       style: normalizedCardStyle,
-      elementConfig: normalizeCardElementConfig(
-        sourceCardDesign.elementConfig ??
-          deriveCardElementConfig(normalizedCardFields, normalizedCardStyle, sourceCardDesign.elementConfig),
-      ),
+      elementConfig: deriveCardElementConfig(normalizedCardFields, normalizedCardStyle, sourceCardDesign.elementConfig),
     },
     ...(normalizedAiDesign ? { aiDesign: normalizedAiDesign } : {}),
   };

@@ -167,7 +167,7 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
                 priceTextColor: 'default',
               },
               elementConfig: {
-                showImage: true,
+                showImage: false,
                 showProductName: true,
                 showSpec: false,
                 showNutrient: false,
@@ -422,7 +422,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
             representativeMediumCategory: 'Premium',
             layoutStyle: { variant: 'card-grid' },
             cardDesign: {
-              visibleFields: ['product_name', 'nutrient', 'tax_price'],
+              visibleFields: ['product_name', 'tax_price', 'nutrient'],
               style: {
                 layout: 'compact',
                 accentColor: '#2563eb',
@@ -436,7 +436,7 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
                 priceTextColor: 'default',
               },
               elementConfig: {
-                showImage: true,
+                showImage: false,
                 showProductName: true,
                 showSpec: false,
                 showNutrient: true,

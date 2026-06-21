@@ -50,6 +50,9 @@ export const DEFAULT_CARD_ELEMENT_CONFIG = {
   metaDensity: 'comfortable',
 };
 
+export const PRICE_FIELD_KEYS = ['zero_tax_price', 'tax_price', 'exempt_tax_price', 'price_subsidy'];
+export const NUTRIENT_FIELD_KEYS = ['nutrient', 'product_nutirent'];
+
 const DEFAULT_BLOCK_PROPS = {
   hero: {},
   productCategoryNav: {},
@@ -228,19 +231,23 @@ export function normalizeCardElementConfig(config) {
 export function deriveCardElementConfig(fields, style, elementConfig) {
   const visibleFields = Array.isArray(fields) ? fields : [];
   const sourceStyle = style ?? {};
-  const fallback = {
-    showImage: sourceStyle.imageSize !== 'hidden',
-    showProductName: true,
-    showSpec: visibleFields.includes('spec'),
-    showNutrient: visibleFields.includes('nutrient'),
-    showPrice: ['zero_tax_price', 'tax_price', 'exempt_tax_price'].some((f) => visibleFields.includes(f)),
-    showBadge: true,
+  const source = elementConfig ?? {};
+  const styleDefaults = {
     imageSize: sourceStyle.imageSize,
     imageFit: sourceStyle.imageFit,
     metaDensity: sourceStyle.layout === 'compact' || sourceStyle.cardSpacing === 'tight' ? 'compact' : 'comfortable',
+    showBadge: true,
   };
 
-  return normalizeCardElementConfig({ ...fallback, ...(elementConfig ?? {}) });
+  return normalizeCardElementConfig({
+    ...styleDefaults,
+    ...source,
+    showImage: visibleFields.includes('img_url'),
+    showProductName: true,
+    showSpec: visibleFields.includes('spec'),
+    showNutrient: NUTRIENT_FIELD_KEYS.some((field) => visibleFields.includes(field)),
+    showPrice: PRICE_FIELD_KEYS.some((field) => visibleFields.includes(field)),
+  });
 }
 
 export function findMobileUiBlock(mobileUiTree, type) {
