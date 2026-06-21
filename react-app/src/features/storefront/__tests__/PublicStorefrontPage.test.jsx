@@ -228,7 +228,7 @@ describe('PublicStorefrontPage', () => {
             representativeMediumCategory: 'Premium',
             layoutStyle: { variant: 'card-grid' },
             cardDesign: {
-              visibleFields: ['product_name', 'tax_price'],
+              visibleFields: ['product_name', 'img_url', 'tax_price'],
               style: {
                 layout: 'compact',
                 accentColor: '#2563eb',
@@ -310,14 +310,9 @@ describe('PublicStorefrontPage', () => {
             representativeMediumCategory: 'Premium',
             layoutStyle: { variant: 'card-grid' },
             cardDesign: {
-              visibleFields: ['product_name', 'spec', 'tax_price'],
+              visibleFields: ['product_name', 'spec'],
               style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
               elementConfig: {
-                showImage: false,
-                showProductName: true,
-                showSpec: true,
-                showNutrient: false,
-                showPrice: false,
                 showBadge: true,
                 imageSize: 'hidden',
                 imageFit: 'cover',
