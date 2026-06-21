@@ -1,3 +1,4 @@
+import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/pageStyleModel';
 import { MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
 import { useStorefrontView } from '../hooks/useStorefrontView';
 import CardGridSection from './CardGridSection';
@@ -282,8 +283,8 @@ export default function StorefrontView({ config, productRows }) {
 
   return (
     <div
-      className={`${styles.page} ${styles[`theme-${view.designDirection}`] || ''}`}
-      data-design-direction={view.designDirection}
+      className={styles.page}
+      data-testid="storefront-page"
       style={{
         '--brand-color': view.brandColor,
         '--chip-accent': view.chipAccentColor,
@@ -291,6 +292,17 @@ export default function StorefrontView({ config, productRows }) {
         '--typography-heading-weight': view.typographyToneValue.headingWeight,
         '--typography-body-weight': view.typographyToneValue.bodyWeight,
         '--typography-letter-spacing': view.typographyToneValue.letterSpacing,
+        '--page-bg': view.pageStyle.palette.backgroundHex,
+        '--page-search-min-height': PAGE_STYLE_SEARCH_SIZE_VALUES[view.pageStyle.search.sizeToken].minHeight,
+        '--page-search-font-size': PAGE_STYLE_SEARCH_SIZE_VALUES[view.pageStyle.search.sizeToken].fontSize,
+        '--page-search-border-width': PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES[view.pageStyle.search.borderStrengthToken],
+        '--page-search-border-color': view.pageStyle.search.borderColorHex,
+        '--page-search-focus-border-color': view.pageStyle.search.focusBorderColorHex,
+        '--page-chip-bg': view.pageStyle.categoryChips.backgroundHex,
+        '--page-chip-text': view.pageStyle.categoryChips.textHex,
+        '--page-chip-border': view.pageStyle.categoryChips.borderColorHex,
+        '--page-chip-active-bg': view.pageStyle.categoryChips.activeBackgroundHex,
+        '--page-chip-active-text': view.pageStyle.categoryChips.activeTextHex,
         ...buildStorefrontRegionStyleVars(regionStyles),
       }}
     >

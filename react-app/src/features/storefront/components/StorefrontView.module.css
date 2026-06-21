@@ -7,26 +7,6 @@
   background: var(--page-bg, #f3f1ec);
 }
 
-.theme-friendly {
-  background: var(--page-bg, #f0f5f0);
-}
-
-.theme-warm {
-  background: var(--page-bg, #fbf1e6);
-}
-
-.theme-green {
-  background: var(--page-bg, #eef5ea);
-}
-
-.theme-trust {
-  background: var(--page-bg, #eef3fb);
-}
-
-.theme-white {
-  background: var(--page-bg, #ffffff);
-}
-
 .hero {
   display: flex;
   flex-direction: column;
@@ -325,9 +305,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: var(--search-min-height, 40px);
+  min-height: var(--search-min-height, var(--page-search-min-height, 40px));
   padding: 7px 12px;
-  border: 1px solid var(--search-border-color, rgba(29, 74, 46, 0.18));
+  border-width: var(--page-search-border-width, 1px);
+  border-style: solid;
+  border-color: var(--search-border-color, var(--page-search-border-color, rgba(29, 74, 46, 0.18)));
   border-radius: var(--search-radius, var(--corp-radius));
   background: #ffffff;
   transition:
@@ -348,7 +330,7 @@
 }
 
 .searchBox:focus-within {
-  border-color: var(--search-accent, var(--brand-color, var(--corp-primary)));
+  border-color: var(--search-accent, var(--page-search-focus-border-color, var(--brand-color, var(--corp-primary))));
   box-shadow: var(--corp-focus-ring);
 }
 
@@ -360,7 +342,7 @@
   outline: none;
   background: transparent;
   color: var(--search-accent, #173223);
-  font-size: var(--search-font-size, 0.94rem);
+  font-size: var(--search-font-size, var(--page-search-font-size, 0.94rem));
 }
 
 .searchInput::placeholder {
@@ -434,10 +416,12 @@
   flex: 0 0 auto;
   min-height: var(--category-chip-height, 32px);
   padding: 0 14px;
-  border: 1px solid rgba(29, 74, 46, 0.16);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--page-chip-border, rgba(29, 74, 46, 0.16));
   border-radius: var(--category-chip-radius, 999px);
-  background: #ffffff;
-  color: #5f6d5b;
+  background: var(--page-chip-bg, #ffffff);
+  color: var(--page-chip-text, #5f6d5b);
   font-size: var(--category-chip-font-size, 0.8rem);
   font-weight: 600;
   white-space: nowrap;
@@ -468,7 +452,8 @@
 }
 
 .categoryChipActive {
-  color: #173223;
+  background: var(--page-chip-active-bg, transparent);
+  color: var(--page-chip-active-text, #173223);
   font-weight: 700;
 }
 
@@ -483,9 +468,9 @@
 }
 
 .categoryWrapSoft .categoryChipActive {
-  background: color-mix(in srgb, var(--category-chip-accent, var(--chip-accent, var(--corp-primary))) 14%, #ffffff);
-  border-color: color-mix(in srgb, var(--category-chip-accent, var(--chip-accent, var(--corp-primary))) 40%, #dfe9dc);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--category-chip-accent, var(--chip-accent, var(--corp-primary))) 22%, transparent);
+  background: color-mix(in srgb, var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))) 14%, #ffffff);
+  border-color: color-mix(in srgb, var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))) 40%, #dfe9dc);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))) 22%, transparent);
 }
 
 .categoryWrapOutline .categoryChip {
@@ -494,8 +479,8 @@
 }
 
 .categoryWrapOutline .categoryChipActive {
-  border-color: var(--category-chip-accent, var(--chip-accent, var(--corp-primary)));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--category-chip-accent, var(--chip-accent, var(--corp-primary))) 24%, transparent);
+  border-color: var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))) 24%, transparent);
 }
 
 .categoryWrapFilled .categoryChip {
@@ -504,9 +489,9 @@
 }
 
 .categoryWrapFilled .categoryChipActive {
-  background: var(--category-chip-accent, var(--chip-accent, var(--corp-primary)));
-  color: #ffffff;
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--category-chip-accent, var(--chip-accent, var(--corp-primary))) 30%, transparent);
+  background: var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))));
+  color: var(--page-chip-active-text, #ffffff);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--category-chip-accent, var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))) 30%, transparent);
 }
 
 .categoryWrap[data-category-layout='wrap'] {

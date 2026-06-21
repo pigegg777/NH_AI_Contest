@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchAllOfficeProductRows } from '../../office-product-editor/services/officeProductDataService';
 import { CARD_STYLE_FONT_SIZE_REM, CARD_STYLE_PRICE_TEXT_COLOR_VALUES } from '../model/cardStyleModel';
-import { TITLE_TEXT_COLOR_VALUES, TYPOGRAPHY_TONE_VALUES } from '../model/storefrontBuilderModel';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
@@ -628,13 +627,24 @@ describe('PublicStorefrontPage', () => {
     expect(within(rail).getByRole('button', { name: 'Control' })).toBeInTheDocument();
   });
 
-  it('renders an image-left card template with muted price color and bold typography', async () => {
+  it('renders an image-left card template with muted price color and a custom header style', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: {
-        schemaVersion: 2,
-        designDirection: 'trust',
-        theme: { brandColor: '#2563eb', backgroundTone: 'sky', titleTextColor: 'ink', typographyTone: 'bold' },
+        schemaVersion: 1,
+        pageStyle: {
+          schemaVersion: 1,
+          palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },
+          header: { titleColorHex: '#0f172a', letterSpacing: '-0.01em', fontWeight: 750 },
+          search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#bcd2ef', focusBorderColorHex: '#2563eb' },
+          categoryChips: {
+            backgroundHex: '#ffffff',
+            textHex: '#1d4ed8',
+            borderColorHex: '#bcd2ef',
+            activeBackgroundHex: '#2563eb',
+            activeTextHex: '#ffffff',
+          },
+        },
         nav: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', logoUrl: '' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
         categoryChips: { enabled: true, sticky: true },
@@ -678,9 +688,10 @@ describe('PublicStorefrontPage', () => {
     const cardEl = screen.getByRole('article');
     expect(cardEl.className).toMatch(/cardImageLeft/);
 
-    const pageEl = container.querySelector('[data-design-direction]');
-    expect(pageEl.style.getPropertyValue('--title-text-color')).toBe(TITLE_TEXT_COLOR_VALUES.ink);
-    expect(pageEl.style.getPropertyValue('--typography-heading-weight')).toBe(String(TYPOGRAPHY_TONE_VALUES.bold.headingWeight));
+    const pageEl = screen.getByTestId('storefront-page');
+    expect(pageEl.style.getPropertyValue('--title-text-color')).toBe('#0f172a');
+    expect(pageEl.style.getPropertyValue('--typography-heading-weight')).toBe('750');
+    expect(pageEl.style.getPropertyValue('--page-chip-active-bg')).toBe('#2563eb');
   });
 
   it('reorders fields price-first under the price-focus template', async () => {
