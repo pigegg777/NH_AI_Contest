@@ -1,0 +1,97 @@
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { DEFAULT_PAGE_AI_DESIGN } from '../model/pageAiDesignModel';
+import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
+import { usePageAiDesign } from '../hooks/usePageAiDesign';
+import { interpretPageAiDesign } from '../services/pageStyleAiInterpreter';
+import { compilePageStyle } from '../services/pageStyleCompiler';
+
+vi.mock('../services/pageStyleAiInterpreter', () => ({ interpretPageAiDesign: vi.fn() }));
+vi.mock('../services/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
+
+describe('usePageAiDesign', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('starts with the white default pageStyle and empty prompts', () => {
+    const { result } = renderHook(() => usePageAiDesign());
+
+    expect(result.current.pageStyle).toEqual(DEFAULT_PAGE_STYLE);
+    expect(result.current.pageAiDesign).toEqual(DEFAULT_PAGE_AI_DESIGN);
+  });
+
+  it('hydratePageStyle replaces pageStyle and resets the session prompts', () => {
+    const { result } = renderHook(() => usePageAiDesign());
+
+    act(() => result.current.setMainPrompt('warm'));
+
+    const stored = { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#2563eb' } };
+
+    act(() => result.current.hydratePageStyle(stored));
+
+    expect(result.current.pageStyle.palette.accentHex).toBe('#2563eb');
+    expect(result.current.pageAiDesign.mainPrompt).toBe('');
+  });
+
+  it('rejects applying with no main prompt and leaves pageStyle untouched', async () => {
+    const { result } = renderHook(() => usePageAiDesign());
+
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+
+    expect(interpretPageAiDesign).not.toHaveBeenCalled();
+    expect(result.current.pageAiErrorMessage).not.toBe('');
+    expect(result.current.pageStyle).toEqual(DEFAULT_PAGE_STYLE);
+  });
+
+  it('applies a successful interpretation+compile and updates pageStyle', async () => {
+    const compiledStyle = { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#ea580c' } };
+    interpretPageAiDesign.mockResolvedValue({ palette: compiledStyle.palette, header: null, categoryChips: null, search: null });
+    compilePageStyle.mockReturnValue(compiledStyle);
+
+    const { result } = renderHook(() => usePageAiDesign());
+
+    act(() => result.current.setMainPrompt('warm'));
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+
+    expect(result.current.pageStyle).toEqual(compiledStyle);
+    expect(result.current.pageAiErrorMessage).toBe('');
+    expect(result.current.isApplyingPageAiDesign).toBe(false);
+  });
+
+  it('keeps the last valid pageStyle and surfaces an error when interpretation fails', async () => {
+    interpretPageAiDesign.mockRejectedValue(new Error('network down'));
+
+    const { result } = renderHook(() => usePageAiDesign());
+
+    act(() => result.current.setMainPrompt('warm'));
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+
+    expect(result.current.pageStyle).toEqual(DEFAULT_PAGE_STYLE);
+    expect(result.current.pageAiErrorMessage).toBe('network down');
+  });
+
+  it('discardPageAiDesignSession clears the prompts but keeps the compiled pageStyle', async () => {
+    const compiledStyle = { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#7c3aed' } };
+    interpretPageAiDesign.mockResolvedValue({ palette: compiledStyle.palette, header: null, categoryChips: null, search: null });
+    compilePageStyle.mockReturnValue(compiledStyle);
+
+    const { result } = renderHook(() => usePageAiDesign());
+
+    act(() => result.current.setMainPrompt('cool purple'));
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+    act(() => result.current.discardPageAiDesignSession());
+
+    expect(result.current.pageAiDesign).toEqual(DEFAULT_PAGE_AI_DESIGN);
+    expect(result.current.pageStyle).toEqual(compiledStyle);
+  });
+});
