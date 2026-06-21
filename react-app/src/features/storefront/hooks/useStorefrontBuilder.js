@@ -4,7 +4,6 @@ import { fetchOfficeProductDataEntries } from '../../office-product-editor/servi
 import { normalizeCardStyle } from '../model/cardStyleModel';
 import { DEFAULT_STOREFRONT_EDIT_POLICY, normalizeStorefrontAiDesign } from '../model/storefrontAiDesignModel';
 import {
-  DEFAULT_CARD_FIELDS,
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
   buildStorefrontSavePayload,
@@ -13,29 +12,20 @@ import {
   deriveProductCategoryOptions,
   findCategoryConfigRow,
   flattenProductEntries,
-  normalizeCardFields,
   normalizeNavConfig,
   normalizePageConfig,
   resolveCategoryDraft,
 } from '../model/storefrontBuilderModel';
-import {
-  DEFAULT_CARD_ELEMENT_CONFIG,
-  normalizeCardElementConfig,
-  sanitizeMobileUiTree,
-} from '../model/storefrontUiModel';
+import { DEFAULT_CARD_ELEMENT_CONFIG, normalizeCardElementConfig, sanitizeMobileUiTree } from '../model/storefrontUiModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 import { requestStorefrontAiSuggestion } from '../services/storefrontAiService';
+import { useDataSelectionDraft } from './useDataSelectionDraft';
 import { usePageAiDesign } from './usePageAiDesign';
 
 const FETCH_ERROR_MESSAGE = 'We could not load the storefront builder.';
 const SAVE_ERROR_MESSAGE = 'We could not save the storefront draft.';
-const FINAL_STEP_INDEX = 1;
-const CARD_ELEMENT_FIELD_MAP = {
-  showProductName: 'product_name',
-  showSpec: 'spec',
-  showNutrient: 'nutrient',
-  showPrice: 'tax_price',
-};
+const DATA_SELECTION_STEP_INDEX = 1;
+const FINAL_STEP_INDEX = 2;
 
 function getInitialCategoryName(productEntries, existingConfig) {
   const existingCategoryName = findCategoryConfigRow(
@@ -63,7 +53,6 @@ export function useStorefrontBuilder({ officeCode }) {
   const [representativeMediumCategory, setRepresentativeMediumCategory] = useState('');
   const pageAi = usePageAiDesign();
   const [cardStyle, setCardStyleState] = useState(() => normalizeCardStyle());
-  const [cardFields, setCardFields] = useState(DEFAULT_CARD_FIELDS);
   const [cardElementConfig, setCardElementConfig] = useState(DEFAULT_CARD_ELEMENT_CONFIG);
   const [cardTemplate, setCardTemplateState] = useState('card-grid');
   const [navConfig, setNavConfig] = useState(DEFAULT_NAV_CONFIG);
@@ -83,6 +72,7 @@ export function useStorefrontBuilder({ officeCode }) {
   const availableCategoryFields = deriveAvailableCategoryFields(currentEntry?.rows);
   const availableScalarKeys = availableCategoryFields.filter((f) => f.isSelectable).map((f) => f.key);
   const effectiveScalarKeys = availableScalarKeys.length > 0 ? availableScalarKeys : undefined;
+  const dataSelection = useDataSelectionDraft({ allowedScalarKeys: effectiveScalarKeys, initialFields: ['product_name'] });
 
   function markDirty() {
     setStatus((current) => (current === 'saved' ? 'ready' : current));
@@ -99,7 +89,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setSelectedProductCategoryName(resolvedCategoryName);
     setSelectedMediumCategories(resolvedDraft.selectedMediumCategories);
     setRepresentativeMediumCategory(resolvedDraft.representativeMediumCategory);
-    setCardFields(resolvedDraft.cardFields);
+    dataSelection.reset(resolvedDraft.cardFields);
     setCardStyleState(resolvedDraft.cardStyle);
     setCardElementConfig(resolvedDraft.cardElementConfig);
     setCardTemplateState(resolvedDraft.cardTemplate);
@@ -173,36 +163,12 @@ export function useStorefrontBuilder({ officeCode }) {
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
   }
 
-  function toggleCardField(field) {
-    markDirty();
-    setAiDesign(null);
-    setCardFields((current) => {
-      const nextFields = current.includes(field) ? current.filter((value) => value !== field) : [...current, field];
-      const normalizedFields = normalizeCardFields(nextFields, effectiveScalarKeys);
-      const cardElementKey = Object.keys(CARD_ELEMENT_FIELD_MAP).find((key) => CARD_ELEMENT_FIELD_MAP[key] === field);
-
-      if (cardElementKey) {
-        setCardElementConfig((currentConfig) =>
-          normalizeCardElementConfig({
-            ...currentConfig,
-            [cardElementKey]: normalizedFields.includes(field),
-          }),
-        );
-      }
-
-      return normalizedFields;
-    });
-  }
-
   function undoAiChanges() {
     if (!lastAiSnapshot) {
       return;
     }
 
     markDirty();
-    setSelectedMediumCategories(lastAiSnapshot.selectedMediumCategories);
-    setRepresentativeMediumCategory(lastAiSnapshot.representativeMediumCategory);
-    setCardFields(lastAiSnapshot.cardFields);
     setCardTemplateState(lastAiSnapshot.cardTemplate);
     setCardStyleState(lastAiSnapshot.cardStyle);
     setCardElementConfig(lastAiSnapshot.cardElementConfig);
@@ -215,7 +181,28 @@ export function useStorefrontBuilder({ officeCode }) {
   }
 
   function goNext() {
-    setCurrentStep((current) => Math.min(current + 1, FINAL_STEP_INDEX));
+    setCurrentStep((current) => {
+      if (current === DATA_SELECTION_STEP_INDEX && !dataSelection.isConfirmed) {
+        return current;
+      }
+
+      return Math.min(current + 1, FINAL_STEP_INDEX);
+    });
+  }
+
+  function confirmDataSelection() {
+    markDirty();
+    dataSelection.confirm();
+    setCardStyleState(normalizeCardStyle());
+    setCardElementConfig(DEFAULT_CARD_ELEMENT_CONFIG);
+    setCardTemplateState('card-grid');
+    setAiDesign(null);
+    setAiPrompt('');
+    setAiSummary('');
+    setAiChangeSummary([]);
+    setAiErrorMessage('');
+    setLastAiSnapshot(null);
+    setCurrentStep(FINAL_STEP_INDEX);
   }
 
   function goPrevious() {
@@ -230,13 +217,13 @@ export function useStorefrontBuilder({ officeCode }) {
       const suggestion = await requestStorefrontAiSuggestion({
         prompt: aiPrompt,
         mediumCategoryOptions,
-        fieldCatalog: availableCategoryFields,
+        fieldCatalog: availableCategoryFields.filter((field) => dataSelection.committed.includes(field.key)),
         editPolicy: DEFAULT_STOREFRONT_EDIT_POLICY,
         currentDraft: {
           productCategoryName: selectedProductCategoryName,
           selectedMediumCategories,
           representativeMediumCategory,
-          cardFields,
+          cardFields: dataSelection.committed,
           cardStyle,
           cardElementConfig,
           cardTemplate,
@@ -244,7 +231,7 @@ export function useStorefrontBuilder({ officeCode }) {
           mobileUiTree,
           aiDesign,
         },
-        allowedScalarKeys: effectiveScalarKeys,
+        allowedScalarKeys: dataSelection.committed,
       });
 
       const nextAiDesign = normalizeStorefrontAiDesign(
@@ -254,13 +241,10 @@ export function useStorefrontBuilder({ officeCode }) {
           designPlan: suggestion.designPlan,
           renderSpec: suggestion.renderSpec,
         },
-        effectiveScalarKeys,
+        dataSelection.committed,
       );
 
       const snapshot = {
-        selectedMediumCategories,
-        representativeMediumCategory,
-        cardFields,
         cardStyle,
         cardElementConfig,
         cardTemplate,
@@ -272,19 +256,9 @@ export function useStorefrontBuilder({ officeCode }) {
       };
 
       startTransition(() => {
-        const nextMediumCategories =
-          suggestion.patch.selectedMediumCategories.length > 0
-            ? suggestion.patch.selectedMediumCategories
-            : selectedMediumCategories;
-
         setHasStarted(true);
         setCurrentStep(FINAL_STEP_INDEX);
         setLastAiSnapshot(snapshot);
-        setSelectedMediumCategories(nextMediumCategories);
-        setRepresentativeMediumCategory(
-          suggestion.patch.representativeMediumCategory || nextMediumCategories[0] || representativeMediumCategory,
-        );
-        setCardFields(normalizeCardFields(suggestion.patch.cardFields, effectiveScalarKeys));
         setCardTemplateState(suggestion.patch.cardTemplate);
         setCardStyleState(normalizeCardStyle(suggestion.patch.cardStyle));
         setCardElementConfig(normalizeCardElementConfig(suggestion.patch.cardElementConfig));
@@ -314,7 +288,7 @@ export function useStorefrontBuilder({ officeCode }) {
         selectedMediumCategories,
         representativeMediumCategory,
         cardStyle,
-        cardFields,
+        cardFields: dataSelection.committed,
         cardElementConfig,
         navConfig,
         mobileUiTree,
@@ -345,7 +319,7 @@ export function useStorefrontBuilder({ officeCode }) {
           selectedMediumCategories,
           representativeMediumCategory,
           cardStyle,
-          cardFields,
+          cardFields: dataSelection.committed,
           cardElementConfig,
           navConfig,
           mobileUiTree,
@@ -373,7 +347,11 @@ export function useStorefrontBuilder({ officeCode }) {
     availableCategoryFields,
     selectedMediumCategories,
     representativeMediumCategory,
-    cardFields,
+    draftDataSelection: dataSelection.draft,
+    committedDataSelection: dataSelection.committed,
+    isDataSelectionConfirmed: dataSelection.isConfirmed,
+    toggleDraftField: dataSelection.toggleField,
+    confirmDataSelection,
     aiPrompt,
     aiSummary,
     aiChangeSummary,
@@ -393,7 +371,6 @@ export function useStorefrontBuilder({ officeCode }) {
     setAiPrompt,
     startSession,
     selectProductCategory,
-    toggleCardField,
     undoAiChanges,
     goNext,
     goPrevious,
