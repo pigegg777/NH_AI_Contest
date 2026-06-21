@@ -116,6 +116,7 @@ const EXISTING_CONFIG = {
 
 afterEach(() => {
   vi.clearAllMocks();
+  vi.unstubAllEnvs();
 });
 
 describe('StorefrontBuilderPage', () => {
@@ -504,6 +505,7 @@ describe('StorefrontBuilderPage', () => {
   }, 10000);
 
   it('applies a page-level AI prompt, previews immediately, and saves only the compiled pageStyle (discarding the prompt session)', async () => {
+    vi.stubEnv('VITE_OPENAI_API_KEY', '');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
