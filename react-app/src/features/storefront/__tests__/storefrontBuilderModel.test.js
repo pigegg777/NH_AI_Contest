@@ -7,6 +7,8 @@ import {
   resolveCategoryDraft,
   normalizeCategoryConfig,
   normalizePageConfig,
+  normalizeCardFields,
+  STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/storefrontBuilderModel';
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 
@@ -268,5 +270,38 @@ describe('buildStorefrontSavePayload pageStyle', () => {
     });
 
     expect(payload.pageConfig.pageStyle.palette.accentHex).toBe('#7c3aed');
+  });
+});
+
+describe('normalizeCardFields', () => {
+  it('always includes product_name even when omitted from input', () => {
+    expect(normalizeCardFields(['spec', 'tax_price'])).toEqual(
+      expect.arrayContaining(['product_name', 'spec', 'tax_price']),
+    );
+  });
+
+  it('sorts into canonical display order regardless of click order', () => {
+    expect(normalizeCardFields(['tax_price', 'product_name', 'spec'])).toEqual([
+      'product_name',
+      'spec',
+      'tax_price',
+    ]);
+  });
+
+  it('keeps product_name mandatory even when allowedScalarKeys restricts the field set', () => {
+    expect(normalizeCardFields(['tax_price'], ['product_name', 'tax_price', 'spec'])).toEqual([
+      'product_name',
+      'tax_price',
+    ]);
+  });
+
+  it('falls back to DEFAULT_CARD_FIELDS, still canonically sorted, when given nothing usable', () => {
+    expect(normalizeCardFields([])).toEqual(['product_name', 'spec', 'nutrient', 'tax_price']);
+  });
+
+  it('places img_url right after product_name in canonical order', () => {
+    expect(STOREFRONT_FIELD_DISPLAY_ORDER.indexOf('img_url')).toBe(
+      STOREFRONT_FIELD_DISPLAY_ORDER.indexOf('product_name') + 1,
+    );
   });
 });

@@ -25,6 +25,7 @@ export const STOREFRONT_FIELD_OPTIONS = [
 
 export const STOREFRONT_FIELD_LABELS = {
   product_name: '상품명',
+  img_url: '상품 이미지',
   spec: '규격',
   large_category: '대분류',
   medium_category: '중분류',
@@ -43,10 +44,12 @@ export const STOREFRONT_FIELD_LABELS = {
   product_usage: '작물별 용도',
 };
 
-// 상품명 -> 규격 -> 가격(영세/과세/면세/보조금) -> 분류(대/중/소/세) -> 성분 -> 링크
+// 상품명 -> 이미지 -> 규격 -> 성분 -> 가격(영세/과세/면세/보조금) -> 분류(대/중/소/세) -> 링크
 export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'product_name',
+  'img_url',
   'spec',
+  'nutrient',
   'zero_tax_price',
   'tax_price',
   'exempt_tax_price',
@@ -55,7 +58,6 @@ export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'medium_category',
   'small_category',
   'detail_category',
-  'nutrient',
   'product_nutirent',
   'product_url',
 ];
@@ -212,25 +214,35 @@ export function normalizeNavConfig(navConfig) {
 }
 
 export function normalizeCardFields(fields, allowedScalarKeys) {
-  if (Array.isArray(allowedScalarKeys) && allowedScalarKeys.length > 0) {
-    const nextFields = Array.isArray(fields)
+  const hasAllowedKeys = Array.isArray(allowedScalarKeys) && allowedScalarKeys.length > 0;
+  let nextFields;
+
+  if (hasAllowedKeys) {
+    nextFields = Array.isArray(fields)
       ? fields.filter((field, index) => allowedScalarKeys.includes(field) && fields.indexOf(field) === index)
       : [];
 
-    if (nextFields.length > 0) return nextFields;
+    if (nextFields.length === 0) {
+      const fallback = DEFAULT_CARD_FIELDS.filter((f) => allowedScalarKeys.includes(f));
+      nextFields = fallback.length > 0 ? fallback : [allowedScalarKeys[0]];
+    }
+  } else {
+    nextFields = Array.isArray(fields)
+      ? fields.filter(
+          (field, index) => typeof field === 'string' && field.trim() !== '' && fields.indexOf(field) === index,
+        )
+      : [];
 
-    const fallback = DEFAULT_CARD_FIELDS.filter((f) => allowedScalarKeys.includes(f));
-    return fallback.length > 0 ? fallback : [allowedScalarKeys[0]];
+    if (nextFields.length === 0) {
+      nextFields = DEFAULT_CARD_FIELDS;
+    }
   }
 
-  const nextFields = Array.isArray(fields)
-    ? fields.filter(
-        (field, index) =>
-          typeof field === 'string' && field.trim() !== '' && fields.indexOf(field) === index,
-      )
-    : [];
+  const isProductNameAllowed = !hasAllowedKeys || allowedScalarKeys.includes('product_name');
+  const withMandatoryField =
+    isProductNameAllowed && !nextFields.includes('product_name') ? ['product_name', ...nextFields] : nextFields;
 
-  return nextFields.length > 0 ? nextFields : DEFAULT_CARD_FIELDS;
+  return sortFieldKeysByDisplayOrder(withMandatoryField);
 }
 
 export function normalizePageConfig(pageConfig) {
