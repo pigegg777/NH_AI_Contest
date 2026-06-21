@@ -141,6 +141,14 @@ export function deriveAvailableCategoryFields(rows) {
   }));
 }
 
+export function deriveEffectiveScalarKeys(rows) {
+  const scalarKeys = deriveAvailableCategoryFields(rows)
+    .filter((field) => field.isSelectable)
+    .map((field) => field.key);
+
+  return scalarKeys.length > 0 ? scalarKeys : undefined;
+}
+
 export const DEFAULT_NAV_CONFIG = {
   title: '',
   subtitle: '',

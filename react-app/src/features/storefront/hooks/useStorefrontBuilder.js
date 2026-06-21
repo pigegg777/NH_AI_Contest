@@ -8,6 +8,7 @@ import {
   DEFAULT_PAGE_CONFIG,
   buildStorefrontSavePayload,
   deriveAvailableCategoryFields,
+  deriveEffectiveScalarKeys,
   deriveMediumCategoryOptions,
   deriveProductCategoryOptions,
   findCategoryConfigRow,
@@ -70,8 +71,7 @@ export function useStorefrontBuilder({ officeCode }) {
   const mediumCategoryOptions = deriveMediumCategoryOptions(currentEntry?.rows);
   const productCategoryOptions = deriveProductCategoryOptions(productEntries, existingConfig);
   const availableCategoryFields = deriveAvailableCategoryFields(currentEntry?.rows);
-  const availableScalarKeys = availableCategoryFields.filter((f) => f.isSelectable).map((f) => f.key);
-  const effectiveScalarKeys = availableScalarKeys.length > 0 ? availableScalarKeys : undefined;
+  const effectiveScalarKeys = deriveEffectiveScalarKeys(currentEntry?.rows);
   const dataSelection = useDataSelectionDraft({ allowedScalarKeys: effectiveScalarKeys, initialFields: ['product_name'] });
 
   function markDirty() {
@@ -89,7 +89,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setSelectedProductCategoryName(resolvedCategoryName);
     setSelectedMediumCategories(resolvedDraft.selectedMediumCategories);
     setRepresentativeMediumCategory(resolvedDraft.representativeMediumCategory);
-    dataSelection.reset(resolvedDraft.cardFields);
+    dataSelection.reset(resolvedDraft.cardFields, deriveEffectiveScalarKeys(resolvedDraft.entry?.rows));
     setCardStyleState(resolvedDraft.cardStyle);
     setCardElementConfig(resolvedDraft.cardElementConfig);
     setCardTemplateState(resolvedDraft.cardTemplate);

@@ -23,8 +23,8 @@ export function useDataSelectionDraft({ allowedScalarKeys, initialFields } = {})
     setCommitted(draft);
   }
 
-  function reset(nextFields) {
-    const normalized = normalizeCardFields(nextFields, allowedScalarKeys);
+  function reset(nextFields, allowedScalarKeysOverride) {
+    const normalized = normalizeCardFields(nextFields, allowedScalarKeysOverride ?? allowedScalarKeys);
     setDraft(normalized);
     setCommitted(normalized);
   }
