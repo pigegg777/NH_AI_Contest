@@ -25,6 +25,7 @@ import {
 } from '../model/storefrontUiModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 import { requestStorefrontAiSuggestion } from '../services/storefrontAiService';
+import { usePageAiDesign } from './usePageAiDesign';
 
 const FETCH_ERROR_MESSAGE = 'We could not load the storefront builder.';
 const SAVE_ERROR_MESSAGE = 'We could not save the storefront draft.';
@@ -60,9 +61,7 @@ export function useStorefrontBuilder({ officeCode }) {
   const [selectedProductCategoryName, setSelectedProductCategoryName] = useState('');
   const [selectedMediumCategories, setSelectedMediumCategories] = useState([]);
   const [representativeMediumCategory, setRepresentativeMediumCategory] = useState('');
-  const [designDirection, setDesignDirectionState] = useState(DEFAULT_PAGE_CONFIG.designDirection);
-  const [titleTextColor, setTitleTextColor] = useState(DEFAULT_PAGE_CONFIG.theme.titleTextColor);
-  const [typographyTone, setTypographyTone] = useState(DEFAULT_PAGE_CONFIG.theme.typographyTone);
+  const pageAi = usePageAiDesign();
   const [cardStyle, setCardStyleState] = useState(() => normalizeCardStyle());
   const [cardFields, setCardFields] = useState(DEFAULT_CARD_FIELDS);
   const [cardElementConfig, setCardElementConfig] = useState(DEFAULT_CARD_ELEMENT_CONFIG);
@@ -127,9 +126,7 @@ export function useStorefrontBuilder({ officeCode }) {
         setProductEntries(nextProductEntries);
         setExistingConfig(config);
         setHiddenProducts(config?.hiddenProducts ?? []);
-        setDesignDirectionState(normalizedPageConfig.designDirection);
-        setTitleTextColor(normalizedPageConfig.theme.titleTextColor);
-        setTypographyTone(normalizedPageConfig.theme.typographyTone);
+        pageAi.hydratePageStyle(normalizedPageConfig.pageStyle);
         setMobileUiTree(sanitizeMobileUiTree(normalizedPageConfig.mobileUiTree));
         setNavConfig(
           normalizeNavConfig({
@@ -176,12 +173,6 @@ export function useStorefrontBuilder({ officeCode }) {
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
   }
 
-  function setDesignDirection(value) {
-    markDirty();
-    setAiDesign(null);
-    setDesignDirectionState(value);
-  }
-
   function toggleCardField(field) {
     markDirty();
     setAiDesign(null);
@@ -209,9 +200,6 @@ export function useStorefrontBuilder({ officeCode }) {
     }
 
     markDirty();
-    setDesignDirectionState(lastAiSnapshot.designDirection);
-    setTitleTextColor(lastAiSnapshot.titleTextColor);
-    setTypographyTone(lastAiSnapshot.typographyTone);
     setSelectedMediumCategories(lastAiSnapshot.selectedMediumCategories);
     setRepresentativeMediumCategory(lastAiSnapshot.representativeMediumCategory);
     setCardFields(lastAiSnapshot.cardFields);
@@ -248,9 +236,6 @@ export function useStorefrontBuilder({ officeCode }) {
           productCategoryName: selectedProductCategoryName,
           selectedMediumCategories,
           representativeMediumCategory,
-          designDirection,
-          titleTextColor,
-          typographyTone,
           cardFields,
           cardStyle,
           cardElementConfig,
@@ -275,9 +260,6 @@ export function useStorefrontBuilder({ officeCode }) {
       const snapshot = {
         selectedMediumCategories,
         representativeMediumCategory,
-        designDirection,
-        titleTextColor,
-        typographyTone,
         cardFields,
         cardStyle,
         cardElementConfig,
@@ -298,9 +280,6 @@ export function useStorefrontBuilder({ officeCode }) {
         setHasStarted(true);
         setCurrentStep(FINAL_STEP_INDEX);
         setLastAiSnapshot(snapshot);
-        setDesignDirectionState(suggestion.patch.designDirection || designDirection);
-        setTitleTextColor(suggestion.patch.titleTextColor);
-        setTypographyTone(suggestion.patch.typographyTone);
         setSelectedMediumCategories(nextMediumCategories);
         setRepresentativeMediumCategory(
           suggestion.patch.representativeMediumCategory || nextMediumCategories[0] || representativeMediumCategory,
@@ -338,12 +317,10 @@ export function useStorefrontBuilder({ officeCode }) {
         cardFields,
         cardElementConfig,
         navConfig,
-        designDirection,
-        titleTextColor,
-        typographyTone,
         mobileUiTree,
         cardTemplate,
         aiDesign,
+        pageStyle: pageAi.pageStyle,
         allowedScalarKeys: effectiveScalarKeys,
       });
 
@@ -351,6 +328,7 @@ export function useStorefrontBuilder({ officeCode }) {
       setExistingConfig(payload);
       setHiddenProducts(payload.hiddenProducts);
       setStatus('saved');
+      pageAi.discardPageAiDesignSession();
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
       setStatus('save-error');
@@ -370,17 +348,15 @@ export function useStorefrontBuilder({ officeCode }) {
           cardFields,
           cardElementConfig,
           navConfig,
-          designDirection,
-          titleTextColor,
-          typographyTone,
           mobileUiTree,
           cardTemplate,
           aiDesign,
+          pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
         })
       : {
           officeCode,
-          pageConfig: normalizePageConfig(existingConfig?.pageConfig),
+          pageConfig: normalizePageConfig({ ...existingConfig?.pageConfig, pageStyle: pageAi.pageStyle }),
           navConfig: normalizeNavConfig(existingConfig?.navConfig),
           categoryConfigs: existingConfig?.categoryConfigs ?? [],
           hiddenProducts,
@@ -397,7 +373,6 @@ export function useStorefrontBuilder({ officeCode }) {
     availableCategoryFields,
     selectedMediumCategories,
     representativeMediumCategory,
-    designDirection,
     cardFields,
     aiPrompt,
     aiSummary,
@@ -406,10 +381,18 @@ export function useStorefrontBuilder({ officeCode }) {
     isAiApplying,
     previewConfig,
     previewProductRows: allProductRows,
+    pageStyle: pageAi.pageStyle,
+    pageAiDesign: pageAi.pageAiDesign,
+    isApplyingPageAiDesign: pageAi.isApplyingPageAiDesign,
+    pageAiErrorMessage: pageAi.pageAiErrorMessage,
+    setPageMainPrompt: pageAi.setMainPrompt,
+    setPageHeaderOverridePrompt: pageAi.setHeaderOverridePrompt,
+    setPageCategoryChipsOverridePrompt: pageAi.setCategoryChipsOverridePrompt,
+    setPageSearchOverridePrompt: pageAi.setSearchOverridePrompt,
+    applyPageAiDesign: pageAi.applyPageAiDesign,
     setAiPrompt,
     startSession,
     selectProductCategory,
-    setDesignDirection,
     toggleCardField,
     undoAiChanges,
     goNext,

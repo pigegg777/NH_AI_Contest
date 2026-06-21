@@ -539,9 +539,6 @@ export function buildStorefrontSavePayload({
   cardFields,
   cardElementConfig,
   navConfig,
-  designDirection,
-  titleTextColor,
-  typographyTone,
   mobileUiTree,
   cardTemplate,
   aiDesign,
@@ -550,7 +547,6 @@ export function buildStorefrontSavePayload({
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
   const resolvedNavConfig = normalizeNavConfig({ ...(existingConfig?.navConfig ?? {}), ...(navConfig ?? {}) });
-  const nextDesignDirection = normalizeDesignDirection(designDirection ?? basePageConfig.designDirection);
   const nextMobileUiTree = normalizeMobileUiTree(mobileUiTree ?? basePageConfig.mobileUiTree, {
     searchEnabled: basePageConfig.searchSection.enabled,
     categoryChipsEnabled: basePageConfig.categoryChips.enabled,
@@ -559,14 +555,10 @@ export function buildStorefrontSavePayload({
   const categoryChipsBlock = nextMobileUiTree.find((block) => block.type === 'categoryChips');
   const nextPageConfig = normalizePageConfig({
     ...basePageConfig,
-    designDirection: nextDesignDirection,
     pageStyle: pageStyle ?? basePageConfig.pageStyle,
     theme: {
       ...basePageConfig.theme,
       brandColor: resolvedNavConfig.brandColor,
-      backgroundTone: STOREFRONT_BACKGROUND_TONES[nextDesignDirection],
-      titleTextColor: TITLE_TEXT_COLOR_OPTIONS.includes(titleTextColor) ? titleTextColor : basePageConfig.theme.titleTextColor,
-      typographyTone: TYPOGRAPHY_TONE_OPTIONS.includes(typographyTone) ? typographyTone : basePageConfig.theme.typographyTone,
     },
     nav: {
       ...basePageConfig.nav,
