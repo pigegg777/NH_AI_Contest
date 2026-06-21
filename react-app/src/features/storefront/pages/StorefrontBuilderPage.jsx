@@ -1,9 +1,12 @@
 import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
-import AiStudioStep from '../components/AiStudioStep';
+import CardDesignStep from '../components/CardDesignStep';
+import DataSelectionStep from '../components/DataSelectionStep';
 import ProductCategoryStep from '../components/ProductCategoryStep';
 import StorefrontView from '../components/StorefrontView';
 import { useStorefrontBuilder } from '../hooks/useStorefrontBuilder';
 import styles from './StorefrontBuilderPage.module.css';
+
+const STEP_COMPONENTS = [ProductCategoryStep, DataSelectionStep, CardDesignStep];
 
 export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
   const builder = useStorefrontBuilder({ officeCode });
@@ -11,7 +14,9 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
   if (builder.status === 'loading') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.statusMessage}>스토어프론트 빌더를 불러오는 중...</div>
+        <div className={panelStyles.statusMessage}>
+          스토어프론트 빌더를 불러오는 중...
+        </div>
       </div>
     );
   }
@@ -19,7 +24,9 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
   if (builder.status === 'error') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.errorBox}>스토어프론트 빌더를 불러오지 못했습니다.</div>
+        <div className={panelStyles.errorBox}>
+          스토어프론트 빌더를 불러오지 못했습니다.
+        </div>
       </div>
     );
   }
@@ -38,8 +45,8 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
               </div>
 
               <p className={styles.description}>
-                먼저 페이지 분위기를 정하고 생성할 상품 카테고리를 선택한 뒤, AI에게 원하는 방향을 입력해
-                스토어프론트 초안을 만들어보세요.
+                먼저 페이지 분위기를 정하고 생성할 상품 카테고리를 선택한 뒤,
+                AI에게 원하는 방향을 입력해 스토어프론트 초안을 만들어보세요.
               </p>
 
               <div className={styles.actions}>
@@ -51,20 +58,14 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
                 >
                   시작하기
                 </button>
-                {typeof onGoHome === 'function' ? (
-                  <button type="button" className={styles.secondaryButton} onClick={onGoHome}>
-                    대시보드로 돌아가기
-                  </button>
-                ) : null}
               </div>
             </section>
           ) : (
             <>
-              {builder.currentStep === 0 ? (
-                <ProductCategoryStep builder={builder} />
-              ) : (
-                <AiStudioStep builder={builder} />
-              )}
+              {(() => {
+                const StepComponent = STEP_COMPONENTS[builder.currentStep];
+                return <StepComponent builder={builder} />;
+              })()}
 
               <div className={styles.stepNavActions}>
                 {builder.currentStep > 0 ? (
@@ -77,19 +78,23 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
                     이전
                   </button>
                 ) : null}
-                {builder.currentStep < 1 ? (
+                {builder.currentStep === 0 ? (
                   <button
                     type="button"
                     className={styles.primaryButton}
                     data-testid="builder-go-next"
                     onClick={builder.goNext}
-                    disabled={builder.currentStep === 0 && !builder.selectedProductCategoryName}
+                    disabled={!builder.selectedProductCategoryName}
                   >
                     다음
                   </button>
                 ) : null}
                 {typeof onGoHome === 'function' ? (
-                  <button type="button" className={styles.secondaryButton} onClick={onGoHome}>
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={onGoHome}
+                  >
                     대시보드로 돌아가기
                   </button>
                 ) : null}
@@ -97,7 +102,8 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
 
               {builder.status === 'save-error' ? (
                 <div className={panelStyles.errorBox}>
-                  {builder.errorMessage || '스토어프론트 초안을 저장하지 못했습니다.'}
+                  {builder.errorMessage ||
+                    '스토어프론트 초안을 저장하지 못했습니다.'}
                 </div>
               ) : null}
             </>
@@ -108,15 +114,23 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
           <div className={styles.previewHeader}>
             <div>
               <p className={styles.eyebrow}>실시간 미리보기</p>
-              <h3 className={styles.previewTitle}>모바일 스토어프론트 미리보기</h3>
+              <h3 className={styles.previewTitle}>
+                모바일 스토어프론트 미리보기
+              </h3>
             </div>
           </div>
 
           <div className={styles.previewStage}>
-            <div className={styles.previewDevice} data-testid="mobile-preview-device">
+            <div
+              className={styles.previewDevice}
+              data-testid="mobile-preview-device"
+            >
               <div className={styles.previewDeviceSpeaker} />
               <div className={styles.previewDeviceScreen}>
-                <StorefrontView config={builder.previewConfig} productRows={builder.previewProductRows} />
+                <StorefrontView
+                  config={builder.previewConfig}
+                  productRows={builder.previewProductRows}
+                />
               </div>
             </div>
           </div>

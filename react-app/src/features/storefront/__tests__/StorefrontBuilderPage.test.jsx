@@ -138,7 +138,7 @@ describe('StorefrontBuilderPage', () => {
     expect(await screen.findByText('스토어프론트 빌더를 불러오지 못했습니다.')).toBeInTheDocument();
   });
 
-  it('shows the card field table and syncs preview visibility with the selected fields', async () => {
+  it('shows the grouped data-selection table, updates the neutral preview live, and only updates the design preview after confirming', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -149,27 +149,32 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
 
-    const table = screen.getByTestId('card-field-table');
-    const preview = screen.getByTestId('mobile-preview-device');
+    const table = screen.getByTestId('data-field-table-description');
+    const neutralPreview = screen.getByTestId('data-selection-preview-grid');
+    const designPreview = screen.getByTestId('mobile-preview-device');
 
-    expect(within(table).getByTestId('card-field-example-product_name')).toHaveTextContent('Alpha');
-    expect(within(table).getByTestId('card-field-example-nutrient')).toHaveTextContent('18-18-18');
-    expect(within(preview).queryByText('18-18-18')).not.toBeInTheDocument();
+    expect(within(table).getByTestId('data-field-example-product_name')).toHaveTextContent('Alpha');
+    expect(within(designPreview).queryByText('18-18-18')).not.toBeInTheDocument();
+    expect(within(neutralPreview).queryByText('18-18-18')).not.toBeInTheDocument();
 
-    await user.click(within(table).getByTestId('card-field-toggle-nutrient'));
+    await user.click(within(table).getByTestId('data-field-toggle-nutrient'));
 
     await waitFor(() => {
-      expect(within(preview).getByText('18-18-18')).toBeInTheDocument();
+      expect(within(neutralPreview).getByText('18-18-18')).toBeInTheDocument();
     });
+    expect(within(designPreview).queryByText('18-18-18')).not.toBeInTheDocument();
+    expect(screen.getByTestId('data-selection-unconfirmed-hint')).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-data-selection')).toHaveTextContent('확인하고 다음 단계로');
 
-    await user.click(within(table).getByTestId('card-field-toggle-nutrient'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
 
+    expect(await screen.findByRole('heading', { name: '카드 디자인' })).toBeInTheDocument();
     await waitFor(() => {
-      expect(within(preview).queryByText('18-18-18')).not.toBeInTheDocument();
+      expect(within(screen.getByTestId('mobile-preview-device')).getByText('18-18-18')).toBeInTheDocument();
     });
   });
 
-  it('runs the simplified two-step flow, keeps preview visible, and saves without category-nav blocks', async () => {
+  it('runs the three-step flow, keeps preview visible, and saves without category-nav blocks', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestStorefrontAiSuggestion.mockResolvedValue({
@@ -232,19 +237,28 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('start-storefront-builder'));
 
     expect(screen.getByRole('heading', { name: '페이지 기본 설정' })).toBeInTheDocument();
+    expect(screen.getByText('페이지의 전반적인 디자인 분위기를 먼저 설정해 주세요.')).toBeInTheDocument();
+    expect(screen.getByText('1-1')).toBeInTheDocument();
+    expect(screen.getByText('1-2')).toBeInTheDocument();
+    expect(screen.getByText('수정 가능 영역')).toBeInTheDocument();
+    expect(screen.getByText('페이지를 추가하거나 수정할 대상을 고르세요.')).toBeInTheDocument();
+    expect(screen.getByText('전체 색감')).toBeInTheDocument();
+    expect(screen.getByText('헤더 텍스트 스타일')).toBeInTheDocument();
+    expect(screen.getByText('카테고리 칩')).toBeInTheDocument();
+    expect(screen.getByText('검색창')).toBeInTheDocument();
     expect(screen.getByTestId('mobile-preview-device')).toBeInTheDocument();
-    expect(screen.queryByTestId('page-design-editor')).not.toBeInTheDocument();
-
-    await user.click(screen.getByTestId('toggle-page-design-settings'));
     expect(screen.getByTestId('page-design-editor')).toBeInTheDocument();
+    expect(screen.queryByTestId('toggle-page-design-settings')).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
 
-    expect(screen.getByRole('heading', { name: 'AI 페이지 초안 생성' })).toBeInTheDocument();
-    expect(screen.getByTestId('card-field-table')).toBeInTheDocument();
+    expect(screen.getByTestId('data-field-table-description')).toBeInTheDocument();
+    await user.click(screen.getByTestId('confirm-data-selection'));
+
+    expect(screen.getByRole('heading', { name: '카드 디자인' })).toBeInTheDocument();
+    expect(screen.queryByTestId('data-field-table-description')).not.toBeInTheDocument();
     expect(screen.queryByTestId('page-design-editor')).not.toBeInTheDocument();
-    expect(screen.queryByText('추천 시작 옵션')).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText('AI로 다듬기'), '가격을 강조하고 모바일에서 읽기 쉽게 정리해줘.');
     await user.click(screen.getByTestId('apply-ai-suggestion'));
@@ -388,6 +402,7 @@ describe('StorefrontBuilderPage', () => {
     await user.click(await screen.findByTestId('start-storefront-builder'));
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
 
     await user.type(screen.getByLabelText('AI로 다듬기'), '가격 중심으로, 진하고 굵게 보여줘.');
     await user.click(screen.getByTestId('apply-ai-suggestion'));
@@ -416,7 +431,7 @@ describe('StorefrontBuilderPage', () => {
     });
   }, 10000);
 
-  it('shows AI change summary and lets users undo the AI update in step 2', async () => {
+  it('shows AI change summary and lets users undo the AI update in step 3', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestStorefrontAiSuggestion.mockResolvedValue({
@@ -485,6 +500,7 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('start-storefront-builder'));
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
 
     expect(screen.queryByTestId('add-block-noticeBanner')).not.toBeInTheDocument();
 
@@ -504,7 +520,7 @@ describe('StorefrontBuilderPage', () => {
     });
   }, 10000);
 
-  it('applies a page-level AI prompt, previews immediately, and saves only the compiled pageStyle (discarding the prompt session)', async () => {
+  it('applies one page-style prompt, previews immediately, and saves only the compiled pageStyle', async () => {
     vi.stubEnv('VITE_OPENAI_API_KEY', '');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
@@ -514,27 +530,36 @@ describe('StorefrontBuilderPage', () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(await screen.findByTestId('start-storefront-builder'));
-    await user.click(screen.getByTestId('toggle-page-design-settings'));
 
     const previewPageEl = screen.getByTestId('storefront-page');
 
-    await user.type(screen.getByLabelText('전체 페이지 분위기'), 'cool trustworthy blue');
+    await user.type(
+      screen.getByLabelText('페이지 스타일 요청'),
+      'cool trustworthy blue, make the title bolder and the search box larger with a stronger border',
+    );
     await user.click(screen.getByTestId('apply-page-ai-design'));
 
     await waitFor(() => {
       expect(previewPageEl.style.getPropertyValue('--brand-color')).toBe('#2563eb');
+      expect(previewPageEl.style.getPropertyValue('--typography-heading-weight')).toBe('800');
+      expect(previewPageEl.style.getPropertyValue('--page-search-border-width')).toBe('2.5px');
     });
 
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
     await user.click(screen.getByTestId('save-storefront-draft'));
 
     await waitFor(() => expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1));
 
     const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
     expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe('#2563eb');
+    expect(savedPayload.pageConfig.pageStyle.header.fontWeight).toBe(800);
+    expect(savedPayload.pageConfig.pageStyle.search.sizeToken).toBe('lg');
+    expect(savedPayload.pageConfig.pageStyle.search.borderStrengthToken).toBe('strong');
     expect(savedPayload.pageConfig.pageAiDesign).toBeUndefined();
     expect(JSON.stringify(savedPayload)).not.toContain('cool trustworthy blue');
+    expect(JSON.stringify(savedPayload)).not.toContain('make the title bolder');
   }, 10000);
 
   it('keeps the last valid pageStyle and shows an error when no main prompt has been entered', async () => {
@@ -545,7 +570,6 @@ describe('StorefrontBuilderPage', () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(await screen.findByTestId('start-storefront-builder'));
-    await user.click(screen.getByTestId('toggle-page-design-settings'));
 
     const previewPageEl = screen.getByTestId('storefront-page');
     const brandColorBeforeApply = previewPageEl.style.getPropertyValue('--brand-color');
@@ -554,5 +578,77 @@ describe('StorefrontBuilderPage', () => {
 
     expect(await screen.findByText('페이지 분위기를 먼저 입력해 주세요.')).toBeInTheDocument();
     expect(previewPageEl.style.getPropertyValue('--brand-color')).toBe(brandColorBeforeApply);
+  });
+
+  it('reconfirming data selection resets only card-design output, not basic page settings', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.type(screen.getByLabelText('페이지 스타일 요청'), 'cool trustworthy blue');
+    await user.click(screen.getByTestId('apply-page-ai-design'));
+    await waitFor(() => {
+      expect(screen.getByTestId('storefront-page').style.getPropertyValue('--brand-color')).toBe('#2563eb');
+    });
+
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
+
+    await user.type(screen.getByLabelText('AI로 다듬기'), 'irrelevant prompt');
+    await user.click(screen.getByTestId('apply-ai-suggestion'));
+    await screen.findByText(/draft/i);
+
+    await user.click(screen.getByTestId('builder-go-previous'));
+    await user.click(within(screen.getByTestId('data-field-table-description')).getByTestId('data-field-toggle-nutrient'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
+
+    expect(screen.queryByTestId('ai-change-summary-panel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('storefront-page').style.getPropertyValue('--brand-color')).toBe('#2563eb');
+  });
+
+  it('never lets an AI suggestion change which fields are saved, even if the AI patch claims otherwise', async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    requestStorefrontAiSuggestion.mockResolvedValue({
+      summary: 'Sneaky draft applied.',
+      patch: {
+        designDirection: 'warm',
+        navConfig: EXISTING_CONFIG.navConfig,
+        cardFields: ['product_name', 'tax_price', 'product_url'],
+        cardStyle: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
+        selectedMediumCategories: ['Starter'],
+        representativeMediumCategory: 'Starter',
+        mobileUiTree: EXISTING_CONFIG.pageConfig?.mobileUiTree,
+        cardElementConfig: { showImage: true, showProductName: true, showSpec: true, showNutrient: true, showPrice: true, showBadge: true, imageSize: 'md', imageFit: 'contain', metaDensity: 'comfortable' },
+        uiChangeSummary: [],
+      },
+    });
+    upsertStorefrontConfig.mockResolvedValue(undefined);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(await screen.findByTestId('start-storefront-builder'));
+    await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
+    await user.click(screen.getByTestId('builder-go-next'));
+    await user.click(screen.getByTestId('confirm-data-selection'));
+
+    await user.type(screen.getByLabelText('AI로 다듬기'), '링크도 보여줘');
+    await user.click(screen.getByTestId('apply-ai-suggestion'));
+    await screen.findByText('Sneaky draft applied.');
+
+    await user.click(screen.getByTestId('save-storefront-draft'));
+
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+    expect(savedPayload.categoryConfigs[0].categoryConfig.cardDesign.visibleFields).toEqual([
+      'product_name',
+      'spec',
+      'tax_price',
+    ]);
+    expect(savedPayload.categoryConfigs[0].categoryConfig.selectedMediumCategories).toEqual(['Premium', 'Starter']);
   });
 });
