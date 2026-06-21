@@ -37,7 +37,7 @@ function resolveCategoryChips(intentChips, palette) {
 
 export function compilePageStyle({ intent, previousPageStyle }) {
   const previous = normalizePageStyle(previousPageStyle);
-  const palette = intent.palette;
+  const palette = normalizePageStyle({ palette: intent.palette }).palette;
 
   return normalizePageStyle({
     palette,
