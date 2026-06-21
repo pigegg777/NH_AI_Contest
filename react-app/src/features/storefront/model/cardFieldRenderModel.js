@@ -1,4 +1,4 @@
-const CURRENCY_FIELD_KEYS = ['tax_price', 'zero_tax_price', 'exempt_tax_price', 'price_subsidy'];
+import { PRICE_FIELD_KEYS } from './storefrontUiModel';
 
 export function hasRenderableValue(value) {
   if (value === null || value === undefined || value === '') {
@@ -30,7 +30,7 @@ export function formatFieldDisplayValue(field, value) {
     return '상세 정보 보기';
   }
 
-  if (CURRENCY_FIELD_KEYS.includes(field)) {
+  if (PRICE_FIELD_KEYS.includes(field)) {
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? `${numericValue.toLocaleString()}원` : String(value);
   }

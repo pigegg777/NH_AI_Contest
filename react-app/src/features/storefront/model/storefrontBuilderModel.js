@@ -380,9 +380,7 @@ export function resolveCategoryDraft({
     (candidate) => toTrimmedString(candidate?.categoryName) === toTrimmedString(productCategoryName),
   );
   const rows = Array.isArray(entry?.rows) ? entry.rows : [];
-  const availableFields = deriveAvailableCategoryFields(rows);
-  const availableScalarKeys = availableFields.filter((f) => f.isSelectable).map((f) => f.key);
-  const effectiveScalarKeys = availableScalarKeys.length > 0 ? availableScalarKeys : undefined;
+  const effectiveScalarKeys = deriveEffectiveScalarKeys(rows);
   const mediumCategoryOptions = deriveMediumCategoryOptions(entry?.rows);
   const existingRow = findCategoryConfigRow(existingConfig?.categoryConfigs, productCategoryName);
   const existingCategoryConfig = normalizeCategoryConfig(existingRow?.categoryConfig, productCategoryName, effectiveScalarKeys);

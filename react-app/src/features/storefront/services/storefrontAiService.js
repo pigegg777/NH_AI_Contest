@@ -24,7 +24,6 @@ import {
 } from '../model/storefrontAiDesignModel';
 import {
   CARD_TEMPLATE_OPTIONS,
-  DEFAULT_CARD_FIELDS,
   DEFAULT_NAV_CONFIG,
   STOREFRONT_DESIGN_ACCENT_COLORS,
   STOREFRONT_FIELD_LABELS,
@@ -658,8 +657,9 @@ function normalizeLegacyPatch(patch, mediumCategoryOptions, allowedScalarKeys, c
     currentDraft?.selectedMediumCategories,
     mediumCategoryOptions,
   );
-  const representativeMediumCategory = selectedMediumCategories.includes(currentDraft?.representativeMediumCategory)
-    ? currentDraft.representativeMediumCategory
+  const requestedRepresentativeMediumCategory = toTrimmedString(currentDraft?.representativeMediumCategory);
+  const representativeMediumCategory = selectedMediumCategories.includes(requestedRepresentativeMediumCategory)
+    ? requestedRepresentativeMediumCategory
     : selectedMediumCategories[0] || mediumCategoryOptions[0] || '';
 
   return {
