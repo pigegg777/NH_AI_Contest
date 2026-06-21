@@ -60,7 +60,6 @@ export function useStorefrontView({ config, productRows }) {
   const [activeMediumCategory, setActiveMediumCategory] = useState(ALL_MEDIUM_CATEGORY_LABEL);
   const [activeSectionName, setActiveSectionName] = useState('');
   const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] = useState(true);
-  const [isCategoryChipsExpanded, setIsCategoryChipsExpanded] = useState(false);
 
   const deferredSearchText = useDeferredValue(searchText);
   const searchQuery = deferredSearchText.trim().toLowerCase();
@@ -79,6 +78,7 @@ export function useStorefrontView({ config, productRows }) {
   const activeSectionEntry =
     catalogSectionEntries.find((entry) => entry.sectionName === activeSectionName) ?? catalogSectionEntries[0] ?? null;
   const activeSectionTitle = activeSectionEntry?.sectionName || '';
+  const activeRegionStyles = activeSectionEntry?.section?.renderSpec?.regionStyles ?? {};
   const activeSectionMediumCategories = buildUniqueMediumCategories(activeSectionEntry?.section?.products);
   const mediumCategoryItems =
     activeSectionMediumCategories.length > 0
@@ -183,10 +183,9 @@ export function useStorefrontView({ config, productRows }) {
     activeMediumCategory,
     isDesktopCategoryNavOpen,
     setIsDesktopCategoryNavOpen,
-    isCategoryChipsExpanded,
-    setIsCategoryChipsExpanded,
     mobileUiTree,
     catalogSectionEntries,
+    activeRegionStyles,
     activeSectionTitle,
     activeSectionMediumCategories,
     mediumCategoryItems,

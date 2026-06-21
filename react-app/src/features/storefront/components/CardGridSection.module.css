@@ -4,14 +4,6 @@
   contain-intrinsic-size: 420px;
 }
 
-.title {
-  margin: 0 0 14px;
-  font-size: 1.02rem;
-  font-weight: var(--typography-heading-weight, 700);
-  letter-spacing: var(--typography-letter-spacing, normal);
-  color: var(--title-text-color, #16311b);
-}
-
 .sectionHeaderContent {
   display: flex;
   flex-direction: column;
@@ -22,7 +14,11 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--card-columns, 2), minmax(0, 1fr));
-  gap: 14px;
+  gap: var(--card-grid-gap, 14px);
+  padding: var(--card-grid-padding, 0);
+  border: var(--card-grid-border, 0);
+  border-radius: var(--card-grid-radius, 0);
+  background: var(--card-grid-bg, transparent);
 }
 
 .layout-grid .card {
@@ -86,9 +82,9 @@
 
 .card {
   overflow: hidden;
-  border: 1px solid var(--corp-line);
+  border: 1px solid var(--card-border-color, var(--corp-line));
   border-radius: 18px;
-  background: var(--corp-panel);
+  background: var(--card-bg, var(--corp-panel));
   box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
   transition:
     box-shadow 0.25s ease,
@@ -191,7 +187,7 @@
 }
 
 .section[data-card-spacing='tight'] .grid {
-  gap: 10px;
+  gap: var(--card-grid-gap, 10px);
 }
 
 .section[data-card-spacing='tight'] .cardHeader {
@@ -204,11 +200,11 @@
 }
 
 .section[data-card-spacing='normal'] .grid {
-  gap: 14px;
+  gap: var(--card-grid-gap, 14px);
 }
 
 .section[data-card-spacing='relaxed'] .grid {
-  gap: 18px;
+  gap: var(--card-grid-gap, 18px);
 }
 
 .section[data-card-spacing='relaxed'] .cardHeader {
@@ -248,10 +244,36 @@
   gap: 3px;
 }
 
+.inlineGroup,
+.stackGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inlineGroupItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.inlineGroupItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stackGroupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .priceField .fieldValue {
-  color: var(--price-text-color, #d32f2f);
-  font-size: calc(var(--card-font-size, 0.85rem) + 0.02rem);
-  font-weight: 700;
+  color: var(--field-text-color, var(--price-text-color, #d32f2f));
+  font-size: var(--field-font-size, calc(var(--card-font-size, 0.85rem) + 0.02rem));
+  font-weight: var(--field-font-weight, 700);
 }
 
 .fieldLabel {
@@ -261,11 +283,28 @@
 }
 
 .fieldValue {
-  font-size: var(--card-font-size, 0.85rem);
-  color: var(--corp-text);
-  font-weight: var(--typography-body-weight, 600);
+  font-size: var(--field-font-size, var(--card-font-size, 0.85rem));
+  color: var(--field-text-color, var(--corp-text));
+  font-weight: var(--field-font-weight, var(--typography-body-weight, 600));
+  letter-spacing: var(--field-letter-spacing, normal);
   line-height: 1.45;
   word-break: break-word;
+}
+
+.groupFieldLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--corp-muted);
+}
+
+.groupFieldValue,
+.groupPriceValue {
+  font-size: var(--card-font-size, 0.85rem);
+}
+
+.groupPriceValue {
+  color: var(--field-text-color, var(--price-text-color, #d32f2f));
+  font-weight: var(--field-font-weight, 700);
 }
 
 .fieldValueLink {

@@ -1,6 +1,7 @@
 import { toTrimmedString } from '../../../common/utils/text';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from './cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from './pageStyleModel';
+import { normalizeStorefrontAiDesign } from './storefrontAiDesignModel';
 import {
   buildDefaultMobileUiTree,
   deriveCardElementConfig,
@@ -342,6 +343,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
   const sourceCardDesign = source.cardDesign ?? {};
   const normalizedCardStyle = normalizeCardStyle(sourceCardDesign.style);
   const normalizedCardFields = normalizeCardFields(sourceCardDesign.visibleFields, allowedScalarKeys);
+  const normalizedAiDesign = normalizeStorefrontAiDesign(source.aiDesign, allowedScalarKeys);
   const selectedMediumCategories = uniqueStrings(
     (Array.isArray(source.selectedMediumCategories) ? source.selectedMediumCategories : []).map(normalizeMediumCategory),
   );
@@ -368,6 +370,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
           deriveCardElementConfig(normalizedCardFields, normalizedCardStyle, sourceCardDesign.elementConfig),
       ),
     },
+    ...(normalizedAiDesign ? { aiDesign: normalizedAiDesign } : {}),
   };
 }
 
@@ -446,6 +449,7 @@ export function resolveCategoryDraft({
     cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.style),
     cardElementConfig: normalizeCardElementConfig(existingCategoryConfig.cardDesign.elementConfig),
     cardTemplate: existingCategoryConfig.layoutStyle.variant,
+    aiDesign: existingCategoryConfig.aiDesign,
   };
 }
 
@@ -458,6 +462,7 @@ export function buildCategoryConfigRow({
   cardStyle,
   cardElementConfig,
   cardTemplate,
+  aiDesign,
   allowedScalarKeys,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
@@ -479,6 +484,7 @@ export function buildCategoryConfigRow({
         style: cardStyle,
         elementConfig: cardElementConfig,
       },
+      aiDesign,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -590,6 +596,7 @@ export function buildStorefrontSavePayload({
     cardStyle: normalizeCardStyle(cardStyle),
     cardElementConfig: normalizeCardElementConfig(cardElementConfig),
     cardTemplate,
+    aiDesign,
     allowedScalarKeys,
   });
 

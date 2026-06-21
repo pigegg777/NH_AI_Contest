@@ -85,6 +85,7 @@ export function buildSections(categoryConfigs, productRows) {
         fields: categoryConfig.cardDesign?.visibleFields,
         style: categoryConfig.cardDesign?.style,
         elementConfig: categoryConfig.cardDesign?.elementConfig,
+        renderSpec: categoryConfig.aiDesign?.renderSpec ?? null,
         representativeMediumCategory: categoryConfig.representativeMediumCategory || '',
         products,
       };

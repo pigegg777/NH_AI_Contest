@@ -271,6 +271,64 @@ describe('StorefrontBuilderPage', () => {
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestStorefrontAiSuggestion.mockResolvedValue({
       summary: 'Bold price-focus draft applied.',
+      activeSkillIds: ['layout', 'transform'],
+      designPlan: {
+        designBrief: {
+          tone: 'warm',
+          goal: 'Compare prices quickly.',
+          audience: 'Customers',
+          priority: ['product_name', 'tax_price', 'zero_tax_price'],
+        },
+        transformPlan: {
+          groups: [
+            {
+              id: 'price-row',
+              label: '가격',
+              display: 'inline-compare',
+              items: [
+                { field: 'tax_price', label: '과세' },
+                { field: 'zero_tax_price', label: '영세' },
+              ],
+            },
+          ],
+          hideIfEmpty: [],
+          formatRules: [],
+        },
+        contentPlan: {
+          blocks: [
+            { id: 'title', type: 'field', source: 'product_name', label: '' },
+            { id: 'price-row', type: 'group', source: 'price-row', label: '가격' },
+          ],
+        },
+        layoutPlan: {
+          cardVariant: 'price-focus',
+          density: 'compact',
+          imagePosition: 'top',
+          pricePriority: 'high',
+        },
+        stylePlan: {
+          titleTextColor: 'ink',
+          typographyTone: 'bold',
+          priceTextColor: 'muted',
+          accentColor: '#2563eb',
+          cardSpacing: 'relaxed',
+        },
+      },
+      renderSpec: {
+        version: 1,
+        bodySlots: [
+          { id: 'title', kind: 'field', field: 'product_name', label: '' },
+          {
+            id: 'price-row',
+            kind: 'inline-group',
+            label: '가격',
+            items: [
+              { id: 'tax', field: 'tax_price', label: '과세' },
+              { id: 'zero', field: 'zero_tax_price', label: '영세' },
+            ],
+          },
+        ],
+      },
       patch: {
         designDirection: 'warm',
         titleTextColor: 'ink',
@@ -284,7 +342,7 @@ describe('StorefrontBuilderPage', () => {
           searchVariant: 'outlined',
           categoryChipVariant: 'filled',
         },
-        cardFields: ['product_name', 'tax_price'],
+        cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
         cardStyle: {
           layout: 'compact',
           accentColor: '#2563eb',
@@ -336,7 +394,7 @@ describe('StorefrontBuilderPage', () => {
     expect(await screen.findByText('Bold price-focus draft applied.')).toBeInTheDocument();
 
     const previewDevice = screen.getByTestId('mobile-preview-device');
-    const sectionEl = within(previewDevice).getByRole('heading', { level: 2 }).closest('section');
+    const sectionEl = previewDevice.querySelector('section[data-card-template]');
     expect(sectionEl.dataset.cardTemplate).toBe('price-focus');
 
     await user.click(screen.getByTestId('save-storefront-draft'));
@@ -345,15 +403,16 @@ describe('StorefrontBuilderPage', () => {
     const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
     expect(savedPayload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('price-focus');
     expect(savedPayload.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('muted');
+    expect(savedPayload.categoryConfigs[0].categoryConfig.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
     expect(savedPayload.pageConfig.theme.titleTextColor).toBe('ink');
     expect(savedPayload.pageConfig.theme.typographyTone).toBe('bold');
 
     await user.click(screen.getByTestId('undo-ai-changes'));
 
     await waitFor(() => {
-      const restoredSectionEl = within(screen.getByTestId('mobile-preview-device'))
-        .getByRole('heading', { level: 2 })
-        .closest('section');
+      const restoredSectionEl = screen
+        .getByTestId('mobile-preview-device')
+        .querySelector('section[data-card-template]');
       expect(restoredSectionEl.dataset.cardTemplate).toBe('card-grid');
     });
   }, 10000);

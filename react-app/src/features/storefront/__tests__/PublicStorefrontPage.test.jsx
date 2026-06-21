@@ -127,8 +127,7 @@ describe('PublicStorefrontPage', () => {
     const user = userEvent.setup();
     const { container } = render(<PublicStorefrontPage officeCode="OFF-1" />);
 
-    expect(await screen.findByRole('heading', { level: 2, name: 'Fertilizer Upload' })).toBeInTheDocument();
-    await user.click(screen.getByTestId('storefront-category-chips-toggle'));
+    expect(await screen.findByText('Alpha')).toBeInTheDocument();
     const categoryChips = screen.getByTestId('storefront-category-chips');
     expect(within(categoryChips).getAllByRole('button')).toHaveLength(3);
     expect(within(categoryChips).getByRole('button', { name: 'Premium' })).toBeInTheDocument();
@@ -192,8 +191,7 @@ describe('PublicStorefrontPage', () => {
     const user = userEvent.setup();
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
-    await user.click(await screen.findByTestId('storefront-category-chips-toggle'));
-    const categoryChips = screen.getByTestId('storefront-category-chips');
+    const categoryChips = await screen.findByTestId('storefront-category-chips');
     expect(within(categoryChips).getAllByRole('button')).toHaveLength(3);
     expect(within(categoryChips).getByRole('button', { name: 'Premium' })).toBeInTheDocument();
     expect(within(categoryChips).getByRole('button', { name: 'Starter' })).toBeInTheDocument();
@@ -398,8 +396,7 @@ describe('PublicStorefrontPage', () => {
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
-    expect(await screen.findByRole('heading', { level: 2, name: '비료' })).toBeInTheDocument();
-    const mobileCategoryBar = screen.getByTestId('storefront-mobile-category-bar');
+    const mobileCategoryBar = await screen.findByTestId('storefront-mobile-category-bar');
     expect(mobileCategoryBar).toBeInTheDocument();
     expect(within(mobileCategoryBar).getByText('비료')).toBeInTheDocument();
     expect(within(mobileCategoryBar).getByText('복합비료')).toBeInTheDocument();
@@ -466,7 +463,6 @@ describe('PublicStorefrontPage', () => {
 
     await screen.findByText('Alpha Premium');
 
-    await user.click(screen.getByTestId('storefront-category-chips-toggle'));
     await user.click(within(screen.getByTestId('storefront-category-chips')).getByRole('button', { name: 'Premium' }));
 
     await waitFor(() => {
@@ -610,7 +606,6 @@ describe('PublicStorefrontPage', () => {
 
     expect(await screen.findByText('Alpha Premium')).toBeInTheDocument();
 
-    await user.click(screen.getByTestId('storefront-category-chips-toggle'));
     const chips = screen.getByTestId('storefront-category-chips');
     expect(within(chips).getByRole('button', { name: 'Premium' })).toBeInTheDocument();
     expect(within(chips).getByRole('button', { name: 'Starter' })).toBeInTheDocument();
@@ -720,5 +715,136 @@ describe('PublicStorefrontPage', () => {
     const card = await screen.findByRole('article');
     const labels = within(card).getAllByText(/규격|과세가격/).map((el) => el.textContent);
     expect(labels[0]).toBe('과세가격');
+  });
+
+  it('renders saved aiDesign inline-group rows from renderSpec', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
+      navConfig: {},
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'price-focus' },
+            cardDesign: {
+              visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
+              style: { layout: 'compact', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 1 },
+            },
+            aiDesign: {
+              prompt: 'compare tax and zero-tax on one row',
+              activeSkillIds: ['transform'],
+              renderSpec: {
+                version: 1,
+                bodySlots: [
+                  { id: 'title', kind: 'field', field: 'product_name', label: '' },
+                  {
+                    id: 'price-row',
+                    kind: 'inline-group',
+                    label: '가격',
+                    items: [
+                      { id: 'tax', field: 'tax_price', label: '과세' },
+                      { id: 'zero', field: 'zero_tax_price', label: '영세' },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-20T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Alpha',
+        medium_category: 'Premium',
+        tax_price: 1000,
+        zero_tax_price: 900,
+      },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    const card = await screen.findByRole('article');
+    const groupedPriceRows = within(card).getAllByText((_, element) => {
+      const text = element?.textContent || '';
+      return text.includes('과세') && text.includes('1,000원') && text.includes('영세') && text.includes('900원');
+    });
+
+    expect(groupedPriceRows.length).toBeGreaterThan(0);
+  });
+
+  it('renders saved aiDesign field styles without changing sibling price fields', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
+      navConfig: {},
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'card-grid' },
+            cardDesign: {
+              visibleFields: ['product_name', 'tax_price', 'price_subsidy'],
+              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 1 },
+            },
+            aiDesign: {
+              prompt: 'make only the subsidy blue',
+              activeSkillIds: ['style'],
+              renderSpec: {
+                version: 1,
+                bodySlots: [
+                  { id: 'title', kind: 'field', field: 'product_name', label: '' },
+                  { id: 'tax', kind: 'field', field: 'tax_price', label: 'Tax price' },
+                  {
+                    id: 'subsidy',
+                    kind: 'field',
+                    field: 'price_subsidy',
+                    label: 'Subsidy',
+                    style: { colorRole: 'blue', fontWeight: 'bold', fontSize: 'large', emphasis: 'strong' },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-20T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Alpha',
+        medium_category: 'Premium',
+        tax_price: 1000,
+        price_subsidy: 250,
+      },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    const card = await screen.findByRole('article');
+    const taxValue = within(card).getByText((_, element) => element?.tagName === 'SPAN' && element.textContent.includes('1,000'));
+    const subsidyValue = within(card).getByText((_, element) => element?.tagName === 'SPAN' && element.textContent.includes('250'));
+
+    expect(taxValue.style.getPropertyValue('--field-text-color')).toBe('');
+    expect(subsidyValue.style.getPropertyValue('--field-text-color')).toBe('#2563eb');
+    expect(subsidyValue.style.getPropertyValue('--field-font-weight')).toBe('800');
   });
 });

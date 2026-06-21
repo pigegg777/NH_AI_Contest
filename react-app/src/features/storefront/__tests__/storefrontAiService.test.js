@@ -46,223 +46,289 @@ describe('STOREFRONT_AI_SCHEMA', () => {
 });
 
 describe('normalizeStorefrontAiSuggestion', () => {
-  it('drops unknown medium categories and normalizes richer presentation fields', () => {
-    expect(
-      normalizeStorefrontAiSuggestion(
-        {
-          summary: 'updated',
-          patch: {
-            designDirection: 'warm',
-            selectedMediumCategories: ['Premium', 'Fake'],
-            representativeMediumCategory: 'Fake',
-            cardFields: ['product_name', 'tax_price'],
-            cardStyle: {
-              layout: 'compact',
-              accentColor: '#2563eb',
-              fontSize: 'large',
-              cardsPerRow: 1,
-              imageSize: 'lg',
-              imageFit: 'contain',
-              cardRadius: 'xl',
-              cardShadow: 'strong',
-              cardSpacing: 'relaxed',
-            },
-            navConfig: {
-              title: 'Premium Fertilizer Guide',
-              subtitle: 'Fast answers',
-              brandColor: '#2563eb',
-              searchPlaceholder: 'Search fertilizer',
-              logoUrl: '',
-              searchVariant: 'outlined',
-              categoryChipVariant: 'filled',
-            },
-            mobileUiTree: [
-              { id: 'search-box', type: 'searchBox', slot: 'top', enabled: false, props: {} },
+  it('normalizes a design plan into renderSpec and legacy preview patch', () => {
+    const result = normalizeStorefrontAiSuggestion(
+      {
+        summary: 'updated',
+        designPlan: {
+          designBrief: {
+            tone: 'warm',
+            goal: 'Compare prices quickly.',
+            audience: 'Customers',
+            priority: ['product_name', 'tax_price', 'zero_tax_price'],
+          },
+          transformPlan: {
+            groups: [
               {
-                id: 'promo',
-                type: 'noticeBanner',
-                slot: 'beforeProducts',
-                enabled: true,
-                props: { title: 'Promo', text: 'Today only' },
+                id: 'price-row',
+                label: '가격',
+                display: 'inline-compare',
+                items: [
+                  { field: 'tax_price', label: '과세' },
+                  { field: 'zero_tax_price', label: '영세' },
+                ],
               },
-              { id: 'hack', type: 'iframe', slot: 'top', enabled: true, props: {} },
             ],
-            cardElementConfig: {
-              showImage: false,
-              showPrice: true,
-              imageSize: 'lg',
-              imageFit: 'contain',
-              metaDensity: 'comfortable',
-            },
-            uiChangeSummary: ['Hide search box', 'Add notice banner above product list'],
+            hideIfEmpty: [],
+            formatRules: [
+              { field: 'tax_price', format: 'currency' },
+              { field: 'zero_tax_price', format: 'currency' },
+            ],
+          },
+          contentPlan: {
+            blocks: [
+              { id: 'title', type: 'field', source: 'product_name', label: '' },
+              { id: 'price-row', type: 'group', source: 'price-row', label: '가격' },
+            ],
+          },
+          layoutPlan: {
+            cardVariant: 'price-focus',
+            density: 'compact',
+            imagePosition: 'hidden',
+            pricePriority: 'high',
+          },
+          stylePlan: {
+            titleTextColor: 'ink',
+            typographyTone: 'bold',
+            priceTextColor: 'muted',
+            accentColor: '#2563eb',
+            cardSpacing: 'tight',
           },
         },
-        ['Premium', 'Starter'],
-      ),
-    ).toEqual({
+      },
+      ['Premium', 'Starter'],
+      ['product_name', 'tax_price', 'zero_tax_price'],
+      {
+        currentDraft: {
+          selectedMediumCategories: ['Premium', 'Fake'],
+          representativeMediumCategory: 'Fake',
+          cardStyle: { fontSize: 'large', cardsPerRow: 1, imageFit: 'contain', cardRadius: 'xl', cardShadow: 'strong' },
+          navConfig: {
+            title: 'Premium Fertilizer Guide',
+            subtitle: 'Fast answers',
+            brandColor: '#1d4a2e',
+            searchPlaceholder: 'Search fertilizer',
+            logoUrl: '',
+            searchVariant: 'outlined',
+            categoryChipVariant: 'filled',
+          },
+          mobileUiTree: [],
+          cardElementConfig: {},
+        },
+        activeSkillIds: ['layout', 'transform'],
+      },
+    );
+
+    expect(result).toMatchObject({
       summary: 'updated',
+      activeSkillIds: ['layout', 'transform'],
+      designPlan: {
+        designBrief: {
+          tone: 'warm',
+        },
+        layoutPlan: {
+          cardVariant: 'price-focus',
+        },
+      },
+      renderSpec: {
+        version: 1,
+        bodySlots: [
+          { id: 'title', kind: 'field', field: 'product_name', label: '' },
+          {
+            id: 'price-row',
+            kind: 'inline-group',
+            label: '가격',
+            items: [
+              { field: 'tax_price', label: '과세' },
+              { field: 'zero_tax_price', label: '영세' },
+            ],
+          },
+        ],
+      },
       patch: {
         designDirection: 'warm',
-        titleTextColor: 'default',
-        typographyTone: 'standard',
+        titleTextColor: 'ink',
+        typographyTone: 'bold',
         selectedMediumCategories: ['Premium'],
         representativeMediumCategory: 'Premium',
-        cardFields: ['product_name', 'tax_price'],
-        cardTemplate: 'card-grid',
+        cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
+        cardTemplate: 'price-focus',
+        navConfig: {
+          title: 'Premium Fertilizer Guide',
+          searchVariant: 'outlined',
+          categoryChipVariant: 'filled',
+        },
         cardStyle: {
           layout: 'compact',
           accentColor: '#2563eb',
           fontSize: 'large',
           cardsPerRow: 1,
-          imageSize: 'lg',
+          imageSize: 'hidden',
           imageFit: 'contain',
           cardRadius: 'xl',
           cardShadow: 'strong',
-          cardSpacing: 'relaxed',
-          priceTextColor: 'default',
+          cardSpacing: 'tight',
+          priceTextColor: 'muted',
         },
-        navConfig: {
-          title: 'Premium Fertilizer Guide',
-          subtitle: 'Fast answers',
-          brandColor: '#2563eb',
-          searchPlaceholder: 'Search fertilizer',
-          logoUrl: '',
-          searchVariant: 'outlined',
-          categoryChipVariant: 'filled',
-        },
-        mobileUiTree: [
-          { id: 'search-box', type: 'searchBox', slot: 'top', enabled: false, props: {} },
-          {
-            id: 'promo',
-            type: 'noticeBanner',
-            slot: 'beforeProducts',
-            enabled: true,
-            props: { title: 'Promo', text: 'Today only' },
-          },
-          { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
-          { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
-        ],
         cardElementConfig: {
           showImage: false,
           showProductName: true,
-          showSpec: true,
-          showNutrient: true,
           showPrice: true,
-          showBadge: true,
-          imageSize: 'lg',
-          imageFit: 'contain',
-          metaDensity: 'comfortable',
+          metaDensity: 'compact',
         },
-        uiChangeSummary: ['Hide search box', 'Add notice banner above product list'],
       },
     });
   });
-});
 
-describe('normalizeStorefrontAiSuggestion new tokens', () => {
-  it('normalizes titleTextColor, typographyTone, cardTemplate, and cardStyle.priceTextColor', () => {
+  it('falls back to legacy patch input when designPlan is absent', () => {
     const result = normalizeStorefrontAiSuggestion(
       {
         summary: 'updated',
         patch: {
           designDirection: 'warm',
+          titleTextColor: 'ink',
+          typographyTone: 'clean',
           selectedMediumCategories: ['Premium'],
           representativeMediumCategory: 'Premium',
-          cardFields: ['product_name'],
-          cardStyle: { priceTextColor: 'muted' },
+          cardFields: ['product_name', 'tax_price'],
+          cardTemplate: 'image-left',
+          cardStyle: { priceTextColor: 'brand' },
           navConfig: {},
           mobileUiTree: [],
           cardElementConfig: {},
-          uiChangeSummary: [],
-          titleTextColor: 'ink',
-          typographyTone: 'bold',
-          cardTemplate: 'price-focus',
         },
       },
       ['Premium'],
+      ['product_name', 'tax_price'],
+      {
+        currentDraft: {
+          cardStyle: {},
+          navConfig: {},
+          mobileUiTree: [],
+          cardElementConfig: {},
+        },
+      },
     );
 
-    expect(result.patch.titleTextColor).toBe('ink');
-    expect(result.patch.typographyTone).toBe('bold');
-    expect(result.patch.cardTemplate).toBe('price-focus');
-    expect(result.patch.cardStyle.priceTextColor).toBe('muted');
+    expect(result.patch.cardTemplate).toBe('image-left');
+    expect(result.patch.cardStyle.priceTextColor).toBe('brand');
+    expect(result.designPlan.layoutPlan.cardVariant).toBe('image-left');
+    expect(result.renderSpec.version).toBe(1);
   });
 
-  it('falls back to defaults for unapproved values', () => {
+  it('keeps card fields independently styleable in renderSpec', () => {
     const result = normalizeStorefrontAiSuggestion(
       {
         summary: 'updated',
-        patch: {
-          titleTextColor: 'neon-pink',
-          typographyTone: 'screamy',
-          cardTemplate: 'free-form-html',
-          cardStyle: {},
-          selectedMediumCategories: [],
-          cardFields: [],
-          navConfig: {},
-          mobileUiTree: [],
-          cardElementConfig: {},
-          uiChangeSummary: [],
+        designPlan: {
+          designBrief: {
+            tone: 'friendly',
+            goal: 'Highlight only the subsidy field.',
+            audience: 'Customers',
+            priority: ['product_name', 'tax_price', 'price_subsidy'],
+          },
+          transformPlan: {
+            groups: [],
+            hideIfEmpty: [],
+            formatRules: [
+              { field: 'tax_price', format: 'currency' },
+              { field: 'price_subsidy', format: 'currency' },
+            ],
+          },
+          contentPlan: {
+            blocks: [
+              { id: 'name', type: 'field', source: 'product_name', label: '' },
+              { id: 'tax-price', type: 'field', source: 'tax_price', label: '' },
+              { id: 'subsidy', type: 'field', source: 'price_subsidy', label: '' },
+            ],
+          },
+          layoutPlan: {
+            cardVariant: 'card-grid',
+            density: 'comfortable',
+            imagePosition: 'top',
+            pricePriority: 'default',
+          },
+          stylePlan: {
+            titleTextColor: 'default',
+            typographyTone: 'standard',
+            priceTextColor: 'default',
+            accentColor: '#2563eb',
+            cardSpacing: 'relaxed',
+            fieldStyles: [
+              {
+                field: 'price_subsidy',
+                colorRole: 'blue',
+                fontWeight: 'bold',
+                fontSize: 'large',
+                emphasis: 'strong',
+              },
+            ],
+          },
         },
       },
       ['Premium'],
+      ['product_name', 'tax_price', 'price_subsidy'],
     );
 
-    expect(result.patch.titleTextColor).toBe('default');
-    expect(result.patch.typographyTone).toBe('standard');
-    expect(result.patch.cardTemplate).toBe('card-grid');
+    const taxPriceSlot = result.renderSpec.bodySlots.find((slot) => slot.field === 'tax_price');
+    const subsidySlot = result.renderSpec.bodySlots.find((slot) => slot.field === 'price_subsidy');
+
+    expect(taxPriceSlot.style).toBeUndefined();
+    expect(subsidySlot).toMatchObject({
+      field: 'price_subsidy',
+      style: {
+        colorRole: 'blue',
+        fontWeight: 'bold',
+        fontSize: 'large',
+        emphasis: 'strong',
+      },
+    });
   });
 });
 
-describe('STOREFRONT_AI_SCHEMA new fields', () => {
-  it('declares titleTextColor, typographyTone, and cardTemplate as required enums on patch', () => {
-    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.titleTextColor.enum).toContain('ink');
-    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.typographyTone.enum).toContain('bold');
-    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.cardTemplate.enum).toContain('price-focus');
-    expect(STOREFRONT_AI_SCHEMA.properties.patch.required).toEqual(
-      expect.arrayContaining(['titleTextColor', 'typographyTone', 'cardTemplate']),
-    );
-    expect(STOREFRONT_AI_SCHEMA.properties.patch.properties.cardStyle.properties.priceTextColor.enum).toContain('brand');
-  });
-});
-
-describe('buildHeuristicSuggestion new tokens', () => {
-  it('detects darker title text, a cleaner font, and an image-left template from the prompt', () => {
+describe('buildHeuristicSuggestion', () => {
+  it('detects an inline price group when the prompt asks for one-line comparison', () => {
     const result = buildHeuristicSuggestion({
-      prompt: 'make the title darker, use a cleaner font, and put the image on the left',
+      prompt: '과세가격이랑 영세가격을 한 줄로 비교하고 제목은 더 진하게 보여줘',
       mediumCategoryOptions: ['Premium'],
-      currentDraft: {},
-      allowedScalarKeys: undefined,
+      currentDraft: {
+        cardStyle: {},
+        navConfig: {},
+        mobileUiTree: [],
+        cardElementConfig: {},
+      },
+      allowedScalarKeys: ['product_name', 'tax_price', 'zero_tax_price'],
     });
 
     expect(result.patch.titleTextColor).toBe('ink');
-    expect(result.patch.typographyTone).toBe('clean');
-    expect(result.patch.cardTemplate).toBe('image-left');
+    expect(result.patch.cardFields).toEqual(['product_name', 'tax_price', 'zero_tax_price']);
+    expect(result.designPlan.transformPlan.groups).toHaveLength(1);
+    expect(result.designPlan.transformPlan.groups[0]).toMatchObject({
+      id: 'price-compare',
+      display: 'inline-compare',
+    });
+    expect(result.renderSpec.bodySlots[1]).toMatchObject({
+      kind: 'inline-group',
+      label: '가격',
+    });
   });
 
-  it('detects bold/official typography and a price-focus template', () => {
+  it('keeps existing style tokens while producing a richer design plan', () => {
     const result = buildHeuristicSuggestion({
       prompt: 'make it bolder and more official-looking, focus on price first',
       mediumCategoryOptions: ['Premium'],
-      currentDraft: {},
+      currentDraft: {
+        cardStyle: {},
+        navConfig: {},
+        mobileUiTree: [],
+        cardElementConfig: {},
+      },
       allowedScalarKeys: undefined,
     });
 
     expect(result.patch.typographyTone).toBe('bold');
     expect(result.patch.cardTemplate).toBe('price-focus');
-  });
-
-  it('defaults to standard/card-grid/default when nothing matches', () => {
-    const result = buildHeuristicSuggestion({
-      prompt: 'just refresh the page',
-      mediumCategoryOptions: ['Premium'],
-      currentDraft: {},
-      allowedScalarKeys: undefined,
-    });
-
-    expect(result.patch.titleTextColor).toBe('default');
-    expect(result.patch.typographyTone).toBe('standard');
-    expect(result.patch.cardTemplate).toBe('card-grid');
-    expect(result.patch.cardStyle.priceTextColor).toBe('default');
+    expect(result.designPlan.layoutPlan.cardVariant).toBe('price-focus');
+    expect(result.designPlan.stylePlan.typographyTone).toBe('bold');
   });
 });

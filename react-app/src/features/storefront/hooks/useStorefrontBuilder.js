@@ -2,6 +2,7 @@ import { startTransition, useEffect, useState } from 'react';
 
 import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/officeProductDataService';
 import { normalizeCardStyle } from '../model/cardStyleModel';
+import { DEFAULT_STOREFRONT_EDIT_POLICY, normalizeStorefrontAiDesign } from '../model/storefrontAiDesignModel';
 import {
   DEFAULT_CARD_FIELDS,
   DEFAULT_NAV_CONFIG,
@@ -72,6 +73,7 @@ export function useStorefrontBuilder({ officeCode }) {
   const [aiSummary, setAiSummary] = useState('');
   const [aiChangeSummary, setAiChangeSummary] = useState([]);
   const [aiErrorMessage, setAiErrorMessage] = useState('');
+  const [aiDesign, setAiDesign] = useState(null);
   const [isAiApplying, setIsAiApplying] = useState(false);
   const [lastAiSnapshot, setLastAiSnapshot] = useState(null);
 
@@ -102,6 +104,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setCardStyleState(resolvedDraft.cardStyle);
     setCardElementConfig(resolvedDraft.cardElementConfig);
     setCardTemplateState(resolvedDraft.cardTemplate);
+    setAiDesign(resolvedDraft.aiDesign);
   }
 
   useEffect(() => {
@@ -175,11 +178,13 @@ export function useStorefrontBuilder({ officeCode }) {
 
   function setDesignDirection(value) {
     markDirty();
+    setAiDesign(null);
     setDesignDirectionState(value);
   }
 
   function toggleCardField(field) {
     markDirty();
+    setAiDesign(null);
     setCardFields((current) => {
       const nextFields = current.includes(field) ? current.filter((value) => value !== field) : [...current, field];
       const normalizedFields = normalizeCardFields(nextFields, effectiveScalarKeys);
@@ -215,6 +220,7 @@ export function useStorefrontBuilder({ officeCode }) {
     setCardElementConfig(lastAiSnapshot.cardElementConfig);
     setNavConfig(lastAiSnapshot.navConfig);
     setMobileUiTree(lastAiSnapshot.mobileUiTree);
+    setAiDesign(lastAiSnapshot.aiDesign);
     setAiSummary(lastAiSnapshot.aiSummary);
     setAiChangeSummary(lastAiSnapshot.aiChangeSummary);
     setLastAiSnapshot(null);
@@ -236,6 +242,8 @@ export function useStorefrontBuilder({ officeCode }) {
       const suggestion = await requestStorefrontAiSuggestion({
         prompt: aiPrompt,
         mediumCategoryOptions,
+        fieldCatalog: availableCategoryFields,
+        editPolicy: DEFAULT_STOREFRONT_EDIT_POLICY,
         currentDraft: {
           productCategoryName: selectedProductCategoryName,
           selectedMediumCategories,
@@ -249,9 +257,20 @@ export function useStorefrontBuilder({ officeCode }) {
           cardTemplate,
           navConfig,
           mobileUiTree,
+          aiDesign,
         },
         allowedScalarKeys: effectiveScalarKeys,
       });
+
+      const nextAiDesign = normalizeStorefrontAiDesign(
+        {
+          prompt: aiPrompt,
+          activeSkillIds: suggestion.activeSkillIds,
+          designPlan: suggestion.designPlan,
+          renderSpec: suggestion.renderSpec,
+        },
+        effectiveScalarKeys,
+      );
 
       const snapshot = {
         selectedMediumCategories,
@@ -265,6 +284,7 @@ export function useStorefrontBuilder({ officeCode }) {
         cardTemplate,
         navConfig,
         mobileUiTree,
+        aiDesign,
         aiSummary,
         aiChangeSummary,
       };
@@ -291,6 +311,7 @@ export function useStorefrontBuilder({ officeCode }) {
         setCardElementConfig(normalizeCardElementConfig(suggestion.patch.cardElementConfig));
         setNavConfig(normalizeNavConfig({ ...navConfig, ...suggestion.patch.navConfig }));
         setMobileUiTree(sanitizeMobileUiTree(suggestion.patch.mobileUiTree));
+        setAiDesign(nextAiDesign);
         setAiSummary(suggestion.summary);
         setAiChangeSummary(suggestion.patch.uiChangeSummary ?? []);
       });
@@ -322,6 +343,7 @@ export function useStorefrontBuilder({ officeCode }) {
         typographyTone,
         mobileUiTree,
         cardTemplate,
+        aiDesign,
         allowedScalarKeys: effectiveScalarKeys,
       });
 
@@ -353,6 +375,7 @@ export function useStorefrontBuilder({ officeCode }) {
           typographyTone,
           mobileUiTree,
           cardTemplate,
+          aiDesign,
           allowedScalarKeys: effectiveScalarKeys,
         })
       : {

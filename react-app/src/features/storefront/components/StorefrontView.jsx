@@ -19,9 +19,139 @@ const CHIP_VARIANT_CLASS_NAMES = {
 
 const HEADER_SLOT_ORDER = ['top', 'afterSearch', 'beforeChips', 'afterChips'];
 const BODY_SLOT_ORDER = ['beforeProducts', 'bottom'];
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
+const REGION_COLOR_ROLE_VALUES = {
+  brand: 'var(--brand-color, var(--corp-primary))',
+  muted: '#6b7280',
+  blue: '#2563eb',
+  red: '#dc2626',
+  green: '#15803d',
+  amber: '#d97706',
+  ink: '#111827',
+};
+const REGION_SPACING_VALUES = {
+  tight: '14px',
+  compact: '14px',
+  normal: '20px',
+  default: '20px',
+  relaxed: '28px',
+  airy: '32px',
+};
+const REGION_SIZE_VALUES = {
+  compact: { minHeight: '34px', fontSize: '0.82rem' },
+  small: { minHeight: '34px', fontSize: '0.82rem' },
+  default: { minHeight: '40px', fontSize: '0.94rem' },
+  medium: { minHeight: '40px', fontSize: '0.94rem' },
+  large: { minHeight: '48px', fontSize: '1rem' },
+};
+const REGION_RADIUS_VALUES = {
+  sm: '10px',
+  md: '14px',
+  lg: '18px',
+  xl: '24px',
+  pill: '999px',
+  rounded: '24px',
+};
+const PAGE_WIDTH_VALUES = {
+  narrow: '860px',
+  default: '1120px',
+  wide: '1320px',
+  full: 'none',
+};
+
+function resolveCssColor(value) {
+  return HEX_COLOR_PATTERN.test(String(value || '')) ? value : '';
+}
+
+function resolveColorRole(value) {
+  return REGION_COLOR_ROLE_VALUES[value] || '';
+}
+
+function resolveSpacing(value) {
+  return REGION_SPACING_VALUES[value] || '';
+}
+
+function resolveRadius(value) {
+  return REGION_RADIUS_VALUES[value] || '';
+}
+
+function buildStorefrontRegionStyleVars(regionStyles) {
+  const page = regionStyles?.page ?? {};
+  const search = regionStyles?.search ?? {};
+  const category = regionStyles?.category ?? {};
+  const cssVars = {};
+  const pageBackground = resolveCssColor(page.backgroundColor);
+  const pageGap = resolveSpacing(page.sectionGap);
+  const pageTopSpacing = resolveSpacing(page.topSpacing);
+  const pageWidth = PAGE_WIDTH_VALUES[page.width];
+  const searchColor = resolveColorRole(search.colorRole);
+  const searchSize = REGION_SIZE_VALUES[search.size];
+  const searchRadius = resolveRadius(search.radius);
+  const searchBorderColor =
+    resolveColorRole(search.border) || resolveCssColor(search.border);
+  const categoryColor = resolveColorRole(category.colorRole);
+  const categoryGap = resolveSpacing(category.gap);
+  const categoryRadius = resolveRadius(category.radius);
+  const categorySize = REGION_SIZE_VALUES[category.size];
+
+  if (pageBackground) {
+    cssVars['--page-bg'] = pageBackground;
+  }
+
+  if (pageGap) {
+    cssVars['--page-section-gap'] = pageGap;
+  }
+
+  if (pageTopSpacing) {
+    cssVars['--page-top-spacing'] = pageTopSpacing;
+  }
+
+  if (pageWidth) {
+    cssVars['--page-content-max-width'] = pageWidth;
+  }
+
+  if (searchColor) {
+    cssVars['--search-accent'] = searchColor;
+  }
+
+  if (searchSize) {
+    cssVars['--search-min-height'] = searchSize.minHeight;
+    cssVars['--search-font-size'] = searchSize.fontSize;
+  }
+
+  if (searchRadius) {
+    cssVars['--search-radius'] = searchRadius;
+  }
+
+  if (searchBorderColor) {
+    cssVars['--search-border-color'] = searchBorderColor;
+  }
+
+  if (categoryColor) {
+    cssVars['--category-chip-accent'] = categoryColor;
+  }
+
+  if (categoryGap) {
+    cssVars['--category-chip-gap'] = categoryGap;
+  }
+
+  if (categoryRadius) {
+    cssVars['--category-chip-radius'] = categoryRadius;
+  }
+
+  if (categorySize) {
+    cssVars['--category-chip-height'] = categorySize.minHeight;
+    cssVars['--category-chip-font-size'] = categorySize.fontSize;
+  }
+
+  return cssVars;
+}
 
 export default function StorefrontView({ config, productRows }) {
   const view = useStorefrontView({ config, productRows });
+  const regionStyles = view.activeRegionStyles ?? {};
+  const searchPlaceholder =
+    regionStyles.search?.placeholder || view.searchPlaceholder;
 
   function renderBlock(block, keyPrefix = '') {
     if (!block || block.enabled === false) {
@@ -40,10 +170,16 @@ export default function StorefrontView({ config, productRows }) {
           <div key={elementKey} className={styles.heroTop}>
             <div className={styles.brandBlock}>
               {config?.navConfig?.logoUrl ? (
-                <img className={styles.logo} src={config.navConfig.logoUrl} alt="로고" />
+                <img
+                  className={styles.logo}
+                  src={config.navConfig.logoUrl}
+                  alt="로고"
+                />
               ) : null}
               <div>
-                <h1 className={styles.title}>{view.activeSectionTitle || view.title}</h1>
+                <h1 className={styles.title}>
+                  {view.activeSectionTitle || view.title}
+                </h1>
               </div>
             </div>
           </div>
@@ -56,12 +192,21 @@ export default function StorefrontView({ config, productRows }) {
         }
 
         return (
-          <div key={elementKey} className={styles.mobileCategoryBar} data-testid="storefront-mobile-category-bar">
-            <strong className={styles.mobileCategoryTitle}>{view.activeSectionTitle}</strong>
+          <div
+            key={elementKey}
+            className={styles.mobileCategoryBar}
+            data-testid="storefront-mobile-category-bar"
+          >
+            <strong className={styles.mobileCategoryTitle}>
+              {view.activeSectionTitle}
+            </strong>
             {view.activeSectionMediumCategories.length > 0 ? (
               <div className={styles.mobileCategoryMeta}>
                 {view.activeSectionMediumCategories.map((item) => (
-                  <span key={`${elementKey}-${item}`} className={styles.mobileCategoryMetaItem}>
+                  <span
+                    key={`${elementKey}-${item}`}
+                    className={styles.mobileCategoryMetaItem}
+                  >
                     {item}
                   </span>
                 ))}
@@ -80,8 +225,8 @@ export default function StorefrontView({ config, productRows }) {
               <input
                 type="search"
                 className={styles.searchInput}
-                aria-label={view.searchPlaceholder}
-                placeholder={view.searchPlaceholder}
+                aria-label={searchPlaceholder}
+                placeholder={searchPlaceholder}
                 value={view.searchText}
                 onChange={(event) => view.setSearchText(event.target.value)}
               />
@@ -96,34 +241,25 @@ export default function StorefrontView({ config, productRows }) {
 
         return (
           <div key={elementKey} className={styles.categoryChipsSection}>
-            <button
-              type="button"
-              className={styles.categoryChipsToggle}
-              data-testid="storefront-category-chips-toggle"
-              aria-expanded={view.isCategoryChipsExpanded}
-              onClick={() => view.setIsCategoryChipsExpanded((current) => !current)}
-            >
-              {view.isCategoryChipsExpanded ? '카테고리 접기' : '카테고리 펼치기'}
-            </button>
             <div
               className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[view.categoryChipVariant] || ''}`}
               data-testid="storefront-category-chips"
               data-chip-variant={view.categoryChipVariant}
+              data-category-layout={
+                regionStyles.category?.layout || 'single-row-scroll'
+              }
               data-chip-size="compact"
-              style={view.isCategoryChipsExpanded ? undefined : { display: 'none' }}
             >
-              {view.isCategoryChipsExpanded
-                ? view.mediumCategoryItems.map((item) => (
-                    <button
-                      key={`${elementKey}-${item}`}
-                      type="button"
-                      className={`${styles.categoryChip} ${view.activeMediumCategory === item ? styles.categoryChipActive : ''}`}
-                      onClick={() => view.handleMediumCategorySelect(item)}
-                    >
-                      {item}
-                    </button>
-                  ))
-                : null}
+              {view.mediumCategoryItems.map((item) => (
+                <button
+                  key={`${elementKey}-${item}`}
+                  type="button"
+                  className={`${styles.categoryChip} ${view.activeMediumCategory === item ? styles.categoryChipActive : ''}`}
+                  onClick={() => view.handleMediumCategorySelect(item)}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
           </div>
         );
@@ -135,7 +271,12 @@ export default function StorefrontView({ config, productRows }) {
 
   function renderSlot(slot) {
     return view.mobileUiTree
-      .filter((block) => block.slot === slot && block.type !== 'productSections' && block.type !== 'emptyState')
+      .filter(
+        (block) =>
+          block.slot === slot &&
+          block.type !== 'productSections' &&
+          block.type !== 'emptyState',
+      )
       .map((block) => renderBlock(block, slot));
   }
 
@@ -150,20 +291,25 @@ export default function StorefrontView({ config, productRows }) {
         '--typography-heading-weight': view.typographyToneValue.headingWeight,
         '--typography-body-weight': view.typographyToneValue.bodyWeight,
         '--typography-letter-spacing': view.typographyToneValue.letterSpacing,
+        ...buildStorefrontRegionStyleVars(regionStyles),
       }}
     >
       <header className={styles.hero}>
         {HEADER_SLOT_ORDER.map((slot) => renderSlot(slot))}
       </header>
 
-      <div className={`${styles.bodyShell} ${!view.canRenderDesktopCategoryRail ? styles.bodyShellSolo : ''}`}>
+      <div
+        className={`${styles.bodyShell} ${!view.canRenderDesktopCategoryRail ? styles.bodyShellSolo : ''}`}
+      >
         {view.canRenderDesktopCategoryRail ? (
           <DesktopCategoryRail
             catalogSectionEntries={view.catalogSectionEntries}
             activeSectionTitle={view.activeSectionTitle}
             title={view.title}
             isOpen={view.isDesktopCategoryNavOpen}
-            onToggle={() => view.setIsDesktopCategoryNavOpen((current) => !current)}
+            onToggle={() =>
+              view.setIsDesktopCategoryNavOpen((current) => !current)
+            }
             activeMediumCategory={view.activeMediumCategory}
             onSectionSelect={view.handleCategoryRailSectionSelect}
             onMediumSelect={view.handleCategoryRailMediumSelect}
@@ -188,15 +334,23 @@ export default function StorefrontView({ config, productRows }) {
                   fields={section?.fields}
                   style={section?.style}
                   cardTemplate={section?.cardTemplate}
-                  sectionHeaderContent={view.sectionHeaderBlocks.map((block) => (
-                    <HelperBlock key={`${sectionId}-${block.id}`} block={block} />
-                  ))}
+                  renderSpec={section?.renderSpec}
+                  sectionHeaderContent={view.sectionHeaderBlocks.map(
+                    (block) => (
+                      <HelperBlock
+                        key={`${sectionId}-${block.id}`}
+                        block={block}
+                      />
+                    ),
+                  )}
                 />
               ))
             : null}
 
           {view.canRenderEmptyState ? (
-            <div className={styles.emptyState}>표시할 상품이 없습니다. 검색어와 중분류를 다시 확인해 주세요.</div>
+            <div className={styles.emptyState}>
+              표시할 상품이 없습니다. 검색어와 중분류를 다시 확인해 주세요.
+            </div>
           ) : null}
 
           {renderSlot('bottom')}

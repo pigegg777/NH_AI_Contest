@@ -139,6 +139,119 @@ describe('cardTemplate write path', () => {
 
     expect(payload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('detail-first');
   });
+
+  it('preserves aiDesign metadata through normalize, draft resolution, and save payload', () => {
+    const aiDesign = {
+      prompt: 'compare tax and zero-tax on one row',
+      activeSkillIds: ['layout', 'transform'],
+      designPlan: {
+        designBrief: {
+          tone: 'trust',
+          goal: 'Compare prices.',
+          audience: 'Customers',
+          priority: ['product_name', 'tax_price', 'zero_tax_price'],
+        },
+        transformPlan: {
+          groups: [
+            {
+              id: 'price-row',
+              label: '가격',
+              display: 'inline-compare',
+              items: [
+                { field: 'tax_price', label: '과세' },
+                { field: 'zero_tax_price', label: '영세' },
+              ],
+            },
+          ],
+          hideIfEmpty: [],
+          formatRules: [],
+        },
+        contentPlan: {
+          blocks: [
+            { id: 'title', type: 'field', source: 'product_name', label: '' },
+            { id: 'price-row', type: 'group', source: 'price-row', label: '가격' },
+          ],
+        },
+        layoutPlan: {
+          cardVariant: 'price-focus',
+          density: 'compact',
+          imagePosition: 'hidden',
+          pricePriority: 'high',
+        },
+        stylePlan: {
+          titleTextColor: 'ink',
+          typographyTone: 'bold',
+          priceTextColor: 'muted',
+          accentColor: '#2563eb',
+          cardSpacing: 'tight',
+        },
+      },
+    };
+    const normalized = normalizeCategoryConfig(
+      {
+        aiDesign,
+        layoutStyle: { variant: 'price-focus' },
+        cardDesign: {
+          visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
+        },
+      },
+      'Fertilizer Upload',
+      ['product_name', 'tax_price', 'zero_tax_price'],
+    );
+
+    expect(normalized.aiDesign.renderSpec.bodySlots[1]).toMatchObject({
+      kind: 'inline-group',
+      label: '가격',
+    });
+
+    const draft = resolveCategoryDraft({
+      productCategoryName: 'Fertilizer Upload',
+      productEntries: [
+        {
+          categoryName: 'Fertilizer Upload',
+          rows: [{ medium_category: 'Premium', product_name: 'Alpha', tax_price: 1000, zero_tax_price: 900 }],
+        },
+      ],
+      existingConfig: {
+        categoryConfigs: [
+          {
+            productCategoryName: 'Fertilizer Upload',
+            categoryConfig: {
+              selectedMediumCategories: ['Premium'],
+              representativeMediumCategory: 'Premium',
+              layoutStyle: { variant: 'price-focus' },
+              cardDesign: {
+                visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
+              },
+              aiDesign,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(draft.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
+
+    const payload = buildStorefrontSavePayload({
+      officeCode: 'OFF-1',
+      existingConfig: null,
+      hiddenProducts: [],
+      selectedProductCategoryName: 'Fertilizer Upload',
+      selectedMediumCategories: ['Premium'],
+      representativeMediumCategory: 'Premium',
+      cardStyle: {},
+      cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
+      cardElementConfig: {},
+      navConfig: {},
+      designDirection: 'friendly',
+      mobileUiTree: [],
+      cardTemplate: 'price-focus',
+      aiDesign,
+      allowedScalarKeys: ['product_name', 'tax_price', 'zero_tax_price'],
+    });
+
+    expect(payload.categoryConfigs[0].categoryConfig.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
+  });
 });
 
 describe('pageConfig.pageStyle', () => {
@@ -180,7 +293,7 @@ describe('buildStorefrontSavePayload pageStyle', () => {
 
   it('keeps the existing saved pageStyle when none is passed', () => {
     const existingConfig = {
-      pageConfig: { ...DEFAULT_PAGE_STYLE && {}, pageStyle: { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#7c3aed' } } },
+      pageConfig: { pageStyle: { ...DEFAULT_PAGE_STYLE, palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#7c3aed' } } },
     };
     const payload = buildStorefrontSavePayload({
       officeCode: 'OFF-1',
