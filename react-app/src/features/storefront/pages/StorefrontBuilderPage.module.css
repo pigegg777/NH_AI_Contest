@@ -139,18 +139,6 @@
   color: var(--corp-text);
 }
 
-.fieldNameBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.fieldKey {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--corp-muted);
-}
-
 .fieldTableValueCell {
   max-width: 0;
 }

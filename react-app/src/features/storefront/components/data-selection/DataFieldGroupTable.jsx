@@ -32,10 +32,7 @@ export default function DataFieldGroupTable({ groupLabel, fields, draftFields, o
             return (
               <tr key={field.key} data-testid={`data-field-row-${field.key}`}>
                 <th scope="row" className={styles.fieldTableHeading}>
-                  <div className={styles.fieldNameBlock}>
-                    <span>{field.label}</span>
-                    <span className={styles.fieldKey}>{field.key}</span>
-                  </div>
+                  {field.label}
                 </th>
                 <td className={styles.fieldTableValueCell}>
                   <span className={styles.fieldTableValue} data-testid={`data-field-example-${field.key}`}>

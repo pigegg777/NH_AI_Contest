@@ -42,6 +42,8 @@ export const STOREFRONT_FIELD_LABELS = {
   product_nutirent: '성분',
   indict_symbl: '작용기작',
   product_usage: '작물별 용도',
+  product_category: '용도',
+  manufacturer_list: '업체',
 };
 
 // 상품명 -> 이미지 -> 규격 -> 가격(영세/과세/면세/보조금) -> 분류(대/중/소/세) -> 성분 -> 링크
