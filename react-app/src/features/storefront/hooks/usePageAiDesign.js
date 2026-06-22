@@ -1,16 +1,23 @@
 import { useState } from 'react';
 
-import { DEFAULT_PAGE_AI_DESIGN, normalizePageAiDesignInput } from '../model/pageAiDesignModel';
+import {
+  DEFAULT_PAGE_AI_DESIGN,
+  normalizePageAiDesignInput,
+  normalizePageAiTargetScope,
+} from '../model/pageAiDesignModel';
 import { normalizePageStyle } from '../model/pageStyleModel';
 import { interpretPageAiDesign } from '../services/pageStyleAiInterpreter';
 import { compilePageStyle } from '../services/pageStyleCompiler';
 
-const MISSING_MAIN_PROMPT_ERROR_MESSAGE = '페이지 분위기를 먼저 입력해 주세요.';
+const MISSING_PAGE_PROMPT_ERROR_MESSAGE = '페이지 분위기를 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '페이지 스타일을 적용하지 못했습니다.';
 
 export function usePageAiDesign({ initialPageStyle } = {}) {
-  const [pageStyle, setPageStyle] = useState(() => normalizePageStyle(initialPageStyle));
-  const [pageAiDesign, setPageAiDesignState] = useState(DEFAULT_PAGE_AI_DESIGN);
+  const [pageStyle, setPageStyle] = useState(() =>
+    normalizePageStyle(initialPageStyle),
+  );
+  const [pageAiDesign, setPageAiDesignState] =
+    useState(DEFAULT_PAGE_AI_DESIGN);
   const [isApplyingPageAiDesign, setIsApplyingPageAiDesign] = useState(false);
   const [pageAiErrorMessage, setPageAiErrorMessage] = useState('');
 
@@ -20,27 +27,25 @@ export function usePageAiDesign({ initialPageStyle } = {}) {
     setPageAiErrorMessage('');
   }
 
-  function setMainPrompt(value) {
-    setPageAiDesignState((current) => ({ ...current, mainPrompt: value }));
+  function setPrompt(value) {
+    setPageAiDesignState((current) => ({
+      ...current,
+      prompt: value,
+    }));
   }
 
-  function setHeaderOverridePrompt(value) {
-    setPageAiDesignState((current) => ({ ...current, headerOverridePrompt: value }));
-  }
-
-  function setCategoryChipsOverridePrompt(value) {
-    setPageAiDesignState((current) => ({ ...current, categoryChipsOverridePrompt: value }));
-  }
-
-  function setSearchOverridePrompt(value) {
-    setPageAiDesignState((current) => ({ ...current, searchOverridePrompt: value }));
+  function setTargetScope(targetScope) {
+    setPageAiDesignState((current) => ({
+      ...current,
+      targetScope: normalizePageAiTargetScope(targetScope),
+    }));
   }
 
   async function applyPageAiDesign() {
     const normalizedInput = normalizePageAiDesignInput(pageAiDesign);
 
-    if (!normalizedInput.mainPrompt) {
-      setPageAiErrorMessage(MISSING_MAIN_PROMPT_ERROR_MESSAGE);
+    if (!normalizedInput.prompt) {
+      setPageAiErrorMessage(MISSING_PAGE_PROMPT_ERROR_MESSAGE);
       return;
     }
 
@@ -48,12 +53,21 @@ export function usePageAiDesign({ initialPageStyle } = {}) {
     setPageAiErrorMessage('');
 
     try {
-      const intent = await interpretPageAiDesign({ pageAiDesign: normalizedInput });
-      const nextPageStyle = compilePageStyle({ intent, previousPageStyle: pageStyle });
+      const intent = await interpretPageAiDesign({
+        pageAiDesign: normalizedInput,
+        currentPageStyle: pageStyle,
+      });
+      const nextPageStyle = compilePageStyle({
+        intent,
+        previousPageStyle: pageStyle,
+        targetScope: normalizedInput.targetScope,
+      });
 
       setPageStyle(nextPageStyle);
     } catch (error) {
-      setPageAiErrorMessage(error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE);
+      setPageAiErrorMessage(
+        error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE,
+      );
     } finally {
       setIsApplyingPageAiDesign(false);
     }
@@ -69,10 +83,8 @@ export function usePageAiDesign({ initialPageStyle } = {}) {
     isApplyingPageAiDesign,
     pageAiErrorMessage,
     hydratePageStyle,
-    setMainPrompt,
-    setHeaderOverridePrompt,
-    setCategoryChipsOverridePrompt,
-    setSearchOverridePrompt,
+    setPrompt,
+    setTargetScope,
     applyPageAiDesign,
     discardPageAiDesignSession,
   };
