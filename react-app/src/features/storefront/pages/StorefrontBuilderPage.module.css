@@ -95,7 +95,7 @@
 .controlCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   padding: 14px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 18px;
@@ -104,9 +104,10 @@
 
 .fieldTableWrap {
   overflow-x: auto;
-  border: 1px solid rgba(17, 24, 39, 0.08);
+  border: 1px solid rgba(17, 24, 39, 0.16);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
 }
 
 .fieldTable {
@@ -118,7 +119,7 @@
 
 .fieldTable th,
 .fieldTable td {
-  padding: 3px 12px;
+  padding: 5px 12px;
   border-top: 1px solid rgba(17, 24, 39, 0.08);
   text-align: left;
   vertical-align: middle;
