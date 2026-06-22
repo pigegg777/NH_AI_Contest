@@ -231,8 +231,7 @@ export function normalizeCardFields(fields, allowedScalarKeys) {
       : [];
 
     if (nextFields.length === 0) {
-      const fallback = DEFAULT_CARD_FIELDS.filter((f) => allowedScalarKeys.includes(f));
-      nextFields = fallback.length > 0 ? fallback : [allowedScalarKeys[0]];
+      nextFields = allowedScalarKeys;
     }
   } else {
     nextFields = Array.isArray(fields)

@@ -304,4 +304,13 @@ describe('normalizeCardFields', () => {
       STOREFRONT_FIELD_DISPLAY_ORDER.indexOf('product_name') + 1,
     );
   });
+
+  it('defaults to every available field, not a curated subset, when a category has no saved selection yet', () => {
+    expect(normalizeCardFields([], ['product_name', 'spec', 'img_url', 'large_category'])).toEqual([
+      'product_name',
+      'img_url',
+      'spec',
+      'large_category',
+    ]);
+  });
 });
