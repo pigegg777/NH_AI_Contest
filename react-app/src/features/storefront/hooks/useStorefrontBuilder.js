@@ -309,6 +309,8 @@ export function useStorefrontBuilder({ officeCode }) {
     }
   }
 
+  const previewCardFields = currentStep === DATA_SELECTION_STEP_INDEX ? dataSelection.draft : dataSelection.committed;
+
   const previewConfig =
     selectedProductCategoryName
       ? buildStorefrontSavePayload({
@@ -319,7 +321,7 @@ export function useStorefrontBuilder({ officeCode }) {
           selectedMediumCategories,
           representativeMediumCategory,
           cardStyle,
-          cardFields: dataSelection.committed,
+          cardFields: previewCardFields,
           cardElementConfig,
           navConfig,
           mobileUiTree,
