@@ -151,6 +151,58 @@ describe('PublicStorefrontPage', () => {
     expect(sectionEl.style.getPropertyValue('--card-font-size')).toBe(CARD_STYLE_FONT_SIZE_REM.large);
   });
 
+  it('flattens manufacturer_list into comma-joined manufacturer names on the card', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: {
+        nav: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true },
+      },
+      navConfig: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', brandColor: '#2563eb', searchPlaceholder: 'Search products', logoUrl: '' },
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'card-grid' },
+            cardDesign: {
+              visibleFields: ['product_name', 'manufacturer_list'],
+              style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Alpha',
+        medium_category: 'Premium',
+        manufacturer_list: [{ manufacturer_name: '경농' }, { manufacturer_name: '팜한농' }],
+      },
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Beta',
+        medium_category: 'Premium',
+        manufacturer_list: [],
+      },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    expect(await screen.findByText('경농, 팜한농')).toBeInTheDocument();
+    const cards = screen.getAllByRole('article');
+    const betaCard = cards.find((card) => within(card).queryByText('Beta'));
+    expect(within(betaCard).queryByText('업체')).not.toBeInTheDocument();
+  });
+
   it('renders medium-category chips from visible storefront rows', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',

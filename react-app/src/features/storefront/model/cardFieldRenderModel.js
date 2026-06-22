@@ -1,5 +1,16 @@
 import { PRICE_FIELD_KEYS } from './storefrontUiModel';
 
+export function formatManufacturerList(manufacturerList) {
+  if (!Array.isArray(manufacturerList) || manufacturerList.length === 0) {
+    return '';
+  }
+
+  return manufacturerList
+    .map((entry) => entry?.manufacturer_name)
+    .filter(Boolean)
+    .join(', ');
+}
+
 export function hasRenderableValue(value) {
   if (value === null || value === undefined || value === '') {
     return false;
@@ -15,6 +26,10 @@ export function hasRenderableValue(value) {
 export function formatFieldDisplayValue(field, value) {
   if (!hasRenderableValue(value)) {
     return '';
+  }
+
+  if (field === 'manufacturer_list') {
+    return formatManufacturerList(value);
   }
 
   if (Array.isArray(value)) {

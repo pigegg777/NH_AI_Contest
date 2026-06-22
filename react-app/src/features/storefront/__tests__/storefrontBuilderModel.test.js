@@ -8,6 +8,7 @@ import {
   normalizeCategoryConfig,
   normalizePageConfig,
   normalizeCardFields,
+  deriveAvailableCategoryFields,
   STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/storefrontBuilderModel';
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
@@ -312,5 +313,27 @@ describe('normalizeCardFields', () => {
       'spec',
       'large_category',
     ]);
+  });
+});
+
+describe('deriveAvailableCategoryFields', () => {
+  it('marks manufacturer_list as selectable even though its raw value is structured, not scalar', () => {
+    const fields = deriveAvailableCategoryFields([
+      {
+        product_name: 'Alpha',
+        manufacturer_list: [{ manufacturer_name: '경농' }, { manufacturer_name: '팜한농' }],
+      },
+    ]);
+    const manufacturerField = fields.find((field) => field.key === 'manufacturer_list');
+
+    expect(manufacturerField.isSelectable).toBe(true);
+  });
+
+  it('still marks other structured fields as not selectable', () => {
+    const fields = deriveAvailableCategoryFields([
+      { product_name: 'Alpha', other_structured_field: [{ size: 'L' }] },
+    ]);
+
+    expect(fields.find((field) => field.key === 'other_structured_field').isSelectable).toBe(false);
   });
 });

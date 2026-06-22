@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatFieldDisplayValue, hasRenderableValue } from '../model/cardFieldRenderModel';
+import { formatFieldDisplayValue, formatManufacturerList, hasRenderableValue } from '../model/cardFieldRenderModel';
 
 describe('hasRenderableValue', () => {
   it('treats null, undefined, empty string, and empty arrays as not renderable', () => {
@@ -28,11 +28,42 @@ describe('formatFieldDisplayValue', () => {
     expect(formatFieldDisplayValue('spec', '')).toBe('');
   });
 
-  it('previews arrays with a truncation marker beyond 3 items', () => {
-    expect(formatFieldDisplayValue('manufacturer_list', ['A', 'B', 'C', 'D'])).toBe('[A, B, C, ...]');
+  it('previews generic structured arrays with a truncation marker beyond 3 items', () => {
+    expect(formatFieldDisplayValue('custom_tags', ['A', 'B', 'C', 'D'])).toBe('[A, B, C, ...]');
   });
 
   it('stringifies plain scalar values', () => {
     expect(formatFieldDisplayValue('product_name', 'Alpha')).toBe('Alpha');
+  });
+
+  it('flattens manufacturer_list into comma-joined manufacturer names', () => {
+    expect(
+      formatFieldDisplayValue('manufacturer_list', [
+        { manufacturer_name: '경농' },
+        { manufacturer_name: '팜한농' },
+      ]),
+    ).toBe('경농, 팜한농');
+  });
+
+  it('hides manufacturer_list when every entry is missing a name', () => {
+    expect(formatFieldDisplayValue('manufacturer_list', [{ manufacturer_name: '' }, {}])).toBe('');
+  });
+});
+
+describe('formatManufacturerList', () => {
+  it('joins manufacturer names with a comma', () => {
+    expect(formatManufacturerList([{ manufacturer_name: '경농' }, { manufacturer_name: '팜한농' }])).toBe(
+      '경농, 팜한농',
+    );
+  });
+
+  it('drops blank or missing names', () => {
+    expect(formatManufacturerList([{ manufacturer_name: '경농' }, { manufacturer_name: '' }, {}])).toBe('경농');
+  });
+
+  it('returns an empty string for an empty or non-array list', () => {
+    expect(formatManufacturerList([])).toBe('');
+    expect(formatManufacturerList(null)).toBe('');
+    expect(formatManufacturerList(undefined)).toBe('');
   });
 });

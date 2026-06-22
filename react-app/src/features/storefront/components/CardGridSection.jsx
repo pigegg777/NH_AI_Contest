@@ -1,3 +1,4 @@
+import { formatManufacturerList } from '../model/cardFieldRenderModel';
 import { CARD_STYLE_FONT_SIZE_REM, normalizeCardStyle, resolveCardPriceTextColor } from '../model/cardStyleModel';
 import { STOREFRONT_FIELD_LABELS, sortFieldKeysByDisplayOrder } from '../model/storefrontBuilderModel';
 import { deriveCardElementConfig } from '../model/storefrontUiModel';
@@ -185,6 +186,10 @@ function buildCardGridRegionVars(regionStyles) {
 function renderFieldValue(field, value) {
   if (value === null || value === undefined || value === '') {
     return '';
+  }
+
+  if (field === 'manufacturer_list') {
+    return formatManufacturerList(value);
   }
 
   if (typeof value === 'object') {

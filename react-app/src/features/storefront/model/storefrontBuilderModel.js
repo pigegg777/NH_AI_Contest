@@ -118,7 +118,15 @@ function getFieldExampleValue(key, rows) {
   return null;
 }
 
+// Structured fields the card-render layer already knows how to flatten into text
+// (see cardFieldRenderModel.js), so they're selectable despite failing the scalar check.
+const STRUCTURED_FIELD_KEYS_WITH_DISPLAY_SUPPORT = new Set(['manufacturer_list']);
+
 function isFieldKeySelectable(key, rows) {
+  if (STRUCTURED_FIELD_KEYS_WITH_DISPLAY_SUPPORT.has(key)) {
+    return true;
+  }
+
   for (const row of Array.isArray(rows) ? rows : []) {
     const value = row?.[key];
 
