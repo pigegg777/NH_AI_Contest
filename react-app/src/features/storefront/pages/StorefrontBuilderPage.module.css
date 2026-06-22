@@ -95,8 +95,8 @@
 .controlCard {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
+  gap: 8px;
+  padding: 14px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.86);
@@ -118,7 +118,7 @@
 
 .fieldTable th,
 .fieldTable td {
-  padding: 6px 14px;
+  padding: 3px 12px;
   border-top: 1px solid rgba(17, 24, 39, 0.08);
   text-align: left;
   vertical-align: middle;
@@ -142,7 +142,7 @@
 .fieldNameBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
 
 .fieldKey {
