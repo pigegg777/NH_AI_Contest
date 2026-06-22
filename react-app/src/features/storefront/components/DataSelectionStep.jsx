@@ -1,5 +1,4 @@
 import DataFieldGroupTable from './data-selection/DataFieldGroupTable';
-import DataSelectionPreviewGrid from './data-selection/DataSelectionPreviewGrid';
 import StepShell from './StepShell';
 import { groupAvailableFields } from '../model/dataSelectionFieldGroupModel';
 import styles from '../pages/StorefrontBuilderPage.module.css';
@@ -20,7 +19,6 @@ function toggleGroupedField(builder, field) {
 
 export default function DataSelectionStep({ builder }) {
   const groups = groupAvailableFields(builder.availableCategoryFields);
-  const previewRows = Array.isArray(builder.currentEntry?.rows) ? builder.currentEntry.rows : [];
 
   function handleForwardClick() {
     if (builder.isDataSelectionConfirmed) {
@@ -58,12 +56,7 @@ export default function DataSelectionStep({ builder }) {
           onToggleField={(field) => toggleGroupedField(builder, field)}
           testId="data-field-table-category"
         />
-        <p className={styles.tableHelperText}>체크를 바꾸면 아래 미리보기가 바로 업데이트됩니다.</p>
-      </section>
-
-      <section className={styles.controlCard}>
-        <h3 className={styles.sectionTitle}>전체 상품 미리보기</h3>
-        <DataSelectionPreviewGrid productRows={previewRows} fields={builder.availableCategoryFields.filter((f) => builder.draftDataSelection.includes(f.key))} />
+        <p className={styles.tableHelperText}>체크를 바꾸면 선택 상태가 바로 업데이트됩니다.</p>
       </section>
 
       {!builder.isDataSelectionConfirmed ? (

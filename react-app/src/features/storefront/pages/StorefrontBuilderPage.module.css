@@ -118,7 +118,7 @@
 
 .fieldTable th,
 .fieldTable td {
-  padding: 12px 14px;
+  padding: 6px 14px;
   border-top: 1px solid rgba(17, 24, 39, 0.08);
   text-align: left;
   vertical-align: middle;
@@ -422,20 +422,4 @@
   .fieldTableToggleCell {
     width: auto;
   }
-}
-
-.dataPreviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-}
-
-.dataPreviewCard {
-  border: 1px solid var(--corp-line);
-  border-radius: 8px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 0.8rem;
 }

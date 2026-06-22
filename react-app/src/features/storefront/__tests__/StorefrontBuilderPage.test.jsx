@@ -138,7 +138,7 @@ describe('StorefrontBuilderPage', () => {
     expect(await screen.findByText('스토어프론트 빌더를 불러오지 못했습니다.')).toBeInTheDocument();
   });
 
-  it('shows the grouped data-selection table, updates the neutral preview live, and only updates the design preview after confirming', async () => {
+  it('shows the grouped data-selection table, marks state unconfirmed on toggle, and only updates the design preview after confirming', async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -150,18 +150,13 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('builder-go-next'));
 
     const table = screen.getByTestId('data-field-table-description');
-    const neutralPreview = screen.getByTestId('data-selection-preview-grid');
     const designPreview = screen.getByTestId('mobile-preview-device');
 
     expect(within(table).getByTestId('data-field-example-product_name')).toHaveTextContent('Alpha');
     expect(within(designPreview).queryByText('18-18-18')).not.toBeInTheDocument();
-    expect(within(neutralPreview).queryByText('18-18-18')).not.toBeInTheDocument();
 
     await user.click(within(table).getByTestId('data-field-toggle-nutrient'));
 
-    await waitFor(() => {
-      expect(within(neutralPreview).getByText('18-18-18')).toBeInTheDocument();
-    });
     expect(within(designPreview).queryByText('18-18-18')).not.toBeInTheDocument();
     expect(screen.getByTestId('data-selection-unconfirmed-hint')).toBeInTheDocument();
     expect(screen.getByTestId('confirm-data-selection')).toHaveTextContent('확인하고 다음 단계로');
