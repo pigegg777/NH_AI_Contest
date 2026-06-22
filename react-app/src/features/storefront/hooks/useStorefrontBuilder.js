@@ -57,8 +57,8 @@ export function useStorefrontBuilder({ officeCode }) {
   const [selectedMediumCategories, setSelectedMediumCategories] = useState([]);
   const [representativeMediumCategory, setRepresentativeMediumCategory] =
     useState('');
-  const pageAi = usePageAiDesign();
-  const cardAi = useCardAiDesign();
+  const pageAi = usePageAiDesign({ officeCode });
+  const cardAi = useCardAiDesign({ officeCode });
   const [navConfig, setNavConfig] = useState(DEFAULT_NAV_CONFIG);
   const [mobileUiTree, setMobileUiTree] = useState(() =>
     sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree),

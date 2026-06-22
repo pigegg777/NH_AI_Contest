@@ -6,13 +6,13 @@ import {
   normalizePageAiTargetScope,
 } from '../model/pageAiDesignModel';
 import { normalizePageStyle } from '../model/pageStyleModel';
-import { interpretPageAiDesign } from '../services/pageStyleAiInterpreter';
+import { requestPageStyleAiIntent } from '../services/pageStyleAiGateway';
 import { compilePageStyle } from '../services/pageStyleCompiler';
 
 const MISSING_PAGE_PROMPT_ERROR_MESSAGE = '페이지 분위기를 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '페이지 스타일을 적용하지 못했습니다.';
 
-export function usePageAiDesign({ initialPageStyle } = {}) {
+export function usePageAiDesign({ officeCode, initialPageStyle } = {}) {
   const [pageStyle, setPageStyle] = useState(() =>
     normalizePageStyle(initialPageStyle),
   );
@@ -53,9 +53,10 @@ export function usePageAiDesign({ initialPageStyle } = {}) {
     setPageAiErrorMessage('');
 
     try {
-      const intent = await interpretPageAiDesign({
+      const intent = await requestPageStyleAiIntent({
         pageAiDesign: normalizedInput,
         currentPageStyle: pageStyle,
+        officeCode,
       });
       const nextPageStyle = compilePageStyle({
         intent,

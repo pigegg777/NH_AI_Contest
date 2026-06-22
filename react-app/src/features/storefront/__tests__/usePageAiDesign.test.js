@@ -4,10 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { usePageAiDesign } from '../hooks/usePageAiDesign';
 import { DEFAULT_PAGE_AI_DESIGN } from '../model/pageAiDesignModel';
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
-import { interpretPageAiDesign } from '../services/pageStyleAiInterpreter';
+import { requestPageStyleAiIntent } from '../services/pageStyleAiGateway';
 import { compilePageStyle } from '../services/pageStyleCompiler';
 
-vi.mock('../services/pageStyleAiInterpreter', () => ({ interpretPageAiDesign: vi.fn() }));
+vi.mock('../services/pageStyleAiGateway', () => ({ requestPageStyleAiIntent: vi.fn() }));
 vi.mock('../services/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
 
 describe('usePageAiDesign', () => {
@@ -48,7 +48,7 @@ describe('usePageAiDesign', () => {
       await result.current.applyPageAiDesign();
     });
 
-    expect(interpretPageAiDesign).not.toHaveBeenCalled();
+    expect(requestPageStyleAiIntent).not.toHaveBeenCalled();
     expect(result.current.pageAiErrorMessage).not.toBe('');
     expect(result.current.pageStyle).toEqual(DEFAULT_PAGE_STYLE);
   });
@@ -59,7 +59,7 @@ describe('usePageAiDesign', () => {
       palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#ea580c' },
     };
 
-    interpretPageAiDesign.mockResolvedValue({
+    requestPageStyleAiIntent.mockResolvedValue({
       palette: compiledStyle.palette,
       header: null,
       categoryChips: null,
@@ -78,12 +78,13 @@ describe('usePageAiDesign', () => {
       await result.current.applyPageAiDesign();
     });
 
-    expect(interpretPageAiDesign).toHaveBeenCalledWith({
+    expect(requestPageStyleAiIntent).toHaveBeenCalledWith({
       pageAiDesign: {
         prompt: 'warm and friendly, make the search box larger with a stronger border',
         targetScope: 'search',
       },
       currentPageStyle: DEFAULT_PAGE_STYLE,
+      officeCode: undefined,
     });
     expect(compilePageStyle).toHaveBeenCalledWith({
       intent: {
@@ -101,7 +102,7 @@ describe('usePageAiDesign', () => {
   });
 
   it('keeps the last valid pageStyle and surfaces an error when interpretation fails', async () => {
-    interpretPageAiDesign.mockRejectedValue(new Error('network down'));
+    requestPageStyleAiIntent.mockRejectedValue(new Error('network down'));
 
     const { result } = renderHook(() => usePageAiDesign());
 
@@ -123,7 +124,7 @@ describe('usePageAiDesign', () => {
       palette: { ...DEFAULT_PAGE_STYLE.palette, accentHex: '#7c3aed' },
     };
 
-    interpretPageAiDesign.mockResolvedValue({
+    requestPageStyleAiIntent.mockResolvedValue({
       palette: compiledStyle.palette,
       header: null,
       categoryChips: null,
