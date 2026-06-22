@@ -1,3 +1,4 @@
+import { toTrimmedString } from '../../../common/utils/text';
 import {
   buildCardAiTargetScopeInstruction,
   normalizeCardAiDesignInput,

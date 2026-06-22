@@ -10,6 +10,7 @@ import {
   detectInfoIntentCandidate,
   detectLayoutIntentCandidate,
   detectShellIntentCandidate,
+  normalizeOpenAiCardIntent,
 } from '../services/cardStyleAiContract';
 
 function collectStrictModeViolations(schema, path = []) {
@@ -267,5 +268,89 @@ describe('buildHeuristicCardAiIntent scope gating', () => {
 
     expect(intent.structuralPresetRequest).toBeNull();
     expect(intent.titleModeRequest).toBeNull();
+  });
+});
+
+describe('normalizeOpenAiCardIntent', () => {
+  it('normalizes a full OpenAI-shaped payload, trimming id/label/field strings in info groups and orders', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        structuralPresetRequest: 'image-left',
+        titleModeRequest: 'inline',
+        layout: { cardsPerRow: 2, sectionOrder: ['header', 'image'], imagePlacement: null, titleClamp: null, contentDensity: null, emphasis: null, groupingHint: null },
+        shell: { backgroundColor: null, borderColor: null, shadow: 'strong', radius: null, spacing: null },
+        header: { backgroundColor: null, titleColorHex: '#111827', letterSpacing: null, fontWeight: null },
+        image: null,
+        info: {
+          backgroundColor: null,
+          borderColor: null,
+          padding: null,
+          radius: null,
+          fieldGap: null,
+          fieldGroupGap: null,
+          requestedGroups: [
+            { id: '  price-compare  ', label: '  가격  ', display: 'inline-group', fields: ['  tax_price  ', 'zero_tax_price'] },
+          ],
+          requestedFieldOrder: ['  tax_price  ', 'product_name'],
+        },
+        field: null,
+      },
+      '',
+    );
+
+    expect(intent.structuralPresetRequest).toBe('image-left');
+    expect(intent.layout).toEqual({ cardsPerRow: 2, sectionOrder: ['header', 'image'] });
+    expect(intent.shell).toEqual({ shadow: 'strong' });
+    expect(intent.header).toEqual({ titleColorHex: '#111827' });
+    expect(intent.info.requestedGroups).toEqual([
+      { id: 'price-compare', label: '가격', display: 'inline-group', fields: ['tax_price', 'zero_tax_price'] },
+    ]);
+    expect(intent.info.requestedFieldOrder).toEqual(['tax_price', 'product_name']);
+  });
+
+  it('drops a requested group with a blank id even if its fields are present', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        structuralPresetRequest: null,
+        titleModeRequest: null,
+        layout: null,
+        shell: null,
+        header: null,
+        image: null,
+        info: {
+          backgroundColor: null,
+          borderColor: null,
+          padding: null,
+          radius: null,
+          fieldGap: null,
+          fieldGroupGap: null,
+          requestedGroups: [{ id: '   ', label: 'x', display: 'inline-group', fields: ['tax_price'] }],
+          requestedFieldOrder: null,
+        },
+        field: null,
+      },
+      '',
+    );
+
+    expect(intent.info).toBeNull();
+  });
+
+  it('nulls out every non-target area when a targetScope is locked to header', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        structuralPresetRequest: null,
+        titleModeRequest: null,
+        layout: null,
+        shell: null,
+        header: { backgroundColor: null, titleColorHex: '#111827', letterSpacing: null, fontWeight: null },
+        image: null,
+        info: null,
+        field: { priceColorRole: 'brand', targetedFieldStyles: null },
+      },
+      'header',
+    );
+
+    expect(intent.header).toEqual({ titleColorHex: '#111827' });
+    expect(intent.field).toBeNull();
   });
 });
