@@ -1,0 +1,120 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { DEFAULT_CARD_STYLE } from '../model/cardStyleModel';
+import { requestCardStyleAiIntent } from '../services/cardStyleAiGateway';
+
+vi.mock('../../../lib/supabaseClient', () => ({
+  default: {
+    auth: {
+      getSession: vi.fn(),
+    },
+  },
+}));
+
+import supabase from '../../../lib/supabaseClient';
+
+afterEach(() => {
+  vi.clearAllMocks();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+describe('requestCardStyleAiIntent', () => {
+  it('uses the local heuristic and skips the network call when VITE_STOREFRONT_AI_LOCAL_HEURISTIC is true', async () => {
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const intent = await requestCardStyleAiIntent({
+      cardAiDesign: { prompt: 'make the title bolder and darker' },
+      visibleFields: ['product_name'],
+      currentCardStyle: DEFAULT_CARD_STYLE,
+      officeCode: 'OFF-1',
+    });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(intent.header).toEqual({ titleColorHex: '#111827', fontWeight: 800 });
+  });
+
+  it('throws a clear error when there is no active session', async () => {
+    supabase.auth.getSession.mockResolvedValue({ data: { session: null } });
+
+    await expect(
+      requestCardStyleAiIntent({
+        cardAiDesign: { prompt: 'warm' },
+        visibleFields: ['product_name'],
+        currentCardStyle: DEFAULT_CARD_STYLE,
+        officeCode: 'OFF-1',
+      }),
+    ).rejects.toThrow('로그인 정보가 만료되었습니다');
+  });
+
+  it('posts to the same-origin endpoint with the bearer token and normalizes the response', async () => {
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: { access_token: 'test-token' } },
+    });
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        intent: {
+          structuralPresetRequest: null,
+          titleModeRequest: null,
+          layout: null,
+          shell: null,
+          header: { backgroundColor: null, titleColorHex: null, letterSpacing: null, fontWeight: 800 },
+          image: null,
+          info: null,
+          field: null,
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const intent = await requestCardStyleAiIntent({
+      cardAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
+      visibleFields: ['product_name', 'tax_price'],
+      productCategoryName: 'Fertilizer Upload',
+      currentCardStyle: DEFAULT_CARD_STYLE,
+      officeCode: 'OFF-1',
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/storefront-ai/card-style',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer test-token',
+          'Content-Type': 'application/json',
+        }),
+      }),
+    );
+    const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(sentBody.officeCode).toBe('OFF-1');
+    expect(sentBody.visibleFields).toEqual(['product_name', 'tax_price']);
+    expect(sentBody.productCategoryName).toBe('Fertilizer Upload');
+    expect(intent.header).toEqual({ fontWeight: 800 });
+  });
+
+  it('throws with the server error message when the response is not ok', async () => {
+    supabase.auth.getSession.mockResolvedValue({
+      data: { session: { access_token: 'test-token' } },
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+        json: async () => ({ error: 'officeCode does not match the authenticated user.' }),
+      }),
+    );
+
+    await expect(
+      requestCardStyleAiIntent({
+        cardAiDesign: { prompt: 'warm' },
+        visibleFields: ['product_name'],
+        currentCardStyle: DEFAULT_CARD_STYLE,
+        officeCode: 'OFF-2',
+      }),
+    ).rejects.toThrow('officeCode does not match the authenticated user.');
+  });
+});
