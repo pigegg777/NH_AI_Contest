@@ -1,6 +1,7 @@
 import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/pageStyleModel';
-import { MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
+import { getDefaultBlock, MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
 import { useStorefrontView } from '../hooks/useStorefrontView';
+import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
 import CardGridSection from './CardGridSection';
 import DesktopCategoryRail from './storefront-view/DesktopCategoryRail';
 import HelperBlock from './storefront-view/HelperBlock';
@@ -17,142 +18,66 @@ const CHIP_VARIANT_CLASS_NAMES = {
   outline: styles.categoryWrapOutline,
   soft: styles.categoryWrapSoft,
 };
+const TOP_SLOT_BLOCK_ORDER = {
+  hero: 0,
+  searchBox: 1,
+  productCategoryNav: 2,
+  mobileCategoryBar: 3,
+};
 
 const HEADER_SLOT_ORDER = ['top', 'afterSearch', 'beforeChips', 'afterChips'];
 const BODY_SLOT_ORDER = ['beforeProducts', 'bottom'];
-const HEX_COLOR_PATTERN = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
-const REGION_COLOR_ROLE_VALUES = {
-  brand: 'var(--brand-color, var(--corp-primary))',
-  muted: '#6b7280',
-  blue: '#2563eb',
-  red: '#dc2626',
-  green: '#15803d',
-  amber: '#d97706',
-  ink: '#111827',
-};
-const REGION_SPACING_VALUES = {
-  tight: '14px',
-  compact: '14px',
-  normal: '20px',
-  default: '20px',
-  relaxed: '28px',
-  airy: '32px',
-};
-const REGION_SIZE_VALUES = {
-  compact: { minHeight: '34px', fontSize: '0.82rem' },
-  small: { minHeight: '34px', fontSize: '0.82rem' },
-  default: { minHeight: '40px', fontSize: '0.94rem' },
-  medium: { minHeight: '40px', fontSize: '0.94rem' },
-  large: { minHeight: '48px', fontSize: '1rem' },
-};
-const REGION_RADIUS_VALUES = {
-  sm: '10px',
-  md: '14px',
-  lg: '18px',
-  xl: '24px',
-  pill: '999px',
-  rounded: '24px',
-};
-const PAGE_WIDTH_VALUES = {
-  narrow: '860px',
-  default: '1120px',
-  wide: '1320px',
-  full: 'none',
-};
 
-function resolveCssColor(value) {
-  return HEX_COLOR_PATTERN.test(String(value || '')) ? value : '';
+function buildRenderableMobileUiTree(mobileUiTree, shouldInferProductCategoryNav) {
+  if (!shouldInferProductCategoryNav) {
+    return mobileUiTree;
+  }
+
+  const hasProductCategoryNav = mobileUiTree.some(
+    (block) => block?.type === 'productCategoryNav' && block.enabled !== false,
+  );
+
+  if (hasProductCategoryNav) {
+    return mobileUiTree;
+  }
+
+  const inferredProductCategoryNav = {
+    ...getDefaultBlock('productCategoryNav'),
+    id: 'inferred-product-category-nav',
+  };
+  const nextTree = [];
+  let inserted = false;
+
+  mobileUiTree.forEach((block) => {
+    nextTree.push(block);
+
+    if (!inserted && block?.type === 'hero') {
+      nextTree.push(inferredProductCategoryNav);
+      inserted = true;
+    }
+  });
+
+  if (!inserted) {
+    const firstTopBlockIndex = nextTree.findIndex((block) => block?.slot === 'top');
+
+    if (firstTopBlockIndex === -1) {
+      nextTree.unshift(inferredProductCategoryNav);
+    } else {
+      nextTree.splice(firstTopBlockIndex, 0, inferredProductCategoryNav);
+    }
+  }
+
+  return nextTree;
 }
 
-function resolveColorRole(value) {
-  return REGION_COLOR_ROLE_VALUES[value] || '';
-}
-
-function resolveSpacing(value) {
-  return REGION_SPACING_VALUES[value] || '';
-}
-
-function resolveRadius(value) {
-  return REGION_RADIUS_VALUES[value] || '';
-}
-
-function buildStorefrontRegionStyleVars(regionStyles) {
-  const page = regionStyles?.page ?? {};
-  const search = regionStyles?.search ?? {};
-  const category = regionStyles?.category ?? {};
-  const cssVars = {};
-  const pageBackground = resolveCssColor(page.backgroundColor);
-  const pageGap = resolveSpacing(page.sectionGap);
-  const pageTopSpacing = resolveSpacing(page.topSpacing);
-  const pageWidth = PAGE_WIDTH_VALUES[page.width];
-  const searchColor = resolveColorRole(search.colorRole);
-  const searchSize = REGION_SIZE_VALUES[search.size];
-  const searchRadius = resolveRadius(search.radius);
-  const searchBorderColor =
-    resolveColorRole(search.border) || resolveCssColor(search.border);
-  const categoryColor = resolveColorRole(category.colorRole);
-  const categoryGap = resolveSpacing(category.gap);
-  const categoryRadius = resolveRadius(category.radius);
-  const categorySize = REGION_SIZE_VALUES[category.size];
-
-  if (pageBackground) {
-    cssVars['--page-bg'] = pageBackground;
-  }
-
-  if (pageGap) {
-    cssVars['--page-section-gap'] = pageGap;
-  }
-
-  if (pageTopSpacing) {
-    cssVars['--page-top-spacing'] = pageTopSpacing;
-  }
-
-  if (pageWidth) {
-    cssVars['--page-content-max-width'] = pageWidth;
-  }
-
-  if (searchColor) {
-    cssVars['--search-accent'] = searchColor;
-  }
-
-  if (searchSize) {
-    cssVars['--search-min-height'] = searchSize.minHeight;
-    cssVars['--search-font-size'] = searchSize.fontSize;
-  }
-
-  if (searchRadius) {
-    cssVars['--search-radius'] = searchRadius;
-  }
-
-  if (searchBorderColor) {
-    cssVars['--search-border-color'] = searchBorderColor;
-  }
-
-  if (categoryColor) {
-    cssVars['--category-chip-accent'] = categoryColor;
-  }
-
-  if (categoryGap) {
-    cssVars['--category-chip-gap'] = categoryGap;
-  }
-
-  if (categoryRadius) {
-    cssVars['--category-chip-radius'] = categoryRadius;
-  }
-
-  if (categorySize) {
-    cssVars['--category-chip-height'] = categorySize.minHeight;
-    cssVars['--category-chip-font-size'] = categorySize.fontSize;
-  }
-
-  return cssVars;
-}
-
-export default function StorefrontView({ config, productRows }) {
-  const view = useStorefrontView({ config, productRows });
-  const regionStyles = view.activeRegionStyles ?? {};
-  const searchPlaceholder =
-    regionStyles.search?.placeholder || view.searchPlaceholder;
+export default function StorefrontView({ config, productRows, officeName }) {
+  const view = useStorefrontView({ config, productRows, officeName });
+  const searchPlaceholder = view.searchPlaceholder;
+  const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
+  const renderableMobileUiTree = buildRenderableMobileUiTree(
+    view.mobileUiTree,
+    view.catalogSectionEntries.length > 0,
+  );
 
   function renderBlock(block, keyPrefix = '') {
     if (!block || block.enabled === false) {
@@ -170,23 +95,55 @@ export default function StorefrontView({ config, productRows }) {
         return (
           <div key={elementKey} className={styles.heroTop}>
             <div className={styles.brandBlock}>
-              {config?.navConfig?.logoUrl ? (
-                <img
-                  className={styles.logo}
-                  src={config.navConfig.logoUrl}
-                  alt="로고"
-                />
-              ) : null}
-              <div>
-                <h1 className={styles.title}>
-                  {view.activeSectionTitle || view.title}
-                </h1>
+              <div className={styles.brandIdentity}>
+                <div className={styles.logoShell} aria-hidden="true">
+                  <img
+                    className={styles.logo}
+                    src={brandLogoSrc}
+                    alt=""
+                    data-testid="storefront-brand-logo"
+                  />
+                </div>
+                <div className={styles.brandCopy}>
+                  {view.coopName ? (
+                    <p className={styles.eyebrow}>{view.coopName}</p>
+                  ) : null}
+                  <h1 className={styles.title}>
+                    {view.headerTitle}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>
         );
       case 'productCategoryNav':
-        return null;
+        if (view.catalogSectionEntries.length === 0) {
+          return null;
+        }
+
+        return (
+          <div key={elementKey} className={styles.productCategorySection}>
+            <p className={styles.selectionLabel}>대분류 선택</p>
+            <div
+              className={styles.productCategoryWrap}
+              data-testid="storefront-product-category-chips"
+            >
+              {view.catalogSectionEntries.map(({ sectionId, sectionName }) => (
+                <button
+                  key={`${elementKey}-${sectionId}`}
+                  type="button"
+                  className={`${styles.productCategoryChip} ${view.activeSectionTitle === sectionName ? styles.productCategoryChipActive : ''}`}
+                  aria-pressed={view.activeSectionTitle === sectionName}
+                  onClick={() =>
+                    view.handleCategoryRailSectionSelect(sectionName, sectionId)
+                  }
+                >
+                  {sectionName}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
       case 'mobileCategoryBar':
         if (!view.activeSectionTitle) {
           return null;
@@ -242,13 +199,12 @@ export default function StorefrontView({ config, productRows }) {
 
         return (
           <div key={elementKey} className={styles.categoryChipsSection}>
+            <p className={styles.selectionLabel}>중분류 선택</p>
             <div
               className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[view.categoryChipVariant] || ''}`}
               data-testid="storefront-category-chips"
               data-chip-variant={view.categoryChipVariant}
-              data-category-layout={
-                regionStyles.category?.layout || 'single-row-scroll'
-              }
+              data-category-layout="single-row-scroll"
               data-chip-size="compact"
             >
               {view.mediumCategoryItems.map((item) => (
@@ -271,14 +227,24 @@ export default function StorefrontView({ config, productRows }) {
   }
 
   function renderSlot(slot) {
-    return view.mobileUiTree
+    const blocks = renderableMobileUiTree
       .filter(
         (block) =>
           block.slot === slot &&
           block.type !== 'productSections' &&
           block.type !== 'emptyState',
-      )
-      .map((block) => renderBlock(block, slot));
+      );
+
+    if (slot === 'top') {
+      blocks.sort((left, right) => {
+        const leftOrder = TOP_SLOT_BLOCK_ORDER[left.type] ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = TOP_SLOT_BLOCK_ORDER[right.type] ?? Number.MAX_SAFE_INTEGER;
+
+        return leftOrder - rightOrder;
+      });
+    }
+
+    return blocks.map((block) => renderBlock(block, slot));
   }
 
   return (
@@ -303,7 +269,6 @@ export default function StorefrontView({ config, productRows }) {
         '--page-chip-border': view.pageStyle.categoryChips.borderColorHex,
         '--page-chip-active-bg': view.pageStyle.categoryChips.activeBackgroundHex,
         '--page-chip-active-text': view.pageStyle.categoryChips.activeTextHex,
-        ...buildStorefrontRegionStyleVars(regionStyles),
       }}
     >
       <header className={styles.hero}>
@@ -344,9 +309,8 @@ export default function StorefrontView({ config, productRows }) {
                   sectionId={sectionId}
                   section={section}
                   fields={section?.fields}
-                  style={section?.style}
-                  cardTemplate={section?.cardTemplate}
-                  renderSpec={section?.renderSpec}
+                  cardStyle={section?.cardStyle}
+                  bodySlots={section?.bodySlots}
                   sectionHeaderContent={view.sectionHeaderBlocks.map(
                     (block) => (
                       <HelperBlock
@@ -361,7 +325,7 @@ export default function StorefrontView({ config, productRows }) {
 
           {view.canRenderEmptyState ? (
             <div className={styles.emptyState}>
-              표시할 상품이 없습니다. 검색어와 중분류를 다시 확인해 주세요.
+              표시할 상품이 없습니다. 검색어나 중분류를 다시 확인해 주세요.
             </div>
           ) : null}
 
