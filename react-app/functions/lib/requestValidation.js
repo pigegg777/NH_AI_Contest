@@ -1,5 +1,5 @@
-export const MAX_PROMPT_LENGTH = 2000;
-export const MAX_REQUEST_BODY_BYTES = 20000;
+const MAX_PROMPT_LENGTH = 2000;
+const MAX_REQUEST_BODY_BYTES = 20000;
 
 export class RequestValidationError extends Error {
   constructor(message, status) {

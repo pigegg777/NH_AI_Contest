@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 import { RequestValidationError } from './requestValidation';
 
-export function createRequestScopedSupabaseClient(env, accessToken) {
+function createRequestScopedSupabaseClient(env, accessToken) {
   return createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, {
     global: {
       headers: { Authorization: `Bearer ${accessToken}` },
@@ -10,7 +10,7 @@ export function createRequestScopedSupabaseClient(env, accessToken) {
   });
 }
 
-export function extractBearerToken(request) {
+function extractBearerToken(request) {
   const header = request.headers.get('Authorization') || request.headers.get('authorization');
 
   if (!header || !header.startsWith('Bearer ')) {
