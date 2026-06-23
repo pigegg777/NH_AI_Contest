@@ -25,7 +25,7 @@ function matchesCategoryConfig(productRow, categoryConfigRow) {
   return true;
 }
 
-export function matchesProductRef(productRow, productRef) {
+function matchesProductRef(productRow, productRef) {
   if (!productRef || typeof productRef !== 'object' || Array.isArray(productRef)) {
     return false;
   }
@@ -81,11 +81,9 @@ export function buildSections(categoryConfigs, productRows) {
       return {
         title: categoryConfig.displayName || categoryConfigRow?.productCategoryName || 'Products',
         productCategoryName: categoryConfigRow?.productCategoryName || '',
-        cardTemplate: categoryConfig.layoutStyle?.variant || 'card-grid',
         fields: categoryConfig.cardDesign?.visibleFields,
-        style: categoryConfig.cardDesign?.style,
-        elementConfig: categoryConfig.cardDesign?.elementConfig,
-        renderSpec: categoryConfig.aiDesign?.renderSpec ?? null,
+        cardStyle: categoryConfig.cardDesign?.cardStyle,
+        bodySlots: categoryConfig.cardDesign?.bodySlots,
         representativeMediumCategory: categoryConfig.representativeMediumCategory || '',
         products,
       };

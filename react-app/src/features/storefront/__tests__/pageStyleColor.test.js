@@ -2,14 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import {
   contrastRatio,
-  deriveTonalPalette,
   ensureReadableTextColor,
-  hexToRgb,
   isHexColor,
   mixHexColors,
   normalizeHexColor,
   pickReadableTextColor,
-  relativeLuminance,
 } from '../model/pageStyleColor';
 
 describe('isHexColor', () => {
@@ -28,21 +25,6 @@ describe('normalizeHexColor', () => {
     expect(normalizeHexColor('#1D4A2E', '#000000')).toBe('#1d4a2e');
     expect(normalizeHexColor('not-a-color', '#000000')).toBe('#000000');
     expect(normalizeHexColor(undefined, '#000000')).toBe('#000000');
-  });
-});
-
-describe('hexToRgb', () => {
-  it('converts hex to 0-255 channel values', () => {
-    expect(hexToRgb('#ffffff')).toEqual({ r: 255, g: 255, b: 255 });
-    expect(hexToRgb('#000000')).toEqual({ r: 0, g: 0, b: 0 });
-    expect(hexToRgb('#1d4a2e')).toEqual({ r: 29, g: 74, b: 46 });
-  });
-});
-
-describe('relativeLuminance', () => {
-  it('returns 1 for white and 0 for black', () => {
-    expect(relativeLuminance('#ffffff')).toBeCloseTo(1, 5);
-    expect(relativeLuminance('#000000')).toBeCloseTo(0, 5);
   });
 });
 
@@ -79,17 +61,5 @@ describe('mixHexColors', () => {
 
   it('blends proportionally at weight 0.5', () => {
     expect(mixHexColors('#000000', '#ffffff', 0.5)).toBe('#808080');
-  });
-});
-
-describe('deriveTonalPalette', () => {
-  it('derives a light background and soft accent from a single base color', () => {
-    const palette = deriveTonalPalette('#1d4a2e');
-
-    expect(palette.accentHex).toBe('#1d4a2e');
-    expect(palette.surfaceHex).toBe('#ffffff');
-    expect(isHexColor(palette.backgroundHex)).toBe(true);
-    expect(isHexColor(palette.accentSoftHex)).toBe(true);
-    expect(contrastRatio(palette.backgroundHex, '#ffffff')).toBeLessThan(1.2);
   });
 });

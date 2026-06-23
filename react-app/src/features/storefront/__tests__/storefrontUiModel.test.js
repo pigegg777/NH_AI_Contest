@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  DEFAULT_CARD_ELEMENT_CONFIG,
-  deriveCardElementConfig,
-  normalizeCardElementConfig,
-  normalizeMobileUiTree,
-  sanitizeMobileUiTree,
-} from '../model/storefrontUiModel';
+import { normalizeMobileUiTree, sanitizeMobileUiTree } from '../model/storefrontUiModel';
 
 describe('normalizeMobileUiTree', () => {
   it('keeps only supported blocks and restores required product blocks', () => {
@@ -46,47 +40,5 @@ describe('sanitizeMobileUiTree', () => {
       'productSections',
       'emptyState',
     ]);
-  });
-});
-
-describe('deriveCardElementConfig', () => {
-  it('derives image/spec/nutrient/price visibility from fields, ignoring a conflicting stored elementConfig', () => {
-    const derived = deriveCardElementConfig(['product_name', 'img_url', 'tax_price'], {}, {
-      showImage: false,
-      showSpec: true,
-      showNutrient: true,
-      showPrice: false,
-    });
-
-    expect(derived.showImage).toBe(true);
-    expect(derived.showSpec).toBe(false);
-    expect(derived.showNutrient).toBe(false);
-    expect(derived.showPrice).toBe(true);
-    expect(derived.showProductName).toBe(true);
-  });
-
-  it('still lets stored elementConfig control showBadge', () => {
-    expect(deriveCardElementConfig(['product_name'], {}, { showBadge: false }).showBadge).toBe(false);
-  });
-
-  it('treats img_url membership as the sole image toggle', () => {
-    expect(deriveCardElementConfig(['product_name'], { imageSize: 'lg' }, null).showImage).toBe(false);
-    expect(deriveCardElementConfig(['product_name', 'img_url'], {}, null).showImage).toBe(true);
-  });
-});
-
-describe('normalizeCardElementConfig', () => {
-  it('falls back to bounded defaults for unsupported values', () => {
-    expect(
-      normalizeCardElementConfig({
-        showImage: false,
-        imageSize: 'huge',
-        imageFit: 'stretch',
-        metaDensity: 'dense',
-      }),
-    ).toEqual({
-      ...DEFAULT_CARD_ELEMENT_CONFIG,
-      showImage: false,
-    });
   });
 });

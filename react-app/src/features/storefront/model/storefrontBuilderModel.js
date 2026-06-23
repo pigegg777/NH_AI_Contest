@@ -1,27 +1,10 @@
 import { toTrimmedString } from '../../../common/utils/text';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from './cardStyleModel';
+import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../services/cardStyleMigration';
+import { normalizeCardStyle } from './cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from './pageStyleModel';
-import { normalizeStorefrontAiDesign } from './storefrontAiDesignModel';
-import {
-  buildDefaultMobileUiTree,
-  deriveCardElementConfig,
-  normalizeCardElementConfig,
-  normalizeMobileUiTree,
-} from './storefrontUiModel';
+import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
-
-export const STOREFRONT_FIELD_OPTIONS = [
-  'product_name',
-  'spec',
-  'large_category',
-  'medium_category',
-  'small_category',
-  'detail_category',
-  'nutrient',
-  'product_url',
-  'tax_price',
-];
 
 export const STOREFRONT_FIELD_LABELS = {
   product_name: '상품명',
@@ -78,7 +61,7 @@ export function sortFieldKeysByDisplayOrder(keys) {
   });
 }
 
-export const STOREFRONT_FIELD_TABLE_HIDDEN_KEYS = new Set([
+const STOREFRONT_FIELD_TABLE_HIDDEN_KEYS = new Set([
   'sale_price_type_code',
   'product_type_variants',
   'product_category_name',
@@ -88,13 +71,13 @@ export const STOREFRONT_FIELD_TABLE_HIDDEN_KEYS = new Set([
   'row_id',
 ]);
 
-export function isScalarFieldValue(value) {
+function isScalarFieldValue(value) {
   if (value === null || value === undefined || value === '') return true;
   const type = typeof value;
   return type === 'string' || type === 'number' || type === 'boolean';
 }
 
-export function collectCategoryFieldKeys(rows) {
+function collectCategoryFieldKeys(rows) {
   const keySet = new Set();
 
   (Array.isArray(rows) ? rows : []).forEach((row) => {
@@ -162,28 +145,18 @@ export function deriveEffectiveScalarKeys(rows) {
 export const DEFAULT_NAV_CONFIG = {
   title: '',
   subtitle: '',
-  brandColor: DEFAULT_CARD_STYLE.accentColor,
+  brandColor: DEFAULT_PAGE_STYLE.palette.accentHex,
   searchPlaceholder: '상품 검색',
   logoUrl: '',
   searchVariant: 'pill',
   categoryChipVariant: 'soft',
 };
 
-export const STOREFRONT_DESIGN_ACCENT_COLORS = {
-  friendly: '#2f9e6e',
-  warm: '#ea580c',
-  green: '#1d4a2e',
-  trust: '#2563eb',
-  white: '#52525b',
-};
-
-export const CARD_TEMPLATE_OPTIONS = ['card-grid', 'image-left', 'price-focus', 'compact-list', 'detail-first'];
-
 export const DEFAULT_PAGE_CONFIG = {
   schemaVersion: 1,
   pageStyle: DEFAULT_PAGE_STYLE,
   theme: {
-    brandColor: DEFAULT_CARD_STYLE.accentColor,
+    brandColor: DEFAULT_PAGE_STYLE.palette.accentHex,
   },
   nav: {
     title: '',
@@ -306,9 +279,11 @@ export function normalizePageConfig(pageConfig) {
 export function normalizeCategoryConfig(categoryConfig, productCategoryName = '', allowedScalarKeys) {
   const source = categoryConfig ?? {};
   const sourceCardDesign = source.cardDesign ?? {};
-  const normalizedCardStyle = normalizeCardStyle(sourceCardDesign.style);
+  const normalizedCardStyle = categoryConfigNeedsCardStyleMigration(source)
+    ? migrateLegacyCategoryConfigToCardStyle(source)
+    : normalizeCardStyle(sourceCardDesign.cardStyle);
   const normalizedCardFields = normalizeCardFields(sourceCardDesign.visibleFields, allowedScalarKeys);
-  const normalizedAiDesign = normalizeStorefrontAiDesign(source.aiDesign, allowedScalarKeys);
+  const bodySlots = Array.isArray(sourceCardDesign.bodySlots) ? sourceCardDesign.bodySlots : [];
   const selectedMediumCategories = uniqueStrings(
     (Array.isArray(source.selectedMediumCategories) ? source.selectedMediumCategories : []).map(normalizeMediumCategory),
   );
@@ -324,15 +299,11 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
       representativeMediumCategory && selectedMediumCategories.includes(representativeMediumCategory)
         ? representativeMediumCategory
         : selectedMediumCategories[0] || '',
-    layoutStyle: {
-      variant: CARD_TEMPLATE_OPTIONS.includes(source.layoutStyle?.variant) ? source.layoutStyle.variant : 'card-grid',
-    },
     cardDesign: {
       visibleFields: normalizedCardFields,
-      style: normalizedCardStyle,
-      elementConfig: deriveCardElementConfig(normalizedCardFields, normalizedCardStyle, sourceCardDesign.elementConfig),
+      cardStyle: normalizedCardStyle,
+      bodySlots,
     },
-    ...(normalizedAiDesign ? { aiDesign: normalizedAiDesign } : {}),
   };
 }
 
@@ -372,7 +343,7 @@ export function deriveProductCategoryOptions(productEntries, existingConfig) {
   }));
 }
 
-export function deriveMediumCategoryOptions(rows) {
+function deriveMediumCategoryOptions(rows) {
   const options = uniqueStrings(
     (Array.isArray(rows) ? rows : []).map((row) => normalizeMediumCategory(row?.medium_category)),
   );
@@ -406,10 +377,8 @@ export function resolveCategoryDraft({
     selectedMediumCategories,
     representativeMediumCategory,
     cardFields: normalizeCardFields(existingCategoryConfig.cardDesign.visibleFields, effectiveScalarKeys),
-    cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.style),
-    cardElementConfig: normalizeCardElementConfig(existingCategoryConfig.cardDesign.elementConfig),
-    cardTemplate: existingCategoryConfig.layoutStyle.variant,
-    aiDesign: existingCategoryConfig.aiDesign,
+    cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.cardStyle),
+    bodySlots: existingCategoryConfig.cardDesign.bodySlots,
   };
 }
 
@@ -420,9 +389,7 @@ export function buildCategoryConfigRow({
   representativeMediumCategory,
   cardFields,
   cardStyle,
-  cardElementConfig,
-  cardTemplate,
-  aiDesign,
+  bodySlots,
   allowedScalarKeys,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
@@ -434,17 +401,11 @@ export function buildCategoryConfigRow({
       sourceCategoryName: normalizedProductCategoryName,
       selectedMediumCategories,
       representativeMediumCategory,
-      layoutStyle: {
-        variant: CARD_TEMPLATE_OPTIONS.includes(cardTemplate)
-          ? cardTemplate
-          : existingRow?.categoryConfig?.layoutStyle?.variant || 'card-grid',
-      },
       cardDesign: {
         visibleFields: cardFields,
-        style: cardStyle,
-        elementConfig: cardElementConfig,
+        cardStyle,
+        bodySlots,
       },
-      aiDesign,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -459,7 +420,7 @@ export function buildCategoryConfigRow({
   };
 }
 
-export function mergeCategoryConfigRows(existingRows, nextRow) {
+function mergeCategoryConfigRows(existingRows, nextRow) {
   const rows = (Array.isArray(existingRows) ? existingRows : [])
     .map((row) => normalizeCategoryConfigRow(row))
     .filter((row) => row.productCategoryName);
@@ -497,11 +458,9 @@ export function buildStorefrontSavePayload({
   representativeMediumCategory,
   cardStyle,
   cardFields,
-  cardElementConfig,
+  bodySlots,
   navConfig,
   mobileUiTree,
-  cardTemplate,
-  aiDesign,
   pageStyle,
   allowedScalarKeys,
 }) {
@@ -546,9 +505,7 @@ export function buildStorefrontSavePayload({
     representativeMediumCategory,
     cardFields: normalizeCardFields(cardFields, allowedScalarKeys),
     cardStyle: normalizeCardStyle(cardStyle),
-    cardElementConfig: normalizeCardElementConfig(cardElementConfig),
-    cardTemplate,
-    aiDesign,
+    bodySlots,
     allowedScalarKeys,
   });
 

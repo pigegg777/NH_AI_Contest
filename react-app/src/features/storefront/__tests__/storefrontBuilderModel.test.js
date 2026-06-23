@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildCategoryConfigRow,
   buildStorefrontSavePayload,
-  CARD_TEMPLATE_OPTIONS,
   resolveCategoryDraft,
   normalizeCategoryConfig,
   normalizePageConfig,
@@ -11,59 +10,58 @@ import {
   deriveAvailableCategoryFields,
   STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/storefrontBuilderModel';
+import { DEFAULT_CARD_STYLE } from '../model/cardStyleModel';
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 
-describe('categoryConfig cardTemplate', () => {
-  it('defaults to card-grid and rejects unapproved templates', () => {
-    expect(normalizeCategoryConfig({ layoutStyle: { variant: 'image-left' } }).layoutStyle.variant).toBe('image-left');
-    expect(normalizeCategoryConfig({ layoutStyle: { variant: 'totally-custom' } }).layoutStyle.variant).toBe('card-grid');
-    expect(normalizeCategoryConfig({}).layoutStyle.variant).toBe('card-grid');
+describe('categoryConfig cardStyle', () => {
+  it('normalizes a missing cardDesign to the default cardStyle', () => {
+    expect(normalizeCategoryConfig({}).cardDesign.cardStyle).toEqual(DEFAULT_CARD_STYLE);
   });
 
-  it('lists exactly the five approved templates', () => {
-    expect(CARD_TEMPLATE_OPTIONS).toEqual(['card-grid', 'image-left', 'price-focus', 'compact-list', 'detail-first']);
+  it('keeps an already-migrated cardStyle as-is', () => {
+    const cardStyle = { ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' };
+
+    expect(
+      normalizeCategoryConfig({ cardDesign: { cardStyle } }).cardDesign.cardStyle.structuralPreset,
+    ).toBe('image-left');
+  });
+
+  it('migrates a legacy layoutStyle/style/elementConfig shape deterministically', () => {
+    const legacyCategoryConfig = {
+      layoutStyle: { variant: 'compact-list' },
+      cardDesign: {
+        visibleFields: ['product_name'],
+        style: { cardsPerRow: 2, cardRadius: 'xl' },
+        elementConfig: { showImage: true },
+      },
+    };
+
+    const normalized = normalizeCategoryConfig(legacyCategoryConfig);
+
+    expect(normalized.cardDesign.cardStyle.structuralPreset).toBe('compact-list');
+    expect(normalized.cardDesign.cardStyle.shell.radius).toBe('xl');
   });
 });
 
-describe('cardTemplate write path', () => {
-  it('buildCategoryConfigRow accepts an explicit cardTemplate', () => {
+describe('cardStyle write path', () => {
+  it('buildCategoryConfigRow persists an explicit cardStyle and bodySlots', () => {
+    const cardStyle = { ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' };
+    const bodySlots = [{ id: 'field-0-spec', kind: 'field', field: 'spec', label: '규격' }];
     const row = buildCategoryConfigRow({
       productCategoryName: 'Fertilizer Upload',
       existingConfig: null,
       selectedMediumCategories: ['Premium'],
       representativeMediumCategory: 'Premium',
       cardFields: ['product_name'],
-      cardStyle: {},
-      cardElementConfig: {},
-      cardTemplate: 'price-focus',
+      cardStyle,
+      bodySlots,
     });
 
-    expect(row.categoryConfig.layoutStyle.variant).toBe('price-focus');
+    expect(row.categoryConfig.cardDesign.cardStyle.structuralPreset).toBe('image-left');
+    expect(row.categoryConfig.cardDesign.bodySlots).toEqual(bodySlots);
   });
 
-  it('buildCategoryConfigRow falls back to the existing saved template when none is passed', () => {
-    const existingConfig = {
-      categoryConfigs: [
-        {
-          productCategoryName: 'Fertilizer Upload',
-          categoryConfig: { layoutStyle: { variant: 'image-left' } },
-        },
-      ],
-    };
-    const row = buildCategoryConfigRow({
-      productCategoryName: 'Fertilizer Upload',
-      existingConfig,
-      selectedMediumCategories: ['Premium'],
-      representativeMediumCategory: 'Premium',
-      cardFields: ['product_name'],
-      cardStyle: {},
-      cardElementConfig: {},
-    });
-
-    expect(row.categoryConfig.layoutStyle.variant).toBe('image-left');
-  });
-
-  it('resolveCategoryDraft surfaces the saved cardTemplate', () => {
+  it('resolveCategoryDraft surfaces the saved cardStyle and bodySlots', () => {
     const draft = resolveCategoryDraft({
       productCategoryName: 'Fertilizer Upload',
       productEntries: [{ categoryName: 'Fertilizer Upload', rows: [{ medium_category: 'Premium' }] }],
@@ -71,127 +69,23 @@ describe('cardTemplate write path', () => {
         categoryConfigs: [
           {
             productCategoryName: 'Fertilizer Upload',
-            categoryConfig: { layoutStyle: { variant: 'compact-list' } },
-          },
-        ],
-      },
-    });
-
-    expect(draft.cardTemplate).toBe('compact-list');
-  });
-
-  it('buildStorefrontSavePayload threads cardTemplate into the saved category row', () => {
-    const payload = buildStorefrontSavePayload({
-      officeCode: 'OFF-1',
-      existingConfig: null,
-      hiddenProducts: [],
-      selectedProductCategoryName: 'Fertilizer Upload',
-      selectedMediumCategories: ['Premium'],
-      representativeMediumCategory: 'Premium',
-      cardStyle: {},
-      cardFields: ['product_name'],
-      cardElementConfig: {},
-      navConfig: {},
-      designDirection: 'friendly',
-      mobileUiTree: [],
-      cardTemplate: 'detail-first',
-    });
-
-    expect(payload.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('detail-first');
-  });
-
-  it('preserves aiDesign metadata through normalize, draft resolution, and save payload', () => {
-    const aiDesign = {
-      prompt: 'compare tax and zero-tax on one row',
-      activeSkillIds: ['layout', 'transform'],
-      designPlan: {
-        designBrief: {
-          tone: 'trust',
-          goal: 'Compare prices.',
-          audience: 'Customers',
-          priority: ['product_name', 'tax_price', 'zero_tax_price'],
-        },
-        transformPlan: {
-          groups: [
-            {
-              id: 'price-row',
-              label: '가격',
-              display: 'inline-compare',
-              items: [
-                { field: 'tax_price', label: '과세' },
-                { field: 'zero_tax_price', label: '영세' },
-              ],
-            },
-          ],
-          hideIfEmpty: [],
-          formatRules: [],
-        },
-        contentPlan: {
-          blocks: [
-            { id: 'title', type: 'field', source: 'product_name', label: '' },
-            { id: 'price-row', type: 'group', source: 'price-row', label: '가격' },
-          ],
-        },
-        layoutPlan: {
-          cardVariant: 'price-focus',
-          density: 'compact',
-          imagePosition: 'hidden',
-          pricePriority: 'high',
-        },
-        stylePlan: {
-          titleTextColor: 'ink',
-          typographyTone: 'bold',
-          priceTextColor: 'muted',
-          accentColor: '#2563eb',
-          cardSpacing: 'tight',
-        },
-      },
-    };
-    const normalized = normalizeCategoryConfig(
-      {
-        aiDesign,
-        layoutStyle: { variant: 'price-focus' },
-        cardDesign: {
-          visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
-        },
-      },
-      'Fertilizer Upload',
-      ['product_name', 'tax_price', 'zero_tax_price'],
-    );
-
-    expect(normalized.aiDesign.renderSpec.bodySlots[1]).toMatchObject({
-      kind: 'inline-group',
-      label: '가격',
-    });
-
-    const draft = resolveCategoryDraft({
-      productCategoryName: 'Fertilizer Upload',
-      productEntries: [
-        {
-          categoryName: 'Fertilizer Upload',
-          rows: [{ medium_category: 'Premium', product_name: 'Alpha', tax_price: 1000, zero_tax_price: 900 }],
-        },
-      ],
-      existingConfig: {
-        categoryConfigs: [
-          {
-            productCategoryName: 'Fertilizer Upload',
             categoryConfig: {
-              selectedMediumCategories: ['Premium'],
-              representativeMediumCategory: 'Premium',
-              layoutStyle: { variant: 'price-focus' },
               cardDesign: {
-                visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
+                cardStyle: { ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'compact-list' },
+                bodySlots: [{ id: 'field-0-spec', kind: 'field', field: 'spec', label: '규격' }],
               },
-              aiDesign,
             },
           },
         ],
       },
     });
 
-    expect(draft.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
+    expect(draft.cardStyle.structuralPreset).toBe('compact-list');
+    expect(draft.bodySlots).toEqual([{ id: 'field-0-spec', kind: 'field', field: 'spec', label: '규격' }]);
+  });
 
+  it('buildStorefrontSavePayload threads cardStyle into the saved category row', () => {
+    const cardStyle = { ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'detail-first' };
     const payload = buildStorefrontSavePayload({
       officeCode: 'OFF-1',
       existingConfig: null,
@@ -199,18 +93,13 @@ describe('cardTemplate write path', () => {
       selectedProductCategoryName: 'Fertilizer Upload',
       selectedMediumCategories: ['Premium'],
       representativeMediumCategory: 'Premium',
-      cardStyle: {},
-      cardFields: ['product_name', 'tax_price', 'zero_tax_price'],
-      cardElementConfig: {},
+      cardStyle,
+      cardFields: ['product_name'],
       navConfig: {},
-      designDirection: 'friendly',
       mobileUiTree: [],
-      cardTemplate: 'price-focus',
-      aiDesign,
-      allowedScalarKeys: ['product_name', 'tax_price', 'zero_tax_price'],
     });
 
-    expect(payload.categoryConfigs[0].categoryConfig.aiDesign.renderSpec.bodySlots[1].kind).toBe('inline-group');
+    expect(payload.categoryConfigs[0].categoryConfig.cardDesign.cardStyle.structuralPreset).toBe('detail-first');
   });
 });
 
@@ -241,10 +130,8 @@ describe('buildStorefrontSavePayload pageStyle', () => {
       representativeMediumCategory: 'Premium',
       cardStyle: {},
       cardFields: ['product_name'],
-      cardElementConfig: {},
       navConfig: {},
       mobileUiTree: undefined,
-      cardTemplate: 'card-grid',
       pageStyle: customPageStyle,
     });
 
@@ -264,10 +151,8 @@ describe('buildStorefrontSavePayload pageStyle', () => {
       representativeMediumCategory: 'Premium',
       cardStyle: {},
       cardFields: ['product_name'],
-      cardElementConfig: {},
       navConfig: {},
       mobileUiTree: undefined,
-      cardTemplate: 'card-grid',
     });
 
     expect(payload.pageConfig.pageStyle.palette.accentHex).toBe('#7c3aed');

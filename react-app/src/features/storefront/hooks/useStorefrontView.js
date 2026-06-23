@@ -1,8 +1,22 @@
-import { startTransition, useDeferredValue, useEffect, useId, useState } from 'react';
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 
-import { buildSections, buildUniqueMediumCategories, filterHiddenProducts } from '../model/sectionMatching';
+import { toTrimmedString } from '../../../common/utils/text';
+import {
+  buildSections,
+  buildUniqueMediumCategories,
+  filterHiddenProducts,
+} from '../model/sectionMatching';
 import { normalizePageConfig } from '../model/storefrontBuilderModel';
-import { MOBILE_UI_HELPER_TYPES, normalizeMobileUiTree } from '../model/storefrontUiModel';
+import {
+  MOBILE_UI_HELPER_TYPES,
+  normalizeMobileUiTree,
+} from '../model/storefrontUiModel';
 
 const ALL_MEDIUM_CATEGORY_LABEL = '전체';
 
@@ -28,7 +42,10 @@ function matchesSearch(product, query) {
 }
 
 function matchesMediumCategory(product, activeMediumCategory) {
-  if (!activeMediumCategory || activeMediumCategory === ALL_MEDIUM_CATEGORY_LABEL) {
+  if (
+    !activeMediumCategory ||
+    activeMediumCategory === ALL_MEDIUM_CATEGORY_LABEL
+  ) {
     return true;
   }
 
@@ -52,17 +69,60 @@ function scrollToSection(sectionId) {
     return;
   }
 
-  document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document
+    .getElementById(sectionId)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-export function useStorefrontView({ config, productRows }) {
+function resolveOfficeName(products) {
+  for (const product of Array.isArray(products) ? products : []) {
+    const officeName = toTrimmedString(
+      product?.officeName || product?.office_name,
+    );
+
+    if (officeName) {
+      return officeName;
+    }
+  }
+
+  return '';
+}
+
+function buildHeaderTitle(parts, fallbackTitle) {
+  const seen = new Set();
+  const values = [];
+
+  for (const part of parts) {
+    const normalizedPart = toTrimmedString(part);
+
+    if (!normalizedPart || seen.has(normalizedPart)) {
+      continue;
+    }
+
+    seen.add(normalizedPart);
+    values.push(normalizedPart);
+  }
+
+  return values.length > 0 ? values.join(' · ') : fallbackTitle;
+}
+
+export function useStorefrontView({
+  config,
+  productRows,
+  officeName: externalOfficeName,
+}) {
   const [searchText, setSearchText] = useState('');
-  const [activeMediumCategory, setActiveMediumCategory] = useState(ALL_MEDIUM_CATEGORY_LABEL);
+  const [activeMediumCategory, setActiveMediumCategory] = useState(
+    ALL_MEDIUM_CATEGORY_LABEL,
+  );
   const [activeSectionName, setActiveSectionName] = useState('');
-  const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] = useState(true);
+  const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] =
+    useState(true);
 
   const deferredSearchText = useDeferredValue(searchText);
   const searchQuery = deferredSearchText.trim().toLowerCase();
+  const effectiveActiveMediumCategory =
+    searchQuery === '' ? activeMediumCategory : ALL_MEDIUM_CATEGORY_LABEL;
   const sectionIdPrefix = useId().replace(/:/g, '-');
 
   const resolvedPageConfig = normalizePageConfig(config?.pageConfig);
@@ -70,31 +130,53 @@ export function useStorefrontView({ config, productRows }) {
     searchEnabled: resolvedPageConfig.searchSection.enabled !== false,
     categoryChipsEnabled: resolvedPageConfig.categoryChips.enabled !== false,
   });
-  const baseVisibleProducts = filterHiddenProducts(productRows, config?.hiddenProducts);
+  const baseVisibleProducts = filterHiddenProducts(
+    productRows,
+    config?.hiddenProducts,
+  );
   const catalogSectionEntries = buildSectionEntries(
     sectionIdPrefix,
     buildSections(config?.categoryConfigs, baseVisibleProducts),
   );
   const activeSectionEntry =
-    catalogSectionEntries.find((entry) => entry.sectionName === activeSectionName) ?? catalogSectionEntries[0] ?? null;
+    catalogSectionEntries.find(
+      (entry) => entry.sectionName === activeSectionName,
+    ) ??
+    catalogSectionEntries[0] ??
+    null;
   const activeSectionTitle = activeSectionEntry?.sectionName || '';
-  const activeRegionStyles = activeSectionEntry?.section?.renderSpec?.regionStyles ?? {};
-  const activeSectionMediumCategories = buildUniqueMediumCategories(activeSectionEntry?.section?.products);
+  const activeSectionMediumCategories = buildUniqueMediumCategories(
+    activeSectionEntry?.section?.products,
+  );
   const mediumCategoryItems =
     activeSectionMediumCategories.length > 0
       ? [ALL_MEDIUM_CATEGORY_LABEL, ...activeSectionMediumCategories]
       : [ALL_MEDIUM_CATEGORY_LABEL];
-  const visibleProducts = baseVisibleProducts.filter(
-    (product) => matchesSearch(product, searchQuery) && matchesMediumCategory(product, activeMediumCategory),
+  const sectionScopedProducts =
+    activeSectionEntry?.section?.products ?? baseVisibleProducts;
+  const visibleProducts = sectionScopedProducts.filter(
+    (product) =>
+      matchesSearch(product, searchQuery) &&
+      matchesMediumCategory(product, effectiveActiveMediumCategory),
   );
-  const sectionIdByName = new Map(catalogSectionEntries.map(({ sectionName, sectionId }) => [sectionName, sectionId]));
-  const sectionEntries = buildSections(config?.categoryConfigs, visibleProducts).map((section, index) => {
+  const sectionIdByName = new Map(
+    catalogSectionEntries.map(({ sectionName, sectionId }) => [
+      sectionName,
+      sectionId,
+    ]),
+  );
+  const sectionEntries = buildSections(
+    config?.categoryConfigs,
+    visibleProducts,
+  ).map((section, index) => {
     const sectionName = getSectionName(section);
 
     return {
       section,
       sectionName,
-      sectionId: sectionIdByName.get(sectionName) ?? `${sectionIdPrefix}-filtered-${index}`,
+      sectionId:
+        sectionIdByName.get(sectionName) ??
+        `${sectionIdPrefix}-filtered-${index}`,
     };
   });
 
@@ -107,29 +189,53 @@ export function useStorefrontView({ config, productRows }) {
     bodyWeight: Math.max(pageStyle.header.fontWeight - 200, 400),
     letterSpacing: pageStyle.header.letterSpacing,
   };
-  const title = config?.navConfig?.title || resolvedPageConfig.nav.title || '상품 안내';
+  const coopName =
+    config?.navConfig?.title || resolvedPageConfig.nav.title || '';
+  const title = coopName || '상품 안내';
+  const officeName =
+    toTrimmedString(externalOfficeName) ||
+    resolveOfficeName(activeSectionEntry?.section?.products) ||
+    resolveOfficeName(baseVisibleProducts);
+  const headerTitle = buildHeaderTitle(
+    [officeName, activeSectionTitle],
+    title,
+  );
   const subtitle =
-    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '고객에게 안내할 상품을 살펴보세요.';
+    config?.navConfig?.subtitle ||
+    resolvedPageConfig.nav.subtitle ||
+    '고객님께 안내할 상품을 둘러보세요.';
   const searchPlaceholder =
-    config?.navConfig?.searchPlaceholder || resolvedPageConfig.searchSection.placeholder || '상품 검색';
+    config?.navConfig?.searchPlaceholder ||
+    resolvedPageConfig.searchSection.placeholder ||
+    '상품 검색';
   const searchVariant =
-    config?.navConfig?.searchVariant || resolvedPageConfig.searchSection.variant || 'pill';
+    config?.navConfig?.searchVariant ||
+    resolvedPageConfig.searchSection.variant ||
+    'pill';
   const categoryChipVariant =
-    config?.navConfig?.categoryChipVariant || resolvedPageConfig.categoryChips.variant || 'soft';
+    config?.navConfig?.categoryChipVariant ||
+    resolvedPageConfig.categoryChips.variant ||
+    'soft';
 
   const sectionHeaderBlocks = mobileUiTree.filter(
     (block) =>
-      block.slot === 'sectionHeaderBelow' && block.enabled !== false && MOBILE_UI_HELPER_TYPES.includes(block.type),
+      block.slot === 'sectionHeaderBelow' &&
+      block.enabled !== false &&
+      MOBILE_UI_HELPER_TYPES.includes(block.type),
   );
   const canRenderDesktopCategoryRail =
-    mobileUiTree.some((block) => block.type === 'productCategoryNav' && block.enabled !== false) &&
-    catalogSectionEntries.length > 0;
+    mobileUiTree.some(
+      (block) =>
+        block.type === 'productCategoryNav' && block.enabled !== false,
+    ) && catalogSectionEntries.length > 0;
   const hasRenderableSections =
-    mobileUiTree.some((block) => block.type === 'productSections' && block.enabled !== false) &&
-    sectionEntries.length > 0;
+    mobileUiTree.some(
+      (block) => block.type === 'productSections' && block.enabled !== false,
+    ) && sectionEntries.length > 0;
   const canRenderEmptyState =
-    mobileUiTree.some((block) => block.type === 'emptyState' && block.enabled !== false) &&
-    sectionEntries.length === 0;
+    mobileUiTree.some(
+      (block) => block.type === 'emptyState' && block.enabled !== false,
+    ) && sectionEntries.length === 0;
 
   useEffect(() => {
     const firstSectionName = catalogSectionEntries[0]?.sectionName || '';
@@ -142,7 +248,11 @@ export function useStorefrontView({ config, productRows }) {
       return;
     }
 
-    if (!catalogSectionEntries.some((entry) => entry.sectionName === activeSectionName)) {
+    if (
+      !catalogSectionEntries.some(
+        (entry) => entry.sectionName === activeSectionName,
+      )
+    ) {
       setActiveSectionName(firstSectionName);
     }
   }, [activeSectionName, catalogSectionEntries]);
@@ -162,7 +272,10 @@ export function useStorefrontView({ config, productRows }) {
       setActiveMediumCategory(item);
     });
 
-    if (item !== ALL_MEDIUM_CATEGORY_LABEL && activeSectionEntry?.sectionId) {
+    if (
+      item !== ALL_MEDIUM_CATEGORY_LABEL &&
+      activeSectionEntry?.sectionId
+    ) {
       scrollToSection(activeSectionEntry.sectionId);
     }
   }
@@ -173,7 +286,11 @@ export function useStorefrontView({ config, productRows }) {
     scrollToSection(sectionId);
   }
 
-  function handleCategoryRailMediumSelect(sectionName, sectionId, mediumCategory) {
+  function handleCategoryRailMediumSelect(
+    sectionName,
+    sectionId,
+    mediumCategory,
+  ) {
     setActiveSectionName(sectionName);
     startTransition(() => {
       setActiveMediumCategory(mediumCategory);
@@ -184,12 +301,11 @@ export function useStorefrontView({ config, productRows }) {
   return {
     searchText,
     setSearchText,
-    activeMediumCategory,
+    activeMediumCategory: effectiveActiveMediumCategory,
     isDesktopCategoryNavOpen,
     setIsDesktopCategoryNavOpen,
     mobileUiTree,
     catalogSectionEntries,
-    activeRegionStyles,
     activeSectionTitle,
     activeSectionMediumCategories,
     mediumCategoryItems,
@@ -198,8 +314,10 @@ export function useStorefrontView({ config, productRows }) {
     brandColor,
     pageStyle,
     chipAccentColor,
+    coopName,
     titleTextColorValue,
     typographyToneValue,
+    headerTitle,
     title,
     subtitle,
     searchPlaceholder,

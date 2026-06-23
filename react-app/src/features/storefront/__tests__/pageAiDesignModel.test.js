@@ -2,33 +2,39 @@ import { describe, expect, it } from 'vitest';
 
 import {
   DEFAULT_PAGE_AI_DESIGN,
-  hasPageAiDesignMainPrompt,
   normalizePageAiDesignInput,
 } from '../model/pageAiDesignModel';
 
 describe('DEFAULT_PAGE_AI_DESIGN', () => {
-  it('starts with four empty prompts', () => {
+  it('starts with one empty prompt', () => {
     expect(DEFAULT_PAGE_AI_DESIGN).toEqual({
-      mainPrompt: '',
-      headerOverridePrompt: '',
-      categoryChipsOverridePrompt: '',
-      searchOverridePrompt: '',
+      prompt: '',
+      targetScope: '',
     });
   });
 });
 
 describe('normalizePageAiDesignInput', () => {
-  it('trims every prompt and defaults missing ones to empty strings', () => {
+  it('trims the prompt and defaults missing values to an empty string', () => {
     const result = normalizePageAiDesignInput({
-      mainPrompt: '  warm and friendly  ',
-      headerOverridePrompt: ' bolder ',
+      prompt: '  warm and friendly, make the search stronger  ',
     });
 
     expect(result).toEqual({
+      prompt: 'warm and friendly, make the search stronger',
+      targetScope: '',
+    });
+  });
+
+  it('merges the legacy main/override fields into one prompt for backward compatibility', () => {
+    const result = normalizePageAiDesignInput({
       mainPrompt: 'warm and friendly',
-      headerOverridePrompt: 'bolder',
-      categoryChipsOverridePrompt: '',
-      searchOverridePrompt: '',
+      overridePrompt: 'make the search stronger',
+    });
+
+    expect(result).toEqual({
+      prompt: 'warm and friendly\n\nmake the search stronger',
+      targetScope: '',
     });
   });
 
@@ -37,15 +43,28 @@ describe('normalizePageAiDesignInput', () => {
   });
 
   it('coerces non-string prompt values to empty strings', () => {
-    expect(normalizePageAiDesignInput({ mainPrompt: 42, searchOverridePrompt: null }).mainPrompt).toBe('');
-    expect(normalizePageAiDesignInput({ searchOverridePrompt: null }).searchOverridePrompt).toBe('');
+    expect(normalizePageAiDesignInput({ prompt: 42 }).prompt).toBe('');
   });
-});
 
-describe('hasPageAiDesignMainPrompt', () => {
-  it('is false for empty/whitespace-only main prompt, true otherwise', () => {
-    expect(hasPageAiDesignMainPrompt(undefined)).toBe(false);
-    expect(hasPageAiDesignMainPrompt({ mainPrompt: '   ' })).toBe(false);
-    expect(hasPageAiDesignMainPrompt({ mainPrompt: 'warm' })).toBe(true);
+  it('keeps a valid targetScope and drops an unknown one', () => {
+    expect(
+      normalizePageAiDesignInput({
+        prompt: 'make the search box larger',
+        targetScope: 'search',
+      }),
+    ).toEqual({
+      prompt: 'make the search box larger',
+      targetScope: 'search',
+    });
+
+    expect(
+      normalizePageAiDesignInput({
+        prompt: 'make the search box larger',
+        targetScope: 'layout',
+      }),
+    ).toEqual({
+      prompt: 'make the search box larger',
+      targetScope: '',
+    });
   });
 });

@@ -21,7 +21,7 @@ export function normalizeHexColor(value, fallbackHex) {
   return isHexColor(value) ? expandHex(value) : fallbackHex;
 }
 
-export function hexToRgb(hex) {
+function hexToRgb(hex) {
   const normalized = expandHex(hex);
 
   return {
@@ -37,7 +37,7 @@ function channelLuminance(channel) {
   return ratio <= 0.03928 ? ratio / 12.92 : ((ratio + 0.055) / 1.055) ** 2.4;
 }
 
-export function relativeLuminance(hex) {
+function relativeLuminance(hex) {
   const { r, g, b } = hexToRgb(hex);
 
   return 0.2126 * channelLuminance(r) + 0.7152 * channelLuminance(g) + 0.0722 * channelLuminance(b);
@@ -80,15 +80,4 @@ export function mixHexColors(hexA, hexB, weight) {
   return `#${toHexChannel(mixChannel(rgbA.r, rgbB.r, clampedWeight))}${toHexChannel(
     mixChannel(rgbA.g, rgbB.g, clampedWeight),
   )}${toHexChannel(mixChannel(rgbA.b, rgbB.b, clampedWeight))}`;
-}
-
-export function deriveTonalPalette(baseAccentHex) {
-  const accentHex = normalizeHexColor(baseAccentHex, '#1d4a2e');
-
-  return {
-    backgroundHex: mixHexColors(accentHex, '#ffffff', 0.94),
-    surfaceHex: '#ffffff',
-    accentHex,
-    accentSoftHex: mixHexColors(accentHex, '#ffffff', 0.82),
-  };
 }

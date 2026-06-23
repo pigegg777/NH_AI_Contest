@@ -1,8 +1,22 @@
+import { normalizePageAiTargetScope } from '../model/pageAiDesignModel';
 import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
 } from '../model/pageStyleModel';
+
+function resolvePalette(intentPalette, previousPalette) {
+  if (!intentPalette) {
+    return previousPalette;
+  }
+
+  return normalizePageStyle({
+    palette: {
+      ...previousPalette,
+      ...intentPalette,
+    },
+  }).palette;
+}
 
 function resolveHeader(intentHeader, previousHeader) {
   return {
@@ -12,37 +26,126 @@ function resolveHeader(intentHeader, previousHeader) {
   };
 }
 
-function resolveSearch(intentSearch, previousSearch, palette) {
+function resolveSearch(intentSearch, previousSearch, palette, shouldRefreshPaletteDefaults) {
   const paletteDefaults = deriveSearchDefaultsFromPalette(palette);
 
   return {
     sizeToken: intentSearch?.sizeToken ?? previousSearch.sizeToken,
-    borderStrengthToken: intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
-    borderColorHex: paletteDefaults.borderColorHex,
-    focusBorderColorHex: paletteDefaults.focusBorderColorHex,
+    borderStrengthToken:
+      intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
+    borderColorHex: shouldRefreshPaletteDefaults
+      ? paletteDefaults.borderColorHex
+      : previousSearch.borderColorHex,
+    focusBorderColorHex: shouldRefreshPaletteDefaults
+      ? paletteDefaults.focusBorderColorHex
+      : previousSearch.focusBorderColorHex,
   };
 }
 
-function resolveCategoryChips(intentChips, palette) {
+function resolveScopedSearch(intentSearch, previousSearch) {
+  return {
+    sizeToken: intentSearch?.sizeToken ?? previousSearch.sizeToken,
+    borderStrengthToken:
+      intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
+    borderColorHex: previousSearch.borderColorHex,
+    focusBorderColorHex: previousSearch.focusBorderColorHex,
+  };
+}
+
+function resolveCategoryChips(
+  intentChips,
+  previousChips,
+  palette,
+  shouldRefreshPaletteDefaults,
+) {
   const paletteDefaults = deriveCategoryChipsFromPalette(palette);
+  const baseChips = shouldRefreshPaletteDefaults ? paletteDefaults : previousChips;
+
+  if (!intentChips && !shouldRefreshPaletteDefaults) {
+    return previousChips;
+  }
 
   return {
-    backgroundHex: intentChips?.backgroundHex ?? paletteDefaults.backgroundHex,
-    textHex: intentChips?.textHex ?? paletteDefaults.textHex,
-    borderColorHex: intentChips?.borderColorHex ?? paletteDefaults.borderColorHex,
-    activeBackgroundHex: intentChips?.activeBackgroundHex ?? paletteDefaults.activeBackgroundHex,
-    activeTextHex: intentChips?.activeTextHex ?? paletteDefaults.activeTextHex,
+    backgroundHex: intentChips?.backgroundHex ?? baseChips.backgroundHex,
+    textHex: intentChips?.textHex ?? baseChips.textHex,
+    borderColorHex:
+      intentChips?.borderColorHex ?? baseChips.borderColorHex,
+    activeBackgroundHex:
+      intentChips?.activeBackgroundHex ?? baseChips.activeBackgroundHex,
+    activeTextHex:
+      intentChips?.activeTextHex ?? baseChips.activeTextHex,
   };
 }
 
-export function compilePageStyle({ intent, previousPageStyle }) {
+function resolveScopedCategoryChips(intentChips, previousChips) {
+  return {
+    backgroundHex: intentChips?.backgroundHex ?? previousChips.backgroundHex,
+    textHex: intentChips?.textHex ?? previousChips.textHex,
+    borderColorHex:
+      intentChips?.borderColorHex ?? previousChips.borderColorHex,
+    activeBackgroundHex:
+      intentChips?.activeBackgroundHex ?? previousChips.activeBackgroundHex,
+    activeTextHex: intentChips?.activeTextHex ?? previousChips.activeTextHex,
+  };
+}
+
+export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
   const previous = normalizePageStyle(previousPageStyle);
-  const palette = normalizePageStyle({ palette: intent.palette }).palette;
+  const normalizedTargetScope = normalizePageAiTargetScope(targetScope);
+
+  if (!normalizedTargetScope) {
+    const hasPalettePatch = Boolean(intent?.palette);
+    const palette = resolvePalette(intent?.palette, previous.palette);
+
+    return normalizePageStyle({
+      palette,
+      header: resolveHeader(intent.header, previous.header),
+      search: resolveSearch(intent.search, previous.search, palette, hasPalettePatch),
+      categoryChips: resolveCategoryChips(
+        intent.categoryChips,
+        previous.categoryChips,
+        palette,
+        hasPalettePatch,
+      ),
+    });
+  }
+
+  if (normalizedTargetScope === 'palette') {
+    const palette = resolvePalette(intent?.palette, previous.palette);
+
+    return normalizePageStyle({
+      palette,
+      header: previous.header,
+      search: previous.search,
+      categoryChips: previous.categoryChips,
+    });
+  }
+
+  if (normalizedTargetScope === 'header') {
+    return normalizePageStyle({
+      palette: previous.palette,
+      header: resolveHeader(intent.header, previous.header),
+      search: previous.search,
+      categoryChips: previous.categoryChips,
+    });
+  }
+
+  if (normalizedTargetScope === 'categoryChips') {
+    return normalizePageStyle({
+      palette: previous.palette,
+      header: previous.header,
+      search: previous.search,
+      categoryChips: resolveScopedCategoryChips(
+        intent.categoryChips,
+        previous.categoryChips,
+      ),
+    });
+  }
 
   return normalizePageStyle({
-    palette,
-    header: resolveHeader(intent.header, previous.header),
-    search: resolveSearch(intent.search, previous.search, palette),
-    categoryChips: resolveCategoryChips(intent.categoryChips, palette),
+    palette: previous.palette,
+    header: previous.header,
+    search: resolveScopedSearch(intent.search, previous.search),
+    categoryChips: previous.categoryChips,
   });
 }

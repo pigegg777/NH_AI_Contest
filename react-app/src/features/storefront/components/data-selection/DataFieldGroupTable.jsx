@@ -1,13 +1,19 @@
 import { isMandatoryField } from '../../model/dataSelectionFieldGroupModel';
 import { formatFieldDisplayValue } from '../../model/cardFieldRenderModel';
-import styles from '../../pages/StorefrontBuilderPage.module.css';
+import styles from './DataFieldGroupTable.module.css';
 
 function isFieldVisible(draftFields, field) {
   const keys = field.aliasKeys ?? [field.key];
   return keys.some((key) => draftFields.includes(key));
 }
 
-export default function DataFieldGroupTable({ groupLabel, fields, draftFields, onToggleField, testId }) {
+export default function DataFieldGroupTable({
+  groupLabel,
+  fields,
+  draftFields,
+  onToggleField,
+  testId,
+}) {
   if (fields.length === 0) {
     return null;
   }
@@ -27,7 +33,10 @@ export default function DataFieldGroupTable({ groupLabel, fields, draftFields, o
           {fields.map((field) => {
             const isVisible = isFieldVisible(draftFields, field);
             const isLocked = isMandatoryField(field.key);
-            const exampleDisplay = formatFieldDisplayValue(field.key, field.exampleValue);
+            const exampleDisplay = formatFieldDisplayValue(
+              field.key,
+              field.exampleValue,
+            );
 
             return (
               <tr key={field.key} data-testid={`data-field-row-${field.key}`}>
@@ -35,7 +44,10 @@ export default function DataFieldGroupTable({ groupLabel, fields, draftFields, o
                   {field.label}
                 </th>
                 <td className={styles.fieldTableValueCell}>
-                  <span className={styles.fieldTableValue} data-testid={`data-field-example-${field.key}`}>
+                  <span
+                    className={styles.fieldTableValue}
+                    data-testid={`data-field-example-${field.key}`}
+                  >
                     {exampleDisplay || '-'}
                   </span>
                 </td>
@@ -52,7 +64,10 @@ export default function DataFieldGroupTable({ groupLabel, fields, draftFields, o
                       <span>{isVisible ? '표시' : '숨김'}</span>
                     </label>
                   ) : (
-                    <span className={styles.fieldDisabled} title="배열 또는 객체 값은 카드에 표시할 수 없습니다">
+                    <span
+                      className={styles.fieldDisabled}
+                      title="배열 또는 객체 값은 카드에 직접 표시할 수 없습니다."
+                    >
                       선택 불가
                     </span>
                   )}

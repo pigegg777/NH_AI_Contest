@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import supabase from '../../../lib/supabaseClient';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 
@@ -151,32 +152,14 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'tax_price'],
-              style: {
-                layout: 'compact',
-                accentColor: '#2563eb',
-                fontSize: 'large',
-                cardsPerRow: 2,
-                imageSize: 'sm',
-                imageFit: 'contain',
-                cardRadius: 'lg',
-                cardShadow: 'soft',
-                cardSpacing: 'relaxed',
-                priceTextColor: 'default',
-              },
-              elementConfig: {
-                showImage: false,
-                showProductName: true,
-                showSpec: false,
-                showNutrient: false,
-                showPrice: true,
-                showBadge: true,
-                imageSize: 'sm',
-                imageFit: 'contain',
-                metaDensity: 'compact',
-              },
+              cardStyle: normalizeCardStyle({
+                ...DEFAULT_CARD_STYLE,
+                info: { ...DEFAULT_CARD_STYLE.info, padding: 'tight', fieldGap: 'tight' },
+                field: { ...DEFAULT_CARD_STYLE.field, defaultFontSize: 'large', priceColorRole: 'red' },
+              }),
+              bodySlots: [],
             },
           },
           updatedAt: '2026-06-15T00:00:00Z',
@@ -246,8 +229,8 @@ describe('storefrontConfigService.fetchStorefrontConfig', () => {
 
     const config = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
 
-    expect(config.categoryConfigs[0].categoryConfig.layoutStyle.variant).toBe('card-grid');
-    expect(config.categoryConfigs[0].categoryConfig.cardDesign.style.priceTextColor).toBe('default');
+    expect(config.categoryConfigs[0].categoryConfig.cardDesign.cardStyle.structuralPreset).toBe('header-top');
+    expect(config.categoryConfigs[0].categoryConfig.cardDesign.cardStyle.field.priceColorRole).toBe('red');
   });
 
   it('migrates a legacy page_config with no pageStyle into a resolved pageStyle on read', async () => {
@@ -363,20 +346,10 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'nutrient', 'tax_price'],
-              style: {
-                layout: 'compact',
-                accentColor: '#2563eb',
-                fontSize: 'large',
-                cardsPerRow: 2,
-                imageSize: 'md',
-                imageFit: 'cover',
-                cardRadius: 'lg',
-                cardShadow: 'soft',
-                cardSpacing: 'normal',
-              },
+              cardStyle: normalizeCardStyle({ ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' }),
+              bodySlots: [],
             },
           },
         },
@@ -420,32 +393,10 @@ describe('storefrontConfigService.upsertStorefrontConfig', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'tax_price', 'nutrient'],
-              style: {
-                layout: 'compact',
-                accentColor: '#2563eb',
-                fontSize: 'large',
-                cardsPerRow: 2,
-                imageSize: 'md',
-                imageFit: 'cover',
-                cardRadius: 'lg',
-                cardShadow: 'soft',
-                cardSpacing: 'normal',
-                priceTextColor: 'default',
-              },
-              elementConfig: {
-                showImage: false,
-                showProductName: true,
-                showSpec: false,
-                showNutrient: true,
-                showPrice: true,
-                showBadge: true,
-                imageSize: 'md',
-                imageFit: 'cover',
-                metaDensity: 'compact',
-              },
+              cardStyle: normalizeCardStyle({ ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' }),
+              bodySlots: [],
             },
           },
         },
