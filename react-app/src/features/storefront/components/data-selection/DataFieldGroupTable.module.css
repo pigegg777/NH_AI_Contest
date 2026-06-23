@@ -1,0 +1,96 @@
+.fieldTableWrap {
+  overflow-x: auto;
+  border: 1px solid rgba(17, 24, 39, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
+}
+
+.sectionTitle {
+  margin: 0;
+  padding: 14px 14px 0;
+  font-size: 1.06rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.fieldTable {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.fieldTable th,
+.fieldTable td {
+  padding: 5px 12px;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.fieldTable thead th {
+  border-top: none;
+  background: rgba(248, 250, 252, 0.96);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--corp-muted);
+}
+
+.fieldTableHeading {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.fieldTableValueCell {
+  max-width: 0;
+}
+
+.fieldTableValue {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--corp-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldTableToggleCell {
+  width: 120px;
+}
+
+.fieldToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.fieldToggle input {
+  accent-color: var(--corp-primary);
+}
+
+.fieldDisabled {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--corp-muted);
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 980px) {
+  .fieldTable {
+    min-width: 100%;
+    table-layout: auto;
+  }
+
+  .fieldTableToggleCell {
+    width: auto;
+  }
+}

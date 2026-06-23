@@ -5,8 +5,13 @@ import DashboardPage from './common/pages/DashboardPage';
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterPage from './features/auth/pages/RegisterPage';
 import { useAppAuthState } from './features/auth/hooks/useAppAuthState';
-import ExcelExtractWorkbookReviewPage from './features/excel-extract/pages/ExcelExtractWorkbookReviewPage';
-import FertilizerInfoPage from './features/fertilizer/pages/FertilizerInfoPage';
+import OfficeProductEditorPage from './features/office-product-editor/pages/OfficeProductEditorPage';
+import PublicStorefrontPage from './features/storefront/pages/PublicStorefrontPage';
+import StorefrontBuilderPage from './features/storefront/pages/StorefrontBuilderPage';
+
+const OFFICE_PRODUCT_EDITOR_PAGE_KEY = 'office-product-editor';
+const STOREFRONT_BUILDER_PAGE_KEY = 'storefront-builder';
+const LEGACY_EXCEL_EXTRACT_TOOL_KEY = 'excel-extract';
 
 const PUBLIC_TOOL_USER = {
   id: null,
@@ -15,12 +20,33 @@ const PUBLIC_TOOL_USER = {
   office_code: '',
 };
 
-function isDirectExcelExtractEntry() {
+function isDirectOfficeProductEditorEntry() {
   if (typeof window === 'undefined') {
     return false;
   }
 
-  return new URLSearchParams(window.location.search).get('tool') === 'excel-extract';
+  const tool = new URLSearchParams(window.location.search).get('tool');
+
+  return (
+    tool === OFFICE_PRODUCT_EDITOR_PAGE_KEY ||
+    tool === LEGACY_EXCEL_EXTRACT_TOOL_KEY
+  );
+}
+
+function isDirectStorefrontEntry() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return new URLSearchParams(window.location.search).get('tool') === 'store';
+}
+
+function getOfficeCodeFromQuery() {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  return new URLSearchParams(window.location.search).get('office') ?? '';
 }
 
 function AuthLoadingPage() {
@@ -30,7 +56,8 @@ function AuthLoadingPage() {
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        background: 'linear-gradient(160deg, #e8f5ed 0%, #f4f2ef 55%, #eef4f0 100%)',
+        background:
+          'linear-gradient(160deg, #e8f5ed 0%, #f4f2ef 55%, #eef4f0 100%)',
         padding: '24px',
       }}
     >
@@ -56,21 +83,30 @@ function AuthLoadingPage() {
 
 export default function App() {
   const [page, setPage] = useState('login');
-  const [isPublicToolMode] = useState(isDirectExcelExtractEntry);
-  const [activePage, setActivePage] = useState(isPublicToolMode ? 'excel-extract' : 'dashboard');
-  const { user, isLoading, handleLogin, handleLogout } = useAppAuthState(!isPublicToolMode);
+  const [isStorefrontEntry] = useState(isDirectStorefrontEntry);
+  const [isPublicToolMode] = useState(isDirectOfficeProductEditorEntry);
+  const [activePage, setActivePage] = useState(
+    isPublicToolMode ? OFFICE_PRODUCT_EDITOR_PAGE_KEY : 'dashboard',
+  );
+  const { user, isLoading, handleLogin, handleLogout } = useAppAuthState(
+    !isPublicToolMode && !isStorefrontEntry,
+  );
+
+  if (isStorefrontEntry) {
+    return <PublicStorefrontPage officeCode={getOfficeCodeFromQuery()} />;
+  }
 
   if (isPublicToolMode) {
     return (
-      <AppLayout user={PUBLIC_TOOL_USER} activePage={activePage} onNavigate={setActivePage}>
-        {activePage === 'excel-extract' ? (
-          <ExcelExtractWorkbookReviewPage
-            user={PUBLIC_TOOL_USER}
-            onGoHome={() => setActivePage('dashboard')}
-          />
-        ) : (
-          <FertilizerInfoPage />
-        )}
+      <AppLayout
+        user={PUBLIC_TOOL_USER}
+        activePage={OFFICE_PRODUCT_EDITOR_PAGE_KEY}
+        showBackButton={false}
+      >
+        <OfficeProductEditorPage
+          user={PUBLIC_TOOL_USER}
+          onGoHome={() => setActivePage('dashboard')}
+        />
       </AppLayout>
     );
   }
@@ -95,21 +131,38 @@ export default function App() {
     );
   }
 
+  async function handleAppLogout() {
+    await handleLogout();
+    setPage('login');
+    setActivePage('dashboard');
+  }
+
   return (
     <AppLayout
       user={user}
       activePage={activePage}
       onNavigate={setActivePage}
-      onLogout={async () => {
-        await handleLogout();
-        setPage('login');
-        setActivePage('dashboard');
-      }}
+      onLogout={handleAppLogout}
     >
-      {activePage === 'dashboard' && <DashboardPage user={user} onNavigate={setActivePage} />}
-      {activePage === 'fertilizer' && <FertilizerInfoPage />}
-      {activePage === 'excel-extract' && (
-        <ExcelExtractWorkbookReviewPage user={user} onGoHome={() => setActivePage('dashboard')} />
+      {activePage === 'dashboard' && (
+        <DashboardPage
+          user={user}
+          onNavigate={setActivePage}
+          onLogout={handleAppLogout}
+        />
+      )}
+      {activePage === OFFICE_PRODUCT_EDITOR_PAGE_KEY && (
+        <OfficeProductEditorPage
+          user={user}
+          onGoHome={() => setActivePage('dashboard')}
+        />
+      )}
+      {activePage === STOREFRONT_BUILDER_PAGE_KEY && (
+        <StorefrontBuilderPage
+          officeCode={user?.office_code ?? ''}
+          nhName={user?.nh_name ?? ''}
+          onGoHome={() => setActivePage('dashboard')}
+        />
       )}
     </AppLayout>
   );

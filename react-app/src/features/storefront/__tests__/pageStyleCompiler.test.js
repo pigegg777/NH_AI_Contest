@@ -77,6 +77,109 @@ describe('compilePageStyle precedence: category chips', () => {
   });
 });
 
+describe('compilePageStyle sticky incremental edits', () => {
+  it('keeps previous non-palette customizations when a later prompt only changes the header', () => {
+    const previousPageStyle = {
+      ...DEFAULT_PAGE_STYLE,
+      palette: {
+        backgroundHex: '#f8fafc',
+        surfaceHex: '#ffffff',
+        accentHex: '#1d4a2e',
+        textHex: '#173223',
+      },
+      header: {
+        titleColorHex: '#173223',
+        letterSpacing: 'normal',
+        fontWeight: 700,
+      },
+      search: {
+        sizeToken: 'lg',
+        borderStrengthToken: 'strong',
+        borderColorHex: '#1d4a2e',
+        focusBorderColorHex: '#173223',
+      },
+      categoryChips: {
+        backgroundHex: '#eef6f0',
+        textHex: '#2d4a36',
+        borderColorHex: '#8aa391',
+        activeBackgroundHex: '#244d31',
+        activeTextHex: '#ffffff',
+      },
+    };
+
+    const result = compilePageStyle({
+      intent: {
+        palette: null,
+        header: { fontWeight: 800 },
+        categoryChips: null,
+        search: null,
+      },
+      previousPageStyle,
+    });
+
+    expect(result.palette).toEqual(previousPageStyle.palette);
+    expect(result.header.fontWeight).toBe(800);
+    expect(result.search).toEqual(previousPageStyle.search);
+    expect(result.categoryChips).toEqual(previousPageStyle.categoryChips);
+  });
+});
+
+describe('compilePageStyle scoped merges', () => {
+  it('keeps non-selected areas unchanged when only the search scope is targeted', () => {
+    const previousPageStyle = {
+      ...DEFAULT_PAGE_STYLE,
+      palette: {
+        backgroundHex: '#f8fafc',
+        surfaceHex: '#ffffff',
+        accentHex: '#1d4a2e',
+        textHex: '#173223',
+      },
+      header: {
+        titleColorHex: '#0f172a',
+        letterSpacing: '0.04em',
+        fontWeight: 700,
+      },
+      search: {
+        sizeToken: 'sm',
+        borderStrengthToken: 'soft',
+        borderColorHex: '#cbd5e1',
+        focusBorderColorHex: '#0f172a',
+      },
+      categoryChips: {
+        backgroundHex: '#eff6ff',
+        textHex: '#1e3a8a',
+        borderColorHex: '#93c5fd',
+        activeBackgroundHex: '#2563eb',
+        activeTextHex: '#ffffff',
+      },
+    };
+
+    const result = compilePageStyle({
+      intent: {
+        palette: {
+          backgroundHex: '#fff7ed',
+          surfaceHex: '#ffffff',
+          accentHex: '#ea580c',
+          textHex: '#7c2d12',
+        },
+        header: { fontWeight: 800 },
+        categoryChips: { activeBackgroundHex: '#ea580c' },
+        search: { sizeToken: 'xl', borderStrengthToken: 'strong' },
+      },
+      previousPageStyle,
+      targetScope: 'search',
+    });
+
+    expect(result.palette).toEqual(previousPageStyle.palette);
+    expect(result.header).toEqual(previousPageStyle.header);
+    expect(result.categoryChips).toEqual(previousPageStyle.categoryChips);
+    expect(result.search.sizeToken).toBe('xl');
+    expect(result.search.borderStrengthToken).toBe('strong');
+    expect(result.search.borderColorHex).toBe(previousPageStyle.search.borderColorHex);
+    expect(result.search.focusBorderColorHex).toBe(previousPageStyle.search.focusBorderColorHex);
+  });
+});
+
 describe('compilePageStyle contrast correction', () => {
   it('keeps header title text readable against an extreme palette background', () => {
     const result = compilePageStyle({

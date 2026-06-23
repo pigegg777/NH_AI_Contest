@@ -1,0 +1,166 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editorLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
+  gap: 18px;
+  align-items: start;
+  border: #0f172a;
+}
+
+.promptColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promptPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 22px;
+  /* */
+}
+
+.promptPanelHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promptPanelTitle {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  color: #0f172a;
+  text-wrap: balance;
+}
+
+.promptPanelDescription {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  /* color: #475569; */
+}
+
+.promptField {
+  gap: 10px;
+}
+
+.promptField textarea {
+  min-height: 130px;
+  padding: 16px 18px;
+  border-width: 2px;
+  border-color: rgba(37, 99, 235, 0.24);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.promptField textarea::placeholder {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.promptField textarea:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+  border-color: #2563eb;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: right;
+  min-height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primaryButton:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: 2px;
+}
+
+.scopePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 20px;
+  /* background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(239, 246, 255, 0.92)
+  ); */
+  /* box-shadow: 0 14px 30px rgba(37, 99, 235, 0.08); */
+}
+
+.scopeListLabel {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.scopeList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scopeItem {
+  color: var(--corp-text);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.scopeLabel {
+  font-weight: 800;
+  color: var(--corp-text);
+}
+
+.scopeDetail {
+  margin-left: 6px;
+  font-weight: 500;
+  color: #465467;
+}
+
+@media (max-width: 920px) {
+  .editorLayout {
+    grid-template-columns: 1fr;
+  }
+}

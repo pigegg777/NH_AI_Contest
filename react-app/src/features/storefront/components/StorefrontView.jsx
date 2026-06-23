@@ -70,8 +70,8 @@ function buildRenderableMobileUiTree(mobileUiTree, shouldInferProductCategoryNav
   return nextTree;
 }
 
-export default function StorefrontView({ config, productRows, officeName }) {
-  const view = useStorefrontView({ config, productRows, officeName });
+export default function StorefrontView({ config, productRows, officeName, nhName }) {
+  const view = useStorefrontView({ config, productRows, officeName, nhName });
   const searchPlaceholder = view.searchPlaceholder;
   const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
   const renderableMobileUiTree = buildRenderableMobileUiTree(
@@ -108,9 +108,7 @@ export default function StorefrontView({ config, productRows, officeName }) {
                   {view.coopName ? (
                     <p className={styles.eyebrow}>{view.coopName}</p>
                   ) : null}
-                  <h1 className={styles.title}>
-                    {view.headerTitle}
-                  </h1>
+                  <h1 className={styles.title}>{view.headerOrgLine}</h1>
                 </div>
               </div>
             </div>
@@ -180,6 +178,7 @@ export default function StorefrontView({ config, productRows, officeName }) {
               data-testid="storefront-search"
               data-search-variant={view.searchVariant}
             >
+              <span className={styles.searchIcon} aria-hidden="true" />
               <input
                 type="search"
                 className={styles.searchInput}
@@ -188,7 +187,6 @@ export default function StorefrontView({ config, productRows, officeName }) {
                 value={view.searchText}
                 onChange={(event) => view.setSearchText(event.target.value)}
               />
-              <span className={styles.searchIcon} aria-hidden="true" />
             </label>
           </div>
         );

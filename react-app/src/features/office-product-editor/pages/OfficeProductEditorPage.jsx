@@ -11,7 +11,6 @@ import { useWorkbookReviewTableState } from '../hooks/useWorkbookReviewTableStat
 import { useWorkbookSave } from '../hooks/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/officeProductDataCatalogModel';
 import { shouldUseStaticDataMerge } from '../model/workbookSaveModel';
-import { WorkbookReviewBanner } from '../components/workbook-review/WorkbookReviewBanner';
 import { WorkbookReviewSidebar } from '../components/workbook-review/WorkbookReviewSidebar';
 import { WorkbookReviewWorkspace } from '../components/workbook-review/workspace-ui/WorkbookReviewWorkspace';
 import styles from './OfficeProductEditorPage.module.css';
@@ -200,11 +199,27 @@ export default function OfficeProductEditorPage({ user }) {
   return (
     <main className={styles.page}>
       {!showsCustomTableNameInput ? (
-        <WorkbookReviewBanner
-          categoryName={activeCategoryName}
-          statusLabel={bannerStatusLabel}
-          statusVariant={bannerStatusVariant}
-        />
+        !activeCategoryName ? (
+          <div className={styles.dataNameBanner}>
+            <span className={styles.dataNameLabel}>현재 작업</span>
+            <h1 className={styles.dataNameTitle}>왼쪽에서 데이터를 선택하세요</h1>
+          </div>
+        ) : (
+          <div className={styles.dataNameBanner}>
+            <span className={styles.dataNameLabel}>현재 등록/편집 데이터</span>
+            <h1 className={styles.dataNameTitle}>{activeCategoryName}</h1>
+            <span
+              className={[
+                styles.dataNameStatus,
+                bannerStatusVariant === 'registered'
+                  ? styles.dataNameStatusRegistered
+                  : styles.dataNameStatusNew,
+              ].join(' ')}
+            >
+              {bannerStatusLabel}
+            </span>
+          </div>
+        )
       ) : null}
 
       <div className={`${styles.layout} ${isSidebarCollapsed ? styles.layoutCollapsed : ''}`.trim()}>

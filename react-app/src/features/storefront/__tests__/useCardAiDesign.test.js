@@ -99,6 +99,7 @@ describe('useCardAiDesign', () => {
     expect(compileCardStyle).toHaveBeenCalledWith({
       intent: { header: { fontWeight: 800 } },
       previousCardStyle: DEFAULT_CARD_STYLE,
+      previousBodySlots: [],
       cardsPerRow: DEFAULT_CARD_STYLE.cardsPerRow,
       visibleFields: ['product_name', 'spec'],
       fieldLabels: { spec: '규격' },

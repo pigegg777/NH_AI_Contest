@@ -1,0 +1,40 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  /* border: 1px solid var(--corp-line); */
+  border-radius: 20px;
+  background: var(--corp-panel);
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.06);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--corp-primary);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--corp-muted);
+}

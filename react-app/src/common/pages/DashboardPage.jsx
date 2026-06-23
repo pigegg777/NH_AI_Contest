@@ -1,79 +1,98 @@
 import styles from './DashboardPage.module.css';
 
-function LeafIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1.5-2.5 2-5 2-8 0-4-1.5-7-2-10z" />
-      <path d="M12 12c2.5-1 5-1.5 8-2" />
-      <path d="M12 22v-4" />
-    </svg>
-  );
-}
-
-function ChartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <path d="M7 16V11M12 16V8M17 16v-4" />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="16" height="16">
-      <path d="M4 10h12M11 5l5 5-5 5" />
-    </svg>
-  );
-}
+const COPY = {
+  dataEditorTitle: '\ub370\uc774\ud130 \uc124\uc815/\uc218\uc815',
+  dataEditorDescription:
+    '\uc5d1\uc140 \ud30c\uc77c\uc5d0\uc11c \ud310\ub9e4\ub2e8\uac00\ub97c \uc790\ub3d9\uc73c\ub85c \ucd94\ucd9c\ud558\uace0 \ub370\uc774\ud130\ub97c \uc124\uc815\u00b7\uc218\uc815\ud558\uc138\uc694.',
+  storefrontTitle: 'AI \uc2a4\ud1a0\uc5b4 \ud398\uc774\uc9c0 \ub9cc\ub4e4\uae30',
+  storefrontDescription:
+    '\uacf5\uac1c\ud560 \uc0c1\ud488, \uce74\ub4dc \uad6c\uc131, \ud398\uc774\uc9c0 \ubb38\uad6c\ub97c AI \uc81c\uc548\uacfc \ubbf8\ub9ac\ubcf4\uae30\ub85c \ube60\ub974\uac8c \uc644\uc131\ud558\uc138\uc694.',
+  dashboard: '\ub300\uc2dc\ubcf4\ub4dc',
+  logout: '\ub85c\uadf8\uc544\uc6c3',
+  greetingPrefix: '\uc548\ub155\ud558\uc138\uc694, ',
+  greetingSuffix: '\ub2d8',
+  systemTitle: '\ubb34\uc5c7\uc744 \ub3c4\uc640\ub4dc\ub9b4\uae4c\uc694?',
+  goTo: '\ubc14\ub85c\uac00\uae30',
+  orgSeparator: ' \u00b7 ',
+};
 
 const FEATURES = [
   {
-    key: 'fertilizer',
-    Icon: LeafIcon,
-    title: '농자재 정보',
-    description: '비료·농약·기타자재의 종류·가격·지원 정보를 검색하고 비교하세요.',
+    key: 'office-product-editor',
+    title: COPY.dataEditorTitle,
+    description: COPY.dataEditorDescription,
   },
   {
-    key: 'excel-extract',
-    Icon: ChartIcon,
-    title: '데이터 설정/수정',
-    description: '엑셀 파일에서 판매단가를 자동으로 추출하고 데이터를 설정·수정하세요.',
+    key: 'storefront-builder',
+    title: COPY.storefrontTitle,
+    description: COPY.storefrontDescription,
   },
 ];
 
-export default function DashboardPage({ user, onNavigate }) {
+export default function DashboardPage({ user, onNavigate, onLogout }) {
   const name = user?.name;
-  const orgLabel = [user?.nh_name, user?.office_name].filter(Boolean).join(' · ');
+  const officeCode = user?.office_code?.trim();
+  const officeName = [user?.nh_name, user?.office_name]
+    .filter(Boolean)
+    .join(COPY.orgSeparator);
 
   return (
     <div className={styles.page}>
-      <div className={styles.welcome}>
-        {name && <p className={styles.greeting}>안녕하세요, <strong>{name}</strong>님</p>}
-        {orgLabel && <p className={styles.org}>{orgLabel}</p>}
-        <h1 className={styles.systemTitle}>무엇을 도와드릴까요?</h1>
+      <div className={styles.navbar}>
+        <div className={styles.navbarInner}>
+          <h1 className={styles.navbarTitle}>{COPY.dashboard}</h1>
+          {typeof onLogout === 'function' ? (
+            <button
+              type="button"
+              className={styles.logoutButton}
+              onClick={onLogout}
+            >
+              {COPY.logout}
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className={styles.grid}>
-        {FEATURES.map(({ key, Icon, title, description }) => (
-          <button
-            key={key}
-            type="button"
-            className={styles.card}
-            onClick={() => onNavigate(key)}
-          >
-            <div className={styles.cardIcon}>
-              <Icon />
+      <div className={styles.content}>
+        <div className={styles.welcome}>
+          {officeCode || officeName ? (
+            <div className={styles.officeSummary}>
+              {officeCode ? (
+                <span className={styles.officeCode} translate="no">
+                  {officeCode}
+                </span>
+              ) : null}
+              {officeName ? (
+                <p className={styles.officeName}>{officeName}</p>
+              ) : null}
             </div>
-            <div className={styles.cardContent}>
-              <h2 className={styles.cardTitle}>{title}</h2>
-              <p className={styles.cardDesc}>{description}</p>
-            </div>
-            <span className={styles.cardAction}>
-              바로가기 <ArrowIcon />
-            </span>
-          </button>
-        ))}
+          ) : null}
+          {name ? (
+            <p className={styles.greeting}>
+              {COPY.greetingPrefix}
+              <strong className={styles.userName}>{name}</strong>
+              {COPY.greetingSuffix}
+            </p>
+          ) : null}
+          <h2 className={styles.systemTitle}>{COPY.systemTitle}</h2>
+        </div>
+
+        <div className={styles.grid}>
+          {FEATURES.map(({ key, title, description }) => (
+            <button
+              key={key}
+              type="button"
+              className={styles.card}
+              onClick={() => onNavigate(key)}
+            >
+              <div className={styles.cardContent}>
+                <h3 className={styles.cardTitle}>{title}</h3>
+                <p className={styles.cardDesc}>{description}</p>
+              </div>
+              <span className={styles.cardAction}>{COPY.goTo}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

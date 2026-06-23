@@ -38,18 +38,6 @@ export const MOBILE_UI_HELPER_TYPES = ['noticeBanner', 'highlightBox', 'ctaButto
 
 const REMOVED_MOBILE_UI_BLOCK_TYPES = new Set(['productCategoryNav', 'mobileCategoryBar']);
 
-export const DEFAULT_CARD_ELEMENT_CONFIG = {
-  showImage: true,
-  showProductName: true,
-  showSpec: true,
-  showNutrient: true,
-  showPrice: true,
-  showBadge: true,
-  imageSize: 'md',
-  imageFit: 'contain',
-  metaDensity: 'comfortable',
-};
-
 export const PRICE_FIELD_KEYS = ['zero_tax_price', 'tax_price', 'exempt_tax_price', 'price_subsidy'];
 export const NUTRIENT_FIELD_KEYS = ['nutrient', 'product_nutirent'];
 
@@ -164,8 +152,6 @@ export function buildDefaultMobileUiTree({ searchEnabled = true, categoryChipsEn
   ];
 }
 
-export const DEFAULT_MOBILE_UI_TREE = buildDefaultMobileUiTree();
-
 export function normalizeMobileUiTree(
   mobileUiTree,
   { searchEnabled = true, categoryChipsEnabled = true } = {},
@@ -206,51 +192,7 @@ export function normalizeMobileUiTree(
   return nextBlocks;
 }
 
-export function normalizeCardElementConfig(config) {
-  const source = config ?? {};
-
-  return {
-    showImage: source.showImage !== false,
-    showProductName: source.showProductName !== false,
-    showSpec: source.showSpec !== false,
-    showNutrient: source.showNutrient !== false,
-    showPrice: source.showPrice !== false,
-    showBadge: source.showBadge !== false,
-    imageSize: ['hidden', 'sm', 'md', 'lg'].includes(source.imageSize)
-      ? source.imageSize
-      : DEFAULT_CARD_ELEMENT_CONFIG.imageSize,
-    imageFit: ['cover', 'contain'].includes(source.imageFit)
-      ? source.imageFit
-      : DEFAULT_CARD_ELEMENT_CONFIG.imageFit,
-    metaDensity: ['compact', 'comfortable'].includes(source.metaDensity)
-      ? source.metaDensity
-      : DEFAULT_CARD_ELEMENT_CONFIG.metaDensity,
-  };
-}
-
-export function deriveCardElementConfig(fields, style, elementConfig) {
-  const visibleFields = Array.isArray(fields) ? fields : [];
-  const sourceStyle = style ?? {};
-  const source = elementConfig ?? {};
-  const styleDefaults = {
-    imageSize: sourceStyle.imageSize,
-    imageFit: sourceStyle.imageFit,
-    metaDensity: sourceStyle.layout === 'compact' || sourceStyle.cardSpacing === 'tight' ? 'compact' : 'comfortable',
-    showBadge: true,
-  };
-
-  return normalizeCardElementConfig({
-    ...styleDefaults,
-    ...source,
-    showImage: visibleFields.includes('img_url'),
-    showProductName: true,
-    showSpec: visibleFields.includes('spec'),
-    showNutrient: NUTRIENT_FIELD_KEYS.some((field) => visibleFields.includes(field)),
-    showPrice: PRICE_FIELD_KEYS.some((field) => visibleFields.includes(field)),
-  });
-}
-
-export function findMobileUiBlock(mobileUiTree, type) {
+function findMobileUiBlock(mobileUiTree, type) {
   return (Array.isArray(mobileUiTree) ? mobileUiTree : []).find((block) => block?.type === type) ?? null;
 }
 

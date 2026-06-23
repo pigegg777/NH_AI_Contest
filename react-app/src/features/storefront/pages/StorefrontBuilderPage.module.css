@@ -15,7 +15,6 @@
   gap: 16px;
 }
 
-.panel,
 .heroPanel,
 .previewPanel {
   display: flex;
@@ -40,26 +39,20 @@
 }
 
 .panelHeader,
-.previewHeader,
-.controlCardHeader {
+.previewHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
-.eyebrow,
-.groupEyebrow {
+.eyebrow {
   margin: 0 0 6px;
   font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--corp-primary);
-}
-
-.groupEyebrow {
-  margin-bottom: 4px;
 }
 
 .heroTitle {
@@ -69,226 +62,29 @@
   color: var(--corp-text);
 }
 
-.title,
-.previewTitle,
-.sectionTitle {
+.previewTitle {
   margin: 0;
   font-size: 1.06rem;
   font-weight: 700;
   color: var(--corp-text);
 }
 
-.description,
-.sectionHint {
+.description {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--corp-muted);
 }
 
-.sectionStack {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.controlCard {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 14px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.86);
-}
-
-.fieldTableWrap {
-  overflow-x: auto;
-  border: 1px solid rgba(17, 24, 39, 0.16);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
-}
-
-.fieldTable {
-  width: 100%;
-  min-width: 560px;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.fieldTable th,
-.fieldTable td {
-  padding: 5px 12px;
-  border-top: 1px solid rgba(17, 24, 39, 0.08);
-  text-align: left;
-  vertical-align: middle;
-}
-
-.fieldTable thead th {
-  border-top: none;
-  background: rgba(248, 250, 252, 0.96);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--corp-muted);
-}
-
-.fieldTableHeading {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--corp-text);
-}
-
-.fieldTableValueCell {
-  max-width: 0;
-}
-
-.fieldTableValue {
-  display: block;
-  font-size: 0.82rem;
-  color: var(--corp-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.fieldTableToggleCell {
-  width: 120px;
-}
-
-.fieldToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--corp-text);
-}
-
-.fieldToggle input {
-  accent-color: var(--corp-primary);
-}
-
-.fieldExampleLink {
-  font-size: inherit;
-  color: var(--corp-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.fieldDisabled {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--corp-muted);
-  opacity: 0.6;
-  cursor: default;
-}
-
-.tableHelperText {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--corp-muted);
-}
-
-.categorySection {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px 16px;
-  border: 1px dashed rgba(17, 24, 39, 0.16);
-  border-radius: 18px;
-  background: transparent;
-}
-
-.categoryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.categoryCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.82);
-}
-
-.categoryCardActive {
-  border-color: var(--corp-primary);
-  background: var(--corp-primary-soft);
-  box-shadow: inset 0 0 0 1px rgba(29, 74, 46, 0.22);
-}
-
-.categorySelectedBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 999px;
-  background: var(--corp-primary);
-  color: var(--corp-on-primary);
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(29, 74, 46, 0.22);
-}
-
-.cardTitle {
-  margin: 0;
-  font-size: 0.98rem;
-  color: var(--corp-text);
-}
-
-.cardMeta {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
-  color: var(--corp-muted);
-}
-
-.inputLabel {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--corp-text);
-}
-
-.textarea {
-  width: 100%;
-  min-height: 140px;
-  padding: 12px 14px;
-  border: 1px solid var(--corp-line);
-  border-radius: 14px;
-  background: #fbfbf8;
-  color: var(--corp-text);
-  font: inherit;
-  resize: vertical;
-}
-
-.actions {
+.actions,
+.stepNavActions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .stepNavActions {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
 }
 
 .primaryButton,
@@ -322,39 +118,10 @@
   cursor: not-allowed;
 }
 
-.savedBadge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(29, 74, 46, 0.1);
-  color: var(--corp-primary);
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
-.summary {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(37, 99, 235, 0.08);
-  color: #1d3f7b;
-  font-size: 0.86rem;
-}
-
-.summaryList {
-  margin: 0;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.summaryItem {
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--corp-text);
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: 2px;
 }
 
 .previewStage {
@@ -366,8 +133,7 @@
   width: min(100%, 390px);
   padding: 16px 10px 12px;
   border-radius: 38px;
-  background:
-    linear-gradient(180deg, #202633 0%, #0f1720 100%);
+  background: linear-gradient(180deg, #202633 0%, #0f1720 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 24px 48px rgba(15, 23, 32, 0.24);
@@ -395,20 +161,5 @@
 
   .previewPanel {
     position: static;
-  }
-
-  .controlCardHeader,
-  .categoryCard {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .fieldTable {
-    min-width: 100%;
-    table-layout: auto;
-  }
-
-  .fieldTableToggleCell {
-    width: auto;
   }
 }

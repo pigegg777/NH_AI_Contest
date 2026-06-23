@@ -8,7 +8,7 @@
 
 .main {
   flex: 1;
-  max-width: 1640px;
+  max-width: 2000px;
   width: 100%;
   margin: 0 auto;
   padding: 0;
@@ -30,7 +30,7 @@
 }
 
 .headerInner {
-  max-width: 1640px;
+  max-width: 2000px;
   margin: 0 auto;
   padding: 0 24px;
   height: 56px;

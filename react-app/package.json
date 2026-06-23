@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "dev:functions": "wrangler pages dev --proxy 5173 --port 8788",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
@@ -15,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "xlsx": "^0.18.5"
@@ -26,6 +28,7 @@
     "@vitejs/plugin-react": "^6.0.2",
     "jsdom": "^29.1.1",
     "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "wrangler": "^4.103.0"
   }
 }

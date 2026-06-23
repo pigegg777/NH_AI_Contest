@@ -2,13 +2,17 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchAllOfficeProductRows } from '../../office-product-editor/services/officeProductDataService';
-import { CARD_STYLE_FONT_SIZE_REM, CARD_STYLE_PRICE_TEXT_COLOR_VALUES } from '../model/cardStyleModel';
+import {
+  fetchAllOfficeProductRows,
+  fetchOfficeProductDataCatalog,
+} from '../../office-product-editor/services/officeProductDataService';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
 vi.mock('../../office-product-editor/services/officeProductDataService', () => ({
   fetchAllOfficeProductRows: vi.fn(),
+  fetchOfficeProductDataCatalog: vi.fn(),
 }));
 
 vi.mock('../services/storefrontConfigService', () => ({
@@ -18,6 +22,72 @@ vi.mock('../services/storefrontConfigService', () => ({
 describe('PublicStorefrontPage', () => {
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('uses the catalog officeName in the main header when public rows do not include it', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: {
+        nav: { title: '', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+      },
+      navConfig: {
+        title: '',
+        subtitle: '',
+        brandColor: '#2563eb',
+        searchPlaceholder: 'Search products',
+        logoUrl: '',
+        searchVariant: 'pill',
+        categoryChipVariant: 'soft',
+      },
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            layoutStyle: { variant: 'card-grid' },
+            cardDesign: {
+              visibleFields: ['product_name'],
+              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 2 },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-22T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Alpha',
+        medium_category: 'Premium',
+      },
+    ]);
+    fetchOfficeProductDataCatalog.mockResolvedValue([
+      {
+        officeCode: 'OFF-1',
+        officeName: '본점',
+        categoryName: 'Fertilizer Upload',
+      },
+    ]);
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: '본점 농자재 정보' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', {
+        level: 1,
+        name: /상품 안내/,
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it('renders the placeholder without fetching when officeCode is missing', () => {
@@ -84,10 +154,9 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'tax_price'],
-              style: { layout: 'compact', accentColor: '#2563eb', fontSize: 'large', cardsPerRow: 2 },
+              cardStyle: { ...DEFAULT_CARD_STYLE, field: { ...DEFAULT_CARD_STYLE.field, defaultFontSize: 'large' } },
             },
           },
           updatedAt: '2026-06-15T00:00:00Z',
@@ -147,8 +216,7 @@ describe('PublicStorefrontPage', () => {
     });
 
     const sectionEl = container.querySelector('section[id]');
-    expect(sectionEl.style.getPropertyValue('--card-accent')).toBe('#2563eb');
-    expect(sectionEl.style.getPropertyValue('--card-font-size')).toBe(CARD_STYLE_FONT_SIZE_REM.large);
+    expect(sectionEl.style.getPropertyValue('--card-font-size')).toBe('1rem');
   });
 
   it('flattens manufacturer_list into comma-joined manufacturer names on the card', async () => {
@@ -278,19 +346,13 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'img_url', 'tax_price'],
-              style: {
-                layout: 'compact',
-                accentColor: '#2563eb',
-                fontSize: 'large',
+              cardStyle: {
+                ...DEFAULT_CARD_STYLE,
                 cardsPerRow: 1,
-                imageSize: 'lg',
-                imageFit: 'contain',
-                cardRadius: 'xl',
-                cardShadow: 'strong',
-                cardSpacing: 'relaxed',
+                image: { fit: 'contain', sizePx: 200 },
+                shell: { ...DEFAULT_CARD_STYLE.shell, radius: 'xl', shadow: 'strong', spacing: 'relaxed' },
               },
             },
           },
@@ -308,20 +370,21 @@ describe('PublicStorefrontPage', () => {
       },
     ]);
 
-    const { container } = render(<PublicStorefrontPage officeCode="OFF-1" />);
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
 
     expect(await screen.findByTestId('storefront-search')).toHaveAttribute('data-search-variant', 'outlined');
     expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-variant', 'filled');
 
-    const sectionEl = container.querySelector('section[id]');
-    expect(sectionEl).toHaveAttribute('data-image-size', 'lg');
-    expect(sectionEl).toHaveAttribute('data-image-fit', 'contain');
+    const sectionEl = screen.getByRole('article').closest('section');
     expect(sectionEl).toHaveAttribute('data-card-radius', 'xl');
     expect(sectionEl).toHaveAttribute('data-card-shadow', 'strong');
     expect(sectionEl).toHaveAttribute('data-card-spacing', 'relaxed');
+
+    const imageEl = screen.getByRole('img', { name: 'Alpha' });
+    expect(imageEl.style.objectFit).toBe('contain');
   });
 
-  it('renders helper blocks from mobileUiTree and respects card element visibility', async () => {
+  it('renders helper blocks from mobileUiTree and only shows fields selected as visible', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: {
@@ -364,12 +427,6 @@ describe('PublicStorefrontPage', () => {
             cardDesign: {
               visibleFields: ['product_name', 'spec'],
               style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
-              elementConfig: {
-                showBadge: true,
-                imageSize: 'hidden',
-                imageFit: 'cover',
-                metaDensity: 'comfortable',
-              },
             },
           },
         },
@@ -451,7 +508,7 @@ describe('PublicStorefrontPage', () => {
     expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-size', 'compact');
   });
 
-  it('filters rows by medium-category chip and keeps search filtering combined', async () => {
+  it('treats medium-category selection like 전체 while searching, then restores the prior chip filter when search clears', async () => {
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
     fetchStorefrontConfig.mockResolvedValue({
@@ -517,10 +574,18 @@ describe('PublicStorefrontPage', () => {
       expect(screen.queryByText('Beta Starter')).not.toBeInTheDocument();
     });
 
-    await user.type(screen.getByPlaceholderText('Search products'), 'Gamma');
+    await user.type(screen.getByPlaceholderText('Search products'), 'Beta');
 
     await waitFor(() => {
       expect(screen.queryByText('Alpha Premium')).not.toBeInTheDocument();
+      expect(screen.queryByText('Gamma Premium')).not.toBeInTheDocument();
+      expect(screen.getByText('Beta Starter')).toBeInTheDocument();
+    });
+
+    await user.clear(screen.getByPlaceholderText('Search products'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha Premium')).toBeInTheDocument();
       expect(screen.getByText('Gamma Premium')).toBeInTheDocument();
       expect(screen.queryByText('Beta Starter')).not.toBeInTheDocument();
     });
@@ -578,7 +643,7 @@ describe('PublicStorefrontPage', () => {
     expect(screen.queryByText('Alpha')).not.toBeInTheDocument();
   });
 
-  it('scopes medium-category chips to the active section and lets the left rail collapse', async () => {
+  it('renders top product-category chips, scopes medium-category chips to the active section, and lets the left rail collapse', async () => {
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
     fetchStorefrontConfig.mockResolvedValue({
@@ -651,19 +716,43 @@ describe('PublicStorefrontPage', () => {
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
     expect(await screen.findByText('Alpha Premium')).toBeInTheDocument();
+    expect(screen.getByText('Beta Starter')).toBeInTheDocument();
+    expect(screen.queryByText('Shield Control')).not.toBeInTheDocument();
+
+    const productCategoryChips = screen.getByTestId('storefront-product-category-chips');
+    expect(within(productCategoryChips).getByRole('button', { name: 'Fertilizer Upload' })).toBeInTheDocument();
+    expect(within(productCategoryChips).getByRole('button', { name: 'Pesticide Upload' })).toBeInTheDocument();
+    const rail = screen.getByTestId('storefront-category-rail');
 
     const chips = screen.getByTestId('storefront-category-chips');
     expect(within(chips).getByRole('button', { name: 'Premium' })).toBeInTheDocument();
     expect(within(chips).getByRole('button', { name: 'Starter' })).toBeInTheDocument();
     expect(within(chips).queryByRole('button', { name: 'Control' })).not.toBeInTheDocument();
 
-    const rail = screen.getByTestId('storefront-category-rail');
-    await user.click(within(rail).getByRole('button', { name: 'Pesticide Upload' }));
+    await user.click(within(productCategoryChips).getByRole('button', { name: 'Pesticide Upload' }));
 
     await waitFor(() => {
+      expect(screen.getByText('Shield Control')).toBeInTheDocument();
+      expect(screen.queryByText('Alpha Premium')).not.toBeInTheDocument();
+      expect(screen.queryByText('Beta Starter')).not.toBeInTheDocument();
       expect(within(screen.getByTestId('storefront-category-chips')).getByRole('button', { name: 'Control' })).toBeInTheDocument();
       expect(
         within(screen.getByTestId('storefront-category-chips')).queryByRole('button', { name: 'Premium' }),
+      ).not.toBeInTheDocument();
+    });
+
+    await user.click(within(screen.getByTestId('storefront-category-chips')).getByRole('button', { name: 'Control' }));
+    expect(screen.getByText('Shield Control')).toBeInTheDocument();
+
+    await user.click(within(productCategoryChips).getByRole('button', { name: 'Fertilizer Upload' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha Premium')).toBeInTheDocument();
+      expect(screen.getByText('Beta Starter')).toBeInTheDocument();
+      expect(screen.queryByText('Shield Control')).not.toBeInTheDocument();
+      expect(within(screen.getByTestId('storefront-category-chips')).getByRole('button', { name: 'Premium' })).toBeInTheDocument();
+      expect(
+        within(screen.getByTestId('storefront-category-chips')).queryByRole('button', { name: 'Control' }),
       ).not.toBeInTheDocument();
     });
 
@@ -708,10 +797,14 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'image-left' },
             cardDesign: {
-              visibleFields: ['product_name', 'tax_price'],
-              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 2, priceTextColor: 'muted' },
+              visibleFields: ['product_name', 'img_url', 'tax_price'],
+              cardStyle: normalizeCardStyle({
+                ...DEFAULT_CARD_STYLE,
+                cardsPerRow: 1,
+                structuralPreset: 'image-left',
+                field: { ...DEFAULT_CARD_STYLE.field, priceColorRole: 'muted' },
+              }),
             },
           },
           updatedAt: '2026-06-18T00:00:00Z',
@@ -729,8 +822,8 @@ describe('PublicStorefrontPage', () => {
     expect(await screen.findByText('Alpha')).toBeInTheDocument();
 
     const sectionEl = container.querySelector('section[id]');
-    expect(sectionEl.dataset.cardTemplate).toBe('image-left');
-    expect(sectionEl.style.getPropertyValue('--price-text-color')).toBe(CARD_STYLE_PRICE_TEXT_COLOR_VALUES.muted);
+    expect(sectionEl.dataset.structuralPreset).toBe('image-left');
+    expect(sectionEl.style.getPropertyValue('--price-text-color')).toBe('#6b7280');
 
     const cardEl = screen.getByRole('article');
     expect(cardEl.className).toMatch(/cardImageLeft/);
@@ -741,7 +834,7 @@ describe('PublicStorefrontPage', () => {
     expect(pageEl.style.getPropertyValue('--page-chip-active-bg')).toBe('#2563eb');
   });
 
-  it('reorders fields price-first under the price-focus template', async () => {
+  it('reorders fields price-first when bodySlots saves an explicit field order', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
@@ -756,8 +849,14 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'price-focus' },
-            cardDesign: { visibleFields: ['product_name', 'spec', 'tax_price'], style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 } },
+            cardDesign: {
+              visibleFields: ['product_name', 'spec', 'tax_price'],
+              cardStyle: { ...DEFAULT_CARD_STYLE },
+              bodySlots: [
+                { id: 'field-0-tax_price', kind: 'field', field: 'tax_price', label: '과세가격' },
+                { id: 'field-1-spec', kind: 'field', field: 'spec', label: '규격' },
+              ],
+            },
           },
         },
       ],
@@ -775,7 +874,7 @@ describe('PublicStorefrontPage', () => {
     expect(labels[0]).toBe('과세가격');
   });
 
-  it('renders saved aiDesign inline-group rows from renderSpec', async () => {
+  it('renders saved bodySlots inline-group rows', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
@@ -790,29 +889,20 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'price-focus' },
             cardDesign: {
               visibleFields: ['product_name', 'tax_price', 'zero_tax_price'],
-              style: { layout: 'compact', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 1 },
-            },
-            aiDesign: {
-              prompt: 'compare tax and zero-tax on one row',
-              activeSkillIds: ['transform'],
-              renderSpec: {
-                version: 1,
-                bodySlots: [
-                  { id: 'title', kind: 'field', field: 'product_name', label: '' },
-                  {
-                    id: 'price-row',
-                    kind: 'inline-group',
-                    label: '가격',
-                    items: [
-                      { id: 'tax', field: 'tax_price', label: '과세' },
-                      { id: 'zero', field: 'zero_tax_price', label: '영세' },
-                    ],
-                  },
-                ],
-              },
+              cardStyle: { ...DEFAULT_CARD_STYLE, cardsPerRow: 1 },
+              bodySlots: [
+                {
+                  id: 'group-price-compare',
+                  kind: 'inline-group',
+                  label: '가격',
+                  items: [
+                    { id: 'group-price-compare-item-0', field: 'tax_price', label: '과세' },
+                    { id: 'group-price-compare-item-1', field: 'zero_tax_price', label: '영세' },
+                  ],
+                },
+              ],
             },
           },
         },
@@ -841,7 +931,7 @@ describe('PublicStorefrontPage', () => {
     expect(groupedPriceRows.length).toBeGreaterThan(0);
   });
 
-  it('renders saved aiDesign field styles without changing sibling price fields', async () => {
+  it('renders saved bodySlots field styles without changing sibling price fields', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: { nav: {}, searchSection: { placeholder: 'Search products' }, categoryChips: { enabled: true, sticky: true } },
@@ -856,28 +946,19 @@ describe('PublicStorefrontPage', () => {
             sourceCategoryName: 'Fertilizer Upload',
             selectedMediumCategories: ['Premium'],
             representativeMediumCategory: 'Premium',
-            layoutStyle: { variant: 'card-grid' },
             cardDesign: {
               visibleFields: ['product_name', 'tax_price', 'price_subsidy'],
-              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 1 },
-            },
-            aiDesign: {
-              prompt: 'make only the subsidy blue',
-              activeSkillIds: ['style'],
-              renderSpec: {
-                version: 1,
-                bodySlots: [
-                  { id: 'title', kind: 'field', field: 'product_name', label: '' },
-                  { id: 'tax', kind: 'field', field: 'tax_price', label: 'Tax price' },
-                  {
-                    id: 'subsidy',
-                    kind: 'field',
-                    field: 'price_subsidy',
-                    label: 'Subsidy',
-                    style: { colorRole: 'blue', fontWeight: 'bold', fontSize: 'large', emphasis: 'strong' },
-                  },
-                ],
-              },
+              cardStyle: { ...DEFAULT_CARD_STYLE, cardsPerRow: 1 },
+              bodySlots: [
+                { id: 'field-0-tax_price', kind: 'field', field: 'tax_price', label: 'Tax price' },
+                {
+                  id: 'field-1-price_subsidy',
+                  kind: 'field',
+                  field: 'price_subsidy',
+                  label: 'Subsidy',
+                  style: { field: 'price_subsidy', colorRole: 'blue', fontWeight: 'bold', fontSize: 'large', emphasis: 'strong' },
+                },
+              ],
             },
           },
         },

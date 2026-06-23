@@ -1,15 +1,33 @@
 import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
-import CardDesignStep from '../components/CardDesignStep';
-import DataSelectionStep from '../components/DataSelectionStep';
-import ProductCategoryStep from '../components/ProductCategoryStep';
 import StorefrontView from '../components/StorefrontView';
+import CardDesignStep from './storefront-builder/CardDesignStep';
+import DataSelectionStep from './storefront-builder/DataSelectionStep';
+import PageDesignStep from './storefront-builder/PageDesignStep';
+import ProductCategoryStep from './storefront-builder/ProductCategoryStep';
 import { useStorefrontBuilder } from '../hooks/useStorefrontBuilder';
 import styles from './StorefrontBuilderPage.module.css';
 
-const STEP_COMPONENTS = [ProductCategoryStep, DataSelectionStep, CardDesignStep];
+const STEP_COMPONENTS = [
+  {
+    Component: ProductCategoryStep,
+    selectStepProps: (builder) => builder.productCategoryStep,
+  },
+  {
+    Component: PageDesignStep,
+    selectStepProps: (builder) => builder.pageDesignStep,
+  },
+  {
+    Component: DataSelectionStep,
+    selectStepProps: (builder) => builder.dataSelectionStep,
+  },
+  {
+    Component: CardDesignStep,
+    selectStepProps: (builder) => builder.cardDesignStep,
+  },
+];
 
-export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
-  const builder = useStorefrontBuilder({ officeCode });
+export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) {
+  const builder = useStorefrontBuilder({ officeCode, nhName });
 
   if (builder.status === 'loading') {
     return (
@@ -45,7 +63,7 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
               </div>
 
               <p className={styles.description}>
-                먼저 페이지 분위기를 정하고 생성할 상품 카테고리를 선택한 뒤,
+                먼저 페이지 분위기를 정하고, 생성할 상품 카테고리를 선택한 뒤,
                 AI에게 원하는 방향을 입력해 스토어프론트 초안을 만들어보세요.
               </p>
 
@@ -63,8 +81,11 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
           ) : (
             <>
               {(() => {
-                const StepComponent = STEP_COMPONENTS[builder.currentStep];
-                return <StepComponent builder={builder} />;
+                const activeStep = STEP_COMPONENTS[builder.currentStep];
+                const StepComponent = activeStep.Component;
+                return (
+                  <StepComponent step={activeStep.selectStepProps(builder)} />
+                );
               })()}
 
               <div className={styles.stepNavActions}>
@@ -78,13 +99,16 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
                     이전
                   </button>
                 ) : null}
-                {builder.currentStep === 0 ? (
+                {builder.currentStep === 0 || builder.currentStep === 1 ? (
                   <button
                     type="button"
                     className={styles.primaryButton}
                     data-testid="builder-go-next"
                     onClick={builder.goNext}
-                    disabled={!builder.selectedProductCategoryName}
+                    disabled={
+                      builder.currentStep === 0 &&
+                      !builder.selectedProductCategoryName
+                    }
                   >
                     다음
                   </button>
@@ -130,6 +154,8 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
                 <StorefrontView
                   config={builder.previewConfig}
                   productRows={builder.previewProductRows}
+                  officeName={builder.officeName}
+                  nhName={builder.nh_name}
                 />
               </div>
             </div>

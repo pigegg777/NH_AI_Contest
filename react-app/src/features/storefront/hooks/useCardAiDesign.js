@@ -81,6 +81,7 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
       const result = compileCardStyle({
         intent,
         previousCardStyle: cardStyle,
+        previousBodySlots: bodySlots,
         cardsPerRow: cardStyle.cardsPerRow,
         visibleFields,
         fieldLabels,
