@@ -178,7 +178,7 @@ describe('StorefrontBuilderPage', () => {
   });
 
   it('runs the four-step flow and saves the resolved cardStyle without touching page-wide nav settings', async () => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', '');
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
@@ -229,7 +229,7 @@ describe('StorefrontBuilderPage', () => {
   }, 10000);
 
   it('applies a field-override AI prompt, previews the styled field, saves it, and undoes it', async () => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', '');
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
@@ -280,7 +280,7 @@ describe('StorefrontBuilderPage', () => {
   }, 10000);
 
   it('applies one page-style prompt, previews immediately, and saves only the compiled pageStyle', async () => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', '');
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
@@ -344,7 +344,7 @@ describe('StorefrontBuilderPage', () => {
   });
 
   it('reconfirming data selection resets only card-design output, not basic page settings', async () => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', '');
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -378,7 +378,7 @@ describe('StorefrontBuilderPage', () => {
   });
 
   it('never lets a card-design AI prompt change which fields are saved', async () => {
-    vi.stubEnv('VITE_OPENAI_API_KEY', '');
+    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
