@@ -42,8 +42,11 @@ export async function readJsonBody(request) {
 }
 
 export function assertPromptWithinLimit(prompt) {
-  if (typeof prompt !== 'string' || prompt.length > MAX_PROMPT_LENGTH) {
-    throw new RequestValidationError(`prompt must be a string of at most ${MAX_PROMPT_LENGTH} characters.`, 422);
+  if (typeof prompt !== 'string' || prompt.trim() === '' || prompt.length > MAX_PROMPT_LENGTH) {
+    throw new RequestValidationError(
+      `prompt must be a non-empty string of at most ${MAX_PROMPT_LENGTH} characters.`,
+      422,
+    );
   }
 }
 

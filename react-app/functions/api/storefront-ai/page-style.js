@@ -30,11 +30,6 @@ export async function onRequestPost({ request, env }) {
     assertOfficeCodePresent(officeCode);
 
     const pageAiDesign = normalizePageAiDesignInput(body.pageAiDesign);
-
-    if (!pageAiDesign.prompt) {
-      throw new RequestValidationError('prompt is required.', 422);
-    }
-
     assertPromptWithinLimit(pageAiDesign.prompt);
 
     const currentPageStyle = normalizePageStyle(body.currentPageStyle);

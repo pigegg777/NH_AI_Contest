@@ -68,6 +68,11 @@ describe('assertPromptWithinLimit', () => {
     expect(() => assertPromptWithinLimit('hello')).not.toThrow();
   });
 
+  it('rejects an empty or whitespace-only prompt with 422', () => {
+    expect(() => assertPromptWithinLimit('')).toThrow(expect.objectContaining({ status: 422 }));
+    expect(() => assertPromptWithinLimit('   ')).toThrow(expect.objectContaining({ status: 422 }));
+  });
+
   it('rejects a prompt over the max length with 422', () => {
     expect(() => assertPromptWithinLimit('x'.repeat(2001))).toThrow(
       expect.objectContaining({ status: 422 }),
