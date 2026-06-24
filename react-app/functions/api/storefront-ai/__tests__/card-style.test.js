@@ -95,7 +95,7 @@ describe('POST /api/storefront-ai/card-style', () => {
     expect(response.status).toBe(502);
   });
 
-  it('returns 200 with a normalized intent on success', async () => {
+  it('returns 200 with a normalized intent, explanation, and suggestion on success', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
     vi.stubGlobal(
       'fetch',
@@ -111,6 +111,8 @@ describe('POST /api/storefront-ai/card-style', () => {
             image: null,
             info: null,
             field: null,
+            explanation: '제목을 더 굵게 바꿨습니다.',
+            suggestion: '이미지 섹션도 같이 밝게 해보면 어울릴 것 같아요.',
           },
         }),
       }),
@@ -119,6 +121,7 @@ describe('POST /api/storefront-ai/card-style', () => {
       officeCode: 'OFF-1',
       cardAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
       visibleFields: ['product_name'],
+      history: [{ role: 'user', text: '제목을 굵게 해줘' }],
     });
 
     const response = await onRequestPost({ request, env: TEST_ENV });
@@ -126,5 +129,25 @@ describe('POST /api/storefront-ai/card-style', () => {
 
     expect(response.status).toBe(200);
     expect(body.intent.header).toEqual({ fontWeight: 800 });
+    expect(body.explanation).toBe('제목을 더 굵게 바꿨습니다.');
+    expect(body.suggestion).toBe('이미지 섹션도 같이 밝게 해보면 어울릴 것 같아요.');
+  });
+
+  it('returns 422 when history has more than 6 turns', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    const history = Array.from({ length: 7 }, (_, index) => ({
+      role: index % 2 === 0 ? 'user' : 'assistant',
+      text: `turn ${index}`,
+    }));
+    const request = buildRequest({
+      officeCode: 'OFF-1',
+      cardAiDesign: { prompt: 'make the title bolder' },
+      visibleFields: ['product_name'],
+      history,
+    });
+
+    const response = await onRequestPost({ request, env: TEST_ENV });
+
+    expect(response.status).toBe(422);
   });
 });
