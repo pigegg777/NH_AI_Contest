@@ -60,10 +60,14 @@ describe('usePageAiDesign', () => {
     };
 
     requestPageStyleAiIntent.mockResolvedValue({
-      palette: compiledStyle.palette,
-      header: null,
-      categoryChips: null,
-      search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
+      intent: {
+        palette: compiledStyle.palette,
+        header: null,
+        categoryChips: null,
+        search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
+      },
+      explanation: '검색창을 더 크고 강하게 바꿨습니다.',
+      suggestion: '헤더 색상도 같이 어울리게 바꿔보면 좋을 것 같아요.',
     });
     compilePageStyle.mockReturnValue(compiledStyle);
 
@@ -85,6 +89,7 @@ describe('usePageAiDesign', () => {
       },
       currentPageStyle: DEFAULT_PAGE_STYLE,
       officeCode: undefined,
+      history: [],
     });
     expect(compilePageStyle).toHaveBeenCalledWith({
       intent: {
@@ -99,6 +104,44 @@ describe('usePageAiDesign', () => {
     expect(result.current.pageStyle).toEqual(compiledStyle);
     expect(result.current.pageAiErrorMessage).toBe('');
     expect(result.current.isApplyingPageAiDesign).toBe(false);
+    expect(result.current.pageAiDesign.prompt).toBe('');
+    expect(result.current.pageAiMessages).toEqual([
+      expect.objectContaining({ role: 'user', text: 'warm and friendly, make the search box larger with a stronger border', scope: 'search' }),
+      expect.objectContaining({
+        role: 'assistant',
+        text: '검색창을 더 크고 강하게 바꿨습니다.',
+        suggestion: '헤더 색상도 같이 어울리게 바꿔보면 좋을 것 같아요.',
+        scope: 'search',
+      }),
+    ]);
+  });
+
+  it('sends up to the last 6 prior messages as history and clears the input on send', async () => {
+    requestPageStyleAiIntent.mockResolvedValue({ intent: {}, explanation: '반영했습니다.', suggestion: null });
+    compilePageStyle.mockReturnValue(DEFAULT_PAGE_STYLE);
+
+    const { result } = renderHook(() => usePageAiDesign());
+
+    act(() => result.current.setPrompt('첫 번째 요청'));
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+
+    act(() => result.current.setPrompt('두 번째 요청'));
+    await act(async () => {
+      await result.current.applyPageAiDesign();
+    });
+
+    expect(requestPageStyleAiIntent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        history: [
+          expect.objectContaining({ role: 'user', text: '첫 번째 요청' }),
+          expect.objectContaining({ role: 'assistant', text: '반영했습니다.' }),
+        ],
+      }),
+    );
+    expect(result.current.pageAiDesign.prompt).toBe('');
   });
 
   it('keeps the last valid pageStyle and surfaces an error when interpretation fails', async () => {
@@ -125,10 +168,14 @@ describe('usePageAiDesign', () => {
     };
 
     requestPageStyleAiIntent.mockResolvedValue({
-      palette: compiledStyle.palette,
-      header: null,
-      categoryChips: null,
-      search: null,
+      intent: {
+        palette: compiledStyle.palette,
+        header: null,
+        categoryChips: null,
+        search: null,
+      },
+      explanation: '보라색으로 바꾸고 제목을 굵게 했습니다.',
+      suggestion: null,
     });
     compilePageStyle.mockReturnValue(compiledStyle);
 

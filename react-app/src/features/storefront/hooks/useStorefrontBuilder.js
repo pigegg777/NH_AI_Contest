@@ -318,6 +318,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   const pageDesignStep = {
     pageAiDesign: pageAi.pageAiDesign,
+    pageAiMessages: pageAi.pageAiMessages,
     isApplyingPageAiDesign: pageAi.isApplyingPageAiDesign,
     pageAiErrorMessage: pageAi.pageAiErrorMessage,
     setPagePrompt: pageAi.setPrompt,
