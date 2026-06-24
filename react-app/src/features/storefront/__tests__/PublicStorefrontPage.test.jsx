@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   fetchAllOfficeProductRows,
-  fetchOfficeProductDataCatalog,
+  fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/officeProductDataService';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
@@ -12,7 +12,7 @@ import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
 vi.mock('../../office-product-editor/services/officeProductDataService', () => ({
   fetchAllOfficeProductRows: vi.fn(),
-  fetchOfficeProductDataCatalog: vi.fn(),
+  fetchPublicOfficeIdentity: vi.fn(),
 }));
 
 vi.mock('../services/storefrontConfigService', () => ({
@@ -24,7 +24,7 @@ describe('PublicStorefrontPage', () => {
     vi.clearAllMocks();
   });
 
-  it('uses the catalog officeName in the main header when public rows do not include it', async () => {
+  it('uses the public office identity officeName in the main header when public rows do not include it', async () => {
     fetchStorefrontConfig.mockResolvedValue({
       officeCode: 'OFF-1',
       pageConfig: {
@@ -69,13 +69,10 @@ describe('PublicStorefrontPage', () => {
         medium_category: 'Premium',
       },
     ]);
-    fetchOfficeProductDataCatalog.mockResolvedValue([
-      {
-        officeCode: 'OFF-1',
-        officeName: '본점',
-        categoryName: 'Fertilizer Upload',
-      },
-    ]);
+    fetchPublicOfficeIdentity.mockResolvedValue({
+      officeName: '본점',
+      nhName: '',
+    });
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
@@ -88,6 +85,62 @@ describe('PublicStorefrontPage', () => {
         name: /상품 안내/,
       }),
     ).not.toBeInTheDocument();
+  });
+
+  it('combines nhName and officeName from the public office identity lookup in the main header', async () => {
+    fetchStorefrontConfig.mockResolvedValue({
+      officeCode: 'OFF-1',
+      pageConfig: {
+        nav: { title: '', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+      },
+      navConfig: {
+        title: '',
+        subtitle: '',
+        brandColor: '#2563eb',
+        searchPlaceholder: 'Search products',
+        logoUrl: '',
+        searchVariant: 'pill',
+        categoryChipVariant: 'soft',
+      },
+      categoryConfigs: [
+        {
+          officeCode: 'OFF-1',
+          productCategoryName: 'Fertilizer Upload',
+          sortOrder: 0,
+          categoryConfig: {
+            displayName: 'Fertilizer Upload',
+            sourceCategoryName: 'Fertilizer Upload',
+            selectedMediumCategories: ['Premium'],
+            representativeMediumCategory: 'Premium',
+            cardDesign: {
+              visibleFields: ['product_name'],
+              style: { layout: 'grid', accentColor: '#2563eb', fontSize: 'medium', cardsPerRow: 2 },
+            },
+          },
+        },
+      ],
+      hiddenProducts: [],
+      updatedAt: '2026-06-22T00:00:00Z',
+    });
+    fetchAllOfficeProductRows.mockResolvedValue([
+      {
+        product_category_name: 'Fertilizer Upload',
+        product_name: 'Alpha',
+        medium_category: 'Premium',
+      },
+    ]);
+    fetchPublicOfficeIdentity.mockResolvedValue({
+      officeName: '본점',
+      nhName: 'NH농협',
+    });
+
+    render(<PublicStorefrontPage officeCode="OFF-1" />);
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'NH농협 본점 농자재 정보' }),
+    ).toBeInTheDocument();
   });
 
   it('renders the placeholder without fetching when officeCode is missing', () => {

@@ -73,6 +73,31 @@ export async function fetchAllOfficeProductRows({ officeCode }) {
   return Array.isArray(data) ? data : [];
 }
 
+export async function fetchPublicOfficeIdentity({ officeCode }) {
+  const normalizedOfficeCode = toTrimmedString(officeCode);
+
+  if (!normalizedOfficeCode) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .rpc('get_public_office_identity', { p_office_code: normalizedOfficeCode })
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message || '매장 정보를 불러오지 못했습니다.');
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    officeName: toTrimmedString(data.office_name),
+    nhName: toTrimmedString(data.nh_name),
+  };
+}
+
 export async function fetchOfficeProductDataCatalog({ officeCode }) {
   const normalizedOfficeCode = toTrimmedString(officeCode);
 

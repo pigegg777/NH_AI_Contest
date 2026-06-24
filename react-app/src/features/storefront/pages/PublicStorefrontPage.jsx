@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
 import {
   fetchAllOfficeProductRows,
-  fetchOfficeProductDataCatalog,
+  fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/officeProductDataService';
 import StorefrontView from '../components/StorefrontView';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
@@ -14,6 +14,7 @@ const EMPTY_STATE = {
   config: null,
   productRows: [],
   officeName: '',
+  nhName: '',
 };
 
 export default function PublicStorefrontPage({ officeCode }) {
@@ -32,14 +33,15 @@ export default function PublicStorefrontPage({ officeCode }) {
       config: null,
       productRows: [],
       officeName: '',
+      nhName: '',
     });
 
     Promise.all([
       fetchStorefrontConfig({ officeCode: normalizedOfficeCode }),
       fetchAllOfficeProductRows({ officeCode: normalizedOfficeCode }),
-      fetchOfficeProductDataCatalog({ officeCode: normalizedOfficeCode }),
+      fetchPublicOfficeIdentity({ officeCode: normalizedOfficeCode }),
     ])
-      .then(([config, productRows, productCatalog]) => {
+      .then(([config, productRows, officeIdentity]) => {
         if (isCancelled) {
           return;
         }
@@ -49,17 +51,12 @@ export default function PublicStorefrontPage({ officeCode }) {
           return;
         }
 
-        const officeName = Array.isArray(productCatalog)
-          ? (productCatalog.find((entry) =>
-              String(entry?.officeName || '').trim(),
-            )?.officeName ?? '')
-          : '';
-
         setState({
           status: 'ready',
           config,
           productRows,
-          officeName,
+          officeName: officeIdentity?.officeName ?? '',
+          nhName: officeIdentity?.nhName ?? '',
         });
       })
       .catch(() => {
@@ -72,6 +69,7 @@ export default function PublicStorefrontPage({ officeCode }) {
           config: null,
           productRows: [],
           officeName: '',
+          nhName: '',
         });
       });
 
@@ -112,6 +110,7 @@ export default function PublicStorefrontPage({ officeCode }) {
         config={state.config}
         productRows={state.productRows}
         officeName={state.officeName}
+        nhName={state.nhName}
       />
     </div>
   );
