@@ -5,7 +5,7 @@ import StorefrontView from '../components/StorefrontView';
 import { DEFAULT_CARD_STYLE } from '../model/cardStyleModel';
 
 describe('StorefrontView', () => {
-  it('renders the co-op name in the brand row and keeps the main title focused on office and category', () => {
+  it('renders the co-op name in the brand row and keeps the main title focused on office only', () => {
     render(
       <StorefrontView
         config={{
@@ -98,10 +98,7 @@ describe('StorefrontView', () => {
 
     expect(screen.getByText('남해농협')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', {
-        level: 1,
-        name: '본점 · Fertilizer Upload',
-      }),
+      screen.getByRole('heading', { level: 1, name: '본점 농자재 정보' }),
     ).toBeInTheDocument();
     expect(productCategoryChips).toBeInTheDocument();
     expect(midCategoryChips).toBeInTheDocument();
@@ -123,6 +120,32 @@ describe('StorefrontView', () => {
       productCategoryChips.compareDocumentPosition(midCategoryChips) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).not.toBe(0);
+  });
+
+  it('still renders the brand logo when no office/co-op name can be derived', () => {
+    render(
+      <StorefrontView
+        config={{
+          pageConfig: {
+            nav: { title: '' },
+            searchSection: { enabled: true, placeholder: 'Search products' },
+            categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+            mobileUiTree: [
+              { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
+              { id: 'search-box', type: 'searchBox', slot: 'top', enabled: true, props: {} },
+              { id: 'product-sections', type: 'productSections', slot: 'beforeProducts', enabled: true, props: {} },
+              { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
+            ],
+          },
+          navConfig: { title: '' },
+          categoryConfigs: [],
+        }}
+        productRows={[]}
+      />,
+    );
+
+    expect(screen.getByTestId('storefront-brand-logo')).toBeInTheDocument();
+    expect(screen.queryByText('남해농협')).not.toBeInTheDocument();
   });
 
   it('renders compiled layoutPlan values such as image-right and one-line titles', () => {

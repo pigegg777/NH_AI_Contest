@@ -70,8 +70,8 @@ function buildRenderableMobileUiTree(mobileUiTree, shouldInferProductCategoryNav
   return nextTree;
 }
 
-export default function StorefrontView({ config, productRows, officeName }) {
-  const view = useStorefrontView({ config, productRows, officeName });
+export default function StorefrontView({ config, productRows, officeName, nhName }) {
+  const view = useStorefrontView({ config, productRows, officeName, nhName });
   const searchPlaceholder = view.searchPlaceholder;
   const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
   const renderableMobileUiTree = buildRenderableMobileUiTree(
@@ -95,25 +95,22 @@ export default function StorefrontView({ config, productRows, officeName }) {
         return (
           <div key={elementKey} className={styles.heroTop}>
             <div className={styles.brandBlock}>
-              {view.coopName ? (
-                <div className={styles.brandIdentity}>
-                  <div className={styles.logoShell} aria-hidden="true">
-                    <img className={styles.logo} src={brandLogoSrc} alt="" />
-                  </div>
-                  <div className={styles.brandCopy}>
-                    <p className={styles.eyebrow}>{view.coopName}</p>
-                    <h1 className={styles.title}>
-                      {view.headerTitle}
-                    </h1>
-                  </div>
+              <div className={styles.brandIdentity}>
+                <div className={styles.logoShell} aria-hidden="true">
+                  <img
+                    className={styles.logo}
+                    src={brandLogoSrc}
+                    alt=""
+                    data-testid="storefront-brand-logo"
+                  />
                 </div>
-              ) : (
                 <div className={styles.brandCopy}>
-                  <h1 className={styles.title}>
-                    {view.headerTitle}
-                  </h1>
+                  {view.coopName ? (
+                    <p className={styles.eyebrow}>{view.coopName}</p>
+                  ) : null}
+                  <h1 className={styles.title}>{view.headerOrgLine}</h1>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         );
@@ -181,6 +178,7 @@ export default function StorefrontView({ config, productRows, officeName }) {
               data-testid="storefront-search"
               data-search-variant={view.searchVariant}
             >
+              <span className={styles.searchIcon} aria-hidden="true" />
               <input
                 type="search"
                 className={styles.searchInput}
@@ -189,7 +187,6 @@ export default function StorefrontView({ config, productRows, officeName }) {
                 value={view.searchText}
                 onChange={(event) => view.setSearchText(event.target.value)}
               />
-              <span className={styles.searchIcon} aria-hidden="true" />
             </label>
           </div>
         );

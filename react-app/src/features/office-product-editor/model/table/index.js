@@ -9,7 +9,7 @@ export {
   createInitialFilters,
   createInitialSortState,
   getTableColumnsByMode,
-} from './constants';
+} from './tableConfigModel';
 export {
   buildFilterOptions,
   buildTableModel,
@@ -20,11 +20,11 @@ export {
   matchesFilter,
   matchesSearch,
   sortRows,
-} from './model';
+} from './tableQueryModel';
 export {
   NUMERIC_FORMAT_COLUMN_KEYS,
   PRICE_COLUMN_KEYS,
   formatPriceValue,
   getCellTextValue,
   parsePriceDraftValue,
-} from './cellFormatting';
+} from './tableCellValueModel';

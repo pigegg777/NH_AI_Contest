@@ -110,7 +110,10 @@
   align-items: center;
   gap: 8px;
   padding: 12px 14px 10px;
-  background: var(--card-header-bg, color-mix(in srgb, var(--card-accent, var(--corp-primary)) 8%, #ffffff));
+  background: var(
+    --card-header-bg,
+    color-mix(in srgb, var(--card-accent, var(--corp-primary)) 8%, #ffffff)
+  );
   border-bottom: 1px solid var(--card-header-border, rgba(17, 24, 39, 0.06));
 }
 
@@ -252,7 +255,10 @@
 
 .priceField .fieldValue {
   color: var(--field-text-color, var(--price-text-color, #d32f2f));
-  font-size: var(--field-font-size, calc(var(--card-font-size, 0.85rem) + 0.02rem));
+  font-size: var(
+    --field-font-size,
+    calc(var(--card-font-size, 0.85rem) + 0.02rem)
+  );
   font-weight: var(--field-font-weight, 700);
 }
 

@@ -80,10 +80,7 @@ describe('PublicStorefrontPage', () => {
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
     expect(
-      await screen.findByRole('heading', {
-        level: 1,
-        name: '본점 · Fertilizer Upload',
-      }),
+      await screen.findByRole('heading', { level: 1, name: '본점 농자재 정보' }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', {

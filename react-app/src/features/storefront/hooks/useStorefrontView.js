@@ -88,28 +88,11 @@ function resolveOfficeName(products) {
   return '';
 }
 
-function buildHeaderTitle(parts, fallbackTitle) {
-  const seen = new Set();
-  const values = [];
-
-  for (const part of parts) {
-    const normalizedPart = toTrimmedString(part);
-
-    if (!normalizedPart || seen.has(normalizedPart)) {
-      continue;
-    }
-
-    seen.add(normalizedPart);
-    values.push(normalizedPart);
-  }
-
-  return values.length > 0 ? values.join(' · ') : fallbackTitle;
-}
-
 export function useStorefrontView({
   config,
   productRows,
   officeName: externalOfficeName,
+  nhName,
 }) {
   const [searchText, setSearchText] = useState('');
   const [activeMediumCategory, setActiveMediumCategory] = useState(
@@ -196,10 +179,12 @@ export function useStorefrontView({
     toTrimmedString(externalOfficeName) ||
     resolveOfficeName(activeSectionEntry?.section?.products) ||
     resolveOfficeName(baseVisibleProducts);
-  const headerTitle = buildHeaderTitle(
-    [officeName, activeSectionTitle],
-    title,
-  );
+  const headerOrgName = [toTrimmedString(nhName), officeName]
+    .filter(Boolean)
+    .join(' ');
+  const headerOrgLine = headerOrgName
+    ? `${headerOrgName} 농자재 정보`
+    : title;
   const subtitle =
     config?.navConfig?.subtitle ||
     resolvedPageConfig.nav.subtitle ||
@@ -225,8 +210,7 @@ export function useStorefrontView({
   );
   const canRenderDesktopCategoryRail =
     mobileUiTree.some(
-      (block) =>
-        block.type === 'productCategoryNav' && block.enabled !== false,
+      (block) => block.type === 'productCategoryNav' && block.enabled !== false,
     ) && catalogSectionEntries.length > 0;
   const hasRenderableSections =
     mobileUiTree.some(
@@ -272,10 +256,7 @@ export function useStorefrontView({
       setActiveMediumCategory(item);
     });
 
-    if (
-      item !== ALL_MEDIUM_CATEGORY_LABEL &&
-      activeSectionEntry?.sectionId
-    ) {
+    if (item !== ALL_MEDIUM_CATEGORY_LABEL && activeSectionEntry?.sectionId) {
       scrollToSection(activeSectionEntry.sectionId);
     }
   }
@@ -315,9 +296,10 @@ export function useStorefrontView({
     pageStyle,
     chipAccentColor,
     coopName,
+    officeName,
     titleTextColorValue,
     typographyToneValue,
-    headerTitle,
+    headerOrgLine,
     title,
     subtitle,
     searchPlaceholder,

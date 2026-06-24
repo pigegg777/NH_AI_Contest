@@ -26,8 +26,8 @@ const STEP_COMPONENTS = [
   },
 ];
 
-export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
-  const builder = useStorefrontBuilder({ officeCode });
+export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) {
+  const builder = useStorefrontBuilder({ officeCode, nhName });
 
   if (builder.status === 'loading') {
     return (
@@ -154,6 +154,8 @@ export default function StorefrontBuilderPage({ officeCode, onGoHome }) {
                 <StorefrontView
                   config={builder.previewConfig}
                   productRows={builder.previewProductRows}
+                  officeName={builder.officeName}
+                  nhName={builder.nh_name}
                 />
               </div>
             </div>

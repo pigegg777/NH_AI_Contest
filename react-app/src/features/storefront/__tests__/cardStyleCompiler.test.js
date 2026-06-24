@@ -254,4 +254,82 @@ describe('compileCardStyle body composition', () => {
       ],
     });
   });
+
+  it('keeps a previously-applied field style when a later prompt does not address field styling', () => {
+    const fieldStyleIntent = {
+      field: {
+        priceColorRole: null,
+        targetedFieldStyles: [
+          { field: 'tax_price', colorRole: 'red', fontWeight: 'bold', fontSize: 'medium', emphasis: 'strong' },
+        ],
+      },
+    };
+
+    const first = compileCardStyle({
+      intent: fieldStyleIntent,
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      cardsPerRow: DEFAULT_CARD_STYLE.cardsPerRow,
+      visibleFields: ['product_name', 'spec', 'tax_price'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    const unrelatedIntent = {
+      image: { sizeDeltaSteps: 1 },
+      field: { priceColorRole: null, targetedFieldStyles: null },
+    };
+
+    const second = compileCardStyle({
+      intent: unrelatedIntent,
+      previousCardStyle: first.cardStyle,
+      previousBodySlots: first.bodySlots,
+      cardsPerRow: first.cardStyle.cardsPerRow,
+      visibleFields: ['product_name', 'spec', 'tax_price'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    const taxPriceSlot = second.bodySlots.find((slot) => slot.field === 'tax_price');
+    expect(taxPriceSlot.style).toEqual({
+      field: 'tax_price',
+      colorRole: 'red',
+      fontWeight: 'bold',
+      fontSize: 'medium',
+      emphasis: 'strong',
+    });
+  });
+
+  it('lets a later prompt override a specific field style without needing previousBodySlots to repeat it', () => {
+    const first = compileCardStyle({
+      intent: {
+        field: {
+          priceColorRole: null,
+          targetedFieldStyles: [
+            { field: 'tax_price', colorRole: 'red', fontWeight: 'bold', fontSize: 'medium', emphasis: 'strong' },
+          ],
+        },
+      },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      cardsPerRow: DEFAULT_CARD_STYLE.cardsPerRow,
+      visibleFields: ['product_name', 'spec', 'tax_price'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    const second = compileCardStyle({
+      intent: {
+        field: {
+          priceColorRole: null,
+          targetedFieldStyles: [
+            { field: 'tax_price', colorRole: 'blue', fontWeight: 'normal', fontSize: 'medium', emphasis: 'none' },
+          ],
+        },
+      },
+      previousCardStyle: first.cardStyle,
+      previousBodySlots: first.bodySlots,
+      cardsPerRow: first.cardStyle.cardsPerRow,
+      visibleFields: ['product_name', 'spec', 'tax_price'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    const taxPriceSlot = second.bodySlots.find((slot) => slot.field === 'tax_price');
+    expect(taxPriceSlot.style.colorRole).toBe('blue');
+  });
 });

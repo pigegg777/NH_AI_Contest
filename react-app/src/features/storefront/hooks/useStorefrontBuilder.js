@@ -43,7 +43,7 @@ function getInitialCategoryName(productEntries, existingConfig) {
   return productEntries?.[0]?.categoryName ?? '';
 }
 
-export function useStorefrontBuilder({ officeCode }) {
+export function useStorefrontBuilder({ officeCode, nhName }) {
   const [status, setStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -366,6 +366,8 @@ export function useStorefrontBuilder({ officeCode }) {
     selectedProductCategoryName,
     previewConfig,
     previewProductRows: allProductRows,
+    officeName,
+    nh_name: toTrimmedString(nhName),
     startSession,
     goNext,
     goPrevious,

@@ -36,7 +36,9 @@ export function useWorkbookExtraction() {
     } catch (error) {
       setResult(null);
       setErrorMessage(
-        error instanceof Error ? error.message : WORKBOOK_EXTRACTION_ERROR_MESSAGE,
+        error instanceof Error
+          ? error.message
+          : WORKBOOK_EXTRACTION_ERROR_MESSAGE,
       );
     } finally {
       setIsExtracting(false);

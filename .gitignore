@@ -3,6 +3,8 @@ react-app/node_modules/
 
 dist/
 react-app/dist/
+coverage/
+react-app/coverage/
 
 .env
 .env.*
@@ -10,7 +12,31 @@ react-app/dist/
 
 .DS_Store
 Thumbs.db
+*.log
 
 .claude/settings.local.json
+.claude/
+.codex/
+.superpowers/
+.agents/
+.mcp.json
 .gstack/
+.gstack-bak*/
 .worktrees/
+
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+react-app/supabase/.temp/
+
+outputs/
+data/
+react-app/test-results.txt
+react-app/test.json
+react-app/tmp-merge-check.xlsx
+react-app/vite-dev.err.log
+react-app/vite-dev.log
+react-app/vite-storefront.log
+run-supabase-mcp.bat
+skills-lock.json

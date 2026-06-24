@@ -132,7 +132,10 @@ function renderFieldSlot(slot, product) {
   return (
     <div key={slot.id} className={className}>
       <span className={styles.fieldLabel}>{label}</span>
-      <span className={styles.fieldValue} style={buildFieldValueStyle(slot.style)}>
+      <span
+        className={styles.fieldValue}
+        style={buildFieldValueStyle(slot.style)}
+      >
         {renderFieldSlotValue(slot.field, product?.[slot.field])}
       </span>
     </div>
@@ -148,7 +151,9 @@ function renderInlineGroupSlot(slot, product) {
 
   return (
     <div key={slot.id} className={styles.inlineGroup}>
-      {slot.label ? <span className={styles.fieldLabel}>{slot.label}</span> : null}
+      {slot.label ? (
+        <span className={styles.fieldLabel}>{slot.label}</span>
+      ) : null}
       <div className={styles.inlineGroupItems}>
         {visibleItems.map((item) => (
           <div key={item.id} className={styles.inlineGroupItem}>
@@ -181,7 +186,9 @@ function renderStackGroupSlot(slot, product) {
 
   return (
     <div key={slot.id} className={styles.stackGroup}>
-      {slot.label ? <span className={styles.fieldLabel}>{slot.label}</span> : null}
+      {slot.label ? (
+        <span className={styles.fieldLabel}>{slot.label}</span>
+      ) : null}
       <div className={styles.stackGroupItems}>
         {visibleItems.map((item) => (
           <div
@@ -224,9 +231,12 @@ function renderInfoSlot(slot, product) {
 
 function buildShellCssVars(cardStyle) {
   const cssVars = {
-    '--card-font-size': CARD_BASE_FONT_SIZE_REM[cardStyle.field.defaultFontSize],
+    '--card-font-size':
+      CARD_BASE_FONT_SIZE_REM[cardStyle.field.defaultFontSize],
     '--card-header-bg': resolveCssColor(cardStyle.header.backgroundColor),
-    '--card-header-title-color': resolveCssColor(cardStyle.header.titleColorHex),
+    '--card-header-title-color': resolveCssColor(
+      cardStyle.header.titleColorHex,
+    ),
     '--card-header-title-weight': cardStyle.header.fontWeight,
     '--card-header-title-letter-spacing': cardStyle.header.letterSpacing,
     '--card-image-size': `${cardStyle.image.sizePx}px`,
@@ -236,7 +246,9 @@ function buildShellCssVars(cardStyle) {
         : cardStyle.info.fieldGroupGap === 'relaxed'
           ? '14px'
           : '10px',
-    '--price-text-color': resolveFieldColorRoleValue(cardStyle.field.priceColorRole),
+    '--price-text-color': resolveFieldColorRoleValue(
+      cardStyle.field.priceColorRole,
+    ),
     '--field-default-color': resolveFieldColorRoleValue(
       cardStyle.field.defaultColorRole,
     ),
@@ -308,7 +320,9 @@ function renderInlineTitleSlot(product, cardStyle) {
 function renderInfoSection(product, cardStyle, infoSlots, titleMode) {
   return (
     <div className={styles.cardBody} key="info">
-      {titleMode === 'inline' ? renderInlineTitleSlot(product, cardStyle) : null}
+      {titleMode === 'inline'
+        ? renderInlineTitleSlot(product, cardStyle)
+        : null}
       {infoSlots.map((slot) => renderInfoSlot(slot, product))}
     </div>
   );
@@ -357,7 +371,9 @@ export default function CardGridSection({
       data-layout-emphasis={resolvedStyle.layoutPlan.emphasis}
     >
       {sectionHeaderContent ? (
-        <div className={styles.sectionHeaderContent}>{sectionHeaderContent}</div>
+        <div className={styles.sectionHeaderContent}>
+          {sectionHeaderContent}
+        </div>
       ) : null}
       <div className={styles.grid}>
         {products.map((product, index) => {
@@ -405,7 +421,9 @@ export default function CardGridSection({
                   ? sectionNodes.image
                   : null}
                 <div className={styles.cardMain}>
-                  {mainSectionOrder.map((sectionName) => sectionNodes[sectionName])}
+                  {mainSectionOrder.map(
+                    (sectionName) => sectionNodes[sectionName],
+                  )}
                 </div>
                 {resolvedStyle.layoutPlan.imagePlacement === 'right'
                   ? sectionNodes.image

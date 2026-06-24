@@ -1,8 +1,8 @@
 import styles from './AppLayout.module.css';
 
 const PAGE_LABELS = {
-  fertilizer: '농자재 정보',
-  'excel-extract': '데이터 설정/수정',
+  'office-product-editor': '데이터 설정/수정',
+  'storefront-builder': 'AI 스토어 페이지 만들기',
 };
 
 function BackArrow() {
@@ -21,15 +21,28 @@ function BackArrow() {
   );
 }
 
-export default function AppLayout({ activePage, onNavigate, onLogout, children }) {
+export default function AppLayout({
+  activePage,
+  onNavigate,
+  onLogout,
+  showBackButton = true,
+  children,
+}) {
   const isDashboard = activePage === 'dashboard';
   const pageLabel = PAGE_LABELS[activePage];
-  const shouldShowHeader = !isDashboard || typeof onLogout === 'function';
+  const shouldShowHeader = !isDashboard;
+  const canGoHome =
+    !isDashboard && showBackButton && typeof onNavigate === 'function';
 
   return (
     <div className={styles.shell}>
       {shouldShowHeader ? (
-        <header className={[styles.header, isDashboard ? styles.headerDashboard : ''].join(' ')}>
+        <header
+          className={[
+            styles.header,
+            isDashboard ? styles.headerDashboard : '',
+          ].join(' ')}
+        >
           <div
             className={[
               styles.headerInner,
@@ -38,23 +51,31 @@ export default function AppLayout({ activePage, onNavigate, onLogout, children }
           >
             {!isDashboard ? (
               <div className={styles.logo}>
-                <button
-                  type="button"
-                  className={styles.backButton}
-                  onClick={() => onNavigate('dashboard')}
-                  aria-label="홈으로 돌아가기"
-                >
-                  <BackArrow />
-                  홈
-                </button>
-                <div className={styles.logoBadge}>NH</div>
-                <span className={styles.logoDivider} />
+                {canGoHome ? (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.backButton}
+                      onClick={() => onNavigate('dashboard')}
+                      aria-label="홈으로 돌아가기"
+                    >
+                      <BackArrow />
+                      홈으로
+                    </button>
+
+                    <span className={styles.logoDivider} />
+                  </>
+                ) : null}
                 <span className={styles.pageLabel}>{pageLabel}</span>
               </div>
             ) : null}
 
             {typeof onLogout === 'function' ? (
-              <button type="button" className={styles.lockButton} onClick={onLogout}>
+              <button
+                type="button"
+                className={styles.lockButton}
+                onClick={onLogout}
+              >
                 로그아웃
               </button>
             ) : null}

@@ -27,7 +27,12 @@ export default function PublicStorefrontPage({ officeCode }) {
     }
 
     let isCancelled = false;
-    setState({ status: 'loading', config: null, productRows: [], officeName: '' });
+    setState({
+      status: 'loading',
+      config: null,
+      productRows: [],
+      officeName: '',
+    });
 
     Promise.all([
       fetchStorefrontConfig({ officeCode: normalizedOfficeCode }),
@@ -44,11 +49,11 @@ export default function PublicStorefrontPage({ officeCode }) {
           return;
         }
 
-        const officeName =
-          Array.isArray(productCatalog)
-            ? productCatalog.find((entry) => String(entry?.officeName || '').trim())
-                ?.officeName ?? ''
-            : '';
+        const officeName = Array.isArray(productCatalog)
+          ? (productCatalog.find((entry) =>
+              String(entry?.officeName || '').trim(),
+            )?.officeName ?? '')
+          : '';
 
         setState({
           status: 'ready',
@@ -62,7 +67,12 @@ export default function PublicStorefrontPage({ officeCode }) {
           return;
         }
 
-        setState({ status: 'error', config: null, productRows: [], officeName: '' });
+        setState({
+          status: 'error',
+          config: null,
+          productRows: [],
+          officeName: '',
+        });
       });
 
     return () => {
@@ -81,7 +91,9 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'error') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.errorBox}>페이지를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>
+        <div className={panelStyles.errorBox}>
+          페이지를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+        </div>
       </div>
     );
   }

@@ -58,6 +58,33 @@ function resolveHeaderContrast({ backgroundColor, titleColorHex, explicitBoth })
   return { backgroundColor: nextBackground, titleColorHex: nextTitleColor, warning: '' };
 }
 
+function extractFieldStylesFromBodySlots(bodySlots) {
+  const styles = [];
+
+  (Array.isArray(bodySlots) ? bodySlots : []).forEach((slot) => {
+    if (slot.kind === 'field' && slot.style) {
+      styles.push(slot.style);
+    } else if (slot.kind === 'inline-group' || slot.kind === 'stack-group') {
+      (Array.isArray(slot.items) ? slot.items : []).forEach((item) => {
+        if (item.style) {
+          styles.push(item.style);
+        }
+      });
+    }
+  });
+
+  return styles;
+}
+
+function mergeFieldStyles(previousFieldStyles, nextFieldStyles) {
+  const nextFields = new Set(
+    (Array.isArray(nextFieldStyles) ? nextFieldStyles : []).map((style) => style.field),
+  );
+  const carriedOverStyles = previousFieldStyles.filter((style) => !nextFields.has(style.field));
+
+  return [...carriedOverStyles, ...(Array.isArray(nextFieldStyles) ? nextFieldStyles : [])];
+}
+
 function composeCardBodySlots({
   visibleFields,
   fieldLabels,
@@ -194,6 +221,7 @@ function buildRequestedFieldOrderFromLayoutPlan(layoutPlan, visibleFields) {
 export function compileCardStyle({
   intent,
   previousCardStyle,
+  previousBodySlots,
   cardsPerRow,
   visibleFields,
   fieldLabels,
@@ -310,6 +338,9 @@ export function compileCardStyle({
     field,
   });
 
+  const previousFieldStyles = extractFieldStylesFromBodySlots(previousBodySlots);
+  const mergedFieldStyles = mergeFieldStyles(previousFieldStyles, intent?.field?.targetedFieldStyles);
+
   const bodySlots = composeCardBodySlots({
     visibleFields,
     fieldLabels,
@@ -319,7 +350,7 @@ export function compileCardStyle({
     requestedFieldOrder:
       intent?.info?.requestedFieldOrder ??
       buildRequestedFieldOrderFromLayoutPlan(layoutPlan, visibleFields),
-    targetedFieldStyles: intent?.field?.targetedFieldStyles,
+    targetedFieldStyles: mergedFieldStyles,
   });
 
   return {
