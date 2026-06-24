@@ -25,14 +25,16 @@ describe('requestPageStyleAiIntent', () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
 
-    const intent = await requestPageStyleAiIntent({
+    const result = await requestPageStyleAiIntent({
       pageAiDesign: { prompt: 'make it feel blue and trustworthy' },
       currentPageStyle: DEFAULT_PAGE_STYLE,
       officeCode: 'OFF-1',
     });
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(intent.palette.accentHex).toBe('#2563eb');
+    expect(result.intent.palette.accentHex).toBe('#2563eb');
+    expect(result.explanation).toBe('전체 색감을 요청하신 대로 변경했습니다.');
+    expect(result.suggestion).toBeNull();
   });
 
   it('throws a clear error when there is no active session', async () => {
@@ -47,7 +49,7 @@ describe('requestPageStyleAiIntent', () => {
     ).rejects.toThrow('로그인 정보가 만료되었습니다');
   });
 
-  it('posts to the same-origin endpoint with the bearer token and normalizes the response', async () => {
+  it('posts to the same-origin endpoint with the bearer token, the history, and normalizes the response', async () => {
     supabase.auth.getSession.mockResolvedValue({
       data: { session: { access_token: 'test-token' } },
     });
@@ -60,14 +62,17 @@ describe('requestPageStyleAiIntent', () => {
           categoryChips: null,
           search: { sizeToken: 'lg', borderStrengthToken: null },
         },
+        explanation: '검색창을 더 크게 바꿨습니다.',
+        suggestion: '헤더 색상도 같이 어울리게 바꿔보면 좋을 것 같아요.',
       }),
     });
     vi.stubGlobal('fetch', fetchSpy);
 
-    const intent = await requestPageStyleAiIntent({
+    const result = await requestPageStyleAiIntent({
       pageAiDesign: { prompt: 'make the search box larger', targetScope: 'search' },
       currentPageStyle: DEFAULT_PAGE_STYLE,
       officeCode: 'OFF-1',
+      history: [{ role: 'user', text: '검색창을 더 잘 보이게 해줘' }],
     });
 
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -83,8 +88,11 @@ describe('requestPageStyleAiIntent', () => {
     const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
     expect(sentBody.officeCode).toBe('OFF-1');
     expect(sentBody.pageAiDesign).toEqual({ prompt: 'make the search box larger', targetScope: 'search' });
-    expect(intent.search).toEqual({ sizeToken: 'lg' });
-    expect(intent.palette).toBeNull();
+    expect(sentBody.history).toEqual([{ role: 'user', text: '검색창을 더 잘 보이게 해줘' }]);
+    expect(result.intent.search).toEqual({ sizeToken: 'lg' });
+    expect(result.intent.palette).toBeNull();
+    expect(result.explanation).toBe('검색창을 더 크게 바꿨습니다.');
+    expect(result.suggestion).toBe('헤더 색상도 같이 어울리게 바꿔보면 좋을 것 같아요.');
   });
 
   it('throws with the server error message when the response is not ok', async () => {
