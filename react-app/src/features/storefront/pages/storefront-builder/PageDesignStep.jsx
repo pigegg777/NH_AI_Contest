@@ -10,6 +10,7 @@ export default function PageDesignStep({ step }) {
     >
       <PageDesignEditor
         pageAiDesign={step.pageAiDesign}
+        pageAiMessages={step.pageAiMessages}
         onChangePrompt={step.setPagePrompt}
         onChangeTargetScope={step.setPageTargetScope}
         onApply={step.applyPageAiDesign}
