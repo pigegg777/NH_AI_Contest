@@ -339,9 +339,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const cardDesignStep = {
     cardStyle: cardAi.cardStyle,
     cardAiDesign: cardAi.cardAiDesign,
+    cardAiMessages: cardAi.cardAiMessages,
     isAiApplying: cardAi.isApplyingCardAiDesign,
     aiErrorMessage: cardAi.cardAiErrorMessage,
-    cardAiWarningMessage: cardAi.cardAiWarningMessage,
     canUndoAiChanges: cardAi.canUndoCardAiDesign,
     setPrompt: cardAi.setPrompt,
     setTargetScope: cardAi.setTargetScope,

@@ -71,7 +71,11 @@ describe('useCardAiDesign', () => {
     const compiledStyle = { ...DEFAULT_CARD_STYLE, header: { ...DEFAULT_CARD_STYLE.header, fontWeight: 800 } };
     const compiledSlots = [{ id: 'field-0-spec', kind: 'field', field: 'spec', label: '규격' }];
 
-    requestCardStyleAiIntent.mockResolvedValue({ header: { fontWeight: 800 } });
+    requestCardStyleAiIntent.mockResolvedValue({
+      intent: { header: { fontWeight: 800 } },
+      explanation: '제목을 더 굵게 바꿨습니다.',
+      suggestion: '이미지도 같이 밝게 해보면 어울릴 것 같아요.',
+    });
     compileCardStyle.mockReturnValue({ cardStyle: compiledStyle, bodySlots: compiledSlots, warning: '대비가 낮습니다.' });
 
     const { result } = renderHook(() => useCardAiDesign());
@@ -95,6 +99,7 @@ describe('useCardAiDesign', () => {
       productCategoryName: 'Fertilizer Upload',
       currentCardStyle: DEFAULT_CARD_STYLE,
       officeCode: undefined,
+      history: [],
     });
     expect(compileCardStyle).toHaveBeenCalledWith({
       intent: { header: { fontWeight: 800 } },
@@ -108,6 +113,61 @@ describe('useCardAiDesign', () => {
     expect(result.current.bodySlots).toEqual(compiledSlots);
     expect(result.current.cardAiWarningMessage).toBe('대비가 낮습니다.');
     expect(result.current.canUndoCardAiDesign).toBe(true);
+    expect(result.current.cardAiDesign.prompt).toBe('');
+    expect(result.current.cardAiMessages).toEqual([
+      expect.objectContaining({ role: 'user', text: 'make the title bolder', scope: 'header' }),
+      expect.objectContaining({
+        role: 'assistant',
+        text: '제목을 더 굵게 바꿨습니다.',
+        suggestion: '이미지도 같이 밝게 해보면 어울릴 것 같아요.',
+        warningMessage: '대비가 낮습니다.',
+        scope: 'header',
+      }),
+    ]);
+  });
+
+  it('sends up to the last 6 prior messages as history and clears the input on send', async () => {
+    requestCardStyleAiIntent.mockResolvedValue({ intent: {}, explanation: '반영했습니다.', suggestion: null });
+    compileCardStyle.mockReturnValue({ cardStyle: DEFAULT_CARD_STYLE, bodySlots: [], warning: '' });
+
+    const { result } = renderHook(() => useCardAiDesign());
+
+    act(() => result.current.setPrompt('첫 번째 요청'));
+    await act(async () => {
+      await result.current.applyCardAiDesign({ visibleFields: ['product_name'] });
+    });
+
+    act(() => result.current.setPrompt('두 번째 요청'));
+    await act(async () => {
+      await result.current.applyCardAiDesign({ visibleFields: ['product_name'] });
+    });
+
+    expect(requestCardStyleAiIntent).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        history: [
+          expect.objectContaining({ role: 'user', text: '첫 번째 요청' }),
+          expect.objectContaining({ role: 'assistant', text: '반영했습니다.' }),
+        ],
+      }),
+    );
+    expect(result.current.cardAiDesign.prompt).toBe('');
+  });
+
+  it('hydrateCardStyle and discardCardAiDesignSession both clear the message thread', async () => {
+    requestCardStyleAiIntent.mockResolvedValue({ intent: {}, explanation: '반영했습니다.', suggestion: null });
+    compileCardStyle.mockReturnValue({ cardStyle: DEFAULT_CARD_STYLE, bodySlots: [], warning: '' });
+
+    const { result } = renderHook(() => useCardAiDesign());
+
+    act(() => result.current.setPrompt('요청'));
+    await act(async () => {
+      await result.current.applyCardAiDesign({ visibleFields: ['product_name'] });
+    });
+    expect(result.current.cardAiMessages).toHaveLength(2);
+
+    act(() => result.current.discardCardAiDesignSession());
+    expect(result.current.cardAiMessages).toEqual([]);
   });
 
   it('keeps the last valid cardStyle and surfaces an error when interpretation fails', async () => {
@@ -127,7 +187,7 @@ describe('useCardAiDesign', () => {
   it('undoLastCardAiDesign restores the snapshot taken before the last apply', async () => {
     const compiledStyle = { ...DEFAULT_CARD_STYLE, cardsPerRow: 1 };
 
-    requestCardStyleAiIntent.mockResolvedValue({});
+    requestCardStyleAiIntent.mockResolvedValue({ intent: {}, explanation: '한 칸씩 보여드렸습니다.', suggestion: null });
     compileCardStyle.mockReturnValue({ cardStyle: compiledStyle, bodySlots: [], warning: '' });
 
     const { result } = renderHook(() => useCardAiDesign());
@@ -148,7 +208,7 @@ describe('useCardAiDesign', () => {
   it('discardCardAiDesignSession clears the prompt/scope but keeps the compiled cardStyle', async () => {
     const compiledStyle = { ...DEFAULT_CARD_STYLE, cardsPerRow: 1 };
 
-    requestCardStyleAiIntent.mockResolvedValue({});
+    requestCardStyleAiIntent.mockResolvedValue({ intent: {}, explanation: '한 칸씩 보여드렸습니다.', suggestion: null });
     compileCardStyle.mockReturnValue({ cardStyle: compiledStyle, bodySlots: [], warning: '' });
 
     const { result } = renderHook(() => useCardAiDesign());
