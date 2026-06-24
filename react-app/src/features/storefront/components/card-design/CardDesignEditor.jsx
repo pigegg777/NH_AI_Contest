@@ -49,7 +49,6 @@ export default function CardDesignEditor({
           <CardStylePromptField
             value={cardAiDesign.prompt}
             onChange={onChangePrompt}
-            describedBy="card-style-prompt-help"
             testId="card-design-prompt"
           />
         }

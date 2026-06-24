@@ -111,7 +111,6 @@ describe('useCardAiDesign', () => {
     });
     expect(result.current.cardStyle).toEqual(compiledStyle);
     expect(result.current.bodySlots).toEqual(compiledSlots);
-    expect(result.current.cardAiWarningMessage).toBe('대비가 낮습니다.');
     expect(result.current.canUndoCardAiDesign).toBe(true);
     expect(result.current.cardAiDesign.prompt).toBe('');
     expect(result.current.cardAiMessages).toEqual([

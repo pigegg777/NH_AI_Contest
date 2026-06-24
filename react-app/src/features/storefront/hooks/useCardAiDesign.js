@@ -158,7 +158,6 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     cardAiMessages,
     isApplyingCardAiDesign,
     cardAiErrorMessage,
-    cardAiWarningMessage,
     canUndoCardAiDesign: Boolean(lastCardAiSnapshot),
     hydrateCardStyle,
     setCardsPerRow,

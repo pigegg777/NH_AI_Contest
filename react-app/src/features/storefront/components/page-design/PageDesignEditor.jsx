@@ -31,7 +31,6 @@ export default function PageDesignEditor({
           <PageStylePromptField
             value={pageAiDesign.prompt}
             onChange={onChangePrompt}
-            describedBy="page-style-prompt-help"
           />
         }
         onSend={onApply}
