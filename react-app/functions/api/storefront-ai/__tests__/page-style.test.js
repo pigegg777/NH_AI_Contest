@@ -106,4 +106,54 @@ describe('POST /api/storefront-ai/page-style', () => {
     expect(response.status).toBe(200);
     expect(body.intent.palette.accentHex).toBe('#2563eb');
   });
+
+  it('returns 200 with a normalized intent, explanation, and suggestion on success', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          output_parsed: {
+            palette: null,
+            header: { titleColorHex: null, letterSpacing: null, fontWeight: 800 },
+            categoryChips: null,
+            search: null,
+            explanation: '제목을 더 굵게 바꿨습니다.',
+            suggestion: '검색창 테두리도 같이 강하게 해보면 어울릴 것 같아요.',
+          },
+        }),
+      }),
+    );
+    const request = buildRequest({
+      officeCode: 'OFF-1',
+      pageAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
+      history: [{ role: 'user', text: '제목을 굵게 해줘' }],
+    });
+
+    const response = await onRequestPost({ request, env: TEST_ENV });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.intent.header).toEqual({ fontWeight: 800 });
+    expect(body.explanation).toBe('제목을 더 굵게 바꿨습니다.');
+    expect(body.suggestion).toBe('검색창 테두리도 같이 강하게 해보면 어울릴 것 같아요.');
+  });
+
+  it('returns 422 when history has more than 6 turns', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    const history = Array.from({ length: 7 }, (_, index) => ({
+      role: index % 2 === 0 ? 'user' : 'assistant',
+      text: `turn ${index}`,
+    }));
+    const request = buildRequest({
+      officeCode: 'OFF-1',
+      pageAiDesign: { prompt: 'make the title bolder' },
+      history,
+    });
+
+    const response = await onRequestPost({ request, env: TEST_ENV });
+
+    expect(response.status).toBe(422);
+  });
 });
