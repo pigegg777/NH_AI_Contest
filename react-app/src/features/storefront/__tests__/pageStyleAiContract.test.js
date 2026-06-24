@@ -2,11 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
 import {
+  buildHeuristicPageAiExplanation,
   buildHeuristicPageAiIntent,
   buildPageStyleOpenAiRequestBody,
   normalizeCategoryChipsIntent,
   normalizeHeaderIntent,
   normalizePaletteIntent,
+  normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
   normalizeSearchIntent,
   PAGE_STYLE_AI_SCHEMA,
@@ -220,5 +222,79 @@ describe('buildHeuristicPageAiIntent', () => {
       sizeToken: 'lg',
       borderStrengthToken: 'strong',
     });
+  });
+});
+
+describe('PAGE_STYLE_AI_SCHEMA explanation/suggestion fields', () => {
+  it('requires explanation as a plain string and suggestion as a nullable string', () => {
+    expect(PAGE_STYLE_AI_SCHEMA.properties.explanation).toEqual({ type: 'string' });
+    expect(PAGE_STYLE_AI_SCHEMA.properties.suggestion.type).toContain('null');
+    expect(PAGE_STYLE_AI_SCHEMA.required).toContain('explanation');
+    expect(PAGE_STYLE_AI_SCHEMA.required).toContain('suggestion');
+  });
+});
+
+describe('buildHeuristicPageAiExplanation', () => {
+  it('lists the Korean labels of every non-null intent section', () => {
+    const explanation = buildHeuristicPageAiExplanation({
+      palette: { accentHex: '#2563eb' },
+      header: null,
+      categoryChips: { textHex: '#111827' },
+      search: null,
+    });
+
+    expect(explanation).toBe('전체 색감, 카테고리 칩을 요청하신 대로 변경했습니다.');
+  });
+
+  it('returns a fallback sentence when nothing changed', () => {
+    expect(
+      buildHeuristicPageAiExplanation({ palette: null, header: null, categoryChips: null, search: null }),
+    ).toBe('요청하신 내용에서 적용할 수 있는 변경 사항을 찾지 못했습니다.');
+  });
+});
+
+describe('normalizePageStyleAiExplanation', () => {
+  it('trims explanation/suggestion and nulls out a blank suggestion', () => {
+    expect(
+      normalizePageStyleAiExplanation({ explanation: '  배경을 밝게 바꿨습니다.  ', suggestion: '  ' }),
+    ).toEqual({ explanation: '배경을 밝게 바꿨습니다.', suggestion: null });
+  });
+
+  it('falls back to a default explanation when the payload omits it', () => {
+    expect(normalizePageStyleAiExplanation({})).toEqual({
+      explanation: '요청하신 내용을 페이지 스타일에 반영했습니다.',
+      suggestion: null,
+    });
+  });
+});
+
+describe('buildPageStyleOpenAiRequestBody history threading', () => {
+  it('splices history turns between the system message and the final user message', () => {
+    const requestBody = buildPageStyleOpenAiRequestBody({
+      pageAiDesign: { prompt: '더 크게 해줘', targetScope: '' },
+      openAiModel: 'gpt-4.1-mini',
+      currentPageStyle: undefined,
+      history: [
+        { role: 'user', text: '파란색으로 해줘' },
+        { role: 'assistant', text: '배경을 파란색으로 바꿨습니다.' },
+      ],
+    });
+
+    expect(requestBody.input[0].role).toBe('system');
+    expect(requestBody.input[1]).toEqual({ role: 'user', content: '파란색으로 해줘' });
+    expect(requestBody.input[2]).toEqual({ role: 'assistant', content: '배경을 파란색으로 바꿨습니다.' });
+    expect(requestBody.input[3].role).toBe('user');
+    expect(requestBody.input).toHaveLength(4);
+  });
+
+  it('mentions explanation and suggestion in the system prompt', () => {
+    const requestBody = buildPageStyleOpenAiRequestBody({
+      pageAiDesign: { prompt: 'x', targetScope: '' },
+      openAiModel: 'gpt-4.1-mini',
+      currentPageStyle: undefined,
+    });
+
+    expect(requestBody.input[0].content).toContain('explanation');
+    expect(requestBody.input[0].content).toContain('suggestion');
   });
 });
