@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   RequestValidationError,
+  assertHistoryWithinLimits,
   assertOfficeCodePresent,
   assertPostJsonRequest,
   assertPromptWithinLimit,
@@ -101,5 +102,56 @@ describe('pickAllowedKeys', () => {
 
   it('fills missing keys with undefined instead of throwing', () => {
     expect(pickAllowedKeys({ a: 1 }, ['a', 'b'])).toEqual({ a: 1, b: undefined });
+  });
+});
+
+describe('assertHistoryWithinLimits', () => {
+  it('passes when history is missing entirely', () => {
+    expect(() => assertHistoryWithinLimits(undefined)).not.toThrow();
+    expect(() => assertHistoryWithinLimits(null)).not.toThrow();
+  });
+
+  it('passes for a small valid history array', () => {
+    expect(() =>
+      assertHistoryWithinLimits([
+        { role: 'user', text: '제목을 굵게 해줘' },
+        { role: 'assistant', text: '제목을 더 굵게 바꿨습니다.' },
+      ]),
+    ).not.toThrow();
+  });
+
+  it('rejects a non-array history with 422', () => {
+    expect(() => assertHistoryWithinLimits('not an array')).toThrow(
+      expect.objectContaining({ status: 422 }),
+    );
+  });
+
+  it('rejects more than 6 turns with 422', () => {
+    const history = Array.from({ length: 7 }, (_, index) => ({
+      role: index % 2 === 0 ? 'user' : 'assistant',
+      text: `turn ${index}`,
+    }));
+
+    expect(() => assertHistoryWithinLimits(history)).toThrow(
+      expect.objectContaining({ status: 422 }),
+    );
+  });
+
+  it('rejects a turn with an invalid role with 422', () => {
+    expect(() => assertHistoryWithinLimits([{ role: 'system', text: 'hi' }])).toThrow(
+      expect.objectContaining({ status: 422 }),
+    );
+  });
+
+  it('rejects a turn whose text is over 500 characters with 422', () => {
+    expect(() =>
+      assertHistoryWithinLimits([{ role: 'user', text: 'x'.repeat(501) }]),
+    ).toThrow(expect.objectContaining({ status: 422 }));
+  });
+
+  it('rejects a turn whose text is not a string with 422', () => {
+    expect(() => assertHistoryWithinLimits([{ role: 'user', text: 123 }])).toThrow(
+      RequestValidationError,
+    );
   });
 });
