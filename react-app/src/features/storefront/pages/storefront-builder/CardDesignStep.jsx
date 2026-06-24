@@ -17,6 +17,7 @@ export default function CardDesignStep({ step }) {
       <CardDesignEditor
         cardStyle={step.cardStyle}
         cardAiDesign={step.cardAiDesign}
+        cardAiMessages={step.cardAiMessages}
         onChangePrompt={step.setPrompt}
         onChangeTargetScope={step.setTargetScope}
         onChangeCardsPerRow={step.setCardsPerRow}
@@ -25,7 +26,6 @@ export default function CardDesignStep({ step }) {
         canUndo={step.canUndoAiChanges}
         isApplying={step.isAiApplying}
         errorMessage={step.aiErrorMessage}
-        warningMessage={step.cardAiWarningMessage}
       />
 
       <StorefrontQrExportCard

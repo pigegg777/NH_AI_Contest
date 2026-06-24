@@ -2,10 +2,15 @@ import supabase from '../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../common/utils/text';
 import { normalizePageAiDesignInput } from '../model/pageAiDesignModel';
 import { normalizePageStyle } from '../model/pageStyleModel';
-import { buildHeuristicPageAiIntent, normalizePageStyleAiIntent } from './pageStyleAiContract';
+import {
+  buildHeuristicPageAiExplanation,
+  buildHeuristicPageAiIntent,
+  normalizePageStyleAiIntent,
+} from './pageStyleAiContract';
 
 const PAGE_STYLE_AI_ENDPOINT = '/api/storefront-ai/page-style';
 const SESSION_EXPIRED_ERROR_MESSAGE = '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.';
+const DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 페이지 스타일에 반영했습니다.';
 
 function isLocalHeuristicModeEnabled() {
   return toTrimmedString(import.meta.env.VITE_STOREFRONT_AI_LOCAL_HEURISTIC) === 'true';
@@ -20,12 +25,15 @@ async function readErrorMessage(response) {
   }
 }
 
-export async function requestPageStyleAiIntent({ pageAiDesign, currentPageStyle, officeCode } = {}) {
+export async function requestPageStyleAiIntent({ pageAiDesign, currentPageStyle, officeCode, history } = {}) {
   const normalizedInput = normalizePageAiDesignInput(pageAiDesign);
   const resolvedCurrentPageStyle = normalizePageStyle(currentPageStyle);
+  const normalizedHistory = Array.isArray(history) ? history : [];
 
   if (isLocalHeuristicModeEnabled()) {
-    return buildHeuristicPageAiIntent(normalizedInput, resolvedCurrentPageStyle);
+    const intent = buildHeuristicPageAiIntent(normalizedInput, resolvedCurrentPageStyle);
+
+    return { intent, explanation: buildHeuristicPageAiExplanation(intent), suggestion: null };
   }
 
   const {
@@ -47,6 +55,7 @@ export async function requestPageStyleAiIntent({ pageAiDesign, currentPageStyle,
       officeCode: toTrimmedString(officeCode),
       pageAiDesign: normalizedInput,
       currentPageStyle: resolvedCurrentPageStyle,
+      history: normalizedHistory,
     }),
   });
 
@@ -56,9 +65,9 @@ export async function requestPageStyleAiIntent({ pageAiDesign, currentPageStyle,
 
   const body = await response.json();
 
-  return normalizePageStyleAiIntent(
-    body?.intent,
-    resolvedCurrentPageStyle.palette.accentHex,
-    normalizedInput.targetScope,
-  );
+  return {
+    intent: normalizePageStyleAiIntent(body?.intent, resolvedCurrentPageStyle.palette.accentHex, normalizedInput.targetScope),
+    explanation: toTrimmedString(body?.explanation) || DEFAULT_EXPLANATION_MESSAGE,
+    suggestion: toTrimmedString(body?.suggestion) || null,
+  };
 }

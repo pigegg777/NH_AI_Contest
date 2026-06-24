@@ -1,3 +1,4 @@
+import { toTrimmedString } from '../../../common/utils/text';
 import {
   buildPageAiTargetScopeInstruction,
   normalizePageAiDesignInput,
@@ -102,8 +103,10 @@ export const PAGE_STYLE_AI_SCHEMA = {
     header: NULLABLE_HEADER_SCHEMA,
     categoryChips: NULLABLE_CATEGORY_CHIPS_SCHEMA,
     search: NULLABLE_SEARCH_SCHEMA,
+    explanation: { type: 'string' },
+    suggestion: { type: ['string', 'null'] },
   },
-  required: ['palette', 'header', 'categoryChips', 'search'],
+  required: ['palette', 'header', 'categoryChips', 'search', 'explanation', 'suggestion'],
 };
 
 function includesAny(text, tokens) {
@@ -494,6 +497,7 @@ export function buildPageStyleOpenAiRequestBody({
   pageAiDesign,
   openAiModel,
   currentPageStyle,
+  history = [],
 }) {
   const scopeInstruction = buildPageAiTargetScopeInstruction(
     pageAiDesign.targetScope,
@@ -501,6 +505,12 @@ export function buildPageStyleOpenAiRequestBody({
   const scopedPrompt = scopeInstruction
     ? `${scopeInstruction}\n사용자 요청:\n${pageAiDesign.prompt}`
     : pageAiDesign.prompt;
+  const historyMessages = (Array.isArray(history) ? history : [])
+    .map((turn) => ({
+      role: turn?.role === 'assistant' ? 'assistant' : 'user',
+      content: toTrimmedString(turn?.text),
+    }))
+    .filter((turn) => turn.content);
 
   return {
     model: openAiModel,
@@ -517,8 +527,11 @@ export function buildPageStyleOpenAiRequestBody({
           'Search may only carry sizeToken and borderStrengthToken. Never invent background, radius, or icon properties.',
           'Category chips may only carry background/text/border/active-state colors. Never invent shape or placement properties.',
           'Header may only carry title color, letter spacing, and font weight. Never rewrite the title text itself.',
+          'Always set "explanation" to 1-2 short Korean sentences describing what you changed, written for a non-technical store owner.',
+          'If a clear complementary tweak exists for another scope of this same page (palette/header/categoryChips/search), set "suggestion" to one short Korean sentence describing it. Otherwise set "suggestion" to null.',
         ].join('\n'),
       },
+      ...historyMessages,
       {
         role: 'user',
         content: JSON.stringify(
@@ -544,5 +557,31 @@ export function buildPageStyleOpenAiRequestBody({
       },
     },
     max_output_tokens: 800,
+  };
+}
+
+const PAGE_INTENT_EXPLANATION_SECTION_LABELS = {
+  palette: '전체 색감',
+  header: '헤더 텍스트',
+  categoryChips: '카테고리 칩',
+  search: '검색창',
+};
+
+export function buildHeuristicPageAiExplanation(intent) {
+  const changedLabels = Object.entries(PAGE_INTENT_EXPLANATION_SECTION_LABELS)
+    .filter(([key]) => Boolean(intent?.[key]))
+    .map(([, label]) => label);
+
+  if (changedLabels.length === 0) {
+    return '요청하신 내용에서 적용할 수 있는 변경 사항을 찾지 못했습니다.';
+  }
+
+  return `${changedLabels.join(', ')}을 요청하신 대로 변경했습니다.`;
+}
+
+export function normalizePageStyleAiExplanation(payload) {
+  return {
+    explanation: toTrimmedString(payload?.explanation) || '요청하신 내용을 페이지 스타일에 반영했습니다.',
+    suggestion: toTrimmedString(payload?.suggestion) || null,
   };
 }

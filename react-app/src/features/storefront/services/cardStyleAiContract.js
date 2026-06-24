@@ -158,8 +158,21 @@ export const CARD_STYLE_AI_SCHEMA = {
     image: NULLABLE_IMAGE_SCHEMA,
     info: NULLABLE_INFO_SCHEMA,
     field: NULLABLE_FIELD_SCHEMA,
+    explanation: { type: 'string' },
+    suggestion: { type: ['string', 'null'] },
   },
-  required: ['structuralPresetRequest', 'titleModeRequest', 'layout', 'shell', 'header', 'image', 'info', 'field'],
+  required: [
+    'structuralPresetRequest',
+    'titleModeRequest',
+    'layout',
+    'shell',
+    'header',
+    'image',
+    'info',
+    'field',
+    'explanation',
+    'suggestion',
+  ],
 };
 
 function includesAny(text, tokens) {
@@ -495,10 +508,17 @@ export function buildCardStyleOpenAiRequestBody({
   productCategoryName,
   openAiModel,
   currentCardStyle,
+  history = [],
 }) {
   const activeSkillIds = selectCardStyleSkillPackIds({ productCategoryName, mode: 'preview' });
   const scopeInstruction = buildCardAiTargetScopeInstruction(cardAiDesign.targetScope);
   const scopedPrompt = scopeInstruction ? `${scopeInstruction}\n사용자 요청:\n${cardAiDesign.prompt}` : cardAiDesign.prompt;
+  const historyMessages = (Array.isArray(history) ? history : [])
+    .map((turn) => ({
+      role: turn?.role === 'assistant' ? 'assistant' : 'user',
+      content: toTrimmedString(turn?.text),
+    }))
+    .filter((turn) => turn.content);
 
   return {
     model: openAiModel,
@@ -513,8 +533,11 @@ export function buildCardStyleOpenAiRequestBody({
           'For every nested property you do not want to change, return null.',
           'If a target scope is given, only that scope (header/image/info/field) may be non-null. All other area objects must be null.',
           'shell, structuralPresetRequest, and titleModeRequest are general and may be set regardless of the target scope.',
+          'Always set "explanation" to 1-2 short Korean sentences describing what you changed, written for a non-technical store owner.',
+          'If a clear complementary tweak exists for another section of this same card (header/image/info/field), set "suggestion" to one short Korean sentence describing it. Otherwise set "suggestion" to null. Never suggest changes outside this card.',
         ].join('\n\n'),
       },
+      ...historyMessages,
       {
         role: 'user',
         content: JSON.stringify(
@@ -684,4 +707,32 @@ export function normalizeOpenAiCardIntent(payload, targetScope) {
     },
     targetScope,
   );
+}
+
+const CARD_INTENT_EXPLANATION_SECTION_LABELS = {
+  shell: '카드 테두리/배경',
+  header: '제목 영역',
+  image: '이미지',
+  info: '정보 영역',
+  field: '항목 스타일',
+  layout: '레이아웃',
+};
+
+export function buildHeuristicCardAiExplanation(intent) {
+  const changedLabels = Object.entries(CARD_INTENT_EXPLANATION_SECTION_LABELS)
+    .filter(([key]) => Boolean(intent?.[key]))
+    .map(([, label]) => label);
+
+  if (changedLabels.length === 0) {
+    return '요청하신 내용에서 적용할 수 있는 변경 사항을 찾지 못했습니다.';
+  }
+
+  return `${changedLabels.join(', ')}을 요청하신 대로 변경했습니다.`;
+}
+
+export function normalizeOpenAiCardExplanation(payload) {
+  return {
+    explanation: toTrimmedString(payload?.explanation) || '요청하신 내용을 카드 디자인에 반영했습니다.',
+    suggestion: toTrimmedString(payload?.suggestion) || null,
+  };
 }

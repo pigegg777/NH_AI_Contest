@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  buildCardStyleOpenAiRequestBody,
+  buildHeuristicCardAiExplanation,
   buildHeuristicCardAiIntent,
   CARD_STYLE_AI_SCHEMA,
   detectAccentHexFromPrompt,
@@ -10,6 +12,7 @@ import {
   detectInfoIntentCandidate,
   detectLayoutIntentCandidate,
   detectShellIntentCandidate,
+  normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
 } from '../services/cardStyleAiContract';
 
@@ -352,5 +355,111 @@ describe('normalizeOpenAiCardIntent', () => {
 
     expect(intent.header).toEqual({ titleColorHex: '#111827' });
     expect(intent.field).toBeNull();
+  });
+});
+
+describe('CARD_STYLE_AI_SCHEMA explanation/suggestion fields', () => {
+  it('requires explanation as a plain string and suggestion as a nullable string', () => {
+    expect(CARD_STYLE_AI_SCHEMA.properties.explanation).toEqual({ type: 'string' });
+    expect(CARD_STYLE_AI_SCHEMA.properties.suggestion.type).toContain('null');
+    expect(CARD_STYLE_AI_SCHEMA.required).toContain('explanation');
+    expect(CARD_STYLE_AI_SCHEMA.required).toContain('suggestion');
+  });
+});
+
+describe('buildHeuristicCardAiExplanation', () => {
+  it('lists the Korean labels of every non-null intent section', () => {
+    const explanation = buildHeuristicCardAiExplanation({
+      header: { fontWeight: 800 },
+      field: { priceColorRole: 'brand' },
+      image: null,
+      info: null,
+      shell: null,
+      layout: null,
+    });
+
+    expect(explanation).toBe('제목 영역, 항목 스타일을 요청하신 대로 변경했습니다.');
+  });
+
+  it('returns a fallback sentence when nothing changed', () => {
+    expect(
+      buildHeuristicCardAiExplanation({
+        header: null,
+        field: null,
+        image: null,
+        info: null,
+        shell: null,
+        layout: null,
+      }),
+    ).toBe('요청하신 내용에서 적용할 수 있는 변경 사항을 찾지 못했습니다.');
+  });
+});
+
+describe('normalizeOpenAiCardExplanation', () => {
+  it('trims explanation/suggestion and nulls out a blank suggestion', () => {
+    expect(
+      normalizeOpenAiCardExplanation({ explanation: '  제목을 굵게 바꿨습니다.  ', suggestion: '  ' }),
+    ).toEqual({ explanation: '제목을 굵게 바꿨습니다.', suggestion: null });
+  });
+
+  it('falls back to a default explanation when the payload omits it', () => {
+    expect(normalizeOpenAiCardExplanation({})).toEqual({
+      explanation: '요청하신 내용을 카드 디자인에 반영했습니다.',
+      suggestion: null,
+    });
+  });
+
+  it('keeps a real suggestion string', () => {
+    expect(
+      normalizeOpenAiCardExplanation({ explanation: 'ok', suggestion: '이미지도 함께 밝게 해보세요.' }),
+    ).toEqual({ explanation: 'ok', suggestion: '이미지도 함께 밝게 해보세요.' });
+  });
+});
+
+describe('buildCardStyleOpenAiRequestBody history threading', () => {
+  it('splices history turns between the system message and the final user message', () => {
+    const requestBody = buildCardStyleOpenAiRequestBody({
+      cardAiDesign: { prompt: '더 크게 해줘', targetScope: '' },
+      visibleFields: ['product_name'],
+      productCategoryName: '',
+      openAiModel: 'gpt-4.1-mini',
+      currentCardStyle: undefined,
+      history: [
+        { role: 'user', text: '제목을 굵게 해줘' },
+        { role: 'assistant', text: '제목을 더 굵게 바꿨습니다.' },
+      ],
+    });
+
+    expect(requestBody.input[0].role).toBe('system');
+    expect(requestBody.input[1]).toEqual({ role: 'user', content: '제목을 굵게 해줘' });
+    expect(requestBody.input[2]).toEqual({ role: 'assistant', content: '제목을 더 굵게 바꿨습니다.' });
+    expect(requestBody.input[3].role).toBe('user');
+    expect(requestBody.input).toHaveLength(4);
+  });
+
+  it('drops blank history turns and defaults to no history when omitted', () => {
+    const requestBody = buildCardStyleOpenAiRequestBody({
+      cardAiDesign: { prompt: '더 크게 해줘', targetScope: '' },
+      visibleFields: ['product_name'],
+      productCategoryName: '',
+      openAiModel: 'gpt-4.1-mini',
+      currentCardStyle: undefined,
+      history: [{ role: 'user', text: '   ' }],
+    });
+
+    expect(requestBody.input).toHaveLength(2);
+  });
+
+  it('mentions explanation and suggestion in the system prompt', () => {
+    const requestBody = buildCardStyleOpenAiRequestBody({
+      cardAiDesign: { prompt: 'x', targetScope: '' },
+      visibleFields: [],
+      productCategoryName: '',
+      openAiModel: 'gpt-4.1-mini',
+      currentCardStyle: undefined,
+    });
+
+    expect(requestBody.input[0].content).toContain('explanation');
+    expect(requestBody.input[0].content).toContain('suggestion');
   });
 });

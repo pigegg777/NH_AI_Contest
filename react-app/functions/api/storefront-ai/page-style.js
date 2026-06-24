@@ -3,11 +3,13 @@ import { normalizePageStyle } from '../../../src/features/storefront/model/pageS
 import { requestOpenAiJson } from '../../../src/features/storefront/services/openAiJsonRequest.js';
 import {
   buildPageStyleOpenAiRequestBody,
+  normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
 } from '../../../src/features/storefront/services/pageStyleAiContract.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,
+  assertHistoryWithinLimits,
   assertOfficeCodePresent,
   assertPostJsonRequest,
   assertPromptWithinLimit,
@@ -18,7 +20,7 @@ import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.j
 import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
 
 const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
-const REQUEST_BODY_ALLOWED_KEYS = ['officeCode', 'pageAiDesign', 'currentPageStyle'];
+const REQUEST_BODY_ALLOWED_KEYS = ['officeCode', 'pageAiDesign', 'currentPageStyle', 'history'];
 
 export async function onRequestPost({ request, env }) {
   try {
@@ -33,6 +35,8 @@ export async function onRequestPost({ request, env }) {
     assertPromptWithinLimit(pageAiDesign.prompt);
 
     const currentPageStyle = normalizePageStyle(body.currentPageStyle);
+    const history = Array.isArray(body.history) ? body.history : [];
+    assertHistoryWithinLimits(history);
 
     const { supabase, user } = await requireAuthenticatedSupabaseUser(request, env);
     await assertOfficeOwnership({ supabase, authUserId: user.id, officeCode });
@@ -41,6 +45,7 @@ export async function onRequestPost({ request, env }) {
       pageAiDesign,
       openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
       currentPageStyle,
+      history,
     });
 
     let payload;
@@ -52,8 +57,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     const intent = normalizePageStyleAiIntent(payload, currentPageStyle.palette.accentHex, pageAiDesign.targetScope);
+    const { explanation, suggestion } = normalizePageStyleAiExplanation(payload);
 
-    return jsonResponse({ intent });
+    return jsonResponse({ intent, explanation, suggestion });
   } catch (error) {
     if (error instanceof RequestValidationError) {
       return errorResponse(error.message, error.status);

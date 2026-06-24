@@ -1,0 +1,47 @@
+.scopeList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scopeItem {
+  margin: 0;
+}
+
+.scopeChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: var(--corp-radius-pill);
+  background: #ffffff;
+  color: var(--corp-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.scopeChip:hover {
+  border-color: rgba(37, 99, 235, 0.32);
+  background: rgba(239, 246, 255, 0.72);
+}
+
+.scopeChip:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+  border-color: #2563eb;
+}
+
+.scopeChipActive {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}

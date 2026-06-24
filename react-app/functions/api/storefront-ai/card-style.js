@@ -3,11 +3,13 @@ import { normalizeCardStyle } from '../../../src/features/storefront/model/cardS
 import { requestOpenAiJson } from '../../../src/features/storefront/services/openAiJsonRequest.js';
 import {
   buildCardStyleOpenAiRequestBody,
+  normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
 } from '../../../src/features/storefront/services/cardStyleAiContract.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,
+  assertHistoryWithinLimits,
   assertOfficeCodePresent,
   assertPostJsonRequest,
   assertPromptWithinLimit,
@@ -24,6 +26,7 @@ const REQUEST_BODY_ALLOWED_KEYS = [
   'visibleFields',
   'productCategoryName',
   'currentCardStyle',
+  'history',
 ];
 
 export async function onRequestPost({ request, env }) {
@@ -41,6 +44,8 @@ export async function onRequestPost({ request, env }) {
     const visibleFields = Array.isArray(body.visibleFields) ? body.visibleFields : [];
     const productCategoryName = typeof body.productCategoryName === 'string' ? body.productCategoryName : '';
     const currentCardStyle = normalizeCardStyle(body.currentCardStyle);
+    const history = Array.isArray(body.history) ? body.history : [];
+    assertHistoryWithinLimits(history);
 
     const { supabase, user } = await requireAuthenticatedSupabaseUser(request, env);
     await assertOfficeOwnership({ supabase, authUserId: user.id, officeCode });
@@ -51,6 +56,7 @@ export async function onRequestPost({ request, env }) {
       productCategoryName,
       openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
       currentCardStyle,
+      history,
     });
 
     let payload;
@@ -62,8 +68,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     const intent = normalizeOpenAiCardIntent(payload, cardAiDesign.targetScope);
+    const { explanation, suggestion } = normalizeOpenAiCardExplanation(payload);
 
-    return jsonResponse({ intent });
+    return jsonResponse({ intent, explanation, suggestion });
   } catch (error) {
     if (error instanceof RequestValidationError) {
       return errorResponse(error.message, error.status);
