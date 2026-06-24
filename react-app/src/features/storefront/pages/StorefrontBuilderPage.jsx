@@ -26,7 +26,11 @@ const STEP_COMPONENTS = [
   },
 ];
 
-export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) {
+export default function StorefrontBuilderPage({
+  officeCode,
+  nhName,
+  onGoHome,
+}) {
   const builder = useStorefrontBuilder({ officeCode, nhName });
 
   if (builder.status === 'loading') {
@@ -49,6 +53,19 @@ export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) 
     );
   }
 
+  const isOnDataSelectionStep =
+    STEP_COMPONENTS[builder.currentStep]?.Component === DataSelectionStep;
+  const isDataSelectionUnconfirmed =
+    isOnDataSelectionStep && !builder.dataSelectionStep.isDataSelectionConfirmed;
+
+  function handleNextClick() {
+    if (isDataSelectionUnconfirmed) {
+      builder.dataSelectionStep.confirmDataSelection();
+    } else {
+      builder.goNext();
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.workspace}>
@@ -57,7 +74,6 @@ export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) 
             <section className={styles.heroPanel}>
               <div className={styles.panelHeader}>
                 <div>
-                  <p className={styles.eyebrow}>AI 스토어프론트 도우미</p>
                   <h1 className={styles.heroTitle}>AI로 스토어프론트 만들기</h1>
                 </div>
               </div>
@@ -99,21 +115,21 @@ export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) 
                     이전
                   </button>
                 ) : null}
-                {builder.currentStep === 0 || builder.currentStep === 1 ? (
+                {builder.currentStep !== 3 ? (
                   <button
                     type="button"
                     className={styles.primaryButton}
                     data-testid="builder-go-next"
-                    onClick={builder.goNext}
+                    onClick={handleNextClick}
                     disabled={
                       builder.currentStep === 0 &&
                       !builder.selectedProductCategoryName
                     }
                   >
-                    다음
+                    {isDataSelectionUnconfirmed ? '확인하고 다음 단계로' : '다음'}
                   </button>
                 ) : null}
-                {typeof onGoHome === 'function' ? (
+                {/* {typeof onGoHome === 'function' ? (
                   <button
                     type="button"
                     className={styles.secondaryButton}
@@ -121,7 +137,7 @@ export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) 
                   >
                     대시보드로 돌아가기
                   </button>
-                ) : null}
+                ) : null} */}
               </div>
 
               {builder.status === 'save-error' ? (
@@ -138,9 +154,7 @@ export default function StorefrontBuilderPage({ officeCode, nhName, onGoHome }) 
           <div className={styles.previewHeader}>
             <div>
               <p className={styles.eyebrow}>실시간 미리보기</p>
-              <h3 className={styles.previewTitle}>
-                모바일 스토어프론트 미리보기
-              </h3>
+              <h3 className={styles.previewTitle}>페이지 미리보기</h3>
             </div>
           </div>
 

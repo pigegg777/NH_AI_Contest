@@ -1,7 +1,10 @@
 import panelStyles from '../../shared/panel.module.css';
 import formStyles from '../../shared/formControls.module.css';
 import { WorkbookReviewTableSection } from '../WorkbookReviewTableSection';
-import { FileWarningsPanel, WarningRowsPanel } from '../review-table-ui/WorkbookReviewWarnings';
+import {
+  FileWarningsPanel,
+  WarningRowsPanel,
+} from '../review-table-ui/WorkbookReviewWarnings';
 import { WorkbookReviewDropzone } from './WorkbookReviewDropzone';
 import { WorkbookReviewTableNameCard } from './WorkbookReviewTableNameCard';
 import styles from './WorkbookReviewWorkspace.module.css';
@@ -10,7 +13,9 @@ function EmptySelectionState() {
   return (
     <div className={styles.emptySelectionState}>
       <p className={styles.emptySelectionTitle}>왼쪽에서 데이터를 선택하세요</p>
-      <p className={styles.emptySelectionHint}>등록 데이터를 선택하거나 추가하세요</p>
+      <p className={styles.emptySelectionHint}>
+        등록 데이터를 선택하거나 추가하세요
+      </p>
     </div>
   );
 }
@@ -27,7 +32,10 @@ function RegisteredDataReviewWorkspace({
     <>
       <div className={styles.viewToolbar}>
         <div className={styles.viewToolbarFile}>
-          <label className={formStyles.uploadButton} htmlFor="excel-workbook-input">
+          <label
+            className={formStyles.uploadButton}
+            htmlFor="excel-workbook-input"
+          >
             파일 선택
           </label>
           <input
@@ -37,19 +45,30 @@ function RegisteredDataReviewWorkspace({
             accept=".xlsx,.xls"
             onChange={onWorkbookChange}
           />
+          <p className={styles.viewToolbarHint}>
+            31-6447에서 엑셀파일을 다운로드하세요!
+          </p>
+          <p className={styles.viewToolbarHint}>
+            새 엑셀 파일을 선택하면 이 데이터를 신규로 등록(덮어쓰기)합니다.
+          </p>
         </div>
-        <p className={styles.viewToolbarHint}>
-          새 엑셀 파일을 선택하면 이 데이터를 신규로 등록(덮어쓰기)합니다.
-        </p>
       </div>
 
-      {isExtracting ? <div className={panelStyles.statusMessage}>엑셀 추출 중...</div> : null}
-      {errorMessage ? <div className={panelStyles.errorBox}>{errorMessage}</div> : null}
+      {isExtracting ? (
+        <div className={panelStyles.statusMessage}>엑셀 추출 중...</div>
+      ) : null}
+      {errorMessage ? (
+        <div className={panelStyles.errorBox}>{errorMessage}</div>
+      ) : null}
       {isRegisteredProductDataLoading ? (
-        <div className={panelStyles.statusMessage}>등록 데이터를 불러오는 중...</div>
+        <div className={panelStyles.statusMessage}>
+          등록 데이터를 불러오는 중...
+        </div>
       ) : null}
       {registeredProductDataErrorMessage ? (
-        <div className={panelStyles.errorBox}>{registeredProductDataErrorMessage}</div>
+        <div className={panelStyles.errorBox}>
+          {registeredProductDataErrorMessage}
+        </div>
       ) : null}
 
       <WorkbookReviewTableSection {...resultSectionProps} />
@@ -86,7 +105,10 @@ function UploadWorkspaceArea({
                 </div>
 
                 <div className={styles.uploadRow}>
-                  <label className={formStyles.uploadButton} htmlFor="excel-workbook-input">
+                  <label
+                    className={formStyles.uploadButton}
+                    htmlFor="excel-workbook-input"
+                  >
                     파일 선택
                   </label>
                   <input
@@ -103,13 +125,23 @@ function UploadWorkspaceArea({
 
                 {isMerged && mergeStatusMessage ? (
                   <div className={styles.mergeActionRow}>
-                    <span className={styles.mergeMeta}>{mergeStatusMessage}</span>
+                    <span className={styles.mergeMeta}>
+                      {mergeStatusMessage}
+                    </span>
                   </div>
                 ) : null}
 
-                {isExtracting ? <div className={panelStyles.statusMessage}>엑셀 추출 중...</div> : null}
-                {errorMessage ? <div className={panelStyles.errorBox}>{errorMessage}</div> : null}
-                {mergeError ? <div className={panelStyles.errorBox}>{mergeError}</div> : null}
+                {isExtracting ? (
+                  <div className={panelStyles.statusMessage}>
+                    엑셀 추출 중...
+                  </div>
+                ) : null}
+                {errorMessage ? (
+                  <div className={panelStyles.errorBox}>{errorMessage}</div>
+                ) : null}
+                {mergeError ? (
+                  <div className={panelStyles.errorBox}>{mergeError}</div>
+                ) : null}
               </section>
 
               <FileWarningsPanel warnings={result.warnings} />
@@ -127,7 +159,9 @@ function UploadWorkspaceArea({
         </div>
       </div>
 
-      {!result && errorMessage ? <div className={panelStyles.errorBox}>{errorMessage}</div> : null}
+      {!result && errorMessage ? (
+        <div className={panelStyles.errorBox}>{errorMessage}</div>
+      ) : null}
 
       {result ? <WorkbookReviewTableSection {...resultSectionProps} /> : null}
     </>

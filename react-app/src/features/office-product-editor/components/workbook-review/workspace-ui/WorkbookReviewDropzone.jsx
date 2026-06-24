@@ -67,8 +67,12 @@ export function WorkbookReviewDropzone({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <p className={styles.dropzoneIcon} aria-hidden="true">📄</p>
-      <p className={styles.dropzoneTitle}>엑셀 파일을 끌어다 놓거나 선택하세요</p>
+      <p className={styles.dropzoneIcon} aria-hidden="true">
+        📄
+      </p>
+      <p className={styles.dropzoneTitle}>
+        생산경제시스템 31-6447 엑셀을 끌어다 놓거나 선택하세요
+      </p>
       <p className={styles.dropzoneHint}>.xlsx, .xls 파일을 지원합니다</p>
 
       <label
@@ -93,12 +97,18 @@ export function WorkbookReviewDropzone({
       />
 
       {selectedFileName ? (
-        <p className={styles.dropzoneFileName}>선택한 파일: {selectedFileName}</p>
+        <p className={styles.dropzoneFileName}>
+          선택한 파일: {selectedFileName}
+        </p>
       ) : null}
 
-      {isExtracting ? <p className={styles.dropzoneStatus}>엑셀 추출 중...</p> : null}
+      {isExtracting ? (
+        <p className={styles.dropzoneStatus}>엑셀 추출 중...</p>
+      ) : null}
 
-      {disabled && disabledHint ? <p className={styles.dropzoneDisabledHint}>{disabledHint}</p> : null}
+      {disabled && disabledHint ? (
+        <p className={styles.dropzoneDisabledHint}>{disabledHint}</p>
+      ) : null}
     </div>
   );
 }

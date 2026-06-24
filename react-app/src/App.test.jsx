@@ -115,7 +115,7 @@ describe('App', () => {
 
     render(<App />);
 
-    await user.click(screen.getByRole('button', { name: /AI 스토어 페이지 만들기/ }));
+    await user.click(screen.getByRole('button', { name: /AI로 자재정보 페이지 만들기/ }));
 
     expect(screen.getByText('storefront-builder-page:OFF-1')).toBeInTheDocument();
   });

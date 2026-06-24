@@ -2,7 +2,7 @@ import styles from './AppLayout.module.css';
 
 const PAGE_LABELS = {
   'office-product-editor': '데이터 설정/수정',
-  'storefront-builder': 'AI 스토어 페이지 만들기',
+  'storefront-builder': 'AI 페이지 만들기',
 };
 
 function BackArrow() {

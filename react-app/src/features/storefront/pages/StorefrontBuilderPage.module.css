@@ -19,18 +19,27 @@
 .previewPanel {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 14px;
   padding: 18px;
-  border: 1px solid var(--corp-line);
-  border-radius: 20px;
-  background: var(--corp-panel);
-  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.06);
+  /* border: 1px solid var(--corp-line); */
+  /* border-radius: 20px; */
+  /* background: var(--corp-panel);
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.06); */
 }
 
 .heroPanel {
-  background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 255, 0.96));
+  /* background:
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.96),
+      rgba(247, 250, 255, 0.96)
+    ); */
 }
 
 .previewPanel {
@@ -65,6 +74,7 @@
 .previewTitle {
   margin: 0;
   font-size: 1.06rem;
+  justify-content: center;
   font-weight: 700;
   color: var(--corp-text);
 }

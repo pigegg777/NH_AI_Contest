@@ -120,7 +120,7 @@ async function reachCardDesignStep(user) {
   await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
   await user.click(screen.getByTestId('builder-go-next'));
   await user.click(screen.getByTestId('builder-go-next'));
-  await user.click(screen.getByTestId('confirm-data-selection'));
+  await user.click(screen.getByTestId('builder-go-next'));
   await screen.findByTestId('save-storefront-draft');
 }
 
@@ -167,9 +167,9 @@ describe('StorefrontBuilderPage', () => {
       expect(within(designPreview).getByText('18-18-18')).toBeInTheDocument();
     });
     expect(screen.getByTestId('data-selection-unconfirmed-hint')).toBeInTheDocument();
-    expect(screen.getByTestId('confirm-data-selection')).toHaveTextContent('확인하고 다음 단계로');
+    expect(screen.getByTestId('builder-go-next')).toHaveTextContent('확인하고 다음 단계로');
 
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     expect(await screen.findByRole('heading', { name: '카드 디자인' })).toBeInTheDocument();
     await waitFor(() => {
@@ -202,7 +202,7 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('builder-go-next'));
 
     expect(screen.getByTestId('data-field-table-description')).toBeInTheDocument();
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     expect(screen.getByRole('heading', { name: '카드 디자인' })).toBeInTheDocument();
     expect(screen.queryByTestId('data-field-table-description')).not.toBeInTheDocument();
@@ -241,7 +241,7 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
     await user.click(screen.getByTestId('builder-go-next'));
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     await user.click(screen.getByTestId('card-design-scope-field'));
     await user.type(screen.getByTestId('card-design-prompt'), '과세가격을 빨간색으로 강조해줘');
@@ -308,7 +308,7 @@ describe('StorefrontBuilderPage', () => {
     });
 
     await user.click(screen.getByTestId('builder-go-next'));
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
     await user.click(screen.getByTestId('save-storefront-draft'));
 
     await waitFor(() => expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1));
@@ -362,13 +362,13 @@ describe('StorefrontBuilderPage', () => {
     });
 
     await user.click(screen.getByTestId('builder-go-next'));
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     await user.click(within(screen.getByTestId('card-design-cards-per-row')).getByText('1개'));
 
     await user.click(screen.getByTestId('builder-go-previous'));
     await user.click(within(screen.getByTestId('data-field-table-description')).getByTestId('data-field-toggle-nutrient'));
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     await waitFor(() => {
       const sectionEl = screen.getByTestId('mobile-preview-device').querySelector('section[data-structural-preset]');
@@ -390,7 +390,7 @@ describe('StorefrontBuilderPage', () => {
     await user.click(screen.getByTestId('select-product-category-Fertilizer Upload'));
     await user.click(screen.getByTestId('builder-go-next'));
     await user.click(screen.getByTestId('builder-go-next'));
-    await user.click(screen.getByTestId('confirm-data-selection'));
+    await user.click(screen.getByTestId('builder-go-next'));
 
     await user.click(screen.getByTestId('card-design-scope-field'));
     await user.type(screen.getByTestId('card-design-prompt'), '링크도 보여줘');

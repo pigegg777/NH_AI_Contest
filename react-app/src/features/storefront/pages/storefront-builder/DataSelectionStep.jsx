@@ -20,14 +20,6 @@ function toggleGroupedField(step, field) {
 export default function DataSelectionStep({ step }) {
   const groups = groupAvailableFields(step.availableCategoryFields);
 
-  function handleForwardClick() {
-    if (step.isDataSelectionConfirmed) {
-      step.goNext();
-    } else {
-      step.confirmDataSelection();
-    }
-  }
-
   return (
     <StepShell
       eyebrow="3단계"
@@ -69,19 +61,6 @@ export default function DataSelectionStep({ step }) {
           변경 사항이 있습니다. 확인을 눌러야 다음 단계로 이동할 수 있어요.
         </p>
       ) : null}
-
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.primaryButton}
-          data-testid="confirm-data-selection"
-          onClick={handleForwardClick}
-        >
-          {step.isDataSelectionConfirmed
-            ? '다음 단계로'
-            : '확인하고 다음 단계로'}
-        </button>
-      </div>
     </StepShell>
   );
 }

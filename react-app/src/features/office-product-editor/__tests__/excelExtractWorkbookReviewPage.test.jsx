@@ -491,7 +491,9 @@ describe('OfficeProductEditorPage', () => {
 
     await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
 
-    expect(screen.getByText('엑셀 파일을 끌어다 놓거나 선택하세요')).toBeInTheDocument();
+    expect(
+      screen.getByText('생산경제시스템 31-6447 엑셀을 끌어다 놓거나 선택하세요'),
+    ).toBeInTheDocument();
     expect(
       screen.getByText('테이블을 만든 뒤 사이드바에서 선택하면 업로드할 수 있습니다.'),
     ).toBeInTheDocument();

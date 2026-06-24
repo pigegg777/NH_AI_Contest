@@ -333,7 +333,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     isDataSelectionConfirmed: dataSelection.isConfirmed,
     toggleDraftField: dataSelection.toggleField,
     confirmDataSelection,
-    goNext,
   };
 
   const cardDesignStep = {
