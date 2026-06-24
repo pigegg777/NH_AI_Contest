@@ -25,15 +25,17 @@ describe('requestCardStyleAiIntent', () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
 
-    const intent = await requestCardStyleAiIntent({
-      cardAiDesign: { prompt: 'make the title bolder and darker' },
+    const result = await requestCardStyleAiIntent({
+      cardAiDesign: { prompt: 'make the title bolder and darker', targetScope: 'header' },
       visibleFields: ['product_name'],
       currentCardStyle: DEFAULT_CARD_STYLE,
       officeCode: 'OFF-1',
     });
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(intent.header).toEqual({ titleColorHex: '#111827', fontWeight: 800 });
+    expect(result.intent.header).toEqual({ titleColorHex: '#111827', fontWeight: 800 });
+    expect(result.explanation).toBe('제목 영역을 요청하신 대로 변경했습니다.');
+    expect(result.suggestion).toBeNull();
   });
 
   it('throws a clear error when there is no active session', async () => {
@@ -49,7 +51,7 @@ describe('requestCardStyleAiIntent', () => {
     ).rejects.toThrow('로그인 정보가 만료되었습니다');
   });
 
-  it('posts to the same-origin endpoint with the bearer token and normalizes the response', async () => {
+  it('posts to the same-origin endpoint with the bearer token, the history, and normalizes the response', async () => {
     supabase.auth.getSession.mockResolvedValue({
       data: { session: { access_token: 'test-token' } },
     });
@@ -66,16 +68,19 @@ describe('requestCardStyleAiIntent', () => {
           info: null,
           field: null,
         },
+        explanation: '제목을 더 굵게 바꿨습니다.',
+        suggestion: '이미지도 같이 밝게 해보면 어울릴 것 같아요.',
       }),
     });
     vi.stubGlobal('fetch', fetchSpy);
 
-    const intent = await requestCardStyleAiIntent({
+    const result = await requestCardStyleAiIntent({
       cardAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
       visibleFields: ['product_name', 'tax_price'],
       productCategoryName: 'Fertilizer Upload',
       currentCardStyle: DEFAULT_CARD_STYLE,
       officeCode: 'OFF-1',
+      history: [{ role: 'user', text: '제목을 굵게 해줘' }],
     });
 
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -92,7 +97,10 @@ describe('requestCardStyleAiIntent', () => {
     expect(sentBody.officeCode).toBe('OFF-1');
     expect(sentBody.visibleFields).toEqual(['product_name', 'tax_price']);
     expect(sentBody.productCategoryName).toBe('Fertilizer Upload');
-    expect(intent.header).toEqual({ fontWeight: 800 });
+    expect(sentBody.history).toEqual([{ role: 'user', text: '제목을 굵게 해줘' }]);
+    expect(result.intent.header).toEqual({ fontWeight: 800 });
+    expect(result.explanation).toBe('제목을 더 굵게 바꿨습니다.');
+    expect(result.suggestion).toBe('이미지도 같이 밝게 해보면 어울릴 것 같아요.');
   });
 
   it('throws with the server error message when the response is not ok', async () => {
