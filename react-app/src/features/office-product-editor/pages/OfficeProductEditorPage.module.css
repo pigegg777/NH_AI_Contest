@@ -1,90 +1,12 @@
 /* ─── Page shell ──────────────────────────────────────── */
 .page {
+  display: flex;
+  flex-direction: column;
   max-width: 100%;
   min-height: 100%;
   margin: 0 auto;
   background: var(--corp-surface-muted);
-  overflow-x: hidden;
-}
-
-.dataNameBanner {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 18px 24px;
-  border-bottom: 1px solid var(--corp-line);
-  background: var(--corp-panel);
-}
-
-.dataNameLabel {
-  color: var(--corp-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dataNameTitle {
-  margin: 0;
-  color: var(--corp-text);
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.dataNameStatus {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  padding: 0 12px;
-  border-radius: var(--corp-radius-pill);
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.dataNameStatusRegistered {
-  background: var(--corp-primary-soft);
-  color: var(--corp-primary);
-}
-
-.dataNameStatusNew {
-  background: rgba(185, 28, 28, 0.08);
-  color: var(--corp-danger);
-}
-
-/* ─── Top bar (replaces hero) ─────────────────────────── */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding: 0 24px;
-  height: 56px;
-  border-bottom: 1px solid var(--corp-line);
-  background: var(--corp-panel);
-}
-
-.topbarLeft {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.topbarLabel {
-  color: var(--corp-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.topbarTitle {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--corp-text);
+  overflow-x: clip;
 }
 
 /* ─── Two-column layout ───────────────────────────────── */
@@ -92,7 +14,7 @@
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
-  min-height: calc(100vh - 56px);
+  min-height: 0;
   transition: grid-template-columns var(--corp-transition);
   overflow-x: hidden;
 }

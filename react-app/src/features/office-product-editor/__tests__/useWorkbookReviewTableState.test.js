@@ -1,19 +1,7 @@
-﻿import { act, renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
-import { createWorkbookReviewStorageKey } from '../services/workbookReviewAnnotationStorage';
-import { SORT_DIRECTION } from '../model/table';
 import { useWorkbookReviewTableState } from '../hooks/useWorkbookReviewTableState';
-import { fetchStaticFertilizerLookup } from '../services/staticFertilizerLookupService';
-import { fetchStaticPesticideLookup } from '../services/staticPesticideLookupService';
-
-vi.mock('../services/staticFertilizerLookupService', () => ({
-  fetchStaticFertilizerLookup: vi.fn(),
-}));
-
-vi.mock('../services/staticPesticideLookupService', () => ({
-  fetchStaticPesticideLookup: vi.fn(),
-}));
 
 const sampleRows = [
   {
@@ -52,256 +40,67 @@ const sampleRows = [
   },
 ];
 
-afterEach(() => {
-  sessionStorage.clear();
-  vi.clearAllMocks();
-});
-
 describe('useWorkbookReviewTableState', () => {
   describe('annotations', () => {
-    it('hydrates saved annotations and persists updates back to sessionStorage', () => {
-      const storageKey = createWorkbookReviewStorageKey('workbook-a');
-      sessionStorage.setItem(
-        storageKey,
-        JSON.stringify({ A100__01: { shadow: true, note: 'saved note' } }),
-      );
-
+    it('applies shadow and note to rows', async () => {
       const { result } = renderHook(() =>
-        useWorkbookReviewTableState(sampleRows, 'workbook-a', { isStaticMergeEnabled: true }),
-      );
-
-      expect(result.current.mergedRows[0]).toEqual(
-        expect.objectContaining({ row_id: 'A100__01', shadow: true, note: 'saved note' }),
-      );
-
-      act(() => {
-        result.current.toggleShadow('B200__02');
-        result.current.updateNote('B200__02', 'new memo');
-        result.current.setShadowForRows(['A100__01', 'B200__02'], true);
-      });
-
-      expect(JSON.parse(sessionStorage.getItem(storageKey))).toEqual(
-        expect.objectContaining({
-          A100__01: { shadow: true, note: 'saved note' },
-          B200__02: { shadow: true, note: 'new memo' },
-        }),
-      );
-    });
-
-    it('keeps annotations isolated across workbook fingerprint changes', () => {
-      sessionStorage.setItem(
-        createWorkbookReviewStorageKey('workbook-a'),
-        JSON.stringify({ A100__01: { shadow: true, note: 'only a' } }),
-      );
-
-      const { result, rerender } = renderHook(
-        ({ rows, fingerprint }) => useWorkbookReviewTableState(rows, fingerprint),
-        { initialProps: { rows: sampleRows, fingerprint: 'workbook-a' } },
-      );
-
-      expect(result.current.mergedRows[0].shadow).toBe(true);
-
-      rerender({ rows: sampleRows, fingerprint: 'workbook-b' });
-
-      expect(result.current.mergedRows[0].shadow).toBe(false);
-      expect(result.current.mergedRows[0].note).toBe('');
-    });
-
-    it('applies a price override via updatePrice and persists it to sessionStorage', () => {
-      const storageKey = createWorkbookReviewStorageKey('workbook-a');
-
-      const { result } = renderHook(() =>
-        useWorkbookReviewTableState(sampleRows, 'workbook-a'),
-      );
-
-      act(() => {
-        result.current.updatePrice('A100__01', 'tax_price', 1500);
-      });
-
-      expect(result.current.mergedRows[0]).toEqual(
-        expect.objectContaining({ row_id: 'A100__01', tax_price: 1500, zero_tax_price: 900 }),
-      );
-      expect(JSON.parse(sessionStorage.getItem(storageKey))).toEqual(
-        expect.objectContaining({
-          A100__01: { shadow: false, note: '', tax_price: 1500 },
-        }),
-      );
-    });
-
-    it('returns a stable empty row set without entering a render loop', () => {
-      const { result, rerender } = renderHook(
-        ({ fingerprint }) => useWorkbookReviewTableState([], fingerprint),
-        { initialProps: { fingerprint: null } },
-      );
-
-      expect(result.current.mergedRows).toEqual([]);
-
-      rerender({ fingerprint: 'workbook-a' });
-
-      expect(result.current.mergedRows).toEqual([]);
-    });
-  });
-
-  describe('static fertilizer merge', () => {
-    it('merges static fertilizer fields into the annotated rows only after handleStaticDataMerge resolves', async () => {
-      fetchStaticFertilizerLookup.mockResolvedValue({
-        A100: {
-          product_code: 'A100',
-          img_url: 'https://example.com/a100.png',
-          product_url: 'https://example.com/a100',
-          nutrient: 'N-P-K',
-          price_subsidy: 1200,
-        },
-      });
-
-      const { result } = renderHook(() =>
-        useWorkbookReviewTableState(sampleRows, 'workbook-a', { isStaticMergeEnabled: true }),
-      );
-
-      expect(result.current.mergedRows[0].img_url).toBeUndefined();
-      expect(result.current.mergeSummary).toBe(null);
-      expect(result.current.mergeStatusMessage).toBe('');
-
-      await act(async () => {
-        await result.current.handleStaticDataMerge();
-      });
-
-      expect(fetchStaticFertilizerLookup).toHaveBeenCalledWith(['A100', 'B200']);
-      expect(result.current.mergeSummary).toEqual({ requested: 2, matched: 1 });
-      expect(result.current.mergeStatusMessage).toBe('병합 완료 1/2');
-      expect(result.current.mergedRows[0]).toEqual(
-        expect.objectContaining({
-          product_code: 'A100',
-          img_url: 'https://example.com/a100.png',
-          nutrient: 'N-P-K',
-          price_subsidy: 1200,
-        }),
-      );
-    });
-
-    it('resets merge state when the workbook fingerprint changes', async () => {
-      fetchStaticFertilizerLookup.mockResolvedValue({
-        A100: {
-          product_code: 'A100',
-          img_url: 'https://example.com/a100.png',
-          product_url: null,
-          nutrient: null,
-          price_subsidy: null,
-        },
-      });
-
-      const { result, rerender } = renderHook(
-        ({ workbookFingerprint, isStaticMergeEnabled }) =>
-          useWorkbookReviewTableState(sampleRows, workbookFingerprint, { isStaticMergeEnabled }),
-        { initialProps: { workbookFingerprint: 'workbook-a', isStaticMergeEnabled: true } },
+        useWorkbookReviewTableState(sampleRows, 'fp-1'),
       );
 
       await act(async () => {
-        await result.current.handleStaticDataMerge();
+        result.current.toggleShadow('A100__01');
+      });
+      await act(async () => {
+        result.current.updateNote('A100__01', 'test note');
       });
 
-      expect(result.current.isMerged).toBe(true);
-
-      rerender({ workbookFingerprint: 'workbook-b', isStaticMergeEnabled: true });
-
-      expect(result.current.isMerged).toBe(false);
-      expect(result.current.mergeSummary).toBe(null);
-      expect(result.current.mergeStatusMessage).toBe('');
-      expect(result.current.mergedRows[0].img_url).toBeUndefined();
+      const row = result.current.rows.find((r) => r.row_id === 'A100__01');
+      expect(row.shadow).toBe(true);
+      expect(row.note).toBe('test note');
     });
 
-    it('returns annotated rows when static merge is disabled after a merge has completed', async () => {
-      fetchStaticFertilizerLookup.mockResolvedValue({
-        A100: {
-          product_code: 'A100',
-          img_url: 'https://example.com/a100.png',
-          product_url: 'https://example.com/a100',
-          nutrient: 'N-P-K',
-          price_subsidy: 1200,
-        },
-      });
-
+    it('resets annotations when fingerprint changes', async () => {
       const { result, rerender } = renderHook(
-        ({ isStaticMergeEnabled }) =>
-          useWorkbookReviewTableState(sampleRows, 'workbook-a', { isStaticMergeEnabled }),
-        { initialProps: { isStaticMergeEnabled: true } },
+        ({ fingerprint }) => useWorkbookReviewTableState(sampleRows, fingerprint),
+        { initialProps: { fingerprint: 'fp-1' } },
       );
 
       await act(async () => {
-        await result.current.handleStaticDataMerge();
+        result.current.toggleShadow('A100__01');
       });
 
-      expect(result.current.mergedRows[0].img_url).toBe('https://example.com/a100.png');
-      expect(result.current.mergeStatusMessage).toBe('병합 완료 1/2');
+      expect(result.current.rows.find((r) => r.row_id === 'A100__01').shadow).toBe(true);
 
-      rerender({ isStaticMergeEnabled: false });
+      rerender({ fingerprint: 'fp-2' });
 
-      expect(result.current.mergedRows[0].img_url).toBeUndefined();
-      expect(result.current.mergeStatusMessage).toBe('');
+      await act(async () => {});
+
+      expect(result.current.rows.find((r) => r.row_id === 'A100__01').shadow).toBe(false);
     });
-  });
 
-  describe('static pesticide merge', () => {
-    it('merges static pesticide fields into the annotated rows only after handleStaticDataMerge resolves', async () => {
-      fetchStaticPesticideLookup.mockResolvedValue({
-        B200: {
-          product_code: 'B200',
-          product_nutirent: '클로르페나피르 액상수화제',
-          product_category: '살충',
-          product_usage: [
-            {
-              cropName: '고추',
-              diseaseWeedName: '꽃노랑총채벌레',
-              pestiUse: '경엽처리',
-              dilutUnit: '2000배',
-              useSuittime: '수확3일전',
-              useNum: '3회',
-            },
-          ],
-          indict_symbl: '13',
-        },
-      });
-
+    it('applies price override to rows', async () => {
       const { result } = renderHook(() =>
-        useWorkbookReviewTableState(sampleRows, 'workbook-a', {
-          isStaticMergeEnabled: true,
-          tableNameMode: 'pesticide',
-        }),
+        useWorkbookReviewTableState(sampleRows, 'fp-1'),
       );
-
-      expect(result.current.mergedRows[1].product_nutirent).toBeUndefined();
 
       await act(async () => {
-        await result.current.handleStaticDataMerge();
+        result.current.updatePrice('A100__01', 'tax_price', 9999);
       });
 
-      expect(fetchStaticPesticideLookup).toHaveBeenCalledWith(['A100', 'B200']);
-      expect(fetchStaticFertilizerLookup).not.toHaveBeenCalled();
-      expect(result.current.mergeSummary).toEqual({ requested: 2, matched: 1 });
-      expect(result.current.mergedRows[1]).toEqual(
-        expect.objectContaining({
-          product_code: 'B200',
-          product_nutirent: '클로르페나피르 액상수화제',
-          product_category: '살충',
-          product_usage: [expect.objectContaining({ cropName: '고추' })],
-          indict_symbl: '13',
-        }),
-      );
-      expect(result.current.mergedRows[0]).toEqual(
-        expect.objectContaining({
-          product_code: 'A100',
-          product_nutirent: null,
-          product_category: null,
-          product_usage: [],
-          indict_symbl: null,
-        }),
-      );
+      const row = result.current.rows.find((r) => r.row_id === 'A100__01');
+      expect(row.tax_price).toBe(9999);
+    });
+
+    it('returns a stable empty row set when no rows provided', () => {
+      const { result } = renderHook(() => useWorkbookReviewTableState([], 'fp-1'));
+      expect(result.current.rows).toEqual([]);
+      expect(result.current.annotatedRows).toEqual([]);
     });
   });
 
   describe('table model', () => {
-    it('derives display rows, warning rows and filter options from the merged set, and supports search/filter/sort', async () => {
-      const { result } = renderHook(() => useWorkbookReviewTableState(sampleRows, 'workbook-a'));
+    it('derives display rows, warning rows and filter options from the extracted set, and supports search/filter/sort', async () => {
+      const { result } = renderHook(() => useWorkbookReviewTableState(sampleRows));
 
       expect(result.current.rows.map((row) => row.row_id)).toEqual(['A100__01', 'B200__02']);
       expect(result.current.warningRows.map((row) => row.row_id)).toEqual(['B200__02']);
@@ -326,7 +125,7 @@ describe('useWorkbookReviewTableState', () => {
         result.current.resetFilters();
       });
       await act(async () => {
-        result.current.setSortState({ key: 'product_code', direction: SORT_DIRECTION.descending });
+        result.current.setSortState({ key: 'product_code', direction: 'desc' });
       });
 
       expect(result.current.rows.map((row) => row.row_id)).toEqual(['B200__02', 'A100__01']);

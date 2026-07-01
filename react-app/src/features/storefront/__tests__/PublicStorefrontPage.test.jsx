@@ -5,12 +5,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
-} from '../../office-product-editor/services/officeProductDataService';
+} from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
-vi.mock('../../office-product-editor/services/officeProductDataService', () => ({
+vi.mock('../../office-product-editor/services/office-product-data/publicOfficeProductService', () => ({
   fetchAllOfficeProductRows: vi.fn(),
   fetchPublicOfficeIdentity: vi.fn(),
 }));

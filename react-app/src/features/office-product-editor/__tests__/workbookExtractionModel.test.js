@@ -10,7 +10,6 @@ describe('workbook extraction model', () => {
       [
         '번호',
         '매출단가유형',
-        '매출단가유형',
         '상품코드',
         '상품명',
         '상품구분',
@@ -25,7 +24,6 @@ describe('workbook extraction model', () => {
       ],
       [
         1,
-        '01',
         '조합원정상가',
         'P-001',
         '테스트비료',
@@ -41,7 +39,6 @@ describe('workbook extraction model', () => {
       ],
       [
         2,
-        '01',
         '조합원정상가',
         'P-001',
         '테스트비료',
@@ -63,9 +60,10 @@ describe('workbook extraction model', () => {
     expect(result.warnings).toEqual([]);
     expect(result.rows).toEqual([
       expect.objectContaining({
-        row_id: 'P-001__01',
+        row_id: 'P-001__조합원정상가',
         product_code: 'P-001',
         product_name: '테스트비료',
+        sale_price_type_name: '조합원정상가',
         tax_price: 1000,
         zero_tax_price: 900,
         manufacturer_list: [{ manufacturer_name: '제조사A' }],

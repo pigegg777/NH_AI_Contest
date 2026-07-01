@@ -2,15 +2,23 @@ import { startTransition, useState } from 'react';
 
 import { extractSalesPriceSheetData } from '../model/excel-extranction/workbookExtractionModel';
 import { readWorkbookSheet } from '../services/workbookSheetReader';
-import { buildWorkbookFingerprint } from '../services/workbookReviewAnnotationStorage';
 
-const WORKBOOK_EXTRACTION_ERROR_MESSAGE = '엑셀 추출에 실패했습니다.';
+function buildWorkbookFingerprint(file) {
+  if (
+    !file ||
+    typeof file.name !== 'string' ||
+    typeof file.size !== 'number' ||
+    typeof file.lastModified !== 'number'
+  ) {
+    return null;
+  }
+
+  return `${file.name}:${file.size}:${file.lastModified}`;
+}
 
 export function useWorkbookExtraction() {
   const [selectedFileName, setSelectedFileName] = useState('');
   const [workbookFingerprint, setWorkbookFingerprint] = useState(null);
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState(null);
 
   async function processFile(file) {
@@ -20,8 +28,6 @@ export function useWorkbookExtraction() {
 
     setSelectedFileName(file.name);
     setWorkbookFingerprint(buildWorkbookFingerprint(file));
-    setIsExtracting(true);
-    setErrorMessage('');
 
     try {
       const { sheetName, sheetRows } = await readWorkbookSheet(file);
@@ -33,15 +39,8 @@ export function useWorkbookExtraction() {
       startTransition(() => {
         setResult(nextResult);
       });
-    } catch (error) {
+    } catch {
       setResult(null);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : WORKBOOK_EXTRACTION_ERROR_MESSAGE,
-      );
-    } finally {
-      setIsExtracting(false);
     }
   }
 
@@ -53,16 +52,12 @@ export function useWorkbookExtraction() {
   function resetWorkbook() {
     setSelectedFileName('');
     setWorkbookFingerprint(null);
-    setIsExtracting(false);
-    setErrorMessage('');
     setResult(null);
   }
 
   return {
     selectedFileName,
     workbookFingerprint,
-    isExtracting,
-    errorMessage,
     result,
     handleWorkbookChange,
     processFile,

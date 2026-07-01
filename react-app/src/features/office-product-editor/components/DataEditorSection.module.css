@@ -1,0 +1,37 @@
+/* ─── Workspace (display:contents → children join page grid) */
+.workspace {
+  display: contents;
+}
+
+/* ─── Top control bar (spans full 2-col page grid) ──────── */
+.controlBar {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+  /* border: 1px solid var(--corp-line); */
+  border-radius: var(--corp-radius-sm);
+  padding: 16px;
+  background-color: white;
+}
+
+.controlColWide {
+  min-width: 0;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-sm);
+  padding: 16px;
+}
+
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Responsive ──────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .controlBar {
+    grid-template-columns: 1fr;
+  }
+}

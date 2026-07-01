@@ -1,7 +1,9 @@
 ﻿import { hasTrimmedText } from '../../../../common/utils/text';
+import { getCell, normalizeHeaderCell } from '../../utils/worksheetCellUtils';
 
 const HEADER_SCAN_LIMIT = 30;
 const DATA_END_BLANK_ROW_STREAK = 2;
+const HEADER_CONFIDENCE_THRESHOLD = 8;
 
 const HEADER_WEIGHTS = new Map([
   ['상품코드', 4],
@@ -19,6 +21,7 @@ const HEADER_WEIGHTS = new Map([
 ]);
 
 const COLUMN_RULES = [
+  { field: 'sale_price_type_name', labels: ['매출단가유형'] },
   { field: 'product_code', labels: ['상품코드'] },
   { field: 'product_name', labels: ['상품명'] },
   { field: 'product_type', labels: ['상품구분'] },
@@ -32,64 +35,52 @@ const COLUMN_RULES = [
   { field: 'manufacturer_name', labels: ['상품제조업체명'] },
 ];
 
-function getCell(row, index) {
-  if (index == null || index < 0) {
-    return null;
-  }
-
-  return row[index] ?? null;
-}
-
-function normalizeHeaderCell(value) {
-  if (value == null) {
-    return '';
-  }
-
-  return String(value).replace(/\r?\n/g, '').replace(/\s+/g, '').trim();
-}
-
-function scoreHeaderRow(row) {
-  const normalizedCells = row.map(normalizeHeaderCell);
-  let score = 0;
-
-  for (const cell of normalizedCells) {
-    score += HEADER_WEIGHTS.get(cell) ?? 0;
-  }
-
-  const salePriceTypeCount = normalizedCells.filter((cell) => cell === '매출단가유형').length;
-  if (salePriceTypeCount >= 2) {
-    score += 3;
-  }
-
-  return score;
-}
-
 function detectHeaderRow(rows) {
   let bestIndex = 0;
   let bestScore = -1;
 
-  for (let index = 0; index < Math.min(rows.length, HEADER_SCAN_LIMIT); index += 1) {
-    const score = scoreHeaderRow(rows[index] ?? []);
+  for (
+    let index = 0;
+    index < Math.min(rows.length, HEADER_SCAN_LIMIT);
+    index += 1
+  ) {
+    const normalizedCells = (rows[index] ?? []).map(normalizeHeaderCell);
+    let score = 0;
+    for (const cell of normalizedCells) {
+      score += HEADER_WEIGHTS.get(cell) ?? 0;
+    }
+    const nextNonEmptyRow = rows
+      .slice(index + 1, Math.min(rows.length, HEADER_SCAN_LIMIT))
+      .find((row) =>
+        (row ?? []).some((cell) => normalizeHeaderCell(cell) !== ''),
+      );
+
+    if (nextNonEmptyRow) {
+      let nextRowScore = 0;
+      for (const cell of nextNonEmptyRow.map(normalizeHeaderCell)) {
+        nextRowScore += HEADER_WEIGHTS.get(cell) ?? 0;
+      }
+
+      if (nextRowScore >= HEADER_CONFIDENCE_THRESHOLD) {
+        score -= HEADER_CONFIDENCE_THRESHOLD;
+      }
+    }
     if (score > bestScore) {
       bestScore = score;
       bestIndex = index;
     }
   }
-
-  return { headerRowIndex: bestIndex, headerScore: bestScore };
+  return {
+    headerRowIndex: bestIndex,
+    isLowConfidence: bestScore < HEADER_CONFIDENCE_THRESHOLD,
+  };
 }
 
 function buildColumnMap(headerRow) {
   const columnMap = {};
-  const priceTypeColumns = [];
 
   headerRow.forEach((value, index) => {
     const normalized = normalizeHeaderCell(value);
-
-    if (normalized === '매출단가유형') {
-      priceTypeColumns.push(index);
-      return;
-    }
 
     for (const rule of COLUMN_RULES) {
       if (rule.labels.includes(normalized) && columnMap[rule.field] == null) {
@@ -99,31 +90,23 @@ function buildColumnMap(headerRow) {
     }
   });
 
-  if (priceTypeColumns[0] != null) {
-    columnMap.sale_price_type_code = priceTypeColumns[0];
-  }
-
-  if (priceTypeColumns[1] != null) {
-    columnMap.sale_price_type_name = priceTypeColumns[1];
-  }
-
   return columnMap;
-}
-
-function isDataCandidate(row, columnMap) {
-  return Boolean(
-    hasTrimmedText(getCell(row, columnMap.product_code)) ||
-    hasTrimmedText(getCell(row, columnMap.product_name)),
-  );
 }
 
 function detectDataRange(rows, headerRowIndex, columnMap) {
   let dataStartRowIndex = headerRowIndex + 1;
 
-  while (
-    dataStartRowIndex < rows.length &&
-    !isDataCandidate(rows[dataStartRowIndex] ?? [], columnMap)
-  ) {
+  while (dataStartRowIndex < rows.length) {
+    const row = rows[dataStartRowIndex] ?? [];
+    const hasDataCandidate = Boolean(
+      hasTrimmedText(getCell(row, columnMap.product_code)) ||
+      hasTrimmedText(getCell(row, columnMap.product_name)),
+    );
+
+    if (hasDataCandidate) {
+      break;
+    }
+
     dataStartRowIndex += 1;
   }
 
@@ -132,13 +115,16 @@ function detectDataRange(rows, headerRowIndex, columnMap) {
 
   for (let index = dataStartRowIndex; index < rows.length; index += 1) {
     const row = rows[index] ?? [];
+    const hasDataCandidate = Boolean(
+      hasTrimmedText(getCell(row, columnMap.product_code)) ||
+      hasTrimmedText(getCell(row, columnMap.product_name)),
+    );
 
-    if (isDataCandidate(row, columnMap)) {
+    if (hasDataCandidate) {
       blankRowStreak = 0;
       dataEndRowIndex = index;
       continue;
     }
-
     if (!row.some(hasTrimmedText)) {
       blankRowStreak += 1;
       if (blankRowStreak >= DATA_END_BLANK_ROW_STREAK) {
@@ -153,11 +139,16 @@ function detectDataRange(rows, headerRowIndex, columnMap) {
   return { dataStartRowIndex, dataEndRowIndex };
 }
 
-function buildWorkbookWarnings(headerScore, columnMap, dataRange) {
+function buildWorkbookWarnings(isLowConfidence, columnMap, dataRange) {
   const warnings = [];
-  const requiredFields = ['product_code', 'product_name', 'sale_price', 'product_type'];
+  const requiredFields = [
+    'product_code',
+    'product_name',
+    'sale_price',
+    'product_type',
+  ];
 
-  if (headerScore < 8) {
+  if (isLowConfidence) {
     warnings.push('헤더 행 탐지 신뢰도가 낮습니다.');
   }
 
@@ -175,17 +166,15 @@ function buildWorkbookWarnings(headerScore, columnMap, dataRange) {
 }
 
 export function analyzeWorksheetStructure(rows) {
-  const { headerRowIndex, headerScore } = detectHeaderRow(rows);
+  const { headerRowIndex, isLowConfidence } = detectHeaderRow(rows);
   const columnMap = buildColumnMap(rows[headerRowIndex] ?? []);
   const dataRange = detectDataRange(rows, headerRowIndex, columnMap);
 
   return {
     headerRowIndex,
-    headerScore,
     columnMap,
     dataStartRowIndex: dataRange.dataStartRowIndex,
     dataEndRowIndex: dataRange.dataEndRowIndex,
-    warnings: buildWorkbookWarnings(headerScore, columnMap, dataRange),
+    warnings: buildWorkbookWarnings(isLowConfidence, columnMap, dataRange),
   };
 }
-

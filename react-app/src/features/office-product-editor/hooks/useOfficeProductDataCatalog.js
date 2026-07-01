@@ -1,92 +1,33 @@
-﻿import { startTransition, useEffect, useState } from 'react';
+import { startTransition } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { fetchOfficeProductDataCatalog } from '../services/officeProductDataService';
+import { fetchOfficeProductDataCatalog } from '../services/office-product-data/officeProductDataReadService';
+import { useAsyncFetch } from './useAsyncFetch';
 
 const DEFAULT_ERROR_MESSAGE = '등록 데이터를 불러오지 못했습니다.';
 
 export function useOfficeProductDataCatalog(user) {
   const officeCode = toTrimmedString(user?.office_code);
-  const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(() => Boolean(officeCode));
-  const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    let isActive = true;
-
-    if (!officeCode) {
-      startTransition(() => {
-        setItems([]);
-        setErrorMessage('');
-      });
-      setIsLoading(false);
-      return () => {
-        isActive = false;
-      };
-    }
-
-    setIsLoading(true);
-    startTransition(() => {
-      setItems([]);
-      setErrorMessage('');
-    });
-
-    fetchOfficeProductDataCatalog({ officeCode })
-      .then((nextItems) => {
-        if (!isActive) {
-          return;
-        }
-
-        startTransition(() => {
-          setItems(Array.isArray(nextItems) ? nextItems : []);
-          setErrorMessage('');
-        });
-      })
-      .catch((error) => {
-        if (!isActive) {
-          return;
-        }
-
-        const nextMessage =
-          error instanceof Error && error.message ? error.message : DEFAULT_ERROR_MESSAGE;
-
-        startTransition(() => {
-          setItems([]);
-          setErrorMessage(nextMessage);
-        });
-      })
-      .finally(() => {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [officeCode]);
+  const { data: items, isLoading, errorMessage, setData } = useAsyncFetch(
+    () => fetchOfficeProductDataCatalog({ officeCode }).then((r) => (Array.isArray(r) ? r : [])),
+    [officeCode],
+    { enabled: Boolean(officeCode), initialData: [], defaultErrorMessage: DEFAULT_ERROR_MESSAGE },
+  );
 
   function removeItem(categoryName) {
     startTransition(() => {
-      setItems((currentItems) => currentItems.filter((item) => item.categoryName !== categoryName));
+      setData((current) => current.filter((item) => item.categoryName !== categoryName));
     });
   }
 
   function upsertItem(item) {
     startTransition(() => {
-      setItems((currentItems) => [
+      setData((current) => [
         item,
-        ...currentItems.filter((existing) => existing.categoryName !== item.categoryName),
+        ...current.filter((existing) => existing.categoryName !== item.categoryName),
       ]);
     });
   }
 
-  return {
-    items,
-    isLoading,
-    errorMessage,
-    removeItem,
-    upsertItem,
-  };
+  return { items, isLoading, errorMessage, removeItem, upsertItem };
 }
-

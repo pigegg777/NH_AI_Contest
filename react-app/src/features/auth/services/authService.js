@@ -4,44 +4,11 @@ import supabase from '../../../lib/supabaseClient';
 const LOGIN_USER_PROFILE_SELECT = 'id, auth_user_id, name, nh_name, office_name, office_code';
 const AUTH_EMAIL_DOMAIN = 'auth.nh-agri.local';
 
-function normalizeEmployeeId(employeeId) {
-  return toTrimmedString(employeeId).replace(/\s+/g, '');
-}
-
 export function buildAuthEmail(employeeId) {
-  const normalizedEmployeeId = normalizeEmployeeId(employeeId)
+  return `${toTrimmedString(employeeId)
+    .replace(/\s+/g, '')
     .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, '-');
-
-  if (!normalizedEmployeeId) {
-    return '';
-  }
-
-  return `${normalizedEmployeeId}@${AUTH_EMAIL_DOMAIN}`;
-}
-
-function buildRegisterMetadata({
-  nhName,
-  officeName,
-  businessCode,
-  name,
-  employeeId,
-}) {
-  return {
-    nhName: toTrimmedString(nhName),
-    officeName: toTrimmedString(officeName),
-    businessCode: toTrimmedString(businessCode),
-    name: toTrimmedString(name),
-    employeeId: normalizeEmployeeId(employeeId),
-  };
-}
-
-function isDuplicateAuthUserResponse(data, error) {
-  if (Array.isArray(data?.user?.identities) && data.user.identities.length === 0) {
-    return true;
-  }
-
-  return /already registered/i.test(toLowerTrimmedString(error?.message));
+    .replace(/[^a-z0-9._-]/g, '-')}@${AUTH_EMAIL_DOMAIN}`;
 }
 
 export async function getUserProfileByAuthUserId(authUserId) {
@@ -82,10 +49,11 @@ export async function getCurrentUserProfile() {
 }
 
 export async function login({ employeeId, password }) {
+  const normalizedEmployeeId = toTrimmedString(employeeId).replace(/\s+/g, '');
   const authEmail = buildAuthEmail(employeeId);
   const normalizedPassword = toTrimmedString(password);
 
-  if (!authEmail || !normalizedPassword) {
+  if (!normalizedEmployeeId || !normalizedPassword) {
     return null;
   }
 
@@ -105,8 +73,20 @@ export async function login({ employeeId, password }) {
 }
 
 export async function register(form) {
-  const metadata = buildRegisterMetadata(form);
-  const authEmail = buildAuthEmail(metadata.employeeId);
+  const metadata = Object.fromEntries(
+    Object.entries({
+      nhName: form?.nhName,
+      officeName: form?.officeName,
+      businessCode: form?.businessCode,
+      name: form?.name,
+      employeeId: form?.employeeId,
+    }).map(([key, value]) => [
+      key,
+      key === 'employeeId'
+        ? toTrimmedString(value).replace(/\s+/g, '')
+        : toTrimmedString(value),
+    ]),
+  );
   const normalizedPassword = toTrimmedString(form?.password);
 
   if (
@@ -115,11 +95,12 @@ export async function register(form) {
     !metadata.businessCode ||
     !metadata.name ||
     !metadata.employeeId ||
-    !normalizedPassword ||
-    !authEmail
+    !normalizedPassword
   ) {
     return { status: 'invalid' };
   }
+
+  const authEmail = buildAuthEmail(metadata.employeeId);
 
   const { data, error } = await supabase.auth.signUp({
     email: authEmail,
@@ -135,7 +116,10 @@ export async function register(form) {
     },
   });
 
-  if (isDuplicateAuthUserResponse(data, error)) {
+  if (
+    (Array.isArray(data?.user?.identities) && data.user.identities.length === 0) ||
+    /already registered/i.test(toLowerTrimmedString(error?.message))
+  ) {
     return { status: 'duplicate' };
   }
 

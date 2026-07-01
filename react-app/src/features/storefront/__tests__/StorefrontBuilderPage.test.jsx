@@ -2,11 +2,11 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/officeProductDataService';
+import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/office-product-data/officeProductDataReadService';
 import StorefrontBuilderPage from '../pages/StorefrontBuilderPage';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../services/storefrontConfigService';
 
-vi.mock('../../office-product-editor/services/officeProductDataService', () => ({
+vi.mock('../../office-product-editor/services/office-product-data/officeProductDataReadService', () => ({
   fetchOfficeProductDataEntries: vi.fn(),
 }));
 

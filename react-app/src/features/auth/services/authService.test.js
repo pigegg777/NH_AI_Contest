@@ -30,6 +30,7 @@ describe('authService', () => {
   it('builds a deterministic internal auth email from employeeId', () => {
     expect(buildAuthEmail(' 1001 ')).toBe('1001@auth.nh-agri.local');
     expect(buildAuthEmail('AB 12')).toBe('ab12@auth.nh-agri.local');
+    expect(buildAuthEmail('   ')).toBe('@auth.nh-agri.local');
   });
 
   it('signs in with the derived auth email and resolves the current login user profile', async () => {
@@ -93,6 +94,16 @@ describe('authService', () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  it('returns null without calling auth when employeeId is blank after normalization', async () => {
+    const result = await login({
+      employeeId: '   ',
+      password: 'secret',
+    });
+
+    expect(result).toBeNull();
+    expect(supabase.auth.signInWithPassword).not.toHaveBeenCalled();
   });
 
   it('registers a new auth user with current-project metadata and signs out the auto-created session', async () => {

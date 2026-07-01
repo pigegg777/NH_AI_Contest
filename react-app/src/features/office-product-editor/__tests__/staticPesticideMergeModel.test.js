@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getStaticPesticideProductCodes,
   mergeRowsWithStaticPesticide,
-} from '../model/merge/staticPesticideMergeModel';
+} from '../model/static-data-merge/staticPesticideMergeModel';
 
 describe('static pesticide merge model', () => {
   it('dedupes normalized product codes and merges lookup fields into rows', () => {

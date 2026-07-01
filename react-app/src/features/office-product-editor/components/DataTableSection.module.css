@@ -1,0 +1,79 @@
+.resultSection {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.resultPanelHeaderMain {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.resultPanelHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.saveButton,
+.dangerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.saveButton {
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover);
+}
+
+.dangerButton {
+  background: var(--corp-surface-muted);
+  color: var(--corp-danger);
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: #ece8e3;
+}
+
+.saveButton:focus-visible,
+.dangerButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.saveButton:disabled,
+.dangerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .resultPanelHeaderActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .resultPanelHeaderActions > * {
+    flex: 1 1 180px;
+  }
+}

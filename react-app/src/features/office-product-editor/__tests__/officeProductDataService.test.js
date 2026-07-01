@@ -1,13 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import supabase from '../../../lib/supabaseClient';
 import {
-  deleteOfficeProductData,
-  fetchAllOfficeProductRows,
-  fetchOfficeProductData,
   fetchOfficeProductDataCatalog,
   fetchOfficeProductDataEntries,
+  fetchOfficeProductData,
+} from '../services/office-product-data/officeProductDataReadService';
+import {
+  deleteOfficeProductData,
   saveOfficeProductData,
-} from '../services/officeProductDataService';
+} from '../services/office-product-data/officeProductDataMutationService';
+import {
+  fetchAllOfficeProductRows,
+} from '../services/office-product-data/publicOfficeProductService';
 
 vi.mock('../../../lib/supabaseClient', () => ({
   default: {
@@ -41,9 +45,9 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     supabase.from.mockReturnValue({ select: readSelect, upsert });
 
     await saveOfficeProductData({
-      user: { id: 7, office_code: 'OFF-1', office_name: '蹂몄젏' },
+      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
       rows: [{ row_id: 'A100__01', product_code: 'A100', note: 'memo', shadow: true }],
-      categoryName: '?띿빟',
+      categoryName: '농약',
       sourceFileName: 'demo.xlsx',
     });
 
@@ -52,10 +56,10 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     expect(upsert).toHaveBeenCalledWith(
       {
         office_code: 'OFF-1',
-        office_name: '蹂몄젏',
+        office_name: '본점',
         product_data: [
           expect.objectContaining({
-            category_name: '?띿빟',
+            category_name: '농약',
             row_count: 1,
             source_file_name: 'demo.xlsx',
             updated_at: expect.any(String),
@@ -79,10 +83,10 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     const existingRow = {
       id: 1,
       office_code: 'OFF-1',
-      office_name: '蹂몄젏',
+      office_name: '본점',
       product_data: [
-        { category_name: '鍮꾨즺', updated_at: '2026-06-01T00:00:00Z', row_count: 3, source_file_name: 'old.xlsx', rows: [{ row_id: 'F1' }] },
-        { category_name: '?띿빟', updated_at: '2026-06-02T00:00:00Z', row_count: 5, source_file_name: 'old2.xlsx', rows: [{ row_id: 'P1' }] },
+        { category_name: '비료', updated_at: '2026-06-01T00:00:00Z', row_count: 3, source_file_name: 'old.xlsx', rows: [{ row_id: 'F1' }] },
+        { category_name: '농약', updated_at: '2026-06-02T00:00:00Z', row_count: 5, source_file_name: 'old2.xlsx', rows: [{ row_id: 'P1' }] },
       ],
     };
     const { select: readSelect } = mockOfficeProductDataRow(existingRow);
@@ -96,9 +100,9 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     supabase.from.mockReturnValue({ select: readSelect, upsert });
 
     await saveOfficeProductData({
-      user: { id: 7, office_code: 'OFF-1', office_name: '蹂몄젏' },
+      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
       rows: [{ row_id: 'P2' }],
-      categoryName: '?띿빟',
+      categoryName: '농약',
       sourceFileName: 'new.xlsx',
     });
 
@@ -106,7 +110,7 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     expect(productData.product_data).toEqual([
       existingRow.product_data[0],
       expect.objectContaining({
-        category_name: '?띿빟',
+        category_name: '농약',
         row_count: 1,
         source_file_name: 'new.xlsx',
         rows: [{ row_id: 'P2' }],
@@ -124,10 +128,10 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
     const { select } = mockOfficeProductDataRow({
       id: 11,
       office_code: 'OFF-1',
-      office_name: '蹂몄젏',
+      office_name: '본점',
       product_data: [
-        { category_name: '鍮꾨즺', updated_at: '2026-06-07T03:00:00Z', row_count: 24, source_file_name: 'fertilizer.xlsx' },
-        { category_name: '?띿빟', updated_at: '2026-06-08T03:00:00Z', row_count: 10, source_file_name: 'pesticide.xlsx' },
+        { category_name: '비료', updated_at: '2026-06-07T03:00:00Z', row_count: 24, source_file_name: 'fertilizer.xlsx' },
+        { category_name: '농약', updated_at: '2026-06-08T03:00:00Z', row_count: 10, source_file_name: 'pesticide.xlsx' },
       ],
     });
 
@@ -141,8 +145,8 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
       {
         id: 11,
         officeCode: 'OFF-1',
-        officeName: '蹂몄젏',
-        categoryName: '?띿빟',
+        officeName: '본점',
+        categoryName: '농약',
         rowCount: 10,
         sourceFileName: 'pesticide.xlsx',
         updatedAt: '2026-06-08T03:00:00Z',
@@ -150,8 +154,8 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
       {
         id: 11,
         officeCode: 'OFF-1',
-        officeName: '蹂몄젏',
-        categoryName: '鍮꾨즺',
+        officeName: '본점',
+        categoryName: '비료',
         rowCount: 24,
         sourceFileName: 'fertilizer.xlsx',
         updatedAt: '2026-06-07T03:00:00Z',
@@ -219,18 +223,18 @@ describe('officeProductDataService.fetchOfficeProductData', () => {
     const { select } = mockOfficeProductDataRow({
       id: 11,
       office_code: 'OFF-1',
-      office_name: '蹂몄젏',
+      office_name: '본점',
       product_data: [
-        { category_name: '鍮꾨즺', updated_at: '2026-06-07T03:00:00Z', row_count: 1, source_file_name: 'fertilizer.xlsx', rows: [{ row_id: 'F1' }] },
+        { category_name: '비료', updated_at: '2026-06-07T03:00:00Z', row_count: 1, source_file_name: 'fertilizer.xlsx', rows: [{ row_id: 'F1' }] },
       ],
     });
 
     supabase.from.mockReturnValue({ select });
 
-    const result = await fetchOfficeProductData({ officeCode: 'OFF-1', categoryName: '鍮꾨즺' });
+    const result = await fetchOfficeProductData({ officeCode: 'OFF-1', categoryName: '비료' });
 
     expect(result).toEqual({
-      rows: [{ row_id: 'F1', product_category_name: '鍮꾨즺' }],
+      rows: [{ row_id: 'F1', product_category_name: '비료' }],
       sourceFileName: 'fertilizer.xlsx',
       updatedAt: '2026-06-07T03:00:00Z',
       rowCount: 1,
@@ -241,13 +245,13 @@ describe('officeProductDataService.fetchOfficeProductData', () => {
     const { select } = mockOfficeProductDataRow({
       id: 11,
       office_code: 'OFF-1',
-      office_name: '蹂몄젏',
+      office_name: '본점',
       product_data: [],
     });
 
     supabase.from.mockReturnValue({ select });
 
-    const result = await fetchOfficeProductData({ officeCode: 'OFF-1', categoryName: '鍮꾨즺' });
+    const result = await fetchOfficeProductData({ officeCode: 'OFF-1', categoryName: '비료' });
 
     expect(result).toBeNull();
   });
@@ -271,9 +275,9 @@ describe('officeProductDataService.fetchAllOfficeProductRows', () => {
         product_category_name: 'Fertilizer Upload',
         product_name: 'Alpha',
         spec: '20kg',
-        large_category: '鍮꾨즺',
-        medium_category: '蹂듯빀',
-        small_category: '?쇰컲',
+        large_category: '비료',
+        medium_category: '복합',
+        small_category: '일반',
         detail_category: null,
         nutrient: 'N-P-K',
         img_url: 'https://example.com/a.png',
@@ -318,10 +322,10 @@ describe('officeProductDataService.deleteOfficeProductData', () => {
     const existingRow = {
       id: 11,
       office_code: 'OFF-1',
-      office_name: '蹂몄젏',
+      office_name: '본점',
       product_data: [
-        { category_name: '鍮꾨즺', rows: [{ row_id: 'F1' }] },
-        { category_name: '?띿빟', rows: [{ row_id: 'P1' }] },
+        { category_name: '비료', rows: [{ row_id: 'F1' }] },
+        { category_name: '농약', rows: [{ row_id: 'P1' }] },
       ],
     };
     const { select: readSelect } = mockOfficeProductDataRow(existingRow);
@@ -330,10 +334,10 @@ describe('officeProductDataService.deleteOfficeProductData', () => {
 
     supabase.from.mockReturnValue({ select: readSelect, update });
 
-    await deleteOfficeProductData({ officeCode: 'OFF-1', categoryName: '鍮꾨즺' });
+    await deleteOfficeProductData({ officeCode: 'OFF-1', categoryName: '비료' });
 
     expect(update).toHaveBeenCalledWith({
-      product_data: [{ category_name: '?띿빟', rows: [{ row_id: 'P1' }] }],
+      product_data: [{ category_name: '농약', rows: [{ row_id: 'P1' }] }],
     });
     expect(eq).toHaveBeenCalledWith('office_code', 'OFF-1');
   });
@@ -344,7 +348,7 @@ describe('officeProductDataService.deleteOfficeProductData', () => {
 
     supabase.from.mockReturnValue({ select: readSelect, update });
 
-    await deleteOfficeProductData({ officeCode: 'OFF-1', categoryName: '鍮꾨즺' });
+    await deleteOfficeProductData({ officeCode: 'OFF-1', categoryName: '비료' });
 
     expect(update).not.toHaveBeenCalled();
   });

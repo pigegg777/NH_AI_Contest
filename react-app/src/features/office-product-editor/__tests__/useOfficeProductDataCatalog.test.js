@@ -2,9 +2,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useOfficeProductDataCatalog } from '../hooks/useOfficeProductDataCatalog';
-import { fetchOfficeProductDataCatalog } from '../services/officeProductDataService';
+import { fetchOfficeProductDataCatalog } from '../services/office-product-data/officeProductDataReadService';
 
-vi.mock('../services/officeProductDataService', async (importOriginal) => {
+vi.mock('../services/office-product-data/officeProductDataReadService', async (importOriginal) => {
   const actual = await importOriginal();
 
   return {

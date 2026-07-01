@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/officeProductDataService';
+import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/office-product-data/officeProductDataReadService';
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -283,6 +283,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       ? dataSelection.draft
       : dataSelection.committed;
 
+  const previewBodySlots =
+    currentStep === DATA_SELECTION_STEP_INDEX ? [] : cardAi.bodySlots;
+
   const previewConfig = selectedProductCategoryName
     ? buildStorefrontSavePayload({
         officeCode,
@@ -293,7 +296,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         representativeMediumCategory,
         cardStyle: cardAi.cardStyle,
         cardFields: previewCardFields,
-        bodySlots: cardAi.bodySlots,
+        bodySlots: previewBodySlots,
         navConfig,
         mobileUiTree,
         pageStyle: pageAi.pageStyle,

@@ -1,4 +1,4 @@
-import { resolveActiveCategoryName } from '../model/officeProductDataCatalogModel';
+import { resolveActiveCategoryName } from '../model/sidebar-catalog/sidebarCatalogCreateModel';
 import { useRegisteredProductData } from './useRegisteredProductData';
 
 const EMPTY_ROWS = [];
@@ -16,7 +16,8 @@ export function useActiveCategoryData({
   const registeredCatalogItem =
     officeProductCatalogItems.find((item) => item.categoryName === activeCategoryName) ?? null;
 
-  const isViewingRegisteredData = Boolean(registeredCatalogItem) && !result;
+  const isViewingRegisteredData = Boolean(registeredCatalogItem);
+  const shouldFetchRegisteredData = isViewingRegisteredData && !result;
 
   const {
     data: registeredProductData,
@@ -25,7 +26,7 @@ export function useActiveCategoryData({
   } = useRegisteredProductData({
     user,
     categoryName: activeCategoryName,
-    isEnabled: isViewingRegisteredData,
+    isEnabled: shouldFetchRegisteredData,
   });
 
   const extractedRows = result?.rows ?? registeredProductData?.rows ?? EMPTY_ROWS;

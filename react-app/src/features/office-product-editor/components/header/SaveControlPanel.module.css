@@ -1,0 +1,30 @@
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 22px;
+  border: 1px solid #991b1b;
+  border-radius: var(--corp-radius-sm);
+  background: #b91c1c;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.saveButton:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.saveButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.25);
+}
+
+.saveButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -3,7 +3,7 @@
 import {
   getStaticFertilizerProductCodes,
   mergeRowsWithStaticFertilizer,
-} from '../model/merge/staticFertilizerMergeModel';
+} from '../model/static-data-merge/staticFertilizerMergeModel';
 
 describe('static fertilizer merge model', () => {
   it('dedupes normalized product codes and merges lookup fields into rows', () => {

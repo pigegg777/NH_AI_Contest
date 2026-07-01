@@ -14,14 +14,12 @@ const processFile = vi.fn();
 const resetWorkbook = vi.fn();
 const saveOfficeProductData = vi.fn();
 const fetchOfficeProductData = vi.fn();
-const fetchStaticFertilizerLookup = vi.fn();
+const fetchStaticProductLookup = vi.fn();
 
 vi.mock('../hooks/useWorkbookExtraction', () => ({
   useWorkbookExtraction: () => ({
     selectedFileName: 'demo.xlsx',
     workbookFingerprint: 'workbook-fingerprint',
-    isExtracting: false,
-    errorMessage: '',
     result: mockResult,
     handleWorkbookChange,
     processFile,
@@ -29,13 +27,16 @@ vi.mock('../hooks/useWorkbookExtraction', () => ({
   }),
 }));
 
-vi.mock('../services/officeProductDataService', () => ({
+vi.mock('../services/office-product-data/officeProductDataMutationService', () => ({
   saveOfficeProductData: (...args) => saveOfficeProductData(...args),
+}));
+
+vi.mock('../services/office-product-data/officeProductDataReadService', () => ({
   fetchOfficeProductData: (...args) => fetchOfficeProductData(...args),
 }));
 
-vi.mock('../services/staticFertilizerLookupService', () => ({
-  fetchStaticFertilizerLookup: (...args) => fetchStaticFertilizerLookup(...args),
+vi.mock('../services/staticProductLookupService', () => ({
+  fetchStaticProductLookup: (...args) => fetchStaticProductLookup(...args),
 }));
 
 vi.mock('../hooks/useOfficeProductDataCatalog', () => ({
@@ -108,7 +109,7 @@ describe('OfficeProductEditorPage', () => {
       isLoading: false,
       errorMessage: '',
     };
-    fetchStaticFertilizerLookup.mockResolvedValue({});
+    fetchStaticProductLookup.mockResolvedValue({});
     fetchOfficeProductData.mockResolvedValue(null);
   });
 
@@ -285,9 +286,8 @@ describe('OfficeProductEditorPage', () => {
       expect(screen.getByText('Alpha')).toBeInTheDocument();
     });
 
-    const resultSection = screen.getByText('집계 결과').closest('section');
-    expect(resultSection).not.toBeNull();
-    expect(within(resultSection).getByRole('button', { name: '저장하기' })).toBeEnabled();
+    expect(screen.getByText('집계 결과')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '저장하기' })).toBeEnabled();
   });
 
   it('saves only the currently rendered rows from the result section', async () => {
@@ -313,9 +313,7 @@ describe('OfficeProductEditorPage', () => {
 
     await user.type(screen.getByRole('searchbox'), 'Alpha');
 
-    const resultSection = screen.getByText('집계 결과').closest('section');
-    expect(resultSection).not.toBeNull();
-    await user.click(within(resultSection).getByRole('button', { name: '저장하기' }));
+    await user.click(screen.getByRole('button', { name: '저장하기' }));
 
     await waitFor(() => {
       expect(saveOfficeProductData).toHaveBeenCalledWith(
@@ -476,7 +474,7 @@ describe('OfficeProductEditorPage', () => {
     });
 
     expect(
-      screen.getByText('새 엑셀 파일을 선택하면 이 데이터를 신규로 등록(덮어쓰기)합니다.'),
+      screen.getByText('⚠️ 새 파일 선택 시 현재 저장된 데이터가 삭제되고 새 파일로 완전히 교체됩니다.'),
     ).toBeInTheDocument();
     expect(fetchOfficeProductData).toHaveBeenCalledWith({
       officeCode: 'OFF-1',

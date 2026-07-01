@@ -4,7 +4,7 @@ import panelStyles from '../../office-product-editor/components/shared/panel.mod
 import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
-} from '../../office-product-editor/services/officeProductDataService';
+} from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
 import StorefrontView from '../components/StorefrontView';
 import { fetchStorefrontConfig } from '../services/storefrontConfigService';
 import styles from './PublicStorefrontPage.module.css';

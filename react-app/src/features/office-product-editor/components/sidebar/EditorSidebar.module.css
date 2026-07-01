@@ -1,0 +1,263 @@
+/* ─── Sidebar shell ────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-right: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+}
+
+.sidebarCollapsed {
+  overflow: hidden;
+}
+
+.sidebarCollapsed .sidebarCard {
+  display: none;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 40px;
+  flex-shrink: 0;
+  border: none;
+  border-bottom: 1px solid var(--corp-line);
+  background: rgba(29, 74, 46, 0.07);
+  color: var(--corp-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.sidebarToggle:hover {
+  background: rgba(29, 74, 46, 0.13);
+}
+
+.sidebarCollapsed .sidebarToggle {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  min-height: 120px;
+  padding: 14px 0;
+}
+
+.sidebarCard {
+  padding: 16px;
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.sidebarCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sidebarTitle {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sidebarBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.sidebarMutedText {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+}
+
+.sidebarErrorText {
+  margin: 0;
+  color: var(--corp-danger);
+  font-size: 0.8rem;
+}
+
+/* ─── Catalog list ─────────────────────────────────────── */
+.catalogList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catalogListItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border-radius: var(--corp-radius-sm);
+}
+
+.catalogListItem .catalogListItemButton {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalogListDeleteButton {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  margin-left: 4px;
+  padding: 0 8px 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--corp-radius-sm);
+  background: transparent;
+  color: var(--corp-danger);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.catalogListDeleteButton::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 18px;
+  background: var(--corp-line);
+  transform: translateY(-50%);
+}
+
+.catalogListDeleteButton:hover {
+  background: rgba(185, 28, 28, 0.1);
+}
+
+.catalogListDeleteButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.catalogListItemButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--corp-radius-sm);
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.catalogListItemButton:hover {
+  background: var(--corp-surface-muted);
+}
+
+.catalogListItemButtonActive {
+  background: rgba(29, 74, 46, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(29, 74, 46, 0.18);
+}
+
+.catalogListItemButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.catalogListMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.catalogListName {
+  color: var(--corp-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogListMeta {
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogListStatus {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.catalogListStatusRegistered {
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+}
+
+.catalogListStatusEmpty {
+  background: var(--corp-surface-muted);
+  color: var(--corp-muted);
+}
+
+.catalogListStatusActive {
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 760px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--corp-line);
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: visible;
+  }
+
+  .sidebarCard {
+    flex: 1 1 200px;
+    border-bottom: none;
+    border-right: 1px solid var(--corp-line);
+  }
+
+  .sidebarCard:last-child {
+    border-right: none;
+  }
+}

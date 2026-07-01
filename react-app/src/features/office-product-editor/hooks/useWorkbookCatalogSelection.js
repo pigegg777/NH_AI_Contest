@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { validateCustomCategoryCreation } from '../model/officeProductDataCatalogModel';
-import { resolveTableNameModeFromCategoryName } from '../model/workbookSaveModel';
+import {
+  resolveTableNameModeFromCategoryName,
+  validateCustomCategoryCreation,
+} from '../model/sidebar-catalog/sidebarCatalogCreateModel';
 
 export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
   const [tableNameMode, setTableNameMode] = useState('');
@@ -62,12 +64,12 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
   }
 
   function isCardSelected(card) {
-    if (card.variant === 'add') {
+    if (card.isAdd) {
       return tableNameMode === 'custom' && !isShowingExistingCustomCategory;
     }
 
-    if (card.variant === 'default') {
-      return resolveTableNameModeFromCategoryName(card.categoryName) === tableNameMode;
+    if (card.selectionMode) {
+      return card.selectionMode === tableNameMode;
     }
 
     return isShowingExistingCustomCategory && activeCustomCategoryName === card.categoryName;
@@ -76,13 +78,13 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
   function handleCatalogSelect(card) {
     clearCreateError();
 
-    if (card.variant === 'add') {
+    if (card.isAdd) {
       setTableNameMode('custom');
       setActiveCustomCategoryName('');
       return;
     }
 
-    const mode = resolveTableNameModeFromCategoryName(card.categoryName);
+    const mode = card.selectionMode;
 
     if (mode) {
       setTableNameMode(mode);

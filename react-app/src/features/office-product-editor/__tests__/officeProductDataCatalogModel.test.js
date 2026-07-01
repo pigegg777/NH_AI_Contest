@@ -1,9 +1,10 @@
 ﻿import { describe, expect, it } from 'vitest';
 
 import {
-  buildOfficeProductDataCatalogModel,
+  resolveActiveCategoryName,
   validateCustomCategoryCreation,
-} from '../model/officeProductDataCatalogModel';
+} from '../model/sidebar-catalog/sidebarCatalogCreateModel';
+import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
 
 describe('buildOfficeProductDataCatalogModel', () => {
   it('builds default cards, extra registered cards, and the add card', () => {
@@ -29,9 +30,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
     expect(model.cards[0]).toEqual(
       expect.objectContaining({
         categoryName: '비료',
-        variant: 'default',
+        isAdd: false,
         isEmpty: false,
-        isSelectable: true,
         selectionMode: 'fertilizer',
         statusLabel: '등록됨',
       }),
@@ -40,9 +40,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
     expect(model.cards[1]).toEqual(
       expect.objectContaining({
         categoryName: '농약',
-        variant: 'default',
+        isAdd: false,
         isEmpty: true,
-        isSelectable: true,
         selectionMode: 'pesticide',
         statusLabel: '미등록',
         description: '아직 저장된 데이터가 없습니다.',
@@ -51,9 +50,8 @@ describe('buildOfficeProductDataCatalogModel', () => {
     expect(model.cards[2]).toEqual(
       expect.objectContaining({
         categoryName: '종자',
-        variant: 'registered',
+        isAdd: false,
         isEmpty: false,
-        isSelectable: true,
         selectionMode: null,
         statusLabel: '등록됨',
       }),
@@ -66,8 +64,7 @@ describe('buildOfficeProductDataCatalogModel', () => {
     expect(model.cards[3]).toEqual(
       expect.objectContaining({
         categoryName: '+ 추가',
-        variant: 'add',
-        isSelectable: true,
+        isAdd: true,
         selectionMode: 'custom',
         statusLabel: '준비 중',
       }),
@@ -92,7 +89,7 @@ describe('buildOfficeProductDataCatalogModel', () => {
     expect(model.cards[2]).toEqual(
       expect.objectContaining({
         categoryName: '자재',
-        variant: 'registered',
+        isAdd: false,
         isEmpty: true,
         statusLabel: '미등록',
       }),
@@ -160,5 +157,16 @@ describe('validateCustomCategoryCreation', () => {
       reason: 'empty',
       message: '',
     });
+  });
+});
+
+describe('resolveActiveCategoryName', () => {
+  it('returns the default category name for preset modes', () => {
+    expect(resolveActiveCategoryName('fertilizer', '')).toBe('비료');
+    expect(resolveActiveCategoryName('pesticide', '')).toBe('농약');
+  });
+
+  it('returns the trimmed custom category name for custom mode', () => {
+    expect(resolveActiveCategoryName('custom', '  자재  ')).toBe('자재');
   });
 });

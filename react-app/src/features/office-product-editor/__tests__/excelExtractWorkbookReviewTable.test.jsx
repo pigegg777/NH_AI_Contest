@@ -2,13 +2,12 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { WorkbookReviewTableSection } from '../components/workbook-review/WorkbookReviewTableSection';
+import { DataTableSection } from '../components/DataTableSection';
 import {
-  SORT_DIRECTION,
-  createInitialFilters,
   createInitialSortState,
   getTableColumnsByMode,
-} from '../model/table';
+} from '../model/review-table/reviewTableConfigModel';
+import { createInitialFilters } from '../model/review-table/reviewTableFilterModel';
 
 const rows = [
   {
@@ -57,7 +56,7 @@ const rows = [
 
 function renderTable(overrides = {}) {
   return render(
-    <WorkbookReviewTableSection
+    <DataTableSection
       rows={rows}
       searchQuery=""
       onSearchQueryChange={vi.fn()}
@@ -90,11 +89,7 @@ function getRenderedColumnKeys() {
 
 describe('excel extract workbook review table', () => {
   it('groups the table controls into accessible dashboard sections', () => {
-    renderTable({
-      onSave: vi.fn(),
-      onResetData: vi.fn(),
-      canSave: true,
-    });
+    renderTable();
 
     expect(screen.getByRole('region', { name: /result table controls/i })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: /search and actions/i })).toBeInTheDocument();
@@ -103,48 +98,6 @@ describe('excel extract workbook review table', () => {
     const searchInput = screen.getByRole('searchbox');
     expect(searchInput).toHaveAttribute('name', 'row-search');
     expect(searchInput).toHaveAttribute('autocomplete', 'off');
-  });
-
-  it('renders a shadow checkbox in the first column and toggles it', async () => {
-    const user = userEvent.setup();
-    const onShadowToggle = vi.fn();
-
-    renderTable({ onShadowToggle });
-
-    const checkbox = screen.getByRole('checkbox', { name: 'shadow-A100__01' });
-    await user.click(checkbox);
-
-    expect(onShadowToggle).toHaveBeenCalledWith('A100__01');
-  });
-
-  it('bulk-selects only the visible rows from the header checkbox', async () => {
-    const user = userEvent.setup();
-    const onVisibleRowsShadowChange = vi.fn();
-
-    renderTable({
-      rows: [rows[0]],
-      onVisibleRowsShadowChange,
-    });
-
-    const headerCheckbox = within(screen.getAllByRole('columnheader')[0]).getByRole('checkbox');
-    await user.click(headerCheckbox);
-
-    expect(onVisibleRowsShadowChange).toHaveBeenCalledWith(['A100__01'], true);
-  });
-
-  it('opens a note input on cell click and saves on blur', async () => {
-    const user = userEvent.setup();
-    const onNoteChange = vi.fn();
-
-    renderTable({ onNoteChange });
-
-    await user.click(screen.getByRole('button', { name: 'note-cell-A100__01' }));
-
-    const input = screen.getByRole('textbox', { name: 'note-input-A100__01' });
-    await user.type(input, 'memo');
-    await user.tab();
-
-    expect(onNoteChange).toHaveBeenCalledWith('A100__01', 'memo');
   });
 
   it('orders columns according to the fertilizer table model', () => {
@@ -181,22 +134,6 @@ describe('excel extract workbook review table', () => {
     expect(renderedColumnKeys).not.toContain('price_subsidy');
     expect(renderedColumnKeys).not.toContain('img_url');
     expect(renderedColumnKeys).not.toContain('product_url');
-  });
-
-  it('opens a price input on tax_price cell click and saves the numeric value on blur', async () => {
-    const user = userEvent.setup();
-    const onPriceChange = vi.fn();
-
-    renderTable({ onPriceChange });
-
-    await user.click(screen.getByRole('button', { name: 'price-cell-tax_price-A100__01' }));
-
-    const input = screen.getByRole('spinbutton', { name: 'price-input-tax_price-A100__01' });
-    await user.clear(input);
-    await user.type(input, '1500');
-    await user.tab();
-
-    expect(onPriceChange).toHaveBeenCalledWith('A100__01', 'tax_price', 1500);
   });
 
   it('renders the pesticide-only usage popup and column set', async () => {
@@ -261,11 +198,77 @@ describe('excel extract workbook review table', () => {
     const { container } = renderTable({
       sortState: {
         key: 'product_code',
-        direction: SORT_DIRECTION.descending,
+        direction: 'desc',
       },
     });
 
     const sortButton = container.querySelector('th[data-col="product_code"] button');
     expect(sortButton).toHaveTextContent('v');
+  });
+
+  it('reflects shadow=true as a checked row checkbox', () => {
+    renderTable({ tableNameMode: 'fertilizer' });
+
+    const shadowA = screen.getByRole('checkbox', { name: 'shadow-A100__01' });
+    const shadowB = screen.getByRole('checkbox', { name: 'shadow-B200__02' });
+
+    expect(shadowA).not.toBeChecked();
+    expect(shadowB).toBeChecked();
+  });
+
+  it('renders note cell content for each row', () => {
+    renderTable({ tableNameMode: 'fertilizer' });
+
+    expect(screen.getByRole('button', { name: 'note-cell-A100__01' })).toHaveTextContent('-');
+    expect(screen.getByRole('button', { name: 'note-cell-B200__02' })).toHaveTextContent('saved');
+  });
+
+  it('calls onNoteChange when note cell is edited and committed', async () => {
+    const user = userEvent.setup();
+    const onNoteChange = vi.fn();
+
+    renderTable({ tableNameMode: 'fertilizer', onNoteChange });
+
+    await user.click(screen.getByRole('button', { name: 'note-cell-A100__01' }));
+
+    const input = screen.getByRole('textbox', { name: 'note-input-A100__01' });
+    await user.clear(input);
+    await user.type(input, 'new note');
+    await user.keyboard('{Enter}');
+
+    expect(onNoteChange).toHaveBeenCalledWith('A100__01', 'new note');
+  });
+
+  it('calls onShadowToggle when row shadow checkbox is clicked', async () => {
+    const user = userEvent.setup();
+    const onShadowToggle = vi.fn();
+
+    renderTable({ tableNameMode: 'fertilizer', onShadowToggle });
+
+    await user.click(screen.getByRole('checkbox', { name: 'shadow-A100__01' }));
+
+    expect(onShadowToggle).toHaveBeenCalledWith('A100__01');
+  });
+
+  it('calls onVisibleRowsShadowChange with all visible row ids when header checkbox is clicked', async () => {
+    const user = userEvent.setup();
+    const onVisibleRowsShadowChange = vi.fn();
+
+    renderTable({
+      tableNameMode: 'fertilizer',
+      rows: [{ ...rows[0], shadow: false }, { ...rows[1], shadow: false }],
+      onVisibleRowsShadowChange,
+    });
+
+    const headerCheckbox = within(
+      screen.getByRole('columnheader', { name: /숨길 상품 표시/ }),
+    ).getByRole('checkbox');
+
+    await user.click(headerCheckbox);
+
+    expect(onVisibleRowsShadowChange).toHaveBeenCalledWith(
+      ['A100__01', 'B200__02'],
+      true,
+    );
   });
 });

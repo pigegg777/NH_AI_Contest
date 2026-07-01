@@ -2,20 +2,16 @@
 
 import {
   DEFAULT_TABLE_COLUMNS,
-  EMPTY_FILTER_VALUE,
   FERTILIZER_TABLE_COLUMNS,
   PESTICIDE_TABLE_COLUMNS,
-  SORT_DIRECTION,
-  createInitialFilters,
   getTableColumnsByMode,
-} from '../model/table';
+} from '../model/review-table/reviewTableConfigModel';
+import { buildFilterOptions, buildTableModel } from '../model/review-table/reviewTableBuildModel';
 import {
-  buildFilterOptions,
-  buildTableModel,
-  formatManufacturerList,
-  getWarningRows,
-  sortRows,
-} from '../model/table';
+  createInitialFilters,
+} from '../model/review-table/reviewTableFilterModel';
+import { sortRows } from '../model/review-table/reviewTableSortModel';
+import { formatManufacturerList } from '../utils/reviewTableCellValueUtils';
 
 const sampleRows = [
   {
@@ -63,7 +59,7 @@ describe('excel extract workbook review table model', () => {
     const filterOptions = buildFilterOptions(sampleRows);
 
     expect(filterOptions.sale_price_type_name).toEqual(['기본단가', '회원단가']);
-    expect(filterOptions.detail_category).toEqual([EMPTY_FILTER_VALUE]);
+    expect(filterOptions.detail_category).toEqual(['__empty__']);
   });
 
   it('filters by nutrient search and collects warning rows through one interface', () => {
@@ -72,7 +68,7 @@ describe('excel extract workbook review table model', () => {
 
     const tableModel = buildTableModel(sampleRows, 'n-p-k', filters, {
       key: 'tax_price',
-      direction: SORT_DIRECTION.descending,
+      direction: 'desc',
     });
 
     expect(tableModel.sortedRows).toHaveLength(1);
@@ -83,14 +79,19 @@ describe('excel extract workbook review table model', () => {
   it('sorts the new static fertilizer fields', () => {
     const sortedRows = sortRows(sampleRows, {
       key: 'price_subsidy',
-      direction: SORT_DIRECTION.descending,
+      direction: 'desc',
     });
 
     expect(sortedRows.map((row) => row.product_code)).toEqual(['B200', 'A100']);
   });
 
   it('formats manufacturer rows for sorting and rendering', () => {
-    expect(getWarningRows(sampleRows)).toHaveLength(1);
+    expect(
+      buildTableModel(sampleRows, '', createInitialFilters(), {
+        key: 'product_code',
+        direction: 'asc',
+      }).warningRows,
+    ).toHaveLength(1);
     expect(formatManufacturerList(sampleRows[0].manufacturer_list)).toBe('제조사B');
     expect(formatManufacturerList([])).toBe('-');
   });

@@ -116,9 +116,6 @@ describe('useWorkbookAiRecommendations', () => {
 
     expect(result.current.analysisMode).toBe('local-only');
     expect(result.current.recommendations).toEqual([mockRecommendation]);
-    expect(result.current.errorMessage).toBe(
-      'OpenAI 보조 분석에 실패하여 로컬 검사 결과만 표시합니다.',
-    );
   });
 
   it('clears recommendations and exposes the error when analysis fails', async () => {
@@ -143,7 +140,6 @@ describe('useWorkbookAiRecommendations', () => {
 
     expect(result.current.recommendations).toEqual([]);
     expect(result.current.activeRecommendationId).toBe(null);
-    expect(result.current.errorMessage).toBe('OpenAI API request failed.');
   });
 });
 

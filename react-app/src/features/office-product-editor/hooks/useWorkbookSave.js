@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { toNullableTrimmedString, toTrimmedString } from '../../../common/utils/text';
-import {
-  canSaveWorkbookData,
-  resolveSaveCategoryName,
-} from '../model/workbookSaveModel';
-import { saveOfficeProductData } from '../services/officeProductDataService';
+import { resolveActiveCategoryName } from '../model/sidebar-catalog/sidebarCatalogCreateModel';
+import { saveOfficeProductData } from '../services/office-product-data/officeProductDataMutationService';
 
 const SAVE_ERROR_MESSAGE = '검토 데이터를 저장하지 못했습니다.';
 
@@ -22,12 +19,18 @@ export function useWorkbookSave({
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState('');
 
-  const resolvedCategoryName = resolveSaveCategoryName(tableNameMode, customTableName);
-  const canSave = canSaveWorkbookData({
-    user,
-    rows: rowsToSave,
-    categoryName: resolvedCategoryName,
-  });
+  const resolvedCategoryName = resolveActiveCategoryName(
+    tableNameMode,
+    customTableName,
+  );
+  const canSave = Boolean(
+    user?.id &&
+      user?.office_code &&
+      user?.office_name &&
+      Array.isArray(rowsToSave) &&
+      rowsToSave.length > 0 &&
+      toTrimmedString(resolvedCategoryName),
+  );
 
   useEffect(() => {
     setSaveErrorMessage('');

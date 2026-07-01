@@ -1,261 +1,199 @@
 import { useState } from 'react';
 
-import { toTrimmedString } from '../../../common/utils/text';
-import { useActiveCategoryData } from '../hooks/useActiveCategoryData';
-import { useOfficeProductDataCatalog } from '../hooks/useOfficeProductDataCatalog';
-import { useOfficeProductDataDeletion } from '../hooks/useOfficeProductDataDeletion';
-import { useWorkbookAiRecommendations } from '../hooks/useWorkbookAiRecommendations';
-import { useWorkbookCatalogSelection } from '../hooks/useWorkbookCatalogSelection';
-import { useWorkbookExtraction } from '../hooks/useWorkbookExtraction';
-import { useWorkbookReviewTableState } from '../hooks/useWorkbookReviewTableState';
-import { useWorkbookSave } from '../hooks/useWorkbookSave';
-import { buildOfficeProductDataCatalogModel } from '../model/officeProductDataCatalogModel';
-import { shouldUseStaticDataMerge } from '../model/workbookSaveModel';
-import { WorkbookReviewSidebar } from '../components/workbook-review/WorkbookReviewSidebar';
-import { WorkbookReviewWorkspace } from '../components/workbook-review/workspace-ui/WorkbookReviewWorkspace';
+import { DataUploadSection } from '../components/DataUploadSection';
+import { DataEditorSection } from '../components/DataEditorSection';
+import { DataTableSection } from '../components/DataTableSection';
+import { EditorSidebar } from '../components/sidebar/EditorSidebar';
+import { HeaderSection } from '../components/header/HeaderSection';
+import uploadPanelStyles from '../components/DataUploadSection.module.css';
+import { useOfficeProductEditorState } from '../hooks/useOfficeProductEditorState';
 import styles from './OfficeProductEditorPage.module.css';
+
+function EmptySelectionState() {
+  return (
+    <div className={uploadPanelStyles.emptySelectionState}>
+      <p className={uploadPanelStyles.emptySelectionTitle}>
+        새 테이블을 등록해주세요
+      </p>
+      <p className={uploadPanelStyles.emptySelectionHint}>
+        등록 데이터를 선택하거나 추가하세요
+      </p>
+    </div>
+  );
+}
 
 export default function OfficeProductEditorPage({ user }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  const {
-    selectedFileName,
-    workbookFingerprint,
-    isExtracting,
-    errorMessage,
-    result,
-    handleWorkbookChange,
-    processFile,
-    resetWorkbook,
-  } = useWorkbookExtraction();
-
-  const {
-    items: officeProductCatalogItems,
-    isLoading: isOfficeProductCatalogLoading,
-    errorMessage: officeProductCatalogErrorMessage,
-    removeItem: removeOfficeProductCatalogItem,
-    upsertItem: upsertOfficeProductCatalogItem,
-  } = useOfficeProductDataCatalog(user);
-
   const {
     tableNameMode,
-    customTableName,
-    pendingCustomCategories,
-    effectiveCustomTableName,
     showsCustomTableNameInput,
-    customTableNameInputRef,
-    handleCustomTableNameChange,
-    handleCreateCustomTable,
-    tableNameValidationError,
-    canCreateTable,
-    isCardSelected,
-    handleCatalogSelect,
-  } = useWorkbookCatalogSelection({ officeProductCatalogItems });
-
-  const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
-
-  const {
     activeCategoryName,
-    registeredCatalogItem,
-    isViewingRegisteredData,
-    isRegisteredProductDataLoading,
-    registeredProductDataErrorMessage,
-    extractedRows,
-    effectiveFingerprint,
     bannerStatusLabel,
     bannerStatusVariant,
-  } = useActiveCategoryData({
-    user,
+    isViewingRegisteredData,
+    activeCategory,
+    catalog,
+    extraction,
+    upload,
+    table,
+    ai,
+    save,
+  } = useOfficeProductEditorState(user);
+
+  const editorResultProps = {
+    rows: table.rows,
+    aiRecommendations: ai.recommendations,
+    aiAnalysisMode: ai.analysisMode,
+    aiActiveRecommendationId: ai.activeRecommendationId,
+    onAiAnalyze: ai.handleAnalyze,
+    onAiRecommendationSelect: ai.handleRecommendationSelect,
+  };
+
+  const uploadResultSectionProps = {
+    rows: table.rows,
+    searchQuery: table.searchQuery,
+    onSearchQueryChange: table.onSearchQueryChange,
+    filters: table.filters,
+    filterOptions: table.filterOptions,
+    onFilterChange: table.onFilterChange,
+    onResetFilters: table.onResetFilters,
+    sortState: table.sortState,
+    onSortChange: table.onSortChange,
     tableNameMode,
-    effectiveCustomTableName,
-    officeProductCatalogItems,
-    result,
-    workbookFingerprint,
-  });
+    onShadowToggle: table.onShadowToggle,
+    onVisibleRowsShadowChange: table.onVisibleRowsShadowChange,
+    onNoteChange: table.onNoteChange,
+    onPriceChange: table.onPriceChange,
+    aiRecommendations: ai.recommendations,
+    aiAnalysisMode: ai.analysisMode,
+    aiActiveRecommendationId: ai.activeRecommendationId,
+    onAiAnalyze: ai.handleAnalyze,
+    onAiRecommendationSelect: ai.handleRecommendationSelect,
+    onSave: save.handleSave,
+    canSave: save.canSave,
+    isSaving: save.isSaving,
+    saveErrorMessage: save.saveErrorMessage,
+    saveSuccessMessage: save.saveSuccessMessage,
+    saveDisabledMessage: save.saveDisabledMessage,
+  };
 
-  const {
-    rows,
-    warningRows,
-    mergedRows,
-    searchQuery,
-    setSearchQuery,
-    filters,
-    filterOptions,
-    sortState,
-    setSortState,
-    handleFilterChange,
-    resetFilters,
-    toggleShadow,
-    setShadowForRows,
-    updateNote,
-    updatePrice,
-    isMerging,
-    isMerged,
-    mergeError,
-    mergeStatusMessage,
-  } = useWorkbookReviewTableState(extractedRows, effectiveFingerprint, {
-    hasResult: Boolean(result),
-    isStaticMergeEnabled,
-    tableNameMode,
-  });
-
-  const {
-    recommendations: aiRecommendations,
-    analysisMode: aiAnalysisMode,
-    isAnalyzing: aiIsAnalyzing,
-    errorMessage: aiErrorMessage,
-    activeRecommendationId: aiActiveRecommendationId,
-    handleAnalyze: handleAiAnalyze,
-    handleRecommendationSelect: handleAiRecommendationSelect,
-  } = useWorkbookAiRecommendations(mergedRows, effectiveFingerprint);
-
-  const {
-    canSave,
-    isSaving,
-    saveErrorMessage,
-    saveSuccessMessage,
-    resolvedCategoryName,
-    handleSave,
-  } = useWorkbookSave({
-    user,
-    rowsToSave: rows,
-    selectedFileName,
-    workbookFingerprint,
-    tableNameMode,
-    customTableName: effectiveCustomTableName,
-    onSaved: upsertOfficeProductCatalogItem,
-  });
-
-  const { cards: catalogCards, registeredCount } = buildOfficeProductDataCatalogModel(
-    officeProductCatalogItems,
-    pendingCustomCategories,
-  );
-
-  const canUploadFile = toTrimmedString(resolvedCategoryName).length > 0;
-  const saveDisabledMessage =
-    rows.length > 0 && !toTrimmedString(resolvedCategoryName)
-      ? '저장하려면 먼저 사이드바에서 카테고리를 선택하세요.'
-      : '';
-
-  const { isDeletingData, handleResetRegisteredData, handleCatalogCardDelete } =
-    useOfficeProductDataDeletion({
-      user,
-      activeCategoryName,
-      onRemoved: removeOfficeProductCatalogItem,
-      onActiveDataDeleted: resetWorkbook,
-    });
-
-  function handleCatalogCardSelect(card) {
-    if (!isCardSelected(card)) {
-      resetWorkbook();
+  function renderWorkspace() {
+    if (tableNameMode === '') {
+      return <EmptySelectionState />;
     }
 
-    handleCatalogSelect(card);
+    if (isViewingRegisteredData) {
+      return (
+        <>
+          <DataEditorSection
+            onWorkbookChange={extraction.handleWorkbookChange}
+            isRegisteredProductDataLoading={
+              activeCategory.isRegisteredProductDataLoading
+            }
+            registeredProductDataErrorMessage={
+              activeCategory.registeredProductDataErrorMessage
+            }
+            fileWarnings={extraction.result?.warnings}
+            warningRows={table.warningRows}
+            resultSectionProps={editorResultProps}
+            saveSectionProps={{
+              handleSave: save.handleSave,
+              canSave: save.canSave,
+              isSaving: save.isSaving,
+              saveDisabledMessage: save.saveDisabledMessage,
+              saveErrorMessage: save.saveErrorMessage,
+              saveSuccessMessage: save.saveSuccessMessage,
+            }}
+          />
+
+          <DataTableSection
+            rows={table.rows}
+            searchQuery={table.searchQuery}
+            onSearchQueryChange={table.onSearchQueryChange}
+            filters={table.filters}
+            filterOptions={table.filterOptions}
+            onFilterChange={table.onFilterChange}
+            onResetFilters={table.onResetFilters}
+            sortState={table.sortState}
+            onSortChange={table.onSortChange}
+            tableNameMode={tableNameMode}
+            onShadowToggle={table.onShadowToggle}
+            onVisibleRowsShadowChange={table.onVisibleRowsShadowChange}
+            onNoteChange={table.onNoteChange}
+            onPriceChange={table.onPriceChange}
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <DataUploadSection
+          tableNameCardProps={upload.tableNameCardProps}
+          result={extraction.result}
+          warningRows={table.warningRows}
+          selectedFileName={extraction.selectedFileName}
+          onWorkbookChange={extraction.handleWorkbookChange}
+          canUploadFile={upload.canUploadFile}
+          onFileSelected={extraction.processFile}
+          resultSectionProps={uploadResultSectionProps}
+        />
+        {extraction.result ? (
+          <DataTableSection
+            rows={table.rows}
+            searchQuery={table.searchQuery}
+            onSearchQueryChange={table.onSearchQueryChange}
+            filters={table.filters}
+            filterOptions={table.filterOptions}
+            onFilterChange={table.onFilterChange}
+            onResetFilters={table.onResetFilters}
+            sortState={table.sortState}
+            onSortChange={table.onSortChange}
+            tableNameMode={tableNameMode}
+            onShadowToggle={table.onShadowToggle}
+            onVisibleRowsShadowChange={table.onVisibleRowsShadowChange}
+            onNoteChange={table.onNoteChange}
+            onPriceChange={table.onPriceChange}
+          />
+        ) : null}
+      </>
+    );
   }
-
-  const tableNameCardProps = {
-    customTableName,
-    inputRef: customTableNameInputRef,
-    onTableNameChange: handleCustomTableNameChange,
-    showsTableNameInput: showsCustomTableNameInput,
-    validationError: tableNameValidationError,
-    canCreateTable,
-    onCreateTable: handleCreateCustomTable,
-  };
-
-  const resultSectionProps = {
-    rows,
-    searchQuery,
-    onSearchQueryChange: setSearchQuery,
-    filters,
-    filterOptions,
-    onFilterChange: handleFilterChange,
-    onResetFilters: resetFilters,
-    sortState,
-    onSortChange: setSortState,
-    onShadowToggle: toggleShadow,
-    onVisibleRowsShadowChange: setShadowForRows,
-    onNoteChange: updateNote,
-    onPriceChange: updatePrice,
-    tableNameMode,
-    aiRecommendations,
-    aiAnalysisMode,
-    aiIsAnalyzing,
-    aiErrorMessage,
-    aiActiveRecommendationId,
-    onAiAnalyze: handleAiAnalyze,
-    onAiRecommendationSelect: handleAiRecommendationSelect,
-    aiDisabled: isExtracting || isMerging,
-    onSave: handleSave,
-    canSave,
-    isSaving,
-    saveErrorMessage,
-    saveSuccessMessage,
-    saveDisabledMessage,
-    onResetData: handleResetRegisteredData,
-    isResetting: isDeletingData,
-  };
 
   return (
     <main className={styles.page}>
-      {!showsCustomTableNameInput ? (
-        !activeCategoryName ? (
-          <div className={styles.dataNameBanner}>
-            <span className={styles.dataNameLabel}>현재 작업</span>
-            <h1 className={styles.dataNameTitle}>왼쪽에서 데이터를 선택하세요</h1>
-          </div>
-        ) : (
-          <div className={styles.dataNameBanner}>
-            <span className={styles.dataNameLabel}>현재 등록/편집 데이터</span>
-            <h1 className={styles.dataNameTitle}>{activeCategoryName}</h1>
-            <span
-              className={[
-                styles.dataNameStatus,
-                bannerStatusVariant === 'registered'
-                  ? styles.dataNameStatusRegistered
-                  : styles.dataNameStatusNew,
-              ].join(' ')}
-            >
-              {bannerStatusLabel}
-            </span>
-          </div>
-        )
-      ) : null}
+      <HeaderSection
+        activeCategoryName={activeCategoryName}
+        bannerStatusLabel={bannerStatusLabel}
+        bannerStatusVariant={bannerStatusVariant}
+        isViewingRegisteredData={isViewingRegisteredData}
+        saveProps={{
+          handleSave: save.handleSave,
+          canSave: save.canSave,
+          isSaving: save.isSaving,
+          saveDisabledMessage: save.saveDisabledMessage,
+          saveErrorMessage: save.saveErrorMessage,
+          saveSuccessMessage: save.saveSuccessMessage,
+        }}
+      />
 
-      <div className={`${styles.layout} ${isSidebarCollapsed ? styles.layoutCollapsed : ''}`.trim()}>
-        <WorkbookReviewSidebar
+      <div
+        className={`${styles.layout} ${isSidebarCollapsed ? styles.layoutCollapsed : ''}`.trim()}
+      >
+        <EditorSidebar
           isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
-          registeredCount={registeredCount}
-          isLoading={isOfficeProductCatalogLoading}
-          errorMessage={officeProductCatalogErrorMessage}
-          cards={catalogCards}
-          isCardSelected={isCardSelected}
-          onCardSelect={handleCatalogCardSelect}
-          onCardDelete={handleCatalogCardDelete}
+          onToggleCollapse={() =>
+            setIsSidebarCollapsed((collapsed) => !collapsed)
+          }
+          registeredCount={catalog.registeredCount}
+          isLoading={catalog.isLoading}
+          errorMessage={catalog.errorMessage}
+          cards={catalog.cards}
+          isCardSelected={catalog.isCardSelected}
+          onCardSelect={catalog.onCardSelect}
+          onCardDelete={catalog.onCardDelete}
         />
-
-        <div className={styles.content}>
-          <WorkbookReviewWorkspace
-            tableNameMode={tableNameMode}
-            isViewingRegisteredData={isViewingRegisteredData}
-            tableNameCardProps={tableNameCardProps}
-            result={result}
-            warningRows={warningRows}
-            selectedFileName={selectedFileName}
-            onWorkbookChange={handleWorkbookChange}
-            isExtracting={isExtracting}
-            isMerged={isMerged}
-            mergeStatusMessage={mergeStatusMessage}
-            errorMessage={errorMessage}
-            mergeError={mergeError}
-            canUploadFile={canUploadFile}
-            onFileSelected={processFile}
-            isRegisteredProductDataLoading={isRegisteredProductDataLoading}
-            registeredProductDataErrorMessage={registeredProductDataErrorMessage}
-            resultSectionProps={resultSectionProps}
-          />
-        </div>
+        <div className={styles.content}>{renderWorkspace()}</div>
       </div>
     </main>
   );
