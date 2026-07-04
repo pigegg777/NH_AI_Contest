@@ -15,7 +15,7 @@
 
 .warningRows {
   display: grid;
-  grid-template-rows: repeat(2, auto);
+  grid-template-rows: repeat(1, auto);
   grid-auto-flow: column;
   gap: 6px;
   overflow-x: auto;
@@ -23,7 +23,7 @@
 }
 
 .warningRowCard {
-  min-width: 180px;
+  min-width: 220px;
   padding: 6px 9px;
   border: 1px solid rgba(154, 52, 18, 0.14);
   border-radius: var(--corp-radius-sm);

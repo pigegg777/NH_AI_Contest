@@ -1,43 +1,50 @@
 import { formatManufacturerList } from '../../utils/reviewTableCellValueUtils';
 
-export function sortRows(rows, sortState) {
-  if (!sortState) {
-    return rows;
+export class ReviewTableSortModel {
+  constructor(rows, sortState) {
+    this.rows = rows;
+    this.sortState = sortState;
   }
 
-  const directionFactor = sortState.direction === 'asc' ? 1 : -1;
-
-  return [...rows].sort((left, right) => {
-    const leftValue =
-      sortState.key === 'manufacturer_list'
-        ? formatManufacturerList(left.manufacturer_list)
-        : left[sortState.key];
-    const rightValue =
-      sortState.key === 'manufacturer_list'
-        ? formatManufacturerList(right.manufacturer_list)
-        : right[sortState.key];
-
-    if (leftValue == null && rightValue == null) {
-      return 0;
+  sortRows() {
+    if (!this.sortState) {
+      return this.rows;
     }
 
-    if (leftValue == null) {
-      return 1;
-    }
+    const directionFactor = this.sortState.direction === 'asc' ? 1 : -1;
 
-    if (rightValue == null) {
-      return -1;
-    }
+    return [...this.rows].sort((left, right) => {
+      const leftValue =
+        this.sortState.key === 'manufacturer_list'
+          ? formatManufacturerList(left.manufacturer_list)
+          : left[this.sortState.key];
+      const rightValue =
+        this.sortState.key === 'manufacturer_list'
+          ? formatManufacturerList(right.manufacturer_list)
+          : right[this.sortState.key];
 
-    if (typeof leftValue === 'number' && typeof rightValue === 'number') {
-      return (leftValue - rightValue) * directionFactor;
-    }
+      if (leftValue == null && rightValue == null) {
+        return 0;
+      }
 
-    return (
-      String(leftValue).localeCompare(String(rightValue), 'ko-KR', {
-        numeric: true,
-        sensitivity: 'base',
-      }) * directionFactor
-    );
-  });
+      if (leftValue == null) {
+        return 1;
+      }
+
+      if (rightValue == null) {
+        return -1;
+      }
+
+      if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+        return (leftValue - rightValue) * directionFactor;
+      }
+
+      return (
+        String(leftValue).localeCompare(String(rightValue), 'ko-KR', {
+          numeric: true,
+          sensitivity: 'base',
+        }) * directionFactor
+      );
+    });
+  }
 }

@@ -23,16 +23,16 @@ export function assertPostJsonRequest(request) {
   }
 }
 
-export async function readJsonBody(request) {
+export async function readJsonBody(request, { maxBytes = MAX_REQUEST_BODY_BYTES } = {}) {
   const contentLength = Number(request.headers.get('content-length'));
 
-  if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BODY_BYTES) {
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
     throw new RequestValidationError('Request body is too large.', 413);
   }
 
   const rawBody = await request.text();
 
-  if (rawBody.length > MAX_REQUEST_BODY_BYTES) {
+  if (rawBody.length > maxBytes) {
     throw new RequestValidationError('Request body is too large.', 413);
   }
 

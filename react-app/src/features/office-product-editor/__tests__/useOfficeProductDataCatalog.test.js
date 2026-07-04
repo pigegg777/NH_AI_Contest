@@ -1,7 +1,7 @@
 ﻿import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useOfficeProductDataCatalog } from '../hooks/useOfficeProductDataCatalog';
+import { useOfficeProductDataCatalog } from '../hooks/office-product-data/useOfficeProductDataCatalog';
 import { fetchOfficeProductDataCatalog } from '../services/office-product-data/officeProductDataReadService';
 
 vi.mock('../services/office-product-data/officeProductDataReadService', async (importOriginal) => {

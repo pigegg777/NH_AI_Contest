@@ -16,7 +16,7 @@ const saveOfficeProductData = vi.fn();
 const fetchOfficeProductData = vi.fn();
 const fetchStaticProductLookup = vi.fn();
 
-vi.mock('../hooks/useWorkbookExtraction', () => ({
+vi.mock('../hooks/excel-extranction/useWorkbookExtraction', () => ({
   useWorkbookExtraction: () => ({
     selectedFileName: 'demo.xlsx',
     workbookFingerprint: 'workbook-fingerprint',
@@ -39,7 +39,7 @@ vi.mock('../services/staticProductLookupService', () => ({
   fetchStaticProductLookup: (...args) => fetchStaticProductLookup(...args),
 }));
 
-vi.mock('../hooks/useOfficeProductDataCatalog', () => ({
+vi.mock('../hooks/office-product-data/useOfficeProductDataCatalog', () => ({
   useOfficeProductDataCatalog: () => {
     const [items, setItems] = useState(mockCatalogState.items);
 
@@ -246,6 +246,40 @@ describe('OfficeProductEditorPage', () => {
         }),
       );
     });
+  });
+
+  it('automatically merges fertilizer static lookup data into extracted excel rows', async () => {
+    const user = userEvent.setup();
+
+    mockResult = { warnings: [], rows: sampleRows };
+    fetchStaticProductLookup.mockResolvedValue({
+      A100: {
+        product_code: 'A100',
+        img_url: 'https://example.com/a100.png',
+        product_url: 'https://example.com/a100',
+        nutrient: 'N-P-K',
+        price_subsidy: 1200,
+      },
+    });
+
+    render(
+      <OfficeProductEditorPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /비료/i }));
+
+    await waitFor(() => {
+      expect(fetchStaticProductLookup).toHaveBeenCalledWith('fertilizer', ['A100']);
+    });
+
+    expect(
+      await screen.findByRole('link', { name: 'img-A100__01' }),
+    ).toHaveAttribute('href', 'https://example.com/a100.png');
+    expect(
+      screen.getByRole('link', { name: 'product-A100__01' }),
+    ).toHaveAttribute('href', 'https://example.com/a100');
   });
 
   it('renders the save button inside the result section for registered data review', async () => {

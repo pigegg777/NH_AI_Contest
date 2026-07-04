@@ -3,11 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DataTableSection } from '../components/DataTableSection';
+import { EditorMetaCtx, TableCtx } from '../contexts/editorContexts';
 import {
   createInitialSortState,
   getTableColumnsByMode,
 } from '../model/review-table/reviewTableConfigModel';
-import { createInitialFilters } from '../model/review-table/reviewTableFilterModel';
+import { createInitialFilters } from '../model/review-table/reviewTableBuildModel';
 
 const rows = [
   {
@@ -54,30 +55,37 @@ const rows = [
   },
 ];
 
-function renderTable(overrides = {}) {
+function renderTable({ tableNameMode, ...tableOverrides } = {}) {
+  const tableValue = {
+    rows,
+    warningRows: [],
+    searchQuery: '',
+    onSearchQueryChange: vi.fn(),
+    filters: createInitialFilters(),
+    filterOptions: {
+      sale_price_type_name: [],
+      large_category: [],
+      medium_category: [],
+      small_category: [],
+      detail_category: [],
+    },
+    onFilterChange: vi.fn(),
+    onResetFilters: vi.fn(),
+    sortState: createInitialSortState(),
+    onSortChange: vi.fn(),
+    onShadowToggle: vi.fn(),
+    onVisibleRowsShadowChange: vi.fn(),
+    onNoteChange: vi.fn(),
+    onPriceChange: vi.fn(),
+    ...tableOverrides,
+  };
+
   return render(
-    <DataTableSection
-      rows={rows}
-      searchQuery=""
-      onSearchQueryChange={vi.fn()}
-      filters={createInitialFilters()}
-      filterOptions={{
-        sale_price_type_name: [],
-        large_category: [],
-        medium_category: [],
-        small_category: [],
-        detail_category: [],
-      }}
-      onFilterChange={vi.fn()}
-      onResetFilters={vi.fn()}
-      sortState={createInitialSortState()}
-      onSortChange={vi.fn()}
-      onShadowToggle={vi.fn()}
-      onVisibleRowsShadowChange={vi.fn()}
-      onNoteChange={vi.fn()}
-      onPriceChange={vi.fn()}
-      {...overrides}
-    />,
+    <EditorMetaCtx.Provider value={{ tableNameMode }}>
+      <TableCtx.Provider value={tableValue}>
+        <DataTableSection />
+      </TableCtx.Provider>
+    </EditorMetaCtx.Provider>,
   );
 }
 

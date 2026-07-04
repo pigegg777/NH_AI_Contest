@@ -1,13 +1,14 @@
 import { toTrimmedString } from '../../../common/utils/text';
-import { useActiveCategoryData } from './useActiveCategoryData';
-import { useOfficeProductDataCatalog } from './useOfficeProductDataCatalog';
-import { useOfficeProductDataDeletion } from './useOfficeProductDataDeletion';
-import { useWorkbookAiRecommendations } from './useWorkbookAiRecommendations';
-import { useWorkbookCatalogSelection } from './useWorkbookCatalogSelection';
-import { useWorkbookExtraction } from './useWorkbookExtraction';
-import { useWorkbookReviewTableState } from './useWorkbookReviewTableState';
-import { useWorkbookSave } from './useWorkbookSave';
+import { useActiveCategoryData } from './sidebar-catalog/useActiveCategoryData';
+import { useOfficeProductDataCatalog } from './office-product-data/useOfficeProductDataCatalog';
+import { useOfficeProductDataDeletion } from './office-product-data/useOfficeProductDataDeletion';
+import { useWorkbookAiRecommendationState } from './ai-recommendations/useWorkbookAiRecommendationState';
+import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
+import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
+import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
+import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
+import { shouldUseStaticDataMerge } from '../model/static-data-merge/staticDataMergeModel';
 
 export function useOfficeProductEditorState(user) {
   // ── 레이어 1: 인프라 (독립) ─────────────────────────────────────
@@ -39,10 +40,24 @@ export function useOfficeProductEditorState(user) {
 
   // ── 레이어 3: 데이터 ─────────────────────────────────────────────
   const { effectiveFingerprint, extractedRows } = activeCategoryData;
+  const hasExtractedResult = Boolean(extraction.result);
+  const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
 
-  const tableState = useWorkbookReviewTableState(extractedRows, effectiveFingerprint);
+  const tableState = useWorkbookReviewTableState(
+    extractedRows,
+    effectiveFingerprint,
+    {
+      hasResult: hasExtractedResult,
+      isStaticMergeEnabled,
+      tableNameMode,
+    },
+  );
 
-  const aiState = useWorkbookAiRecommendations(tableState.annotatedRows, effectiveFingerprint);
+  const aiState = useWorkbookAiRecommendationState(
+    tableState.annotatedRows,
+    effectiveFingerprint,
+    user?.office_code,
+  );
 
   const saveState = useWorkbookSave({
     user,
@@ -116,11 +131,9 @@ export function useOfficeProductEditorState(user) {
       canUploadFile,
       tableNameCardProps: {
         customTableName: selection.customTableName,
-        inputRef: selection.customTableNameInputRef,
         onTableNameChange: selection.handleCustomTableNameChange,
         showsTableNameInput: selection.showsCustomTableNameInput,
         validationError: selection.tableNameValidationError,
-        canCreateTable: selection.canCreateTable,
         onCreateTable: selection.handleCreateCustomTable,
       },
     },
@@ -147,6 +160,7 @@ export function useOfficeProductEditorState(user) {
     ai: {
       recommendations: aiState.recommendations,
       analysisMode: aiState.analysisMode,
+      analysisMessage: aiState.analysisMessage,
       activeRecommendationId: aiState.activeRecommendationId,
       handleAnalyze: aiState.handleAnalyze,
       handleRecommendationSelect: aiState.handleRecommendationSelect,

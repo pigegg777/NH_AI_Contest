@@ -1,5 +1,5 @@
-import { resolveActiveCategoryName } from '../model/sidebar-catalog/sidebarCatalogCreateModel';
-import { useRegisteredProductData } from './useRegisteredProductData';
+import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
+import { useRegisteredProductData } from '../office-product-data/useRegisteredProductData';
 
 const EMPTY_ROWS = [];
 

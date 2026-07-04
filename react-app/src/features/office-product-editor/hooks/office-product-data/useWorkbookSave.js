@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { toNullableTrimmedString, toTrimmedString } from '../../../common/utils/text';
-import { resolveActiveCategoryName } from '../model/sidebar-catalog/sidebarCatalogCreateModel';
-import { saveOfficeProductData } from '../services/office-product-data/officeProductDataMutationService';
+import { toNullableTrimmedString, toTrimmedString } from '../../../../common/utils/text';
+import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
+import { saveOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
 
 const SAVE_ERROR_MESSAGE = '검토 데이터를 저장하지 못했습니다.';
 

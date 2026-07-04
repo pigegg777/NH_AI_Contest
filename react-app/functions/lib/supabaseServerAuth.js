@@ -2,8 +2,44 @@ import { createClient } from '@supabase/supabase-js';
 
 import { RequestValidationError } from './requestValidation';
 
+function normalizeEnvValue(value) {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value).trim();
+  }
+
+  return '';
+}
+
+function readRequiredEnvValue(env, keys) {
+  const sources = [env, globalThis.process?.env];
+
+  for (const source of sources) {
+    for (const key of keys) {
+      const normalizedValue = normalizeEnvValue(source?.[key]);
+
+      if (normalizedValue !== '') {
+        return normalizedValue;
+      }
+    }
+  }
+
+  throw new RequestValidationError('Server is missing Supabase environment configuration.', 500);
+}
+
 function createRequestScopedSupabaseClient(env, accessToken) {
-  return createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, {
+  const supabaseUrl = readRequiredEnvValue(env, ['SUPABASE_URL', 'VITE_SUPABASE_URL']);
+  const supabasePublishableKey = readRequiredEnvValue(env, [
+    'SUPABASE_PUBLISHABLE_KEY',
+    'SUPABASE_ANON_KEY',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
+    'VITE_SUPABASE_KEY',
+  ]);
+
+  return createClient(supabaseUrl, supabasePublishableKey, {
     global: {
       headers: { Authorization: `Bearer ${accessToken}` },
     },

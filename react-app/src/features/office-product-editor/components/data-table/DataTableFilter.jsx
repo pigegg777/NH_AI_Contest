@@ -1,4 +1,4 @@
-import { FILTER_FIELDS } from '../../model/review-table/reviewTableFilterModel';
+import { FILTER_FIELDS } from '../../model/review-table/reviewTableBuildModel';
 import styles from './DataTableFilter.module.css';
 
 export function DataTableFilter({

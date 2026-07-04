@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useWorkbookReviewTableState } from '../hooks/useWorkbookReviewTableState';
+import { useWorkbookReviewTableState } from '../hooks/review-table/useWorkbookReviewTableState';
 
 const sampleRows = [
   {

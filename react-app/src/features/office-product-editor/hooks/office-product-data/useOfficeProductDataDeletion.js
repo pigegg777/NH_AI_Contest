@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { deleteOfficeProductData } from '../services/office-product-data/officeProductDataMutationService';
+import { deleteOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
 
 export function useOfficeProductDataDeletion({
   user,

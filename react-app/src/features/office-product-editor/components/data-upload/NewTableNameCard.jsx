@@ -2,11 +2,9 @@ import styles from './NewTableNameCard.module.css';
 
 export function NewTableNameCard({
   customTableName,
-  inputRef,
   onTableNameChange,
   showsTableNameInput,
   validationError,
-  canCreateTable,
   onCreateTable,
 }) {
   const isCustomTableNameEmpty = customTableName.trim().length === 0;
@@ -33,7 +31,6 @@ export function NewTableNameCard({
         >
           <span className={styles.catalogInlineLabel}>테이블 이름</span>
           <input
-            ref={inputRef}
             id="table-name-input"
             className={styles.catalogInlineInput}
             type="text"
@@ -47,7 +44,6 @@ export function NewTableNameCard({
           type="button"
           className={styles.createTableButton}
           onClick={onCreateTable}
-          disabled={!canCreateTable}
         >
           만들기
         </button>

@@ -1,17 +1,10 @@
 import { toTrimmedString } from '../../../../common/utils/text';
+import { toUniqueStrings } from '../../../../common/utils/array';
 
 const ALLOWED_SEVERITIES = new Set(['high', 'medium', 'low']);
 
-function normalizeRelatedRowIds(relatedRowIds) {
-  if (!Array.isArray(relatedRowIds)) {
-    return [];
-  }
-
-  return [...new Set(relatedRowIds.filter((rowId) => typeof rowId === 'string' && rowId !== ''))];
-}
-
 function buildRecommendationId(input) {
-  const relatedRowIds = normalizeRelatedRowIds(input.relatedRowIds);
+  const relatedRowIds = toUniqueStrings(input.relatedRowIds);
   const title = toTrimmedString(input.title);
 
   return input.id ?? `${title || 'recommendation'}:${relatedRowIds.join(',')}`;
@@ -29,6 +22,6 @@ export function createAiRecommendation(input) {
     severity: normalizeSeverity(input.severity),
     title: toTrimmedString(input.title),
     reason: toTrimmedString(input.reason),
-    relatedRowIds: normalizeRelatedRowIds(input.relatedRowIds),
+    relatedRowIds: toUniqueStrings(input.relatedRowIds),
   };
 }

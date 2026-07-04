@@ -1,6 +1,6 @@
 import panelStyles from '../shared/panel.module.css';
-import styles from './AiRecommendPanel.module.css';
-import recStyles from './AIRecommendations.module.css';
+import styles from './WorkbookAiRecommendationPanel.module.css';
+import recStyles from './WorkbookAiRecommendations.module.css';
 
 function countRecommendationsBySeverity(recommendations) {
   return recommendations.reduce(
@@ -17,45 +17,63 @@ function countRecommendationsBySeverity(recommendations) {
   );
 }
 
-export function AIRecommendations({
+export function WorkbookAiRecommendations({
   recommendations,
   analysisMode,
+  analysisMessage = '',
   activeRecommendationId,
   onRecommendationSelect,
 }) {
   const severityCounts = countRecommendationsBySeverity(recommendations);
+  const isUnavailable = analysisMode === 'unavailable';
+  const isError = analysisMode === 'error';
 
   return (
     <section className={`${panelStyles.panel} ${panelStyles.compactPanel}`}>
       <div className={panelStyles.panelHeader}>
         <div className={recStyles.aiPanelHeader}>
           <h2 className={panelStyles.panelTitle}>AI 추천</h2>
-          {analysisMode === 'unavailable' ? (
-            <span className={recStyles.aiBadge}>AI off</span>
-          ) : null}
         </div>
-        <span className={panelStyles.panelMeta}>
+        {/* <span className={panelStyles.panelMeta}>
           {recommendations.length}건 추천
-        </span>
+        </span> */}
       </div>
 
-      <div className={recStyles.recommendationSummary}>
-        <span className={recStyles.recommendationStat}>
-          높음 {severityCounts.high}
-        </span>
-        <span className={recStyles.recommendationStat}>
-          중간 {severityCounts.medium}
-        </span>
-        <span className={recStyles.recommendationStat}>
-          낮음 {severityCounts.low}
-        </span>
-      </div>
-
-      {recommendations.length === 0 ? (
+      {/* {isUnavailable ? (
         <p className={panelStyles.aiEmptyState}>
-          아직 AI 분석 결과가 없습니다.
+          사업장 정보를 확인하지 못해 AI 분석을 사용할 수 없습니다. 다시
+          로그인한 뒤 시도해 주세요.
         </p>
       ) : null}
+
+      {isError ? (
+        <p className={panelStyles.errorBox}>
+          {analysisMessage ||
+            'OpenAI 보조 분석에 실패했습니다. 잠시 후 다시 시도해 주세요.'}
+        </p>
+      ) : null}
+
+      {!isUnavailable && !isError ? (
+        <>
+          <div className={recStyles.recommendationSummary}>
+            <span className={recStyles.recommendationStat}>
+              높음 {severityCounts.high}
+            </span>
+            <span className={recStyles.recommendationStat}>
+              중간 {severityCounts.medium}
+            </span>
+            <span className={recStyles.recommendationStat}>
+              낮음 {severityCounts.low}
+            </span>
+          </div>
+
+          {recommendations.length === 0 ? (
+            <p className={panelStyles.aiEmptyState}>
+              아직 AI 분석 결과가 없습니다.
+            </p>
+          ) : null}
+        </>
+      ) : null} */}
 
       {recommendations.length > 0 ? (
         <div className={recStyles.recommendationGrid}>
@@ -93,12 +111,13 @@ export function AIRecommendations({
   );
 }
 
-export function AiRecommendPanel({
+export function WorkbookAiRecommendationPanel({
   onAiAnalyze,
   aiDisabled,
   hasRows,
   aiRecommendations = [],
   aiAnalysisMode = 'idle',
+  aiAnalysisMessage = '',
   aiActiveRecommendationId = null,
   onAiRecommendationSelect,
 }) {
@@ -120,9 +139,10 @@ export function AiRecommendPanel({
       </button>
       {showPanel ? (
         <div className={styles.recommendSection}>
-          <AIRecommendations
+          <WorkbookAiRecommendations
             recommendations={aiRecommendations}
             analysisMode={aiAnalysisMode}
+            analysisMessage={aiAnalysisMessage}
             activeRecommendationId={aiActiveRecommendationId}
             onRecommendationSelect={onAiRecommendationSelect}
           />

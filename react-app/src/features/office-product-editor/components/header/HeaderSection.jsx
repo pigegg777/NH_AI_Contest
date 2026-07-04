@@ -1,14 +1,17 @@
+import { useEditorMeta, useSaveCtx } from '../../contexts/editorContexts';
 import { EditingDataName } from './EditingDataName';
 import { SaveControlPanel } from './SaveControlPanel';
 import styles from './HeaderSection.module.css';
 
-export function HeaderSection({
-  activeCategoryName,
-  bannerStatusLabel,
-  bannerStatusVariant,
-  isViewingRegisteredData,
-  saveProps,
-}) {
+export function HeaderSection() {
+  const {
+    activeCategoryName,
+    bannerStatusLabel,
+    bannerStatusVariant,
+    isViewingRegisteredData,
+  } = useEditorMeta();
+  const save = useSaveCtx();
+
   return (
     <div className={styles.banner}>
       <EditingDataName
@@ -18,7 +21,7 @@ export function HeaderSection({
       />
       {isViewingRegisteredData && (
         <div className={styles.actions}>
-          <SaveControlPanel {...saveProps} />
+          <SaveControlPanel {...save} />
         </div>
       )}
     </div>

@@ -48,6 +48,10 @@
   font-size: 0.78rem;
 }
 
+.filterInput {
+  width: 60%;
+}
+
 .filterInput::placeholder {
   color: var(--corp-muted);
 }

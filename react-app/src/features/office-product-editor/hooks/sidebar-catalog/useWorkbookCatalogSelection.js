@@ -1,45 +1,43 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
-import { toTrimmedString } from '../../../common/utils/text';
+import { toTrimmedString } from '../../../../common/utils/text';
 import {
   resolveTableNameModeFromCategoryName,
   validateCustomCategoryCreation,
-} from '../model/sidebar-catalog/sidebarCatalogCreateModel';
+} from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
 
 export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
   const [tableNameMode, setTableNameMode] = useState('');
   const [customTableName, setCustomTableName] = useState('');
   const [pendingCustomCategories, setPendingCustomCategories] = useState([]);
   const [activeCustomCategoryName, setActiveCustomCategoryName] = useState('');
-  const [tableNameValidationError, setTableNameValidationError] = useState('');
-  const customTableNameInputRef = useRef(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const isShowingExistingCustomCategory =
     tableNameMode === 'custom' && activeCustomCategoryName !== '';
-  const showsCustomTableNameInput = tableNameMode === 'custom' && !isShowingExistingCustomCategory;
-  const effectiveCustomTableName = isShowingExistingCustomCategory ? activeCustomCategoryName : '';
-  const trimmedCustomTableName = toTrimmedString(customTableName);
+  const showsCustomTableNameInput =
+    tableNameMode === 'custom' && !isShowingExistingCustomCategory;
+  const effectiveCustomTableName = isShowingExistingCustomCategory
+    ? activeCustomCategoryName
+    : '';
+
   const existingCategoryNames = [
     ...officeProductCatalogItems.map((item) => item.categoryName),
     ...pendingCustomCategories,
   ];
-  const canCreateTable = showsCustomTableNameInput && trimmedCustomTableName.length > 0;
 
-  useEffect(() => {
-    if (!showsCustomTableNameInput) {
-      return;
-    }
-
-    customTableNameInputRef.current?.focus();
-  }, [showsCustomTableNameInput]);
-
-  function clearCreateError() {
-    setTableNameValidationError('');
-  }
+  const tableNameValidationError =
+    showsCustomTableNameInput && submitAttempted
+      ? validateCustomCategoryCreation(customTableName, existingCategoryNames)
+          .message ||
+        (toTrimmedString(customTableName).length === 0
+          ? '테이블 이름을 입력하세요'
+          : '')
+      : '';
 
   function handleCustomTableNameChange(event) {
     setCustomTableName(event.target.value);
-    clearCreateError();
+    setSubmitAttempted(false);
   }
 
   function handleCreateCustomTable() {
@@ -47,20 +45,23 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
       return;
     }
 
-    const validation = validateCustomCategoryCreation(customTableName, existingCategoryNames);
+    const validation = validateCustomCategoryCreation(
+      customTableName,
+      existingCategoryNames,
+    );
 
     if (!validation.isValid) {
-      setTableNameValidationError(validation.message);
+      setSubmitAttempted(true);
       return;
     }
 
+    setSubmitAttempted(false);
     setPendingCustomCategories((previous) =>
       previous.includes(validation.normalizedCategoryName)
         ? previous
         : [...previous, validation.normalizedCategoryName],
     );
     setCustomTableName('');
-    clearCreateError();
   }
 
   function isCardSelected(card) {
@@ -72,12 +73,13 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
       return card.selectionMode === tableNameMode;
     }
 
-    return isShowingExistingCustomCategory && activeCustomCategoryName === card.categoryName;
+    return (
+      isShowingExistingCustomCategory &&
+      activeCustomCategoryName === card.categoryName
+    );
   }
 
   function handleCatalogSelect(card) {
-    clearCreateError();
-
     if (card.isAdd) {
       setTableNameMode('custom');
       setActiveCustomCategoryName('');
@@ -102,11 +104,9 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
     pendingCustomCategories,
     effectiveCustomTableName,
     showsCustomTableNameInput,
-    customTableNameInputRef,
     handleCustomTableNameChange,
     handleCreateCustomTable,
     tableNameValidationError,
-    canCreateTable,
     isCardSelected,
     handleCatalogSelect,
   };

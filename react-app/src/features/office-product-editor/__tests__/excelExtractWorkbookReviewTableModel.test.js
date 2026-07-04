@@ -6,11 +6,11 @@ import {
   PESTICIDE_TABLE_COLUMNS,
   getTableColumnsByMode,
 } from '../model/review-table/reviewTableConfigModel';
-import { buildFilterOptions, buildTableModel } from '../model/review-table/reviewTableBuildModel';
 import {
   createInitialFilters,
-} from '../model/review-table/reviewTableFilterModel';
-import { sortRows } from '../model/review-table/reviewTableSortModel';
+  ReviewTableBuildModel,
+} from '../model/review-table/reviewTableBuildModel';
+import { ReviewTableSortModel } from '../model/review-table/reviewTableSortModel';
 import { formatManufacturerList } from '../utils/reviewTableCellValueUtils';
 
 const sampleRows = [
@@ -56,7 +56,7 @@ const sampleRows = [
 
 describe('excel extract workbook review table model', () => {
   it('builds filter options and keeps an empty marker for nullable categories', () => {
-    const filterOptions = buildFilterOptions(sampleRows);
+    const filterOptions = ReviewTableBuildModel.buildFilterOptions(sampleRows);
 
     expect(filterOptions.sale_price_type_name).toEqual(['기본단가', '회원단가']);
     expect(filterOptions.detail_category).toEqual(['__empty__']);
@@ -66,10 +66,10 @@ describe('excel extract workbook review table model', () => {
     const filters = createInitialFilters();
     filters.small_category = '단비';
 
-    const tableModel = buildTableModel(sampleRows, 'n-p-k', filters, {
+    const tableModel = new ReviewTableBuildModel(sampleRows, 'n-p-k', filters, {
       key: 'tax_price',
       direction: 'desc',
-    });
+    }).build();
 
     expect(tableModel.sortedRows).toHaveLength(1);
     expect(tableModel.sortedRows[0].product_code).toBe('A100');
@@ -77,20 +77,20 @@ describe('excel extract workbook review table model', () => {
   });
 
   it('sorts the new static fertilizer fields', () => {
-    const sortedRows = sortRows(sampleRows, {
+    const sortedRows = new ReviewTableSortModel(sampleRows, {
       key: 'price_subsidy',
       direction: 'desc',
-    });
+    }).sortRows();
 
     expect(sortedRows.map((row) => row.product_code)).toEqual(['B200', 'A100']);
   });
 
   it('formats manufacturer rows for sorting and rendering', () => {
     expect(
-      buildTableModel(sampleRows, '', createInitialFilters(), {
+      new ReviewTableBuildModel(sampleRows, '', createInitialFilters(), {
         key: 'product_code',
         direction: 'asc',
-      }).warningRows,
+      }).build().warningRows,
     ).toHaveLength(1);
     expect(formatManufacturerList(sampleRows[0].manufacturer_list)).toBe('제조사B');
     expect(formatManufacturerList([])).toBe('-');

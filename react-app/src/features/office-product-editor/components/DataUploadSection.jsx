@@ -1,50 +1,31 @@
+import { useAiCtx, useExtractionCtx, useSaveCtx, useTableCtx, useUploadCtx } from '../contexts/editorContexts';
 import panelStyles from './shared/panel.module.css';
-import { DataTableSection } from './DataTableSection';
-import { AIRecommendations } from './data-edit-controls/AiRecommendPanel';
-import { ExcelUploadPanel } from './data-edit-controls/ExcelUploadPanel';
+import { WorkbookAiRecommendations } from './data-edit-controls/WorkbookAiRecommendationPanel';
 import { ExcelUploadDropzone } from './data-upload/ExcelUploadDropzone';
 import { NewTableNameCard } from './data-upload/NewTableNameCard';
 import styles from './DataUploadSection.module.css';
 import sectionStyles from './DataTableSection.module.css';
 
-export function DataUploadSection({
-  tableNameCardProps,
-  result,
-  warningRows,
-  selectedFileName,
-  onWorkbookChange,
-  canUploadFile,
-  onFileSelected,
-  resultSectionProps,
-}) {
+export function DataUploadSection() {
+  const { result, selectedFileName, handleWorkbookChange, processFile } = useExtractionCtx();
+  const { canUploadFile, tableNameCardProps } = useUploadCtx();
+  const { rows, warningRows } = useTableCtx();
   const {
-    rows,
-    searchQuery,
-    onSearchQueryChange,
-    filters,
-    filterOptions,
-    onFilterChange,
-    onResetFilters,
-    sortState,
-    onSortChange,
-    tableNameMode,
-    onShadowToggle,
-    onVisibleRowsShadowChange,
-    onNoteChange,
-    onPriceChange,
-    aiRecommendations = [],
-    aiAnalysisMode = 'idle',
-    aiActiveRecommendationId = null,
-    onAiAnalyze,
-    onAiRecommendationSelect,
-    aiDisabled = false,
-    onSave,
+    recommendations: aiRecommendations = [],
+    analysisMode: aiAnalysisMode = 'idle',
+    analysisMessage: aiAnalysisMessage = '',
+    activeRecommendationId: aiActiveRecommendationId = null,
+    handleAnalyze: onAiAnalyze,
+    handleRecommendationSelect: onAiRecommendationSelect,
+  } = useAiCtx();
+  const {
+    handleSave: onSave,
     canSave = false,
     isSaving = false,
     saveErrorMessage = '',
     saveSuccessMessage = '',
     saveDisabledMessage = '',
-  } = resultSectionProps ?? {};
+  } = useSaveCtx();
 
   const showAiPanel =
     aiAnalysisMode !== 'idle' || (aiRecommendations ?? []).length > 0;
@@ -54,13 +35,13 @@ export function DataUploadSection({
       <div className={styles.uploadWorkspace}>
         <NewTableNameCard {...tableNameCardProps} />
 
-          {!result && (
+        {!result && (
           <div className={styles.uploadMain}>
             <ExcelUploadDropzone
               selectedFileName={selectedFileName}
               disabled={!canUploadFile}
               disabledHint="테이블을 만든 뒤 사이드바에서 선택하면 업로드할 수 있습니다."
-              onFileSelected={onFileSelected}
+              onFileSelected={processFile}
             />
           </div>
         )}
@@ -73,7 +54,7 @@ export function DataUploadSection({
               type="button"
               className={sectionStyles.aiButton}
               onClick={onAiAnalyze}
-              disabled={aiDisabled || !rows?.length}
+              disabled={!rows?.length}
             >
               AI 분석하기
             </button>
@@ -90,9 +71,7 @@ export function DataUploadSection({
           </div>
 
           {saveDisabledMessage ? (
-            <div className={panelStyles.statusMessage}>
-              {saveDisabledMessage}
-            </div>
+            <div className={panelStyles.statusMessage}>{saveDisabledMessage}</div>
           ) : null}
           {saveErrorMessage ? (
             <div className={panelStyles.errorBox}>{saveErrorMessage}</div>
@@ -102,9 +81,10 @@ export function DataUploadSection({
           ) : null}
 
           {showAiPanel ? (
-            <AIRecommendations
+            <WorkbookAiRecommendations
               recommendations={aiRecommendations}
               analysisMode={aiAnalysisMode}
+              analysisMessage={aiAnalysisMessage}
               activeRecommendationId={aiActiveRecommendationId}
               onRecommendationSelect={onAiRecommendationSelect}
             />

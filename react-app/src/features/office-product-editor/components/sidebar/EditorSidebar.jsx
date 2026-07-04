@@ -1,17 +1,11 @@
+import { useCatalogCtx } from '../../contexts/editorContexts';
 import styles from './EditorSidebar.module.css';
 import { SidebarCatalogItem } from './SidebarCatalogItem';
 
-export function EditorSidebar({
-  isCollapsed,
-  onToggleCollapse,
-  registeredCount,
-  isLoading,
-  errorMessage,
-  cards,
-  isCardSelected,
-  onCardSelect,
-  onCardDelete,
-}) {
+export function EditorSidebar({ isCollapsed, onToggleCollapse }) {
+  const { registeredCount, isLoading, errorMessage, cards, isCardSelected, onCardSelect, onCardDelete } =
+    useCatalogCtx();
+
   return (
     <aside
       className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`.trim()}

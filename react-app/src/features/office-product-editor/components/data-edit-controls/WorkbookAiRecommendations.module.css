@@ -25,7 +25,7 @@
 
 .recommendationStat {
   display: inline-flex;
-  align-items: center;
+  align-items: left;
   min-height: 18px;
   padding: 0 7px;
   border-radius: 999px;
@@ -36,13 +36,19 @@
 }
 
 .recommendationGrid {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
+  gap: 6px; */
+  display: grid;
+  grid-template-rows: repeat(1, auto);
+  grid-auto-flow: column;
   gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .recommendationCard {
-  flex: 1 1 220px;
+  /* flex: 1 1 220px;
   max-width: 320px;
   padding: 6px 9px;
   border: 1px solid var(--corp-line);
@@ -51,7 +57,15 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background var(--corp-transition), border-color var(--corp-transition);
+  transition:
+    background var(--corp-transition),
+    border-color var(--corp-transition); */
+  min-width: 310px;
+  padding: 6px 9px;
+  border: 1px solid rgba(154, 52, 18, 0.14);
+  border-radius: var(--corp-radius-sm);
+  background: hsl(190, 30%, 96%);
+  text-align: left;
 }
 
 .recommendationCard:hover {

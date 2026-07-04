@@ -1,10 +1,8 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import {
-  buildWorkbookAiRequestBody,
-  extractWorkbookAiStructuredPayload,
-} from '../model/ai-recommendations/workbookAiRecommendationPayloadModel';
-import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../services/workbook-ai-recommendation/workbookAiRecommendationPrompt';
+import { buildWorkbookAiRequestBody } from '../model/ai-recommendations/workbookAiRequestBodyModel';
+import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../model/ai-recommendations/workbookAiRecommendationPrompt';
+import { extractStructuredPayload } from '../../storefront/services/openAiJsonRequest';
 
 describe('workbook AI recommendation payload model', () => {
   it('builds the OpenAI request body with the separated prompt', () => {
@@ -37,19 +35,19 @@ describe('workbook AI recommendation payload model', () => {
 
   it('extracts a structured payload from output_parsed, output_text, and REST output content', () => {
     expect(
-      extractWorkbookAiStructuredPayload({
+      extractStructuredPayload({
         output_parsed: { recommendations: [{ title: 'x' }] },
       }),
     ).toEqual({ recommendations: [{ title: 'x' }] });
 
     expect(
-      extractWorkbookAiStructuredPayload({
+      extractStructuredPayload({
         output_text: JSON.stringify({ recommendations: [{ title: 'y' }] }),
       }),
     ).toEqual({ recommendations: [{ title: 'y' }] });
 
     expect(
-      extractWorkbookAiStructuredPayload({
+      extractStructuredPayload({
         output: [
           {
             type: 'message',
@@ -65,7 +63,7 @@ describe('workbook AI recommendation payload model', () => {
     ).toEqual({ recommendations: [{ title: 'z' }] });
 
     expect(
-      extractWorkbookAiStructuredPayload({
+      extractStructuredPayload({
         output: [
           {
             type: 'message',
@@ -81,4 +79,3 @@ describe('workbook AI recommendation payload model', () => {
     ).toEqual({ recommendations: [{ title: 'parsed' }] });
   });
 });
-

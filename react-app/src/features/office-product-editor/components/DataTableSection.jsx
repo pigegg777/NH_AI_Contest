@@ -1,25 +1,28 @@
+import { useEditorMeta, useTableCtx } from '../contexts/editorContexts';
 import { getTableColumnsByMode } from '../model/review-table/reviewTableConfigModel';
 import panelStyles from './shared/panel.module.css';
 import { DataTableFilter } from './data-table/DataTableFilter';
 import { DataTable } from './data-table/DataTable';
 import styles from './DataTableSection.module.css';
 
-export function DataTableSection({
-  rows,
-  searchQuery,
-  onSearchQueryChange,
-  filters,
-  filterOptions,
-  onFilterChange,
-  onResetFilters,
-  sortState,
-  onSortChange,
-  tableNameMode,
-  onShadowToggle,
-  onVisibleRowsShadowChange,
-  onNoteChange,
-  onPriceChange,
-}) {
+export function DataTableSection() {
+  const { tableNameMode } = useEditorMeta();
+  const {
+    rows,
+    searchQuery,
+    onSearchQueryChange,
+    filters,
+    filterOptions,
+    onFilterChange,
+    onResetFilters,
+    sortState,
+    onSortChange,
+    onShadowToggle,
+    onVisibleRowsShadowChange,
+    onNoteChange,
+    onPriceChange,
+  } = useTableCtx();
+
   const columns = getTableColumnsByMode(tableNameMode);
 
   return (

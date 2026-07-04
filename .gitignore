@@ -40,3 +40,9 @@ react-app/vite-dev.log
 react-app/vite-storefront.log
 run-supabase-mcp.bat
 skills-lock.json
+
+.vscode/
+.docx-venv/
+tmp_pdf_pages/
+tmp_proposal_pages2/
+tmp_proposal_pages3/

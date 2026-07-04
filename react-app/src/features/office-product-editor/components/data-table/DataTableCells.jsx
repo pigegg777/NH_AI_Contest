@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useInlineEditableValue } from '../../hooks/useInlineEditableValue';
+import { useInlineEditableValue } from '../../hooks/review-table/useInlineEditableValue';
 import {
   formatPriceValue,
   parsePriceDraftValue,

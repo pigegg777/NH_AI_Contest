@@ -20,8 +20,9 @@ const HEADER_WEIGHTS = new Map([
   ['상품제조업체명', 1],
 ]);
 
+const SALE_PRICE_TYPE_LABEL = '매출단가유형';
+
 const COLUMN_RULES = [
-  { field: 'sale_price_type_name', labels: ['매출단가유형'] },
   { field: 'product_code', labels: ['상품코드'] },
   { field: 'product_name', labels: ['상품명'] },
   { field: 'product_type', labels: ['상품구분'] },
@@ -78,9 +79,15 @@ function detectHeaderRow(rows) {
 
 function buildColumnMap(headerRow) {
   const columnMap = {};
+  const salePriceTypeIndexes = [];
 
   headerRow.forEach((value, index) => {
     const normalized = normalizeHeaderCell(value);
+
+    if (normalized === SALE_PRICE_TYPE_LABEL) {
+      salePriceTypeIndexes.push(index);
+      return;
+    }
 
     for (const rule of COLUMN_RULES) {
       if (rule.labels.includes(normalized) && columnMap[rule.field] == null) {
@@ -89,6 +96,13 @@ function buildColumnMap(headerRow) {
       }
     }
   });
+
+  if (salePriceTypeIndexes.length >= 2) {
+    columnMap.sale_price_type_code = salePriceTypeIndexes[0];
+    columnMap.sale_price_type_name = salePriceTypeIndexes[1];
+  } else if (salePriceTypeIndexes.length === 1) {
+    columnMap.sale_price_type_name = salePriceTypeIndexes[0];
+  }
 
   return columnMap;
 }

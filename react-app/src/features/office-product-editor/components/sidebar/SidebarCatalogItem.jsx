@@ -37,7 +37,9 @@ export function SidebarCatalogItem({ card, isSelected, onSelect, onDelete }) {
           {card.meta.length > 0 ? (
             <span className={styles.catalogListMeta}>{card.meta[0]}</span>
           ) : (
-            <span className={styles.catalogListMeta}>{card.description || card.statusLabel}</span>
+            <span className={styles.catalogListMeta}>
+              {card.description || card.statusLabel}
+            </span>
           )}
         </div>
         <span

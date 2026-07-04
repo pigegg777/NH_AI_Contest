@@ -1,10 +1,10 @@
-﻿import { act, renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useWorkbookAiRecommendations } from '../hooks/useWorkbookAiRecommendations';
-import { analyzeWorkbookAiRecommendations } from '../model/ai-recommendations';
+import { useWorkbookAiRecommendationState } from '../hooks/ai-recommendations/useWorkbookAiRecommendationState';
+import { analyzeWorkbookAiRecommendations } from '../model/ai-recommendations/workbookAiAnalysisModel';
 
-vi.mock('../model/ai-recommendations', async (importOriginal) => {
+vi.mock('../model/ai-recommendations/workbookAiAnalysisModel', async (importOriginal) => {
   const actual = await importOriginal();
 
   return {
@@ -30,20 +30,24 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe('useWorkbookAiRecommendations', () => {
-  it('analyzes exactly the merged rows it was given', async () => {
+describe('useWorkbookAiRecommendationState', () => {
+  it('analyzes exactly the merged rows and officeCode it was given', async () => {
     analyzeWorkbookAiRecommendations.mockResolvedValue({
       mode: 'openai',
       recommendations: [mockRecommendation],
     });
 
-    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+    );
 
     await act(async () => {
       await result.current.handleAnalyze();
     });
 
-    expect(analyzeWorkbookAiRecommendations).toHaveBeenCalledWith(mergedRows);
+    expect(analyzeWorkbookAiRecommendations).toHaveBeenCalledWith(mergedRows, {
+      officeCode: 'OFF-1',
+    });
     expect(result.current.analysisMode).toBe('openai');
     expect(result.current.recommendations).toEqual([mockRecommendation]);
   });
@@ -54,7 +58,9 @@ describe('useWorkbookAiRecommendations', () => {
       recommendations: [mockRecommendation],
     });
 
-    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+    );
 
     await act(async () => {
       await result.current.handleAnalyze();
@@ -80,7 +86,12 @@ describe('useWorkbookAiRecommendations', () => {
     });
 
     const { result, rerender } = renderHook(
-      ({ workbookFingerprint }) => useWorkbookAiRecommendations(mergedRows, workbookFingerprint),
+      ({ workbookFingerprint }) =>
+        useWorkbookAiRecommendationState(
+          mergedRows,
+          workbookFingerprint,
+          'OFF-1',
+        ),
       { initialProps: { workbookFingerprint: 'workbook-a' } },
     );
 
@@ -101,21 +112,24 @@ describe('useWorkbookAiRecommendations', () => {
     expect(result.current.activeRecommendationId).toBe(null);
   });
 
-  it('surfaces a non-fatal notice when only local recommendations are available', async () => {
+  it('surfaces the mode and message returned by a failed analysis', async () => {
     analyzeWorkbookAiRecommendations.mockResolvedValue({
-      mode: 'local-only',
-      recommendations: [mockRecommendation],
-      message: 'OpenAI 보조 분석에 실패하여 로컬 검사 결과만 표시합니다.',
+      mode: 'error',
+      recommendations: [],
+      message: 'OpenAI 보조 분석에 실패했습니다.',
     });
 
-    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+    );
 
     await act(async () => {
       await result.current.handleAnalyze();
     });
 
-    expect(result.current.analysisMode).toBe('local-only');
-    expect(result.current.recommendations).toEqual([mockRecommendation]);
+    expect(result.current.analysisMode).toBe('error');
+    expect(result.current.analysisMessage).toBe('OpenAI 보조 분석에 실패했습니다.');
+    expect(result.current.recommendations).toEqual([]);
   });
 
   it('clears recommendations and exposes the error when analysis fails', async () => {
@@ -126,7 +140,9 @@ describe('useWorkbookAiRecommendations', () => {
       })
       .mockRejectedValueOnce(new Error('OpenAI API request failed.'));
 
-    const { result } = renderHook(() => useWorkbookAiRecommendations(mergedRows, 'workbook-a'));
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+    );
 
     await act(async () => {
       await result.current.handleAnalyze();
@@ -142,4 +158,3 @@ describe('useWorkbookAiRecommendations', () => {
     expect(result.current.activeRecommendationId).toBe(null);
   });
 });
-

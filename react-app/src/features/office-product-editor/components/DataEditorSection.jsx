@@ -1,24 +1,20 @@
+import { useActiveCategoryCtx, useAiCtx, useExtractionCtx, useTableCtx } from '../contexts/editorContexts';
 import { ExcelUploadPanel } from './data-edit-controls/ExcelUploadPanel';
-import { AiRecommendPanel } from './data-edit-controls/AiRecommendPanel';
+import { WorkbookAiRecommendationPanel } from './data-edit-controls/WorkbookAiRecommendationPanel';
 import styles from './DataEditorSection.module.css';
 
-export function DataEditorSection({
-  onWorkbookChange,
-  isRegisteredProductDataLoading,
-  registeredProductDataErrorMessage,
-  fileWarnings,
-  warningRows = [],
-  resultSectionProps,
-}) {
+export function DataEditorSection() {
+  const { handleWorkbookChange, result } = useExtractionCtx();
+  const { isRegisteredProductDataLoading, registeredProductDataErrorMessage } = useActiveCategoryCtx();
+  const { rows, warningRows } = useTableCtx();
   const {
-    rows,
-    aiRecommendations = [],
-    aiAnalysisMode = 'idle',
-    aiActiveRecommendationId = null,
-    onAiAnalyze,
-    onAiRecommendationSelect,
-    aiDisabled = false,
-  } = resultSectionProps;
+    recommendations: aiRecommendations,
+    analysisMode: aiAnalysisMode,
+    analysisMessage: aiAnalysisMessage,
+    activeRecommendationId: aiActiveRecommendationId,
+    handleAnalyze: onAiAnalyze,
+    handleRecommendationSelect: onAiRecommendationSelect,
+  } = useAiCtx();
 
   return (
     <section className={styles.workspace}>
@@ -26,27 +22,27 @@ export function DataEditorSection({
         <div className={styles.controlColWide}>
           <div className={styles.uploadSection}>
             <ExcelUploadPanel
-              onWorkbookChange={onWorkbookChange}
+              onWorkbookChange={handleWorkbookChange}
               isLoading={isRegisteredProductDataLoading}
               loadingErrorMessage={registeredProductDataErrorMessage}
-              fileWarnings={fileWarnings}
+              fileWarnings={result?.warnings}
               warningRows={warningRows}
             />
           </div>
         </div>
 
         <div className={styles.controlColWide}>
-          <AiRecommendPanel
+          <WorkbookAiRecommendationPanel
             onAiAnalyze={onAiAnalyze}
-            aiDisabled={aiDisabled}
+            aiDisabled={false}
             hasRows={rows.length > 0}
             aiRecommendations={aiRecommendations}
             aiAnalysisMode={aiAnalysisMode}
+            aiAnalysisMessage={aiAnalysisMessage}
             aiActiveRecommendationId={aiActiveRecommendationId}
             onAiRecommendationSelect={onAiRecommendationSelect}
           />
         </div>
-
       </div>
     </section>
   );
