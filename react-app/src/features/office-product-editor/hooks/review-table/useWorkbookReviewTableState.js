@@ -15,6 +15,8 @@ import { fetchStaticProductLookup } from '../../services/staticProductLookupServ
 
 import { createInitialFilters } from '../../model/review-table/reviewTableBuildModel';
 
+const DEFAULT_SORT_STATE = { key: 'product_code', direction: 'asc' };
+
 export function useWorkbookReviewTableState(
   extractedRows,
   workbookFingerprint,
@@ -30,14 +32,17 @@ export function useWorkbookReviewTableState(
     setShadowForRows,
     updateNote,
     updatePrice,
-  } = useAnnotations(workbookFingerprint);
+  } = useAnnotations(workbookFingerprint, extractedRows);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState(() => createInitialFilters());
-  const [sortState, setSortState] = useState({
-    key: 'product_code',
-    direction: 'asc',
-  });
+  const [sortState, setSortState] = useState(DEFAULT_SORT_STATE);
+
+  useEffect(() => {
+    setSearchQuery('');
+    setFilters(createInitialFilters());
+    setSortState(DEFAULT_SORT_STATE);
+  }, [workbookFingerprint]);
 
   const annotatedRows = useMemo(
     () =>

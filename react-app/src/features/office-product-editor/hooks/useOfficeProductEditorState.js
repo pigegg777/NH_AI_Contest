@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from 'react';
 import { toTrimmedString } from '../../../common/utils/text';
 import { useActiveCategoryData } from './sidebar-catalog/useActiveCategoryData';
 import { useOfficeProductDataCatalog } from './office-product-data/useOfficeProductDataCatalog';
@@ -9,15 +10,28 @@ import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTab
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
 import { shouldUseStaticDataMerge } from '../model/static-data-merge/staticDataMergeModel';
+import {
+  readStoredOfficeProductEditorDraft,
+  writeStoredOfficeProductEditorDraft,
+} from '../model/workspace-draft/officeProductEditorDraftStorageModel';
 
 export function useOfficeProductEditorState(user) {
-  // ── 레이어 1: 인프라 (독립) ─────────────────────────────────────
-  const extraction = useWorkbookExtraction();
+  const draftOfficeCode = toTrimmedString(user?.office_code);
+  const initialDraft = useMemo(
+    () =>
+      readStoredOfficeProductEditorDraft(
+        globalThis.sessionStorage,
+        draftOfficeCode,
+      ),
+    [draftOfficeCode],
+  );
+
+  const extraction = useWorkbookExtraction(initialDraft?.extraction ?? null);
   const officeProductCatalog = useOfficeProductDataCatalog(user);
 
-  // ── 레이어 2: 선택/카탈로그 ─────────────────────────────────────
   const selection = useWorkbookCatalogSelection({
     officeProductCatalogItems: officeProductCatalog.items,
+    initialSelectionState: initialDraft?.selection ?? null,
   });
 
   const { tableNameMode } = selection;
@@ -38,7 +52,6 @@ export function useOfficeProductEditorState(user) {
     onActiveDataDeleted: extraction.resetWorkbook,
   });
 
-  // ── 레이어 3: 데이터 ─────────────────────────────────────────────
   const { effectiveFingerprint, extractedRows } = activeCategoryData;
   const hasExtractedResult = Boolean(extraction.result);
   const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
@@ -57,6 +70,7 @@ export function useOfficeProductEditorState(user) {
     tableState.annotatedRows,
     effectiveFingerprint,
     user?.office_code,
+    tableNameMode,
   );
 
   const saveState = useWorkbookSave({
@@ -69,7 +83,6 @@ export function useOfficeProductEditorState(user) {
     onSaved: officeProductCatalog.upsertItem,
   });
 
-  // ── 파생 상태 ────────────────────────────────────────────────────
   const saveDisabledMessage =
     tableState.rows.length > 0 && !toTrimmedString(saveState.resolvedCategoryName)
       ? '저장하려면 먼저 사이드바에서 카테고리를 선택하세요.'
@@ -82,7 +95,6 @@ export function useOfficeProductEditorState(user) {
 
   const canUploadFile = toTrimmedString(saveState.resolvedCategoryName).length > 0;
 
-  // ── 이벤트 핸들러 ────────────────────────────────────────────────
   function handleCatalogCardSelect(card) {
     if (!selection.isCardSelected(card)) {
       extraction.resetWorkbook();
@@ -90,24 +102,61 @@ export function useOfficeProductEditorState(user) {
     selection.handleCatalogSelect(card);
   }
 
-  // ── 반환 ─────────────────────────────────────────────────────────
+  function handleCatalogCardDelete(card) {
+    if (card?.isPendingCustom) {
+      const isDeletingActivePendingCard = selection.isCardSelected(card);
+
+      selection.handlePendingCustomCategoryDelete(card.categoryName);
+
+      if (isDeletingActivePendingCard) {
+        extraction.resetWorkbook();
+      }
+
+      return;
+    }
+
+    void deletion.handleCatalogCardDelete(card);
+  }
+
+  useEffect(() => {
+    writeStoredOfficeProductEditorDraft(globalThis.sessionStorage, draftOfficeCode, {
+      selection: {
+        tableNameMode: selection.tableNameMode,
+        customTableName: selection.customTableName,
+        pendingCustomCategories: selection.pendingCustomCategories,
+        activeCustomCategoryName: selection.activeCustomCategoryName,
+      },
+      extraction: {
+        selectedFileName: extraction.selectedFileName,
+        workbookFingerprint: extraction.workbookFingerprint,
+        result: extraction.result,
+      },
+    });
+  }, [
+    draftOfficeCode,
+    extraction.result,
+    extraction.selectedFileName,
+    extraction.workbookFingerprint,
+    selection.activeCustomCategoryName,
+    selection.customTableName,
+    selection.pendingCustomCategories,
+    selection.tableNameMode,
+  ]);
+
   return {
     tableNameMode,
     showsCustomTableNameInput: selection.showsCustomTableNameInput,
 
-    // 배너
     activeCategoryName: activeCategoryData.activeCategoryName,
     bannerStatusLabel: activeCategoryData.bannerStatusLabel,
     bannerStatusVariant: activeCategoryData.bannerStatusVariant,
 
-    // 워크스페이스 분기
     isViewingRegisteredData: activeCategoryData.isViewingRegisteredData,
     activeCategory: {
       isRegisteredProductDataLoading: activeCategoryData.isRegisteredProductDataLoading,
       registeredProductDataErrorMessage: activeCategoryData.registeredProductDataErrorMessage,
     },
 
-    // 사이드바
     catalog: {
       cards,
       registeredCount,
@@ -115,10 +164,9 @@ export function useOfficeProductEditorState(user) {
       errorMessage: officeProductCatalog.errorMessage,
       isCardSelected: selection.isCardSelected,
       onCardSelect: handleCatalogCardSelect,
-      onCardDelete: deletion.handleCatalogCardDelete,
+      onCardDelete: handleCatalogCardDelete,
     },
 
-    // 추출/업로드
     extraction: {
       result: extraction.result,
       selectedFileName: extraction.selectedFileName,
@@ -126,7 +174,6 @@ export function useOfficeProductEditorState(user) {
       processFile: extraction.processFile,
     },
 
-    // 업로드 섹션 전용
     upload: {
       canUploadFile,
       tableNameCardProps: {
@@ -138,7 +185,6 @@ export function useOfficeProductEditorState(user) {
       },
     },
 
-    // 테이블
     table: {
       rows: tableState.rows,
       warningRows: tableState.warningRows,
@@ -156,9 +202,9 @@ export function useOfficeProductEditorState(user) {
       onPriceChange: tableState.updatePrice,
     },
 
-    // AI
     ai: {
       recommendations: aiState.recommendations,
+      isLoading: aiState.isLoading,
       analysisMode: aiState.analysisMode,
       analysisMessage: aiState.analysisMessage,
       activeRecommendationId: aiState.activeRecommendationId,
@@ -166,7 +212,6 @@ export function useOfficeProductEditorState(user) {
       handleRecommendationSelect: aiState.handleRecommendationSelect,
     },
 
-    // 저장
     save: {
       canSave: saveState.canSave,
       isSaving: saveState.isSaving,

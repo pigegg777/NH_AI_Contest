@@ -1,12 +1,13 @@
 /* ─── Sidebar shell ────────────────────────────────────── */
 .sidebar {
   position: sticky;
-  top: 0;
-  height: 100vh;
+  top: var(--office-editor-sticky-top, 72px);
+  max-height: calc(100vh - var(--office-editor-sticky-top, 72px));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0;
+  align-self: start;
   border-right: 1px solid var(--corp-line);
   background: var(--corp-panel);
 }
@@ -243,7 +244,9 @@
 @media (max-width: 760px) {
   .sidebar {
     position: static;
+    top: auto;
     height: auto;
+    max-height: none;
     border-right: none;
     border-bottom: 1px solid var(--corp-line);
     flex-direction: row;

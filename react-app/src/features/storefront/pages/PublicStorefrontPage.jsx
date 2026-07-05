@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
 import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
@@ -81,7 +80,7 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'loading') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.statusMessage}>불러오는 중...</div>
+        <div className={styles.statusMessage}>불러오는 중...</div>
       </div>
     );
   }
@@ -89,7 +88,7 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'error') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.errorBox}>
+        <div className={styles.errorBox}>
           페이지를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
         </div>
       </div>
@@ -99,7 +98,7 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'placeholder') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.statusMessage}>페이지 준비 중입니다.</div>
+        <div className={styles.statusMessage}>페이지 준비 중입니다.</div>
       </div>
     );
   }

@@ -1,6 +1,73 @@
+.panel {
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.compactPanel {
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  box-shadow: none;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.statusMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.statusMessage::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: aiRecommendSpin 0.7s linear infinite;
+}
+
+@keyframes aiRecommendSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusMessage::before {
+    animation: none;
+  }
+}
+
 .sectionTitle {
   margin: 0 0 6px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--corp-text);
   letter-spacing: -0.01em;
@@ -9,13 +76,13 @@
 .desc {
   margin: 0 0 10px;
   color: var(--corp-muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.5;
 }
 
 .recommendSection {
-  margin-top: 16px;
+  margin-top: 3px;
   display: grid;
   grid-template-rows: repeat(1, auto);
   grid-auto-flow: column;

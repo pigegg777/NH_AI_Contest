@@ -8,6 +8,27 @@ const initialState = {
   result: null,
 };
 
+function sanitizeInitialExtractionState(initialDraft) {
+  if (!initialDraft || typeof initialDraft !== 'object') {
+    return initialState;
+  }
+
+  return {
+    selectedFileName:
+      typeof initialDraft.selectedFileName === 'string'
+        ? initialDraft.selectedFileName
+        : '',
+    workbookFingerprint:
+      typeof initialDraft.workbookFingerprint === 'string' && initialDraft.workbookFingerprint
+        ? initialDraft.workbookFingerprint
+        : null,
+    result:
+      initialDraft.result && typeof initialDraft.result === 'object'
+        ? initialDraft.result
+        : null,
+  };
+}
+
 function extractionReducer(state, action) {
   switch (action.type) {
     case 'FILE_SELECTED':
@@ -27,8 +48,12 @@ function extractionReducer(state, action) {
   }
 }
 
-export function useWorkbookExtraction() {
-  const [state, dispatch] = useReducer(extractionReducer, initialState);
+export function useWorkbookExtraction(initialDraft = null) {
+  const [state, dispatch] = useReducer(
+    extractionReducer,
+    initialDraft,
+    sanitizeInitialExtractionState,
+  );
 
   async function processFile(file) {
     if (!file) {

@@ -2,7 +2,10 @@ export { createAiRecommendation } from './workbookAiRecommendationModel';
 import { toTrimmedString } from '../../../../common/utils/text';
 import { requestWorkbookAiRecommendations } from '../../services/workbook-ai-recommendation/workbookAiRecommendationClient';
 
-export async function analyzeWorkbookAiRecommendations(rows, { officeCode } = {}) {
+export async function analyzeWorkbookAiRecommendations(
+  rows,
+  { officeCode, tableNameMode } = {},
+) {
   const safeRows = Array.isArray(rows) ? rows : [];
 
   if (safeRows.length === 0) {
@@ -23,6 +26,7 @@ export async function analyzeWorkbookAiRecommendations(rows, { officeCode } = {}
     const { recommendations } = await requestWorkbookAiRecommendations({
       officeCode,
       rows: safeRows,
+      tableNameMode,
     });
 
     return {

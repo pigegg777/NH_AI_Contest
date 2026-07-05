@@ -99,10 +99,16 @@ describe('excel extract workbook review table model', () => {
   it('returns the extended fertilizer column set for fertilizer mode', () => {
     const extendedKeys = FERTILIZER_TABLE_COLUMNS.map((column) => column.key);
 
+    expect(extendedKeys.slice(0, 8)).toEqual(
+      DEFAULT_TABLE_COLUMNS.slice(0, 8).map((column) => column.key),
+    );
     expect(extendedKeys).toContain('nutrient');
     expect(extendedKeys).toContain('price_subsidy');
     expect(extendedKeys).toContain('img_url');
     expect(extendedKeys).toContain('product_url');
+    expect(extendedKeys[8]).toBe('price_subsidy');
+    expect(extendedKeys[11]).toBe('product_url');
+    expect(extendedKeys[12]).toBe('note');
     expect(getTableColumnsByMode('fertilizer')).toBe(FERTILIZER_TABLE_COLUMNS);
   });
 

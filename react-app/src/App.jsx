@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Activity, useState } from 'react';
 
 import AppLayout from './common/layouts/AppLayout';
 import DashboardPage from './common/pages/DashboardPage';
@@ -151,12 +151,16 @@ export default function App() {
           onLogout={handleAppLogout}
         />
       )}
-      {activePage === OFFICE_PRODUCT_EDITOR_PAGE_KEY && (
+      <Activity
+        mode={
+          activePage === OFFICE_PRODUCT_EDITOR_PAGE_KEY ? 'visible' : 'hidden'
+        }
+      >
         <OfficeProductEditorPage
           user={user}
           onGoHome={() => setActivePage('dashboard')}
         />
-      )}
+      </Activity>
       {activePage === STOREFRONT_BUILDER_PAGE_KEY && (
         <StorefrontBuilderPage
           officeCode={user?.office_code ?? ''}

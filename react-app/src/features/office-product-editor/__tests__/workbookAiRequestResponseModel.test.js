@@ -7,6 +7,7 @@ import { extractStructuredPayload } from '../../storefront/services/openAiJsonRe
 describe('workbook AI recommendation payload model', () => {
   it('builds the OpenAI request body with the separated prompt', () => {
     const requestBody = buildWorkbookAiRequestBody({
+      tableNameMode: 'fertilizer',
       rows: [
         {
           row_id: 'A100__01',
@@ -18,11 +19,20 @@ describe('workbook AI recommendation payload model', () => {
       openAiModel: 'gpt-4.1-mini',
       prompt: WORKBOOK_AI_ANALYSIS_PROMPT,
     });
+    const userPayload = JSON.parse(requestBody.input[1].content);
 
     expect(requestBody.model).toBe('gpt-4.1-mini');
     expect(requestBody.input[0].content).toBe(WORKBOOK_AI_ANALYSIS_PROMPT);
-    expect(requestBody.input[1].content).toContain('"analysis_scope": "all_rows"');
-    expect(requestBody.input[1].content).toContain('"manufacturer_name": "NH"');
+    expect(userPayload.analysis_scope).toBe('all_rows');
+    expect(userPayload.table_name_mode).toBe('fertilizer');
+    expect(userPayload.rows).toEqual([
+      expect.objectContaining({
+        row_id: 'A100__01',
+        product_code: 'A100',
+        product_name: 'Alpha',
+        manufacturer_list: [{ manufacturer_name: 'NH' }],
+      }),
+    ]);
     expect(requestBody.input[1].content).not.toContain('manufacturer_code');
     expect(requestBody.input[1].content).not.toContain('rule_based_findings');
     expect(requestBody.text.format.schema.properties.recommendations.items.required).toEqual([

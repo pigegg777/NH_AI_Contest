@@ -68,11 +68,13 @@ describe('workbookAiAnalysisModel', () => {
 
     const result = await analyzeWorkbookAiRecommendations(sampleRows, {
       officeCode: 'OFF-1',
+      tableNameMode: 'fertilizer',
     });
 
     expect(result.mode).toBe('openai');
     expect(requestWorkbookAiRecommendations).toHaveBeenCalledWith({
       officeCode: 'OFF-1',
+      tableNameMode: 'fertilizer',
       rows: sampleRows,
     });
     expect(result.recommendations).toEqual([

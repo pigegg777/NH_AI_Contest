@@ -1,4 +1,3 @@
-import panelStyles from '../../office-product-editor/components/shared/panel.module.css';
 import StorefrontView from '../components/StorefrontView';
 import CardDesignStep from './storefront-builder/CardDesignStep';
 import DataSelectionStep from './storefront-builder/DataSelectionStep';
@@ -36,7 +35,7 @@ export default function StorefrontBuilderPage({
   if (builder.status === 'loading') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.statusMessage}>
+        <div className={styles.statusMessage}>
           스토어프론트 빌더를 불러오는 중...
         </div>
       </div>
@@ -46,7 +45,7 @@ export default function StorefrontBuilderPage({
   if (builder.status === 'error') {
     return (
       <div className={styles.page}>
-        <div className={panelStyles.errorBox}>
+        <div className={styles.errorBox}>
           스토어프론트 빌더를 불러오지 못했습니다.
         </div>
       </div>
@@ -141,7 +140,7 @@ export default function StorefrontBuilderPage({
               </div>
 
               {builder.status === 'save-error' ? (
-                <div className={panelStyles.errorBox}>
+                <div className={styles.errorBox}>
                   {builder.errorMessage ||
                     '스토어프론트 초안을 저장하지 못했습니다.'}
                 </div>

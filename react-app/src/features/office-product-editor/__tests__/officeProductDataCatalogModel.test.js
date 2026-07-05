@@ -91,6 +91,7 @@ describe('buildOfficeProductDataCatalogModel', () => {
         categoryName: '자재',
         isAdd: false,
         isEmpty: true,
+        isPendingCustom: true,
         statusLabel: '미등록',
       }),
     );

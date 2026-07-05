@@ -1,12 +1,12 @@
 /* ─── Page shell ──────────────────────────────────────── */
 .page {
+  --office-editor-sticky-top: 72px;
   display: flex;
   flex-direction: column;
   max-width: 100%;
   min-height: 100%;
   margin: 0 auto;
   background: var(--corp-surface-muted);
-  overflow-x: clip;
 }
 
 /* ─── Two-column layout ───────────────────────────────── */
@@ -16,7 +16,6 @@
   align-items: start;
   min-height: 0;
   transition: grid-template-columns var(--corp-transition);
-  overflow-x: hidden;
 }
 
 .layoutCollapsed {

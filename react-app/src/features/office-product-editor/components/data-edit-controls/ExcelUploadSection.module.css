@@ -1,3 +1,61 @@
+.panel {
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: white;
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.compactPanel {
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  box-shadow: none;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.panelMeta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.compactPanel .panelHeader {
+  margin-bottom: 10px;
+}
+
+.compactPanel .panelTitle {
+  font-size: 14px;
+}
+
+.compactPanel .panelMeta {
+  min-height: 18px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
 .uploadBlock {
   display: flex;
   flex-direction: column;
@@ -6,7 +64,7 @@
 
 .sectionTitle {
   margin: 0 0 6px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--corp-text);
   letter-spacing: -0.01em;
@@ -15,7 +73,7 @@
 .desc {
   margin: 0 0 10px;
   color: var(--corp-muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.5;
 }
@@ -41,8 +99,57 @@
   background: rgb(117, 117, 236);
 }
 
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.statusMessage {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(185, 28, 28, 0.16);
+  border-radius: var(--corp-radius);
+  background: rgba(185, 28, 28, 0.07);
+  color: var(--corp-danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.compactPanel .statusMessage,
+.compactPanel .errorBox {
+  margin-top: 6px;
+  padding: 5px 8px;
+  font-size: 0.72rem;
+}
+
 .statusArea {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+@media (max-width: 760px) {
+  .panel {
+    padding: 10px 12px;
+  }
+
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

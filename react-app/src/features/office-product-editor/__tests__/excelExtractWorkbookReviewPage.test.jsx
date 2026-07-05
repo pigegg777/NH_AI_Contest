@@ -103,6 +103,7 @@ const sampleRowsWithSibling = [
 
 describe('OfficeProductEditorPage', () => {
   beforeEach(() => {
+    globalThis.sessionStorage.clear();
     mockResult = null;
     mockCatalogState = {
       items: [],
@@ -516,25 +517,25 @@ describe('OfficeProductEditorPage', () => {
     });
   });
 
-  it('keeps the upload dropzone disabled until a sidebar category is actually selected', async () => {
+  it('renders only the table-name card until a sidebar category is selected', async () => {
     const user = userEvent.setup();
 
     render(<OfficeProductEditorPage />);
 
     await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
 
+    expect(screen.getByLabelText('테이블 이름')).toBeInTheDocument();
     expect(
-      screen.getByText('생산경제시스템 31-6447 엑셀을 끌어다 놓거나 선택하세요'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('테이블을 만든 뒤 사이드바에서 선택하면 업로드할 수 있습니다.'),
-    ).toBeInTheDocument();
+      screen.queryByText('📂 파일 선택'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'AI 분석하기' })).not.toBeInTheDocument();
 
     await user.type(screen.getByLabelText('테이블 이름'), '자재');
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+    await user.click(screen.getAllByRole('button', { name: /자재/i })[0]);
 
-    expect(
-      screen.getByText('테이블을 만든 뒤 사이드바에서 선택하면 업로드할 수 있습니다.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('📂 파일 선택')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'AI 분석하기' })).toBeDisabled();
   });
 
   it('disables the 만들기 button only until a table name is entered', async () => {
@@ -566,6 +567,29 @@ describe('OfficeProductEditorPage', () => {
     expect(screen.getByLabelText('테이블 이름')).toHaveValue('');
     expect(screen.queryByRole('heading', { name: '자재' })).not.toBeInTheDocument();
     expect(screen.queryByText('신규 등록')).not.toBeInTheDocument();
+  });
+
+  it('renders a delete action for pending custom categories and removes them from the sidebar', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(<OfficeProductEditorPage />);
+
+    await user.click(screen.getByRole('button', { name: /\+ 추가/i }));
+    await user.type(screen.getByLabelText('테이블 이름'), '자재');
+    await user.click(screen.getByRole('button', { name: '만들기' }));
+
+    const cardList = screen.getByRole('list', { name: '등록 데이터 목록' });
+
+    expect(within(cardList).getByText('자재')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '자재 삭제' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '자재 삭제' }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(within(cardList).queryByText('자재')).not.toBeInTheDocument();
+
+    confirmSpy.mockRestore();
   });
 
   it('shows the new custom category only after the sidebar item is clicked', async () => {

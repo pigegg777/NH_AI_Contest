@@ -8,29 +8,72 @@ import {
   NUMERIC_FORMAT_COLUMN_KEYS,
   PRICE_COLUMN_KEYS,
 } from '../../utils/reviewTableCellValueUtils';
-import formStyles from '../shared/formControls.module.css';
 import styles from './DataTable.module.css';
+
+const SORT_ICON_ASC_SRC = new URL(
+  '../../../../../dist/assets/arrow-drop-up-line.png',
+  import.meta.url,
+).href;
+
+const SORT_ICON_DESC_SRC = new URL(
+  '../../../../../dist/assets/arrow-drop-down-line.png',
+  import.meta.url,
+).href;
+
+function renderSortButtonLabel(column) {
+  if (column.key === 'img_url') {
+    return (
+      <>
+        이미지
+        <br />
+        URL
+      </>
+    );
+  }
+
+  if (column.key === 'product_url') {
+    return (
+      <>
+        상품
+        <br />
+        URL
+      </>
+    );
+  }
+
+  return column.label;
+}
 
 function SortButton({ column, sortState, onSortChange }) {
   const isActive = sortState?.key === column.key;
   const nextDirection =
     !isActive || sortState.direction === 'desc' ? 'asc' : 'desc';
   const isDescending = isActive && sortState.direction === 'desc';
-  const sortIndicator = isDescending ? 'v' : '^';
+  const sortIndicatorSrc = isDescending ? SORT_ICON_DESC_SRC : SORT_ICON_ASC_SRC;
+  const isMultilineLabel =
+    column.key === 'img_url' || column.key === 'product_url';
 
   return (
     <button
       type="button"
-      className={`${styles.sortButton} ${isActive ? styles.sortButtonActive : ''}`.trim()}
+      className={`${styles.sortButton} ${isActive ? styles.sortButtonActive : ''} ${isMultilineLabel ? styles.sortButtonMultiline : ''}`.trim()}
       onClick={() => onSortChange({ key: column.key, direction: nextDirection })}
     >
-      <span>{column.label}</span>
+      <span
+        className={isMultilineLabel ? styles.sortButtonLabelMultiline : undefined}
+      >
+        {renderSortButtonLabel(column)}
+      </span>
       {isActive ? (
         <span
           className={`${styles.sortIndicator} ${isDescending ? styles.sortIndicatorDesc : ''}`.trim()}
           aria-hidden="true"
         >
-          {sortIndicator}
+          <img
+            className={styles.sortIndicatorImage}
+            src={sortIndicatorSrc}
+            alt=""
+          />
         </span>
       ) : null}
     </button>
@@ -140,7 +183,7 @@ export function DataTable({
                   checked={row.shadow === true}
                   type="checkbox"
                   aria-label={`shadow-${row.row_id}`}
-                  className={formStyles.shadowCheckbox}
+                  className={styles.shadowCheckbox}
                   onChange={() => onShadowToggle(row.row_id)}
                 />
               </td>

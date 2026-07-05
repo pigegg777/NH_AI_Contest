@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { useWorkbookReviewTableState } from '../hooks/review-table/useWorkbookReviewTableState';
 
@@ -41,7 +41,28 @@ const sampleRows = [
 ];
 
 describe('useWorkbookReviewTableState', () => {
+  beforeEach(() => {
+    globalThis.sessionStorage.clear();
+  });
+
   describe('annotations', () => {
+    it('preserves saved note and shadow values from loaded rows before any local edit', () => {
+      const savedRows = [
+        {
+          ...sampleRows[0],
+          shadow: true,
+          note: 'saved note',
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(savedRows, 'fp-saved'),
+      );
+
+      expect(result.current.rows[0].shadow).toBe(true);
+      expect(result.current.rows[0].note).toBe('saved note');
+    });
+
     it('applies shadow and note to rows', async () => {
       const { result } = renderHook(() =>
         useWorkbookReviewTableState(sampleRows, 'fp-1'),
@@ -57,6 +78,25 @@ describe('useWorkbookReviewTableState', () => {
       const row = result.current.rows.find((r) => r.row_id === 'A100__01');
       expect(row.shadow).toBe(true);
       expect(row.note).toBe('test note');
+    });
+
+    it('toggles shadow from the currently loaded row value', async () => {
+      const savedRows = [
+        {
+          ...sampleRows[0],
+          shadow: true,
+          note: 'saved note',
+        },
+      ];
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(savedRows, 'fp-shadow'),
+      );
+
+      await act(async () => {
+        result.current.toggleShadow('A100__01');
+      });
+
+      expect(result.current.rows[0].shadow).toBe(false);
     });
 
     it('resets annotations when fingerprint changes', async () => {
@@ -76,6 +116,34 @@ describe('useWorkbookReviewTableState', () => {
       await act(async () => {});
 
       expect(result.current.rows.find((r) => r.row_id === 'A100__01').shadow).toBe(false);
+    });
+
+    it('resets search/filters/sort when the fingerprint changes to a different category', async () => {
+      const { result, rerender } = renderHook(
+        ({ fingerprint }) => useWorkbookReviewTableState(sampleRows, fingerprint),
+        { initialProps: { fingerprint: 'fp-1' } },
+      );
+
+      await act(async () => {
+        result.current.setSearchQuery('Alpha');
+      });
+      await act(async () => {
+        result.current.handleFilterChange('medium_category', '복합');
+      });
+      await act(async () => {
+        result.current.setSortState({ key: 'product_code', direction: 'desc' });
+      });
+
+      expect(result.current.rows.map((row) => row.row_id)).toEqual(['A100__01']);
+
+      rerender({ fingerprint: 'fp-2' });
+
+      await act(async () => {});
+
+      expect(result.current.searchQuery).toBe('');
+      expect(result.current.filters.medium_category).toBe('');
+      expect(result.current.sortState).toEqual({ key: 'product_code', direction: 'asc' });
+      expect(result.current.rows.map((row) => row.row_id)).toEqual(['A100__01', 'B200__02']);
     });
 
     it('applies price override to rows', async () => {

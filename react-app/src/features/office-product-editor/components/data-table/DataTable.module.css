@@ -30,22 +30,22 @@
 
 .table th[data-col='product_code'],
 .table td[data-col='product_code'] {
-  width: 100px;
+  width: 95px;
 }
 
 .table th[data-col='product_name'],
 .table td[data-col='product_name'] {
-  width: 210px;
+  width: 170px;
 }
 
 .table th[data-col='spec'],
 .table td[data-col='spec'] {
-  width: 92px;
+  width: 90px;
 }
 
 .table th[data-col='sale_price_type_code'],
 .table td[data-col='sale_price_type_code'] {
-  width: 76px;
+  width: 90px;
   text-align: center;
 }
 
@@ -61,12 +61,12 @@
 .table td[data-col='tax_price'],
 .table th[data-col='exempt_tax_price'],
 .table td[data-col='exempt_tax_price'] {
-  width: 80px;
+  width: 95px;
 }
 
 .table th[data-col='price_subsidy'],
 .table td[data-col='price_subsidy'] {
-  width: 70px;
+  width: 80px;
 }
 
 .table th[data-col='note'],
@@ -83,7 +83,7 @@
 .table td[data-col='img_url'],
 .table th[data-col='product_url'],
 .table td[data-col='product_url'] {
-  width: 76px;
+  width: 80px;
 }
 
 .table th[data-col='medium_category'],
@@ -178,6 +178,12 @@
   text-align: center !important;
 }
 
+.shadowCheckbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .noteHeader,
 .noteCell {
   width: 148px;
@@ -188,7 +194,7 @@
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 44px;
+  min-height: 50px;
   padding: 8px 6px;
   border: none;
   background: transparent;
@@ -206,6 +212,18 @@
 .sortButton > span:first-child {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sortButtonMultiline {
+  white-space: normal;
+}
+
+.sortButtonLabelMultiline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  white-space: normal;
 }
 
 .sortButton:hover {
@@ -227,12 +245,20 @@
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
-  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sortIndicatorDesc {
-  transform: translateY(-50%) scale(0.84);
-  transform-origin: center;
+  transform: translateY(-50%);
+}
+
+.sortIndicatorImage {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .emptyState {

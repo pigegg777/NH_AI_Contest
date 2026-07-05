@@ -22,9 +22,21 @@ const mockRecommendation = {
   id: 'rec-1',
   severity: 'medium',
   title: '가격 확인',
-  reason: '세전가가 세후가보다 낮습니다',
+  reason: '이전 가격이 현재 값보다 더 높습니다',
   relatedRowIds: ['B200__02'],
 };
+
+function createDeferred() {
+  let resolve;
+  let reject;
+
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -38,7 +50,12 @@ describe('useWorkbookAiRecommendationState', () => {
     });
 
     const { result } = renderHook(() =>
-      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
     );
 
     await act(async () => {
@@ -47,9 +64,73 @@ describe('useWorkbookAiRecommendationState', () => {
 
     expect(analyzeWorkbookAiRecommendations).toHaveBeenCalledWith(mergedRows, {
       officeCode: 'OFF-1',
+      tableNameMode: 'fertilizer',
     });
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.analysisMode).toBe('openai');
     expect(result.current.recommendations).toEqual([mockRecommendation]);
+  });
+
+  it('exposes loading state while the AI analysis request is pending', async () => {
+    const deferred = createDeferred();
+
+    analyzeWorkbookAiRecommendations.mockReturnValue(deferred.promise);
+
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
+    );
+
+    act(() => {
+      void result.current.handleAnalyze();
+    });
+
+    expect(result.current.isLoading).toBe(true);
+
+    await act(async () => {
+      deferred.resolve({
+        mode: 'openai',
+        recommendations: [mockRecommendation],
+      });
+      await deferred.promise;
+    });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.recommendations).toEqual([mockRecommendation]);
+  });
+
+  it('ignores duplicate analyze requests while a request is already running', async () => {
+    const deferred = createDeferred();
+
+    analyzeWorkbookAiRecommendations.mockReturnValue(deferred.promise);
+
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
+    );
+
+    act(() => {
+      void result.current.handleAnalyze();
+      void result.current.handleAnalyze();
+    });
+
+    expect(analyzeWorkbookAiRecommendations).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      deferred.resolve({
+        mode: 'openai',
+        recommendations: [mockRecommendation],
+      });
+      await deferred.promise;
+    });
   });
 
   it('toggles the active recommendation', async () => {
@@ -59,7 +140,12 @@ describe('useWorkbookAiRecommendationState', () => {
     });
 
     const { result } = renderHook(() =>
-      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
     );
 
     await act(async () => {
@@ -91,6 +177,7 @@ describe('useWorkbookAiRecommendationState', () => {
           mergedRows,
           workbookFingerprint,
           'OFF-1',
+          'fertilizer',
         ),
       { initialProps: { workbookFingerprint: 'workbook-a' } },
     );
@@ -108,6 +195,7 @@ describe('useWorkbookAiRecommendationState', () => {
     rerender({ workbookFingerprint: 'workbook-b' });
 
     expect(result.current.recommendations).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.analysisMode).toBe('idle');
     expect(result.current.activeRecommendationId).toBe(null);
   });
@@ -120,7 +208,12 @@ describe('useWorkbookAiRecommendationState', () => {
     });
 
     const { result } = renderHook(() =>
-      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
     );
 
     await act(async () => {
@@ -141,7 +234,12 @@ describe('useWorkbookAiRecommendationState', () => {
       .mockRejectedValueOnce(new Error('OpenAI API request failed.'));
 
     const { result } = renderHook(() =>
-      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1'),
+      useWorkbookAiRecommendationState(
+        mergedRows,
+        'workbook-a',
+        'OFF-1',
+        'fertilizer',
+      ),
     );
 
     await act(async () => {
@@ -155,6 +253,7 @@ describe('useWorkbookAiRecommendationState', () => {
     });
 
     expect(result.current.recommendations).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.activeRecommendationId).toBe(null);
   });
 });
