@@ -1,81 +1,32 @@
-import panelStyles from '../shared/panel.module.css';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 import recStyles from './WorkbookAiRecommendations.module.css';
 
-function countRecommendationsBySeverity(recommendations) {
-  return recommendations.reduce(
-    (counts, recommendation) => {
-      const severity = recommendation.severity;
-
-      if (severity === 'high' || severity === 'medium' || severity === 'low') {
-        counts[severity] += 1;
-      }
-
-      return counts;
-    },
-    { high: 0, medium: 0, low: 0 },
-  );
-}
-
 export function WorkbookAiRecommendations({
   recommendations,
+  isLoading = false,
   analysisMode,
   analysisMessage = '',
   activeRecommendationId,
   onRecommendationSelect,
 }) {
-  const severityCounts = countRecommendationsBySeverity(recommendations);
-  const isUnavailable = analysisMode === 'unavailable';
-  const isError = analysisMode === 'error';
+  void analysisMode;
+  void analysisMessage;
 
   return (
-    <section className={`${panelStyles.panel} ${panelStyles.compactPanel}`}>
-      <div className={panelStyles.panelHeader}>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
+      <div className={styles.panelHeader}>
         <div className={recStyles.aiPanelHeader}>
-          <h2 className={panelStyles.panelTitle}>AI 추천</h2>
+          <h2 className={styles.panelTitle}>AI 추천</h2>
         </div>
-        {/* <span className={panelStyles.panelMeta}>
-          {recommendations.length}건 추천
-        </span> */}
       </div>
 
-      {/* {isUnavailable ? (
-        <p className={panelStyles.aiEmptyState}>
-          사업장 정보를 확인하지 못해 AI 분석을 사용할 수 없습니다. 다시
-          로그인한 뒤 시도해 주세요.
+      {isLoading ? (
+        <p className={styles.statusMessage}>
+          AI가 데이터를 분석하고 있습니다
         </p>
       ) : null}
 
-      {isError ? (
-        <p className={panelStyles.errorBox}>
-          {analysisMessage ||
-            'OpenAI 보조 분석에 실패했습니다. 잠시 후 다시 시도해 주세요.'}
-        </p>
-      ) : null}
-
-      {!isUnavailable && !isError ? (
-        <>
-          <div className={recStyles.recommendationSummary}>
-            <span className={recStyles.recommendationStat}>
-              높음 {severityCounts.high}
-            </span>
-            <span className={recStyles.recommendationStat}>
-              중간 {severityCounts.medium}
-            </span>
-            <span className={recStyles.recommendationStat}>
-              낮음 {severityCounts.low}
-            </span>
-          </div>
-
-          {recommendations.length === 0 ? (
-            <p className={panelStyles.aiEmptyState}>
-              아직 AI 분석 결과가 없습니다.
-            </p>
-          ) : null}
-        </>
-      ) : null} */}
-
-      {recommendations.length > 0 ? (
+      {!isLoading && recommendations.length > 0 ? (
         <div className={recStyles.recommendationGrid}>
           {recommendations.map((recommendation) => {
             const isActive = recommendation.id === activeRecommendationId;
@@ -116,24 +67,26 @@ export function WorkbookAiRecommendationPanel({
   aiDisabled,
   hasRows,
   aiRecommendations = [],
+  aiIsLoading = false,
   aiAnalysisMode = 'idle',
   aiAnalysisMessage = '',
   aiActiveRecommendationId = null,
   onAiRecommendationSelect,
 }) {
-  const showPanel = aiAnalysisMode !== 'idle' || aiRecommendations.length > 0;
+  const showPanel =
+    aiIsLoading || aiAnalysisMode !== 'idle' || aiRecommendations.length > 0;
 
   return (
     <>
-      <h3 className={styles.sectionTitle}>🤖 AI 분석</h3>
+      <h3 className={styles.sectionTitle}>AI 분석</h3>
       <p className={styles.desc}>
-        ✨ 업로드된 데이터를 AI가 분석하여 가격·품목 추천 사항을 제공합니다.
+        업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
       </p>
       <button
         type="button"
         className={styles.aiButton}
         onClick={onAiAnalyze}
-        disabled={aiDisabled || !hasRows}
+        disabled={aiDisabled || !hasRows || aiIsLoading}
       >
         AI 분석하기
       </button>
@@ -141,6 +94,7 @@ export function WorkbookAiRecommendationPanel({
         <div className={styles.recommendSection}>
           <WorkbookAiRecommendations
             recommendations={aiRecommendations}
+            isLoading={aiIsLoading}
             analysisMode={aiAnalysisMode}
             analysisMessage={aiAnalysisMessage}
             activeRecommendationId={aiActiveRecommendationId}

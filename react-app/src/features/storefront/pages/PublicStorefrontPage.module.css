@@ -2,6 +2,27 @@
   min-height: 100vh;
 }
 
+.statusMessage {
+  margin: 16px;
+  padding: 8px 12px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  margin: 16px;
+  padding: 8px 12px;
+  border: 1px solid rgba(185, 28, 28, 0.16);
+  border-radius: var(--corp-radius);
+  background: rgba(185, 28, 28, 0.07);
+  color: var(--corp-danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 .nav {
   display: flex;
   align-items: center;

@@ -1,32 +1,39 @@
 .filterToolbar {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  align-items: end;
+  gap: 12px;
   margin-bottom: 10px;
+  min-width: 0;
 }
 
 .filterTopRow {
   display: flex;
   align-items: end;
   gap: 10px;
+  flex: 1 1 320px;
+  min-width: 280px;
 }
 
 .filterBottomRow {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(112px, 1fr)) auto;
   gap: 8px;
   align-items: end;
+  flex: 2 1 0;
+  min-width: 0;
 }
 
 .filterField {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .filterFieldWide {
   flex: 1;
-  min-width: 0;
+  min-width: 280px;
 }
 
 .filterLabel {
@@ -40,16 +47,16 @@
 .filterInput,
 .filterSelect {
   width: 100%;
-  min-height: 30px;
-  padding: 0 9px;
+  min-height: 34px;
+  padding: 0 10px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-panel);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 
 .filterInput {
-  width: 60%;
+  width: 100%;
 }
 
 .filterInput::placeholder {
@@ -68,8 +75,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
-  padding: 0 11px;
+  min-height: 34px;
+  padding: 0 14px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-surface-muted);
@@ -77,6 +84,7 @@
   font-size: 0.76rem;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   touch-action: manipulation;
   transition: background var(--corp-transition);
@@ -91,20 +99,37 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 1280px) {
+  .filterToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterTopRow,
+  .filterBottomRow,
+  .filterFieldWide {
+    min-width: 0;
+  }
+
   .filterBottomRow {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 760px) {
+  .resetButton {
+    width: 100%;
+  }
+
+  .filterBottomRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
   .filterTopRow {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .resetButton {
-    width: 100%;
   }
 
   .filterBottomRow {

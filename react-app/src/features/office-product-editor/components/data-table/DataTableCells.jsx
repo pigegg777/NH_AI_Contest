@@ -6,7 +6,6 @@ import {
   formatPriceValue,
   parsePriceDraftValue,
 } from '../../utils/reviewTableCellValueUtils';
-import formStyles from '../shared/formControls.module.css';
 import styles from './DataTableCells.module.css';
 
 export function SelectionHeaderCheckbox({ checked, indeterminate, onChange }) {
@@ -27,7 +26,7 @@ export function SelectionHeaderCheckbox({ checked, indeterminate, onChange }) {
         ref={inputRef}
         type="checkbox"
         checked={checked}
-        className={formStyles.shadowCheckbox}
+        className={styles.shadowCheckbox}
         onChange={onChange}
       />
     </label>

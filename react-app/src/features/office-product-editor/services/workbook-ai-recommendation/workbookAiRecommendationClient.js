@@ -17,7 +17,11 @@ async function readErrorMessage(response) {
   }
 }
 
-export async function requestWorkbookAiRecommendations({ officeCode, rows }) {
+export async function requestWorkbookAiRecommendations({
+  officeCode,
+  rows,
+  tableNameMode,
+}) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -35,6 +39,7 @@ export async function requestWorkbookAiRecommendations({ officeCode, rows }) {
     },
     body: JSON.stringify({
       officeCode: toTrimmedString(officeCode),
+      tableNameMode: toTrimmedString(tableNameMode),
       rows: Array.isArray(rows) ? rows : [],
       supabaseUrl: LOCAL_SUPABASE_URL,
       supabasePublishableKey: LOCAL_SUPABASE_PUBLISHABLE_KEY,

@@ -50,7 +50,10 @@ export function buildOfficeProductDataCatalogModel(
 
   const pendingCards = pendingCategoryNames
     .filter((categoryName) => !registeredItemsByCategory.has(categoryName))
-    .map((categoryName) => createCatalogCard(categoryName, null));
+    .map((categoryName) => ({
+      ...createCatalogCard(categoryName, null),
+      isPendingCustom: true,
+    }));
 
   return {
     registeredCount: items.length,

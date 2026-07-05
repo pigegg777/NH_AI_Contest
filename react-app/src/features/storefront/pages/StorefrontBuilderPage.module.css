@@ -2,6 +2,27 @@
   padding: 16px;
 }
 
+.statusMessage {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.errorBox {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(185, 28, 28, 0.16);
+  border-radius: var(--corp-radius);
+  background: rgba(185, 28, 28, 0.07);
+  color: var(--corp-danger);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(360px, 1fr) minmax(320px, 460px);

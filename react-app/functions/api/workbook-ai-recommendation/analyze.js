@@ -16,8 +16,14 @@ import {
 import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.js';
 import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
-const REQUEST_BODY_ALLOWED_KEYS = ['officeCode', 'rows', 'supabaseUrl', 'supabasePublishableKey'];
+const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini';
+const REQUEST_BODY_ALLOWED_KEYS = [
+  'officeCode',
+  'tableNameMode',
+  'rows',
+  'supabaseUrl',
+  'supabasePublishableKey',
+];
 const MAX_ROWS = 500;
 const MAX_REQUEST_BODY_BYTES = 300000;
 
@@ -28,7 +34,12 @@ function toOptionalTrimmedString(value) {
 function isLocalDevelopmentRequest(request) {
   try {
     const hostname = new URL(request.url).hostname;
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]';
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '[::1]'
+    );
   } catch {
     return false;
   }
@@ -40,7 +51,9 @@ function buildLocalSupabaseEnvFallback(request, body) {
   }
 
   const supabaseUrl = toOptionalTrimmedString(body.supabaseUrl);
-  const supabasePublishableKey = toOptionalTrimmedString(body.supabasePublishableKey);
+  const supabasePublishableKey = toOptionalTrimmedString(
+    body.supabasePublishableKey,
+  );
   const fallbackEnv = {};
 
   if (supabaseUrl) {
@@ -58,9 +71,14 @@ export async function onRequestPost({ request, env }) {
   try {
     assertPostJsonRequest(request);
 
-    const rawBody = await readJsonBody(request, { maxBytes: MAX_REQUEST_BODY_BYTES });
+    const rawBody = await readJsonBody(request, {
+      maxBytes: MAX_REQUEST_BODY_BYTES,
+    });
     const body = pickAllowedKeys(rawBody, REQUEST_BODY_ALLOWED_KEYS);
-    const officeCode = typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
+    const officeCode =
+      typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
+    const tableNameMode =
+      typeof body.tableNameMode === 'string' ? body.tableNameMode.trim() : '';
     assertOfficeCodePresent(officeCode);
 
     const rows = Array.isArray(body.rows) ? body.rows.slice(0, MAX_ROWS) : [];
@@ -74,11 +92,15 @@ export async function onRequestPost({ request, env }) {
       ...env,
     };
 
-    const { supabase, user } = await requireAuthenticatedSupabaseUser(request, effectiveEnv);
+    const { supabase, user } = await requireAuthenticatedSupabaseUser(
+      request,
+      effectiveEnv,
+    );
     await assertOfficeOwnership({ supabase, authUserId: user.id, officeCode });
 
     const requestBody = buildWorkbookAiRequestBody({
       rows,
+      tableNameMode,
       openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
       prompt: WORKBOOK_AI_ANALYSIS_PROMPT,
     });
@@ -88,15 +110,26 @@ export async function onRequestPost({ request, env }) {
     try {
       payload = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY);
     } catch (error) {
-      return errorResponse(error instanceof Error ? error.message : 'OpenAI request failed.', 502);
+      return errorResponse(
+        error instanceof Error ? error.message : 'OpenAI request failed.',
+        502,
+      );
     }
 
     if (!Array.isArray(payload?.recommendations)) {
-      return errorResponse('OpenAI returned an unreadable structured response.', 502);
+      return errorResponse(
+        'OpenAI returned an unreadable structured response.',
+        502,
+      );
     }
 
-    const openAiRecommendations = normalizeOpenAiRecommendations(payload.recommendations, rows);
-    const recommendations = sortWorkbookAiRecommendations(openAiRecommendations);
+    const openAiRecommendations = normalizeOpenAiRecommendations(
+      payload.recommendations,
+      rows,
+    );
+    const recommendations = sortWorkbookAiRecommendations(
+      openAiRecommendations,
+    );
 
     return jsonResponse({ recommendations });
   } catch (error) {

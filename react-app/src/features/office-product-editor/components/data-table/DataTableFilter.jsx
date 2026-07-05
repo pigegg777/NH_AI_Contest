@@ -33,7 +33,7 @@ export function DataTableFilter({
             value={searchQuery}
             onChange={(event) => onSearchQueryChange(event.target.value)}
             autoComplete="off"
-            placeholder="상품코드, 상품명, 분류명 검색"
+            placeholder="상품코드, 상품명, 분류명 검색…"
           />
         </label>
       </div>

@@ -1,18 +1,19 @@
 import styles from './EditorSidebar.module.css';
 
 export function SidebarCatalogItem({ card, isSelected, onSelect, onDelete }) {
+  const isPendingCustom = card.isPendingCustom === true;
   const isEditingRegistered = isSelected && !card.isEmpty && !card.isAdd;
   const statusLabel = isEditingRegistered ? '편집 중' : card.statusLabel;
-  const isDeletable = !card.isEmpty && !card.isAdd;
+  const isDeletable = isPendingCustom || (!card.isEmpty && !card.isAdd);
 
   function handleDeleteClick(event) {
     event.stopPropagation();
 
-    if (
-      !window.confirm(
-        `'${card.categoryName}' 데이터를 삭제하면 복구할 수 없습니다. 계속할까요?`,
-      )
-    ) {
+    const confirmMessage = isPendingCustom
+      ? `'${card.categoryName}' 카테고리를 삭제할까요?`
+      : `'${card.categoryName}' 데이터를 삭제하면 복구할 수 없습니다. 계속할까요?`;
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 

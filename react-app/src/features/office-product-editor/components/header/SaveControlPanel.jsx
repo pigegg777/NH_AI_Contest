@@ -1,4 +1,3 @@
-import panelStyles from '../shared/panel.module.css';
 import styles from './SaveControlPanel.module.css';
 
 export function SaveControlPanel({
@@ -22,13 +21,13 @@ export function SaveControlPanel({
         </button>
       ) : null}
       {saveDisabledMessage ? (
-        <div className={panelStyles.statusMessage}>{saveDisabledMessage}</div>
+        <div className={styles.statusMessage}>{saveDisabledMessage}</div>
       ) : null}
       {saveErrorMessage ? (
-        <div className={panelStyles.errorBox}>{saveErrorMessage}</div>
+        <div className={styles.errorBox}>{saveErrorMessage}</div>
       ) : null}
       {saveSuccessMessage ? (
-        <div className={panelStyles.successBox}>{saveSuccessMessage}</div>
+        <div className={styles.successBox}>{saveSuccessMessage}</div>
       ) : null}
     </>
   );

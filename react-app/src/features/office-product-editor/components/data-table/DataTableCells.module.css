@@ -11,6 +11,12 @@
   white-space: nowrap;
 }
 
+.shadowCheckbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 .noteButton {
   width: 100%;
   min-height: 32px;

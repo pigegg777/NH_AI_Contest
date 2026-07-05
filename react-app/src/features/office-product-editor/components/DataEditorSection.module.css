@@ -12,8 +12,8 @@
   align-items: start;
   /* border: 1px solid var(--corp-line); */
   border-radius: var(--corp-radius-sm);
-  padding: 16px;
-  background-color: white;
+  padding: 0px;
+  /* background-color: white; */
 }
 
 .controlColWide {
@@ -21,6 +21,7 @@
   border: 1px solid var(--corp-line);
   border-radius: var(--corp-radius-sm);
   padding: 16px;
+  background: white;
 }
 
 .uploadSection {

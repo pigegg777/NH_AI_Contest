@@ -6,11 +6,39 @@ import {
   validateCustomCategoryCreation,
 } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
 
-export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
-  const [tableNameMode, setTableNameMode] = useState('');
-  const [customTableName, setCustomTableName] = useState('');
-  const [pendingCustomCategories, setPendingCustomCategories] = useState([]);
-  const [activeCustomCategoryName, setActiveCustomCategoryName] = useState('');
+function createInitialSelectionState(initialSelectionState) {
+  return {
+    tableNameMode:
+      typeof initialSelectionState?.tableNameMode === 'string'
+        ? initialSelectionState.tableNameMode
+        : '',
+    customTableName:
+      typeof initialSelectionState?.customTableName === 'string'
+        ? initialSelectionState.customTableName
+        : '',
+    pendingCustomCategories: Array.isArray(initialSelectionState?.pendingCustomCategories)
+      ? initialSelectionState.pendingCustomCategories
+      : [],
+    activeCustomCategoryName:
+      typeof initialSelectionState?.activeCustomCategoryName === 'string'
+        ? initialSelectionState.activeCustomCategoryName
+        : '',
+  };
+}
+
+export function useWorkbookCatalogSelection({
+  officeProductCatalogItems,
+  initialSelectionState = null,
+}) {
+  const initialState = createInitialSelectionState(initialSelectionState);
+  const [tableNameMode, setTableNameMode] = useState(initialState.tableNameMode);
+  const [customTableName, setCustomTableName] = useState(initialState.customTableName);
+  const [pendingCustomCategories, setPendingCustomCategories] = useState(
+    initialState.pendingCustomCategories,
+  );
+  const [activeCustomCategoryName, setActiveCustomCategoryName] = useState(
+    initialState.activeCustomCategoryName,
+  );
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const isShowingExistingCustomCategory =
@@ -64,6 +92,24 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
     setCustomTableName('');
   }
 
+  function handlePendingCustomCategoryDelete(categoryName) {
+    const normalizedCategoryName = toTrimmedString(categoryName);
+
+    if (normalizedCategoryName.length === 0) {
+      return;
+    }
+
+    setPendingCustomCategories((previous) =>
+      previous.filter((name) => name !== normalizedCategoryName),
+    );
+    setSubmitAttempted(false);
+
+    if (activeCustomCategoryName === normalizedCategoryName) {
+      setTableNameMode('custom');
+      setActiveCustomCategoryName('');
+    }
+  }
+
   function isCardSelected(card) {
     if (card.isAdd) {
       return tableNameMode === 'custom' && !isShowingExistingCustomCategory;
@@ -102,10 +148,12 @@ export function useWorkbookCatalogSelection({ officeProductCatalogItems }) {
     tableNameMode,
     customTableName,
     pendingCustomCategories,
+    activeCustomCategoryName,
     effectiveCustomTableName,
     showsCustomTableNameInput,
     handleCustomTableNameChange,
     handleCreateCustomTable,
+    handlePendingCustomCategoryDelete,
     tableNameValidationError,
     isCardSelected,
     handleCatalogSelect,

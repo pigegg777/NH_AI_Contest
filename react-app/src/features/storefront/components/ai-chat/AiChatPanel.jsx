@@ -1,4 +1,3 @@
-import panelStyles from '../../../office-product-editor/components/shared/panel.module.css';
 import ChatMessageBubble from './ChatMessageBubble';
 import ScopeSelectorStrip from './ScopeSelectorStrip';
 import styles from './AiChatPanel.module.css';
@@ -74,7 +73,7 @@ export default function AiChatPanel({
         ) : null}
       </div>
 
-      {errorMessage ? <div className={panelStyles.errorBox}>{errorMessage}</div> : null}
+      {errorMessage ? <div className={styles.errorBox}>{errorMessage}</div> : null}
     </div>
   );
 }

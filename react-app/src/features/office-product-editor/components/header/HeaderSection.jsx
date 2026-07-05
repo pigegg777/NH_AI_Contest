@@ -8,7 +8,6 @@ export function HeaderSection() {
     activeCategoryName,
     bannerStatusLabel,
     bannerStatusVariant,
-    isViewingRegisteredData,
   } = useEditorMeta();
   const save = useSaveCtx();
 
@@ -19,7 +18,7 @@ export function HeaderSection() {
         bannerStatusLabel={bannerStatusLabel}
         bannerStatusVariant={bannerStatusVariant}
       />
-      {isViewingRegisteredData && (
+      {save?.handleSave && (
         <div className={styles.actions}>
           <SaveControlPanel {...save} />
         </div>

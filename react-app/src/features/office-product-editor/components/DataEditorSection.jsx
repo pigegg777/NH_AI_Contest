@@ -9,6 +9,7 @@ export function DataEditorSection() {
   const { rows, warningRows } = useTableCtx();
   const {
     recommendations: aiRecommendations,
+    isLoading: aiIsLoading = false,
     analysisMode: aiAnalysisMode,
     analysisMessage: aiAnalysisMessage,
     activeRecommendationId: aiActiveRecommendationId,
@@ -37,6 +38,7 @@ export function DataEditorSection() {
             aiDisabled={false}
             hasRows={rows.length > 0}
             aiRecommendations={aiRecommendations}
+            aiIsLoading={aiIsLoading}
             aiAnalysisMode={aiAnalysisMode}
             aiAnalysisMessage={aiAnalysisMessage}
             aiActiveRecommendationId={aiActiveRecommendationId}

@@ -1,6 +1,3 @@
-import { MAX_WARNING_ROW_COUNT } from '../../model/review-table/reviewTableConfigModel';
-import formStyles from '../shared/formControls.module.css';
-import sharedStyles from '../shared/panel.module.css';
 import styles from './ExcelUploadSection.module.css';
 import warningStyles from './FileWarningsPanel.module.css';
 
@@ -10,9 +7,9 @@ function FileWarningsPanel({ warnings }) {
   }
 
   return (
-    <section className={`${sharedStyles.panel} ${sharedStyles.compactPanel}`}>
-      <div className={sharedStyles.panelHeader}>
-        <h2 className={sharedStyles.panelTitle}>파일 경고</h2>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
+      <div className={styles.panelHeader}>
+        <h2 className={styles.panelTitle}>파일 경고</h2>
       </div>
       <ul className={warningStyles.warningList}>
         {warnings.map((warning) => (
@@ -29,14 +26,14 @@ function WarningRowsPanel({ rows }) {
   if (rows.length === 0) {
     return null;
   }
-
+  const MAX_WARNING_ROW_COUNT = 30;
   const visibleRows = rows.slice(0, MAX_WARNING_ROW_COUNT);
 
   return (
-    <section className={`${sharedStyles.panel} ${sharedStyles.compactPanel}`}>
-      <div className={sharedStyles.panelHeader}>
-        <h2 className={sharedStyles.panelTitle}>행 경고</h2>
-        <span className={sharedStyles.panelMeta}>{visibleRows.length}건</span>
+    <section className={`${styles.panel} ${styles.compactPanel}`}>
+      <div className={styles.panelHeader}>
+        <h2 className={styles.panelTitle}>행 경고</h2>
+        <span className={styles.panelMeta}>{visibleRows.length}건</span>
       </div>
 
       <div className={warningStyles.warningRows}>
@@ -86,7 +83,7 @@ export function ExcelUploadPanel({
               📊 엑셀 업로드 (31-6447에서 엑셀파일을 다운로드한 뒤 선택하세요.)
             </h3>
             <p className={styles.desc}>
-              ⚠️ 새 파일 선택 시 현재 저장된 데이터가 삭제되고 새 파일로 완전히
+              새 파일 선택 시 현재 저장된 데이터가 삭제되고 새 파일로 완전히
               교체됩니다.
             </p>
             <label className={styles.uploadBtn} htmlFor="excel-workbook-input">
@@ -94,7 +91,7 @@ export function ExcelUploadPanel({
             </label>
             <input
               id="excel-workbook-input"
-              className={formStyles.fileInput}
+              className={styles.fileInput}
               type="file"
               accept=".xlsx,.xls"
               onChange={onWorkbookChange}
@@ -104,12 +101,12 @@ export function ExcelUploadPanel({
           {isLoading || loadingErrorMessage ? (
             <div className={styles.statusArea}>
               {isLoading ? (
-                <div className={sharedStyles.statusMessage}>
+                <div className={styles.statusMessage}>
                   등록 데이터를 불러오는 중...
                 </div>
               ) : null}
               {loadingErrorMessage ? (
-                <div className={sharedStyles.errorBox}>
+                <div className={styles.errorBox}>
                   {loadingErrorMessage}
                 </div>
               ) : null}
