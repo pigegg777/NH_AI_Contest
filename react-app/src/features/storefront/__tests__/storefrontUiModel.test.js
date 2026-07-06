@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeMobileUiTree, sanitizeMobileUiTree } from '../model/storefrontUiModel';
+import { normalizeMobileUiTree, sanitizeMobileUiTree } from '../model/storefront-config/storefrontUiModel';
 
 describe('normalizeMobileUiTree', () => {
   it('keeps only supported blocks and restores required product blocks', () => {

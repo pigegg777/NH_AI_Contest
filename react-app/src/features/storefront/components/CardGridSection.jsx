@@ -1,19 +1,19 @@
 import {
   formatFieldDisplayValue,
   hasRenderableValue,
-} from '../model/cardFieldRenderModel';
+} from '../model/card-design/cardFieldRenderModel';
 import {
   buildFieldSlots,
   resolveSectionOrderFromLayoutPlan,
-} from '../model/cardCompositionModel';
+} from '../model/card-design/cardCompositionModel';
 import {
   normalizeCardStyle,
   resolveFieldColorRoleValue,
-} from '../model/cardStyleModel';
+} from '../model/card-design/cardStyleModel';
 import {
   STOREFRONT_FIELD_LABELS,
   sortFieldKeysByDisplayOrder,
-} from '../model/storefrontBuilderModel';
+} from '../model/storefront-config/storefrontBuilderModel';
 import styles from './CardGridSection.module.css';
 
 const PRICE_FIELD_SET = new Set([

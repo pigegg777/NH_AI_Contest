@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildWorkbookAiRequestBody } from '../model/ai-recommendations/workbookAiRequestBodyModel';
 import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../model/ai-recommendations/workbookAiRecommendationPrompt';
-import { extractStructuredPayload } from '../../storefront/services/openAiJsonRequest';
+import { extractStructuredPayload } from '../../storefront/services/openai/openAiJsonRequest';
 
 describe('workbook AI recommendation payload model', () => {
   it('builds the OpenAI request body with the separated prompt', () => {

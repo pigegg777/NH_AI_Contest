@@ -4,10 +4,10 @@ import {
   DEFAULT_PAGE_AI_DESIGN,
   normalizePageAiDesignInput,
   normalizePageAiTargetScope,
-} from '../model/pageAiDesignModel';
-import { normalizePageStyle } from '../model/pageStyleModel';
-import { requestPageStyleAiIntent } from '../services/pageStyleAiGateway';
-import { compilePageStyle } from '../services/pageStyleCompiler';
+} from '../model/page-design/pageAiDesignModel';
+import { normalizePageStyle } from '../model/page-design/pageStyleModel';
+import { requestPageStyleAiIntent } from '../services/page-design/pageStyleAiGateway';
+import { compilePageStyle } from '../services/page-design/pageStyleCompiler';
 
 const MISSING_PAGE_PROMPT_ERROR_MESSAGE = '페이지 분위기를 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '페이지 스타일을 적용하지 못했습니다.';
@@ -50,17 +50,26 @@ export function usePageAiDesign({ officeCode, initialPageStyle } = {}) {
     }));
   }
 
-  async function applyPageAiDesign() {
-    const normalizedInput = normalizePageAiDesignInput(pageAiDesign);
+  async function applyPageAiDesign(overrides = {}) {
+    const normalizedInput = normalizePageAiDesignInput({
+      ...pageAiDesign,
+      prompt: overrides.prompt ?? pageAiDesign.prompt,
+      targetScope: overrides.targetScope ?? pageAiDesign.targetScope,
+    });
 
     if (!normalizedInput.prompt) {
       setPageAiErrorMessage(MISSING_PAGE_PROMPT_ERROR_MESSAGE);
-      return;
+      return {
+        ok: false,
+        error: MISSING_PAGE_PROMPT_ERROR_MESSAGE,
+      };
     }
 
-    const history = pageAiMessages
-      .slice(-MAX_PAGE_AI_HISTORY_TURNS)
-      .map((message) => ({ role: message.role, text: message.text }));
+    const history = Array.isArray(overrides.history)
+      ? overrides.history
+      : pageAiMessages
+          .slice(-MAX_PAGE_AI_HISTORY_TURNS)
+          .map((message) => ({ role: message.role, text: message.text }));
 
     setPageAiMessages((current) => [
       ...current,
@@ -101,10 +110,23 @@ export function usePageAiDesign({ officeCode, initialPageStyle } = {}) {
           ts: Date.now(),
         },
       ]);
+
+      return {
+        ok: true,
+        explanation,
+        suggestion,
+        scope: normalizedInput.targetScope,
+      };
     } catch (error) {
-      setPageAiErrorMessage(
-        error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE,
-      );
+      const message =
+        error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE;
+
+      setPageAiErrorMessage(message);
+
+      return {
+        ok: false,
+        error: message,
+      };
     } finally {
       setIsApplyingPageAiDesign(false);
     }

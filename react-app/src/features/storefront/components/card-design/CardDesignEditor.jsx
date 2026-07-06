@@ -1,5 +1,5 @@
-import { CARD_AI_TARGET_SCOPE_OPTIONS } from '../../model/cardAiDesignModel';
-import { CARD_CARDS_PER_ROW_OPTIONS } from '../../model/cardCompositionModel';
+import { CARD_AI_TARGET_SCOPE_OPTIONS } from '../../model/card-design/cardAiDesignModel';
+import { CARD_CARDS_PER_ROW_OPTIONS } from '../../model/card-design/cardCompositionModel';
 import AiChatPanel from '../ai-chat/AiChatPanel';
 import CardStylePromptField from './CardStylePromptField';
 import styles from './CardDesignEditor.module.css';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../model/pageStyleColor';
+import { contrastRatio } from '../model/page-design/pageStyleColor';
 import {
   DEFAULT_PAGE_STYLE,
   PAGE_STYLE_SCHEMA_VERSION,
@@ -11,7 +11,7 @@ import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../model/pageStyleModel';
+} from '../model/page-design/pageStyleModel';
 
 describe('DEFAULT_PAGE_STYLE', () => {
   it('is an explicit white default, not a fallback branch', () => {

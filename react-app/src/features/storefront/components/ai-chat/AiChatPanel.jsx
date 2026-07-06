@@ -48,8 +48,12 @@ export default function AiChatPanel({
           messages.map((message) => (
             <ChatMessageBubble
               key={message.id}
-              message={message}
-              scopeLabel={resolveScopeLabel(scopeOptions, message.scope)}
+              message={{
+                ...message,
+                scopeLabel:
+                  message.scopeLabel ??
+                  resolveScopeLabel(scopeOptions, message.scope),
+              }}
             />
           ))
         )}

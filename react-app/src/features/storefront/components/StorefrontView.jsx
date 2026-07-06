@@ -1,5 +1,5 @@
-import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/pageStyleModel';
-import { getDefaultBlock, MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
+import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/page-design/pageStyleModel';
+import { getDefaultBlock, MOBILE_UI_HELPER_TYPES } from '../model/storefront-config/storefrontUiModel';
 import { useStorefrontView } from '../hooks/useStorefrontView';
 import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
 import CardGridSection from './CardGridSection';

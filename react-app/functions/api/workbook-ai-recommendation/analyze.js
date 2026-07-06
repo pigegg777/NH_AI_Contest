@@ -4,7 +4,7 @@ import {
   sortWorkbookAiRecommendations,
 } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRecommendationListModel.js';
 import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRecommendationPrompt.js';
-import { requestOpenAiJson } from '../../../src/features/storefront/services/openAiJsonRequest.js';
+import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,

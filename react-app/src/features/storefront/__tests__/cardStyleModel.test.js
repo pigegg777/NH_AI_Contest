@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CARD_STYLE, normalizeCardStyle, resolveFieldColorRoleValue } from '../model/cardStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle, resolveFieldColorRoleValue } from '../model/card-design/cardStyleModel';
 
 describe('normalizeCardStyle', () => {
   it('keeps allowed values for every section and falls back to defaults otherwise', () => {

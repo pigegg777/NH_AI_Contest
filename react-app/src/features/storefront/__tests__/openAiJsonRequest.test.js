@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractStructuredPayload } from '../services/openAiJsonRequest';
+import { extractStructuredPayload } from '../services/openai/openAiJsonRequest';
 
 describe('extractStructuredPayload', () => {
   it('reads output_parsed directly when present', () => {

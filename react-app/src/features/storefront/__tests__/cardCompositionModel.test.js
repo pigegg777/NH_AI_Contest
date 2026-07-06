@@ -14,7 +14,7 @@ import {
   resolveSectionOrder,
   resolveStructuralPreset,
   resolveStructuralPresetFromLayoutPlan,
-} from '../model/cardCompositionModel';
+} from '../model/card-design/cardCompositionModel';
 
 describe('normalizeCardsPerRow', () => {
   it('only allows 1 or 2, falling back otherwise', () => {

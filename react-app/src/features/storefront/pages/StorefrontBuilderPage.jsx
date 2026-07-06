@@ -1,8 +1,7 @@
-import StorefrontView from '../components/StorefrontView';
-import CardDesignStep from './storefront-builder/CardDesignStep';
+import PublicStorefrontScreen from '../../public-storefront/components/PublicStorefrontScreen';
 import DataSelectionStep from './storefront-builder/DataSelectionStep';
-import PageDesignStep from './storefront-builder/PageDesignStep';
 import ProductCategoryStep from './storefront-builder/ProductCategoryStep';
+import UnifiedDesignStep from './storefront-builder/UnifiedDesignStep';
 import { useStorefrontBuilder } from '../hooks/useStorefrontBuilder';
 import styles from './StorefrontBuilderPage.module.css';
 
@@ -12,16 +11,12 @@ const STEP_COMPONENTS = [
     selectStepProps: (builder) => builder.productCategoryStep,
   },
   {
-    Component: PageDesignStep,
-    selectStepProps: (builder) => builder.pageDesignStep,
-  },
-  {
     Component: DataSelectionStep,
     selectStepProps: (builder) => builder.dataSelectionStep,
   },
   {
-    Component: CardDesignStep,
-    selectStepProps: (builder) => builder.cardDesignStep,
+    Component: UnifiedDesignStep,
+    selectStepProps: (builder) => builder.unifiedDesignStep,
   },
 ];
 
@@ -114,7 +109,7 @@ export default function StorefrontBuilderPage({
                     이전
                   </button>
                 ) : null}
-                {builder.currentStep !== 3 ? (
+                {builder.currentStep !== 2 ? (
                   <button
                     type="button"
                     className={styles.primaryButton}
@@ -164,7 +159,7 @@ export default function StorefrontBuilderPage({
             >
               <div className={styles.previewDeviceSpeaker} />
               <div className={styles.previewDeviceScreen}>
-                <StorefrontView
+                <PublicStorefrontScreen
                   config={builder.previewConfig}
                   productRows={builder.previewProductRows}
                   officeName={builder.officeName}

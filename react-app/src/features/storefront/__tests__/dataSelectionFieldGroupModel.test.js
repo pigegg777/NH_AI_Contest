@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { groupAvailableFields, isMandatoryField } from '../model/dataSelectionFieldGroupModel';
+import { groupAvailableFields, isMandatoryField } from '../model/data-selection/dataSelectionFieldGroupModel';
 
 const AVAILABLE_FIELDS = [
   { key: 'product_name', label: '상품명', exampleValue: 'Alpha', isSelectable: true },

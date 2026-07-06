@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import PageDesignEditor from '../components/page-design/PageDesignEditor';
-import { DEFAULT_PAGE_AI_DESIGN } from '../model/pageAiDesignModel';
+import { DEFAULT_PAGE_AI_DESIGN } from '../model/page-design/pageAiDesignModel';
 
 describe('PageDesignEditor', () => {
   it('renders one page-style prompt field, lets the user choose a target scope, and calls onApply', async () => {

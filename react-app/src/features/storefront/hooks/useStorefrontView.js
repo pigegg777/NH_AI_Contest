@@ -11,12 +11,12 @@ import {
   buildSections,
   buildUniqueMediumCategories,
   filterHiddenProducts,
-} from '../model/sectionMatching';
-import { normalizePageConfig } from '../model/storefrontBuilderModel';
+} from '../model/storefront-config/sectionMatching';
+import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import {
   MOBILE_UI_HELPER_TYPES,
   normalizeMobileUiTree,
-} from '../model/storefrontUiModel';
+} from '../model/storefront-config/storefrontUiModel';
 
 const ALL_MEDIUM_CATEGORY_LABEL = '전체';
 

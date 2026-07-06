@@ -1,11 +1,11 @@
 import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/cardAiDesignModel.js';
 import { normalizeCardStyle } from '../../../src/features/storefront/model/cardStyleModel.js';
-import { requestOpenAiJson } from '../../../src/features/storefront/services/openAiJsonRequest.js';
+import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
 import {
   buildCardStyleOpenAiRequestBody,
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../../../src/features/storefront/services/cardStyleAiContract.js';
+} from '../../../src/features/storefront/services/card-design/cardStyleAiContract.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,

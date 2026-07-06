@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from './App';
 import { useAppAuthState } from './features/auth/hooks/useAppAuthState';
@@ -21,8 +21,12 @@ vi.mock('./features/office-product-editor/pages/OfficeProductEditorPage', () => 
   default: () => <div>office-product-editor-page</div>,
 }));
 
-vi.mock('./features/storefront/pages/PublicStorefrontPage', () => ({
+vi.mock('./features/public-storefront/pages/PublicStorefrontPage', () => ({
   default: ({ officeCode }) => <div>public-storefront-page:{officeCode}</div>,
+}));
+
+vi.mock('./features/public-storefront/components/PublicStorefrontQrCard', () => ({
+  default: () => <div data-testid="dashboard-public-storefront-qr-card" />,
 }));
 
 vi.mock('./features/storefront/pages/StorefrontBuilderPage', () => ({
@@ -54,7 +58,9 @@ describe('App', () => {
     render(<App />);
 
     expect(screen.getByText('login-page')).toBeInTheDocument();
-    expect(screen.queryByText('office-product-editor-page')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('office-product-editor-page'),
+    ).not.toBeInTheDocument();
   });
 
   it('renders the auth loading state while bootstrapping a session', () => {
@@ -115,7 +121,9 @@ describe('App', () => {
 
     render(<App />);
 
-    await user.click(screen.getByRole('button', { name: /AI로 자재정보 페이지 만들기/ }));
+    await user.click(
+      screen.getByRole('button', { name: /AI 스토어프론트 만들기/ }),
+    );
 
     expect(screen.getByText('storefront-builder-page:OFF-1')).toBeInTheDocument();
   });

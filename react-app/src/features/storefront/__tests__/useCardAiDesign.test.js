@@ -2,13 +2,13 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useCardAiDesign } from '../hooks/useCardAiDesign';
-import { DEFAULT_CARD_AI_DESIGN } from '../model/cardAiDesignModel';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/cardStyleModel';
-import { requestCardStyleAiIntent } from '../services/cardStyleAiGateway';
-import { compileCardStyle } from '../services/cardStyleCompiler';
+import { DEFAULT_CARD_AI_DESIGN } from '../model/card-design/cardAiDesignModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/cardStyleModel';
+import { requestCardStyleAiIntent } from '../services/card-design/cardStyleAiGateway';
+import { compileCardStyle } from '../services/card-design/cardStyleCompiler';
 
-vi.mock('../services/cardStyleAiGateway', () => ({ requestCardStyleAiIntent: vi.fn() }));
-vi.mock('../services/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
+vi.mock('../services/card-design/cardStyleAiGateway', () => ({ requestCardStyleAiIntent: vi.fn() }));
+vi.mock('../services/card-design/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
 
 describe('useCardAiDesign', () => {
   afterEach(() => {

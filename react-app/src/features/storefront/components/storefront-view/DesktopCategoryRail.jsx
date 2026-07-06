@@ -1,4 +1,4 @@
-import { buildUniqueMediumCategories } from '../../model/sectionMatching';
+import { buildUniqueMediumCategories } from '../../model/storefront-config/sectionMatching';
 import styles from '../StorefrontView.module.css';
 
 function CategoryRailToggleIcon({ collapsed = false }) {

@@ -7,7 +7,7 @@ import {
   getCardAiTargetScopeOption,
   normalizeCardAiDesignInput,
   normalizeCardAiTargetScope,
-} from '../model/cardAiDesignModel';
+} from '../model/card-design/cardAiDesignModel';
 
 describe('normalizeCardAiTargetScope', () => {
   it('only allows the four approved scopes, falling back to empty (no selection) otherwise', () => {

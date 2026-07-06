@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCardStyleAiSystemPrompt, selectCardStyleSkillPackIds } from '../services/cardStyleSkillPromptService';
+import { buildCardStyleAiSystemPrompt, selectCardStyleSkillPackIds } from '../services/card-design/cardStyleSkillPromptService';
 
 describe('buildCardStyleAiSystemPrompt', () => {
   it('always appends the bundled card-design-edit skill references', () => {

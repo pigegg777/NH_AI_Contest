@@ -14,7 +14,7 @@ import {
   detectShellIntentCandidate,
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../services/cardStyleAiContract';
+} from '../services/card-design/cardStyleAiContract';
 
 function collectStrictModeViolations(schema, path = []) {
   if (!schema || typeof schema !== 'object') return [];

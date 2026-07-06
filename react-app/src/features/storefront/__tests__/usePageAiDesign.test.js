@@ -2,13 +2,13 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { usePageAiDesign } from '../hooks/usePageAiDesign';
-import { DEFAULT_PAGE_AI_DESIGN } from '../model/pageAiDesignModel';
-import { DEFAULT_PAGE_STYLE } from '../model/pageStyleModel';
-import { requestPageStyleAiIntent } from '../services/pageStyleAiGateway';
-import { compilePageStyle } from '../services/pageStyleCompiler';
+import { DEFAULT_PAGE_AI_DESIGN } from '../model/page-design/pageAiDesignModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
+import { requestPageStyleAiIntent } from '../services/page-design/pageStyleAiGateway';
+import { compilePageStyle } from '../services/page-design/pageStyleCompiler';
 
-vi.mock('../services/pageStyleAiGateway', () => ({ requestPageStyleAiIntent: vi.fn() }));
-vi.mock('../services/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
+vi.mock('../services/page-design/pageStyleAiGateway', () => ({ requestPageStyleAiIntent: vi.fn() }));
+vi.mock('../services/page-design/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
 
 describe('usePageAiDesign', () => {
   afterEach(() => {

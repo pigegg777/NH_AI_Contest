@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import StorefrontView from '../components/StorefrontView';
-import { DEFAULT_CARD_STYLE } from '../model/cardStyleModel';
+import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
 
 describe('StorefrontView', () => {
   it('renders the co-op name in the brand row and keeps the main title focused on office only', () => {
