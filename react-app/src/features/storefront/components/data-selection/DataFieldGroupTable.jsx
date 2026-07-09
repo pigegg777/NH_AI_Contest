@@ -1,5 +1,5 @@
-import { isMandatoryField } from '../../model/dataSelectionFieldGroupModel';
-import { formatFieldDisplayValue } from '../../model/cardFieldRenderModel';
+import { isMandatoryField } from '../../model/data-selection/dataSelectionFieldGroupModel';
+import { formatFieldDisplayValue } from '../../model/card-design/cardFieldRenderModel';
 import styles from './DataFieldGroupTable.module.css';
 
 function isFieldVisible(draftFields, field) {

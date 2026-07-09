@@ -1,0 +1,68 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.metaLine {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.targetSection {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(29, 74, 46, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+}
+
+.targetLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.densityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.densityLabel {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.densityOptions {
+  display: flex;
+  gap: 6px;
+}
+
+.densityButton {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.densityButtonActive {
+  border-color: var(--corp-primary);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}

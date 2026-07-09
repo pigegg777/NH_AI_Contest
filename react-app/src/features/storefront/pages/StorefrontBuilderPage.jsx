@@ -1,48 +1,22 @@
-import StorefrontView from '../components/StorefrontView';
-import CardDesignStep from './storefront-builder/CardDesignStep';
-import DataSelectionStep from './storefront-builder/DataSelectionStep';
-import PageDesignStep from './storefront-builder/PageDesignStep';
-import ProductCategoryStep from './storefront-builder/ProductCategoryStep';
-import { useStorefrontBuilder } from '../hooks/useStorefrontBuilder';
-import styles from './StorefrontBuilderPage.module.css';
+import PublicStorefrontScreen from "../../public-storefront/components/PublicStorefrontScreen";
+import StorefrontConversationPanel from "../components/chat-builder/StorefrontConversationPanel";
+import { useStorefrontBuilder } from "../hooks/useStorefrontBuilder";
+import styles from "./StorefrontBuilderPage.module.css";
 
-const STEP_COMPONENTS = [
-  {
-    Component: ProductCategoryStep,
-    selectStepProps: (builder) => builder.productCategoryStep,
-  },
-  {
-    Component: PageDesignStep,
-    selectStepProps: (builder) => builder.pageDesignStep,
-  },
-  {
-    Component: DataSelectionStep,
-    selectStepProps: (builder) => builder.dataSelectionStep,
-  },
-  {
-    Component: CardDesignStep,
-    selectStepProps: (builder) => builder.cardDesignStep,
-  },
-];
-
-export default function StorefrontBuilderPage({
-  officeCode,
-  nhName,
-  onGoHome,
-}) {
+export default function StorefrontBuilderPage({ officeCode, nhName }) {
   const builder = useStorefrontBuilder({ officeCode, nhName });
 
-  if (builder.status === 'loading') {
+  if (builder.status === "loading") {
     return (
       <div className={styles.page}>
         <div className={styles.statusMessage}>
-          스토어프론트 빌더를 불러오는 중...
+          스토어프론트 빌더를 불러오는 중..
         </div>
       </div>
     );
   }
 
-  if (builder.status === 'error') {
+  if (builder.status === "error") {
     return (
       <div className={styles.page}>
         <div className={styles.errorBox}>
@@ -52,101 +26,18 @@ export default function StorefrontBuilderPage({
     );
   }
 
-  const isOnDataSelectionStep =
-    STEP_COMPONENTS[builder.currentStep]?.Component === DataSelectionStep;
-  const isDataSelectionUnconfirmed =
-    isOnDataSelectionStep && !builder.dataSelectionStep.isDataSelectionConfirmed;
-
-  function handleNextClick() {
-    if (isDataSelectionUnconfirmed) {
-      builder.dataSelectionStep.confirmDataSelection();
-    } else {
-      builder.goNext();
-    }
-  }
-
   return (
     <div className={styles.page}>
       <div className={styles.workspace}>
         <div className={styles.leftColumn}>
-          {!builder.hasStarted ? (
-            <section className={styles.heroPanel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <h1 className={styles.heroTitle}>AI로 스토어프론트 만들기</h1>
-                </div>
-              </div>
+          <StorefrontConversationPanel builder={builder} />
 
-              <p className={styles.description}>
-                먼저 페이지 분위기를 정하고, 생성할 상품 카테고리를 선택한 뒤,
-                AI에게 원하는 방향을 입력해 스토어프론트 초안을 만들어보세요.
-              </p>
-
-              <div className={styles.actions}>
-                <button
-                  type="button"
-                  className={styles.primaryButton}
-                  data-testid="start-storefront-builder"
-                  onClick={builder.startSession}
-                >
-                  시작하기
-                </button>
-              </div>
-            </section>
-          ) : (
-            <>
-              {(() => {
-                const activeStep = STEP_COMPONENTS[builder.currentStep];
-                const StepComponent = activeStep.Component;
-                return (
-                  <StepComponent step={activeStep.selectStepProps(builder)} />
-                );
-              })()}
-
-              <div className={styles.stepNavActions}>
-                {builder.currentStep > 0 ? (
-                  <button
-                    type="button"
-                    className={styles.secondaryButton}
-                    data-testid="builder-go-previous"
-                    onClick={builder.goPrevious}
-                  >
-                    이전
-                  </button>
-                ) : null}
-                {builder.currentStep !== 3 ? (
-                  <button
-                    type="button"
-                    className={styles.primaryButton}
-                    data-testid="builder-go-next"
-                    onClick={handleNextClick}
-                    disabled={
-                      builder.currentStep === 0 &&
-                      !builder.selectedProductCategoryName
-                    }
-                  >
-                    {isDataSelectionUnconfirmed ? '확인하고 다음 단계로' : '다음'}
-                  </button>
-                ) : null}
-                {/* {typeof onGoHome === 'function' ? (
-                  <button
-                    type="button"
-                    className={styles.secondaryButton}
-                    onClick={onGoHome}
-                  >
-                    대시보드로 돌아가기
-                  </button>
-                ) : null} */}
-              </div>
-
-              {builder.status === 'save-error' ? (
-                <div className={styles.errorBox}>
-                  {builder.errorMessage ||
-                    '스토어프론트 초안을 저장하지 못했습니다.'}
-                </div>
-              ) : null}
-            </>
-          )}
+          {builder.status === "save-error" ? (
+            <div className={styles.errorBox}>
+              {builder.errorMessage ||
+                "스토어프론트 초안을 저장하지 못했습니다."}
+            </div>
+          ) : null}
         </div>
 
         <section className={styles.previewPanel}>
@@ -164,7 +55,7 @@ export default function StorefrontBuilderPage({
             >
               <div className={styles.previewDeviceSpeaker} />
               <div className={styles.previewDeviceScreen}>
-                <StorefrontView
+                <PublicStorefrontScreen
                   config={builder.previewConfig}
                   productRows={builder.previewProductRows}
                   officeName={builder.officeName}

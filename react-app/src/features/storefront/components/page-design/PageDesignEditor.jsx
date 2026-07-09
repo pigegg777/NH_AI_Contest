@@ -1,4 +1,4 @@
-import { PAGE_AI_TARGET_SCOPE_OPTIONS } from '../../model/pageAiDesignModel';
+import { PAGE_AI_TARGET_SCOPE_OPTIONS } from '../../model/page-design/pageAiDesignModel';
 import AiChatPanel from '../ai-chat/AiChatPanel';
 import PageStylePromptField from './PageStylePromptField';
 import styles from './PageDesignEditor.module.css';

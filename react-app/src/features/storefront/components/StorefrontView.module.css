@@ -311,7 +311,7 @@
 
 .title {
   margin: 1px 0 0;
-  font-size: 1.1rem;
+  font-size: var(--title-font-size, 1.1rem);
   font-weight: var(--typography-heading-weight, 800);
   letter-spacing: var(--typography-letter-spacing, normal);
   line-height: 1.12;

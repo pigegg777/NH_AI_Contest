@@ -6,7 +6,7 @@ import LoginPage from './features/auth/pages/LoginPage';
 import RegisterPage from './features/auth/pages/RegisterPage';
 import { useAppAuthState } from './features/auth/hooks/useAppAuthState';
 import OfficeProductEditorPage from './features/office-product-editor/pages/OfficeProductEditorPage';
-import PublicStorefrontPage from './features/storefront/pages/PublicStorefrontPage';
+import PublicStorefrontPage from './features/public-storefront/pages/PublicStorefrontPage';
 import StorefrontBuilderPage from './features/storefront/pages/StorefrontBuilderPage';
 
 const OFFICE_PRODUCT_EDITOR_PAGE_KEY = 'office-product-editor';

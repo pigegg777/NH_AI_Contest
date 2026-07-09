@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 
-import { normalizeCardsPerRow, resolveStructuralPreset } from '../model/cardCompositionModel';
+import { normalizeCardsPerRow, resolveStructuralPreset } from '../model/card-design/cardCompositionModel';
 import {
   DEFAULT_CARD_AI_DESIGN,
   normalizeCardAiDesignInput,
   normalizeCardAiTargetScope,
-} from '../model/cardAiDesignModel';
-import { normalizeCardStyle } from '../model/cardStyleModel';
-import { requestCardStyleAiIntent } from '../services/cardStyleAiGateway';
-import { compileCardStyle } from '../services/cardStyleCompiler';
+} from '../model/card-design/cardAiDesignModel';
+import { collectConditionFieldValueSamples, normalizeCardStyle } from '../model/card-design/cardStyleModel';
+import { requestCardStyleAiIntent } from '../model/card-design/cardStyleAiOrchestrator';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
 const MISSING_CARD_PROMPT_ERROR_MESSAGE = '카드 디자인 요청을 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '카드 디자인을 적용하지 못했습니다.';
@@ -67,17 +67,34 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     });
   }
 
-  async function applyCardAiDesign({ visibleFields, fieldLabels, productCategoryName } = {}) {
-    const normalizedInput = normalizeCardAiDesignInput(cardAiDesign);
+  async function applyCardAiDesign({
+    visibleFields,
+    fieldLabels,
+    productCategoryName,
+    productRows,
+    prompt,
+    targetScope,
+    history: externalHistory,
+  } = {}) {
+    const normalizedInput = normalizeCardAiDesignInput({
+      ...cardAiDesign,
+      prompt: prompt ?? cardAiDesign.prompt,
+      targetScope: targetScope ?? cardAiDesign.targetScope,
+    });
 
     if (!normalizedInput.prompt) {
       setCardAiErrorMessage(MISSING_CARD_PROMPT_ERROR_MESSAGE);
-      return;
+      return {
+        ok: false,
+        error: MISSING_CARD_PROMPT_ERROR_MESSAGE,
+      };
     }
 
-    const history = cardAiMessages
-      .slice(-MAX_CARD_AI_HISTORY_TURNS)
-      .map((message) => ({ role: message.role, text: message.text }));
+    const history = Array.isArray(externalHistory)
+      ? externalHistory
+      : cardAiMessages
+          .slice(-MAX_CARD_AI_HISTORY_TURNS)
+          .map((message) => ({ role: message.role, text: message.text }));
 
     setCardAiMessages((current) => [
       ...current,
@@ -95,10 +112,12 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     setCardAiWarningMessage('');
 
     try {
+      const conditionFieldValueSamples = collectConditionFieldValueSamples(productRows);
       const { intent, explanation, suggestion } = await requestCardStyleAiIntent({
         cardAiDesign: normalizedInput,
         visibleFields,
         productCategoryName,
+        conditionFieldValueSamples,
         currentCardStyle: cardStyle,
         officeCode,
         history,
@@ -128,8 +147,24 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
           warningMessage: result.warning,
         },
       ]);
+
+      return {
+        ok: true,
+        explanation,
+        suggestion,
+        scope: normalizedInput.targetScope,
+        warningMessage: result.warning,
+      };
     } catch (error) {
-      setCardAiErrorMessage(error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE);
+      const message =
+        error instanceof Error ? error.message : APPLY_FAILED_ERROR_MESSAGE;
+
+      setCardAiErrorMessage(message);
+
+      return {
+        ok: false,
+        error: message,
+      };
     } finally {
       setIsApplyingCardAiDesign(false);
     }

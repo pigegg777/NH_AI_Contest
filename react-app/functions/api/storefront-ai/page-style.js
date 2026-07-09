@@ -1,11 +1,17 @@
-import { normalizePageAiDesignInput } from '../../../src/features/storefront/model/pageAiDesignModel.js';
-import { normalizePageStyle } from '../../../src/features/storefront/model/pageStyleModel.js';
-import { requestOpenAiJson } from '../../../src/features/storefront/services/openAiJsonRequest.js';
 import {
-  buildPageStyleOpenAiRequestBody,
+  PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
+} from '../../../src/features/storefront/config/page-design/pageStyleAiOpenAiConfig.js';
+import {
+  PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS,
+} from '../../../src/features/storefront/config/page-design/pageStyleAiHttpConfig.js';
+import { normalizePageAiDesignInput } from '../../../src/features/storefront/model/page-design/pageAiDesignModel.js';
+import {
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
-} from '../../../src/features/storefront/services/pageStyleAiContract.js';
+} from '../../../src/features/storefront/model/page-design/pageStyleAiResponseModel.js';
+import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/pageStyleModel.js';
+import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
+import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/model/page-design/pageStyleOpenAiRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,
@@ -19,15 +25,12 @@ import {
 import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.js';
 import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
-const REQUEST_BODY_ALLOWED_KEYS = ['officeCode', 'pageAiDesign', 'currentPageStyle', 'history'];
-
 export async function onRequestPost({ request, env }) {
   try {
     assertPostJsonRequest(request);
 
     const rawBody = await readJsonBody(request);
-    const body = pickAllowedKeys(rawBody, REQUEST_BODY_ALLOWED_KEYS);
+    const body = pickAllowedKeys(rawBody, PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS);
     const officeCode = typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
     assertOfficeCodePresent(officeCode);
 
@@ -43,7 +46,7 @@ export async function onRequestPost({ request, env }) {
 
     const requestBody = buildPageStyleOpenAiRequestBody({
       pageAiDesign,
-      openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
+      openAiModel: env.OPENAI_MODEL || PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
       currentPageStyle,
       history,
     });
@@ -53,10 +56,17 @@ export async function onRequestPost({ request, env }) {
     try {
       payload = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY);
     } catch (error) {
-      return errorResponse(error instanceof Error ? error.message : 'OpenAI request failed.', 502);
+      return errorResponse(
+        error instanceof Error ? error.message : 'OpenAI request failed.',
+        502,
+      );
     }
 
-    const intent = normalizePageStyleAiIntent(payload, currentPageStyle.palette.accentHex, pageAiDesign.targetScope);
+    const intent = normalizePageStyleAiIntent(
+      payload,
+      currentPageStyle.palette.accentHex,
+      pageAiDesign.targetScope,
+    );
     const { explanation, suggestion } = normalizePageStyleAiExplanation(payload);
 
     return jsonResponse({ intent, explanation, suggestion });

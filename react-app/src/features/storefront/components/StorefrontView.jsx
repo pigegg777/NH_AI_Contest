@@ -1,5 +1,5 @@
-import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/pageStyleModel';
-import { getDefaultBlock, MOBILE_UI_HELPER_TYPES } from '../model/storefrontUiModel';
+import { PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES, PAGE_STYLE_SEARCH_SIZE_VALUES } from '../model/page-design/pageStyleModel';
+import { getDefaultBlock, MOBILE_UI_HELPER_TYPES } from '../model/storefront-config/storefrontUiModel';
 import { useStorefrontView } from '../hooks/useStorefrontView';
 import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
 import CardGridSection from './CardGridSection';
@@ -253,6 +253,7 @@ export default function StorefrontView({ config, productRows, officeName, nhName
         '--brand-color': view.brandColor,
         '--chip-accent': view.chipAccentColor,
         '--title-text-color': view.titleTextColorValue,
+        '--title-font-size': view.titleFontSizeValue,
         '--typography-heading-weight': view.typographyToneValue.headingWeight,
         '--typography-body-weight': view.typographyToneValue.bodyWeight,
         '--typography-letter-spacing': view.typographyToneValue.letterSpacing,

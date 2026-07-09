@@ -11,12 +11,13 @@ import {
   buildSections,
   buildUniqueMediumCategories,
   filterHiddenProducts,
-} from '../model/sectionMatching';
-import { normalizePageConfig } from '../model/storefrontBuilderModel';
+} from '../model/storefront-config/sectionMatching';
+import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/pageStyleModel';
+import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import {
   MOBILE_UI_HELPER_TYPES,
   normalizeMobileUiTree,
-} from '../model/storefrontUiModel';
+} from '../model/storefront-config/storefrontUiModel';
 
 const ALL_MEDIUM_CATEGORY_LABEL = '전체';
 
@@ -167,6 +168,9 @@ export function useStorefrontView({
   const brandColor = pageStyle.palette.accentHex;
   const chipAccentColor = pageStyle.palette.accentHex;
   const titleTextColorValue = pageStyle.header.titleColorHex;
+  const titleFontSizeValue =
+    PAGE_STYLE_HEADER_TITLE_SIZE_VALUES[pageStyle.header.titleFontSizeToken] ??
+    PAGE_STYLE_HEADER_TITLE_SIZE_VALUES.md;
   const typographyToneValue = {
     headingWeight: pageStyle.header.fontWeight,
     bodyWeight: Math.max(pageStyle.header.fontWeight - 200, 400),
@@ -298,6 +302,7 @@ export function useStorefrontView({
     coopName,
     officeName,
     titleTextColorValue,
+    titleFontSizeValue,
     typographyToneValue,
     headerOrgLine,
     title,

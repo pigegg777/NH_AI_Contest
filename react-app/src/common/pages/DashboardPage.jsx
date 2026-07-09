@@ -1,17 +1,18 @@
+import PublicStorefrontQrCard from '../../features/public-storefront/components/PublicStorefrontQrCard';
 import styles from './DashboardPage.module.css';
 
 const COPY = {
-  dataEditorTitle: '판매 상품 데이터 설정/수정',
+  dataEditorTitle: '상품 데이터 정리',
   dataEditorDescription:
-    '생산경제시스템 31-6447에서 엑셀 추출 후 데이터를 등록해주세요',
-  storefrontTitle: 'AI로 자재정보 페이지 만들기',
+    '업로드된 원본 데이터에서 고객에게 보여줄 상품 정보를 정리하고 저장합니다.',
+  storefrontTitle: 'AI 스토어프론트 만들기',
   storefrontDescription:
-    '공개할 상품, 카드 구성, 페이지 문구를 AI 제안과 미리보기로 빠르게 완성하세요.',
+    '공개 상품 페이지의 카드 구성과 문구를 AI와 함께 빠르게 다듬습니다.',
   dashboard: '대시보드',
   logout: '로그아웃',
   greetingPrefix: '안녕하세요, ',
-  greetingSuffix: '님',
-  systemTitle: 'AI로 자재판매장 물품정보 페이지를 만들어보세요',
+  greetingSuffix: '님.',
+  systemTitle: 'AI로 고객용 상품 페이지를 만들고 배포해 보세요',
   goTo: '바로가기',
   orgSeparator: ' · ',
 };
@@ -32,7 +33,7 @@ const FEATURES = [
 export default function DashboardPage({ user, onNavigate, onLogout }) {
   const name = user?.name;
   const officeCode = user?.office_code?.trim();
-  const officeName = [user?.nh_name, user?.office_name]
+  const officeLabel = [user?.nh_name, user?.office_name]
     .filter(Boolean)
     .join(COPY.orgSeparator);
 
@@ -55,10 +56,10 @@ export default function DashboardPage({ user, onNavigate, onLogout }) {
 
       <div className={styles.content}>
         <div className={styles.welcome}>
-          {officeCode || officeName ? (
+          {officeCode || officeLabel ? (
             <div className={styles.officeSummary}>
-              {officeName ? (
-                <p className={styles.officeName}>{officeName}</p>
+              {officeLabel ? (
+                <p className={styles.officeName}>{officeLabel}</p>
               ) : null}
             </div>
           ) : null}
@@ -72,21 +73,29 @@ export default function DashboardPage({ user, onNavigate, onLogout }) {
           <h2 className={styles.systemTitle}>{COPY.systemTitle}</h2>
         </div>
 
-        <div className={styles.grid}>
-          {FEATURES.map(({ key, title, description }) => (
-            <button
-              key={key}
-              type="button"
-              className={styles.card}
-              onClick={() => onNavigate(key)}
-            >
-              <div className={styles.cardContent}>
-                <h3 className={styles.cardTitle}>{title}</h3>
-                <p className={styles.cardDesc}>{description}</p>
-              </div>
-              <span className={styles.cardAction}>{COPY.goTo}</span>
-            </button>
-          ))}
+        <div className={styles.dashboardSections}>
+          <PublicStorefrontQrCard
+            officeCode={officeCode}
+            officeName={user?.office_name}
+            nhName={user?.nh_name}
+          />
+
+          <div className={styles.grid}>
+            {FEATURES.map(({ key, title, description }) => (
+              <button
+                key={key}
+                type="button"
+                className={styles.card}
+                onClick={() => onNavigate(key)}
+              >
+                <div className={styles.cardContent}>
+                  <h3 className={styles.cardTitle}>{title}</h3>
+                  <p className={styles.cardDesc}>{description}</p>
+                </div>
+                <span className={styles.cardAction}>{COPY.goTo}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import StepShell from '../../components/step-shell/StepShell';
 import DataFieldGroupTable from '../../components/data-selection/DataFieldGroupTable';
-import { groupAvailableFields } from '../../model/dataSelectionFieldGroupModel';
+import { groupAvailableFields } from '../../model/data-selection/dataSelectionFieldGroupModel';
 import styles from './DataSelectionStep.module.css';
 
 function toggleGroupedField(step, field) {
@@ -22,7 +22,7 @@ export default function DataSelectionStep({ step }) {
 
   return (
     <StepShell
-      eyebrow="3단계"
+      eyebrow="2단계"
       title="데이터 선택"
       description="카드에 보여줄 데이터를 먼저 확정해 주세요. 디자인은 다음 단계에서 다룹니다."
     >
