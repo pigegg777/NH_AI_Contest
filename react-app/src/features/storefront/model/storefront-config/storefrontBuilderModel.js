@@ -1,5 +1,5 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../../services/card-design/cardStyleMigration';
+import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/cardStyleMigration';
 import { normalizeCardStyle } from '../card-design/cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/pageStyleModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';

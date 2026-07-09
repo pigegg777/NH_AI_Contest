@@ -6,9 +6,9 @@ import {
   normalizeCardAiDesignInput,
   normalizeCardAiTargetScope,
 } from '../model/card-design/cardAiDesignModel';
-import { normalizeCardStyle } from '../model/card-design/cardStyleModel';
-import { requestCardStyleAiIntent } from '../services/card-design/cardStyleAiGateway';
-import { compileCardStyle } from '../services/card-design/cardStyleCompiler';
+import { collectConditionFieldValueSamples, normalizeCardStyle } from '../model/card-design/cardStyleModel';
+import { requestCardStyleAiIntent } from '../model/card-design/cardStyleAiOrchestrator';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
 const MISSING_CARD_PROMPT_ERROR_MESSAGE = '카드 디자인 요청을 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '카드 디자인을 적용하지 못했습니다.';
@@ -71,6 +71,7 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     visibleFields,
     fieldLabels,
     productCategoryName,
+    productRows,
     prompt,
     targetScope,
     history: externalHistory,
@@ -111,10 +112,12 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     setCardAiWarningMessage('');
 
     try {
+      const conditionFieldValueSamples = collectConditionFieldValueSamples(productRows);
       const { intent, explanation, suggestion } = await requestCardStyleAiIntent({
         cardAiDesign: normalizedInput,
         visibleFields,
         productCategoryName,
+        conditionFieldValueSamples,
         currentCardStyle: cardStyle,
         officeCode,
         history,

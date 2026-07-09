@@ -6,8 +6,8 @@ import {
   normalizePageAiTargetScope,
 } from '../model/page-design/pageAiDesignModel';
 import { normalizePageStyle } from '../model/page-design/pageStyleModel';
-import { requestPageStyleAiIntent } from '../services/page-design/pageStyleAiGateway';
-import { compilePageStyle } from '../services/page-design/pageStyleCompiler';
+import { requestPageStyleAiIntent } from '../model/page-design/pageStyleAiOrchestrator';
+import { compilePageStyle } from '../model/page-design/pageStyleCompiler';
 
 const MISSING_PAGE_PROMPT_ERROR_MESSAGE = '페이지 분위기를 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '페이지 스타일을 적용하지 못했습니다.';

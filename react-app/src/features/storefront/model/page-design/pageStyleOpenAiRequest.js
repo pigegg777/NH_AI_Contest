@@ -4,9 +4,9 @@ import {
   PAGE_STYLE_AI_OPENAI_RESPONSE_FORMAT_NAME,
   PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS,
 } from '../../config/page-design/pageStyleAiOpenAiConfig';
-import { buildPageAiTargetScopeInstruction } from '../../model/page-design/pageAiDesignModel';
-import { PAGE_STYLE_AI_SCHEMA } from '../../model/page-design/pageStyleAiResponseModel';
-import { normalizePageStyle } from '../../model/page-design/pageStyleModel';
+import { buildPageAiTargetScopeInstruction } from './pageAiDesignModel';
+import { PAGE_STYLE_AI_SCHEMA } from './pageStyleAiResponseModel';
+import { normalizePageStyle } from './pageStyleModel';
 
 export function buildPageStyleOpenAiRequestBody({
   pageAiDesign,

@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { toTrimmedString } from '../../../common/utils/text';
-import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/office-product-data/officeProductDataReadService';
-import { CARD_AI_TARGET_SCOPE_OPTIONS } from '../model/card-design/cardAiDesignModel';
-import { PAGE_AI_TARGET_SCOPE_OPTIONS } from '../model/page-design/pageAiDesignModel';
+import { toTrimmedString } from "../../../common/utils/text";
+import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
+import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/cardAiDesignModel";
+import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/pageAiDesignModel";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -17,19 +17,19 @@ import {
   normalizeNavConfig,
   normalizePageConfig,
   resolveCategoryDraft,
-} from '../model/storefront-config/storefrontBuilderModel';
-import { sanitizeMobileUiTree } from '../model/storefront-config/storefrontUiModel';
+} from "../model/storefront-config/storefrontBuilderModel";
+import { sanitizeMobileUiTree } from "../model/storefront-config/storefrontUiModel";
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
-} from '../services/storefront-config/storefrontConfigService';
-import { useCardAiDesign } from './useCardAiDesign';
-import { useDataSelectionDraft } from './useDataSelectionDraft';
-import { usePageAiDesign } from './usePageAiDesign';
-import { useUnifiedDesignSession } from './useUnifiedDesignSession';
+} from "../model/storefront-config/storefrontConfigOrchestrator";
+import { useCardAiDesign } from "./useCardAiDesign";
+import { useDataSelectionDraft } from "./useDataSelectionDraft";
+import { usePageAiDesign } from "./usePageAiDesign";
+import { useUnifiedDesignSession } from "./useUnifiedDesignSession";
 
-const FETCH_ERROR_MESSAGE = 'We could not load the storefront builder.';
-const SAVE_ERROR_MESSAGE = 'We could not save the storefront draft.';
+const FETCH_ERROR_MESSAGE = "We could not load the storefront builder.";
+const SAVE_ERROR_MESSAGE = "We could not save the storefront draft.";
 const DATA_SELECTION_STEP_INDEX = 1;
 const FINAL_STEP_INDEX = 2;
 const MAX_SHARED_AI_HISTORY_MESSAGES = 12;
@@ -44,15 +44,15 @@ function getInitialCategoryName(productEntries, existingConfig) {
     return existingCategoryName;
   }
 
-  return productEntries?.[0]?.categoryName ?? '';
+  return productEntries?.[0]?.categoryName ?? "";
 }
 
 function resolveScopeLabel(scopeOptions, scopeId) {
   if (!scopeId) {
-    return '';
+    return "";
   }
 
-  return scopeOptions.find((option) => option.id === scopeId)?.label ?? '';
+  return scopeOptions.find((option) => option.id === scopeId)?.label ?? "";
 }
 
 function buildSharedHistory(messages) {
@@ -62,18 +62,18 @@ function buildSharedHistory(messages) {
 }
 
 export function useStorefrontBuilder({ officeCode, nhName }) {
-  const [status, setStatus] = useState('loading');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState("loading");
+  const [errorMessage, setErrorMessage] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [productEntries, setProductEntries] = useState([]);
   const [existingConfig, setExistingConfig] = useState(null);
   const [hiddenProducts, setHiddenProducts] = useState([]);
   const [selectedProductCategoryName, setSelectedProductCategoryName] =
-    useState('');
+    useState("");
   const [selectedMediumCategories, setSelectedMediumCategories] = useState([]);
   const [representativeMediumCategory, setRepresentativeMediumCategory] =
-    useState('');
+    useState("");
   const pageAi = usePageAiDesign({ officeCode });
   const cardAi = useCardAiDesign({ officeCode });
   const unifiedDesign = useUnifiedDesignSession();
@@ -100,11 +100,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const effectiveScalarKeys = deriveEffectiveScalarKeys(currentEntry?.rows);
   const dataSelection = useDataSelectionDraft({
     allowedScalarKeys: effectiveScalarKeys,
-    initialFields: ['product_name'],
+    initialFields: ["product_name"],
   });
 
   function markDirty() {
-    setStatus((current) => (current === 'saved' ? 'ready' : current));
+    setStatus((current) => (current === "saved" ? "ready" : current));
   }
 
   function hydrateCategoryDraft(
@@ -112,7 +112,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     nextProductEntries,
     nextExistingConfig,
   ) {
-    const resolvedCategoryName = categoryName || '';
+    const resolvedCategoryName = categoryName || "";
     const resolvedDraft = resolveCategoryDraft({
       productCategoryName: resolvedCategoryName,
       productEntries: nextProductEntries,
@@ -121,9 +121,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
     setSelectedProductCategoryName(resolvedCategoryName);
     setSelectedMediumCategories(resolvedDraft.selectedMediumCategories);
-    setRepresentativeMediumCategory(
-      resolvedDraft.representativeMediumCategory,
-    );
+    setRepresentativeMediumCategory(resolvedDraft.representativeMediumCategory);
     dataSelection.reset(
       resolvedDraft.cardFields,
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
@@ -134,8 +132,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   useEffect(() => {
     let isCancelled = false;
 
-    setStatus('loading');
-    setErrorMessage('');
+    setStatus("loading");
+    setErrorMessage("");
     setHasStarted(false);
     setCurrentStep(0);
 
@@ -184,7 +182,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         );
         unifiedDesign.resetSession();
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
-        setStatus('ready');
+        setHasStarted(true);
+        setCurrentStep(0);
+        setStatus("ready");
       })
       .catch((error) => {
         if (isCancelled) {
@@ -194,7 +194,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         setErrorMessage(
           error instanceof Error ? error.message : FETCH_ERROR_MESSAGE,
         );
-        setStatus('error');
+        setStatus("error");
       });
 
     return () => {
@@ -212,14 +212,19 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       toTrimmedString(categoryName) !==
       toTrimmedString(selectedProductCategoryName);
 
-    if (isDifferentCategory) {
-      markDirty();
-      unifiedDesign.resetSession();
-      pageAi.discardPageAiDesignSession();
-      cardAi.discardCardAiDesignSession();
+    if (!isDifferentCategory) {
+      setHasStarted(true);
+      setCurrentStep(DATA_SELECTION_STEP_INDEX);
+      return;
     }
 
+    markDirty();
+    unifiedDesign.resetSession();
+    pageAi.discardPageAiDesignSession();
+    cardAi.discardCardAiDesignSession();
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
+    setHasStarted(true);
+    setCurrentStep(DATA_SELECTION_STEP_INDEX);
   }
 
   function undoAiChanges() {
@@ -240,7 +245,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   function confirmDataSelection() {
     markDirty();
     dataSelection.confirm();
-    cardAi.hydrateCardStyle();
     setCurrentStep(FINAL_STEP_INDEX);
   }
 
@@ -248,26 +252,35 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setCurrentStep((current) => Math.max(current - 1, 0));
   }
 
+  function reopenCategorySelection() {
+    setCurrentStep(0);
+  }
+
+  function reopenFieldSelection() {
+    setCurrentStep(DATA_SELECTION_STEP_INDEX);
+  }
+
   async function applyUnifiedAiDesign() {
     const prompt = toTrimmedString(unifiedDesign.promptDraft);
     const selectedTarget = unifiedDesign.selectedTarget;
     const scopeOptions =
-      selectedTarget === 'card'
+      selectedTarget === "card"
         ? CARD_AI_TARGET_SCOPE_OPTIONS
         : PAGE_AI_TARGET_SCOPE_OPTIONS;
     const targetScope =
-      selectedTarget === 'card'
+      selectedTarget === "card"
         ? cardAi.cardAiDesign.targetScope
         : pageAi.pageAiDesign.targetScope;
 
     if (!prompt) {
-      if (selectedTarget === 'card') {
+      if (selectedTarget === "card") {
         await cardAi.applyCardAiDesign({
           prompt,
           targetScope,
           visibleFields: dataSelection.committed,
           fieldLabels: STOREFRONT_FIELD_LABELS,
           productCategoryName: selectedProductCategoryName,
+          productRows: currentEntry?.rows,
         });
       } else {
         await pageAi.applyPageAiDesign({
@@ -283,10 +296,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setHasStarted(true);
     setCurrentStep(FINAL_STEP_INDEX);
 
-    const targetLabel = selectedTarget === 'card' ? '카드' : '페이지';
+    const targetLabel = selectedTarget === "card" ? "카드" : "페이지";
     const scopeLabel = resolveScopeLabel(scopeOptions, targetScope);
     const userMessage = unifiedDesign.createMessage({
-      role: 'user',
+      role: "user",
       target: selectedTarget,
       targetLabel,
       scope: targetScope,
@@ -296,11 +309,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     const nextMessages = [...unifiedDesign.messages, userMessage];
 
     unifiedDesign.setMessages(nextMessages);
-    unifiedDesign.setPromptDraft('');
+    unifiedDesign.setPromptDraft("");
 
     const history = buildSharedHistory(nextMessages);
     const result =
-      selectedTarget === 'card'
+      selectedTarget === "card"
         ? await cardAi.applyCardAiDesign({
             prompt,
             targetScope,
@@ -308,6 +321,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             visibleFields: dataSelection.committed,
             fieldLabels: STOREFRONT_FIELD_LABELS,
             productCategoryName: selectedProductCategoryName,
+            productRows: currentEntry?.rows,
           })
         : await pageAi.applyPageAiDesign({
             prompt,
@@ -322,7 +336,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     unifiedDesign.setMessages((current) => [
       ...current,
       unifiedDesign.createMessage({
-        role: 'assistant',
+        role: "assistant",
         target: selectedTarget,
         targetLabel,
         scope: targetScope,
@@ -335,8 +349,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   }
 
   async function saveDraft() {
-    setStatus('saving');
-    setErrorMessage('');
+    setStatus("saving");
+    setErrorMessage("");
 
     try {
       const payload = buildStorefrontSavePayload({
@@ -358,12 +372,14 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       await upsertStorefrontConfig(payload);
       setExistingConfig(payload);
       setHiddenProducts(payload.hiddenProducts);
-      setStatus('saved');
+      unifiedDesign.resetSession();
+      setCurrentStep(0);
+      setStatus("saved");
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : SAVE_ERROR_MESSAGE,
       );
-      setStatus('save-error');
+      setStatus("save-error");
     }
   }
 
@@ -372,8 +388,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       ? dataSelection.draft
       : dataSelection.committed;
 
-  const previewBodySlots =
-    currentStep === DATA_SELECTION_STEP_INDEX ? [] : cardAi.bodySlots;
+  const previewBodySlots = cardAi.bodySlots;
 
   const previewConfig = selectedProductCategoryName
     ? buildStorefrontSavePayload({
@@ -403,7 +418,17 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       };
 
   const productCategoryStep = {
-    productCategoryOptions,
+    productCategoryOptions: productCategoryOptions.map((option) => {
+      const entry = productEntries.find(
+        (productEntry) => productEntry?.categoryName === option.categoryName,
+      );
+
+      return {
+        ...option,
+        sourceFileName: toTrimmedString(entry?.sourceFileName),
+        updatedAt: entry?.updatedAt ?? null,
+      };
+    }),
     selectedProductCategoryName,
     selectProductCategory,
   };
@@ -417,7 +442,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     confirmDataSelection,
   };
 
-  const isCardTarget = unifiedDesign.selectedTarget === 'card';
+  const isCardTarget = unifiedDesign.selectedTarget === "card";
   const unifiedDesignStep = {
     selectedTarget: unifiedDesign.selectedTarget,
     setSelectedTarget: unifiedDesign.setSelectedTarget,
@@ -444,6 +469,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     selectedProductCategoryName,
   };
 
+  const conversationFlow = {
+    reopenCategorySelection,
+    reopenFieldSelection,
+  };
+
   return {
     status,
     errorMessage,
@@ -460,5 +490,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     productCategoryStep,
     dataSelectionStep,
     unifiedDesignStep,
+    conversationFlow,
   };
 }

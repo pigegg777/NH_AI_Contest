@@ -1,91 +1,15 @@
 import supabase from '../../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../../common/utils/text';
-import {
-  normalizeCategoryConfigRow,
-  normalizeNavConfig,
-  normalizePageConfig,
-} from '../../model/storefront-config/storefrontBuilderModel';
-import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../page-design/pageStyleMigration';
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
-function normalizeConfig(officeRow, categoryRows) {
-  if (!officeRow) {
-    return null;
-  }
-
-  const rawPageConfig = officeRow.page_config ?? {};
-  const pageConfig = normalizePageConfig(
-    pageConfigNeedsPageStyleMigration(rawPageConfig)
-      ? { ...rawPageConfig, pageStyle: migrateLegacyPageConfigToPageStyle(rawPageConfig) }
-      : rawPageConfig,
-  );
-  const normalizedCategoryConfigs = toArray(categoryRows).map((row) => normalizeCategoryConfigRow(row));
-
-  return {
-    officeCode: toTrimmedString(officeRow.office_code),
-    pageConfig,
-    navConfig: normalizeNavConfig({
-      title: pageConfig.nav.title,
-      subtitle: pageConfig.nav.subtitle,
-      brandColor: pageConfig.theme.brandColor,
-      searchPlaceholder: pageConfig.searchSection.placeholder,
-      logoUrl: pageConfig.nav.logoUrl,
-    }),
-    categoryConfigs: normalizedCategoryConfigs,
-    hiddenProducts: toArray(officeRow.hidden_products),
-    updatedAt: officeRow.updated_at ?? null,
-  };
-}
-
-function buildPageConfigPayload({ navConfig, pageConfig }) {
-  const normalizedPageConfig = normalizePageConfig(pageConfig);
-  const normalizedNavConfig = normalizeNavConfig({
-    title: navConfig?.title ?? normalizedPageConfig.nav.title,
-    subtitle: navConfig?.subtitle ?? normalizedPageConfig.nav.subtitle,
-    brandColor: navConfig?.brandColor ?? normalizedPageConfig.theme.brandColor,
-    searchPlaceholder: navConfig?.searchPlaceholder ?? normalizedPageConfig.searchSection.placeholder,
-    logoUrl: navConfig?.logoUrl ?? normalizedPageConfig.nav.logoUrl,
-  });
-
-  return normalizePageConfig({
-    ...normalizedPageConfig,
-    theme: {
-      ...normalizedPageConfig.theme,
-      brandColor: normalizedNavConfig.brandColor,
-    },
-    nav: {
-      ...normalizedPageConfig.nav,
-      title: normalizedNavConfig.title,
-      subtitle: normalizedNavConfig.subtitle,
-      logoUrl: normalizedNavConfig.logoUrl,
-    },
-    searchSection: {
-      ...normalizedPageConfig.searchSection,
-      placeholder: normalizedNavConfig.searchPlaceholder,
-    },
-  });
-}
-
-function buildCategoryRows({ officeCode, categoryConfigs }) {
-  return toArray(categoryConfigs)
-    .map((row, index) => normalizeCategoryConfigRow({ ...row, sortOrder: row?.sortOrder ?? index }))
-    .filter((row) => row.productCategoryName)
-    .map((row, index) => ({
-      office_code: officeCode,
-      product_category_name: row.productCategoryName,
-      sort_order: Number.isFinite(row.sortOrder) ? row.sortOrder : index,
-      category_config: row.categoryConfig,
-    }));
-}
-
-export async function fetchStorefrontConfig({ officeCode }) {
+export async function fetchOfficeConfigRows({ officeCode }) {
   const normalizedOfficeCode = toTrimmedString(officeCode);
 
   if (!normalizedOfficeCode) {
-    return null;
+    return { officeRow: null, categoryRows: [] };
   }
 
   const { data: officeRow, error: officeError } = await supabase
@@ -99,7 +23,7 @@ export async function fetchStorefrontConfig({ officeCode }) {
   }
 
   if (!officeRow) {
-    return null;
+    return { officeRow: null, categoryRows: [] };
   }
 
   const { data: categoryRows, error: categoryError } = await supabase
@@ -112,27 +36,20 @@ export async function fetchStorefrontConfig({ officeCode }) {
     throw new Error(categoryError.message || 'Failed to load storefront category config.');
   }
 
-  return normalizeConfig(officeRow, categoryRows);
+  return { officeRow, categoryRows: toArray(categoryRows) };
 }
 
-export async function upsertStorefrontConfig({
+export async function saveOfficeConfigRows({
   officeCode,
-  categoryConfigs,
-  navConfig,
-  pageConfig,
+  pageConfigPayload,
   hiddenProducts,
+  categoryRows,
 }) {
   const normalizedOfficeCode = toTrimmedString(officeCode);
 
   if (!normalizedOfficeCode) {
     throw new Error('officeCode is required.');
   }
-
-  const pageConfigPayload = buildPageConfigPayload({ navConfig, pageConfig });
-  const categoryRows = buildCategoryRows({
-    officeCode: normalizedOfficeCode,
-    categoryConfigs,
-  });
 
   const { error: officeError } = await supabase.from('office_page_config').upsert(
     {
@@ -156,8 +73,10 @@ export async function upsertStorefrontConfig({
     throw new Error(existingCategoryError.message || 'Failed to load existing storefront category config.');
   }
 
-  if (categoryRows.length > 0) {
-    const { error: categoryUpsertError } = await supabase.from('office_page_category_configs').upsert(categoryRows, {
+  const normalizedCategoryRows = toArray(categoryRows);
+
+  if (normalizedCategoryRows.length > 0) {
+    const { error: categoryUpsertError } = await supabase.from('office_page_category_configs').upsert(normalizedCategoryRows, {
       onConflict: 'office_code,product_category_name',
     });
 
@@ -166,7 +85,7 @@ export async function upsertStorefrontConfig({
     }
   }
 
-  const nextCategoryNames = new Set(categoryRows.map((row) => row.product_category_name));
+  const nextCategoryNames = new Set(normalizedCategoryRows.map((row) => row.product_category_name));
   const staleCategoryNames = toArray(existingCategoryRows)
     .map((row) => toTrimmedString(row?.product_category_name))
     .filter((productCategoryName) => productCategoryName && !nextCategoryNames.has(productCategoryName));

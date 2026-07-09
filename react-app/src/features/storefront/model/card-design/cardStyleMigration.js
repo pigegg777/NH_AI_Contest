@@ -1,4 +1,4 @@
-import { normalizeCardStyle } from '../../model/card-design/cardStyleModel';
+import { normalizeCardStyle } from './cardStyleModel';
 
 const LEGACY_TEMPLATE_TO_STRUCTURAL_PRESET = {
   'card-grid': 'header-top',

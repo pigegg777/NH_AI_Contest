@@ -11,7 +11,7 @@ import {
 } from '../../../src/features/storefront/model/page-design/pageStyleAiResponseModel.js';
 import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/pageStyleModel.js';
 import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
-import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/services/page-design/pageStyleOpenAiRequest.js';
+import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/model/page-design/pageStyleOpenAiRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,

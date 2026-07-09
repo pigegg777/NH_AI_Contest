@@ -7,7 +7,7 @@ import {
   fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/cardStyleModel';
-import { fetchStorefrontConfig } from '../services/storefront-config/storefrontConfigService';
+import { fetchStorefrontConfig } from '../model/storefront-config/storefrontConfigOrchestrator';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
 vi.mock('../../office-product-editor/services/office-product-data/publicOfficeProductService', () => ({
@@ -15,7 +15,7 @@ vi.mock('../../office-product-editor/services/office-product-data/publicOfficePr
   fetchPublicOfficeIdentity: vi.fn(),
 }));
 
-vi.mock('../services/storefront-config/storefrontConfigService', () => ({
+vi.mock('../model/storefront-config/storefrontConfigOrchestrator', () => ({
   fetchStorefrontConfig: vi.fn(),
 }));
 

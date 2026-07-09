@@ -8,6 +8,7 @@ import {
   normalizeTitleMode,
   resolveStructuralPreset,
 } from './cardCompositionModel';
+import { toTrimmedString } from '../../../../common/utils/text';
 import { normalizeHexColor } from '../page-design/pageStyleColor';
 
 export const CARD_STYLE_SCHEMA_VERSION = 1;
@@ -21,6 +22,68 @@ export const CARD_RADIUS_OPTIONS = ['md', 'lg', 'xl'];
 export const CARD_SPACING_OPTIONS = ['tight', 'normal', 'relaxed'];
 export const CARD_IMAGE_FIT_OPTIONS = ['cover', 'contain'];
 export const CARD_INFO_ALIGNMENT_OPTIONS = ['start', 'center'];
+export const CARD_CONDITION_OPERATOR_OPTIONS = ['equals', 'contains'];
+export const CARD_CONDITION_FIELD_OPTIONS = [
+  'product_name',
+  'img_url',
+  'spec',
+  'large_category',
+  'medium_category',
+  'small_category',
+  'detail_category',
+  'nutrient',
+  'product_url',
+  'note',
+  'sale_price_type_name',
+  'product_nutirent',
+  'indict_symbl',
+  'product_usage',
+  'product_category',
+  'manufacturer_list',
+];
+// Low-cardinality classification fields worth showing the AI real sample values for,
+// so it can ground conditionField/conditionValue in what the data actually contains
+// instead of guessing from the field name alone. Free-text fields (product_name, spec,
+// nutrient, note) are excluded — they have too many distinct values to sample usefully.
+export const CARD_CONDITION_GROUNDING_FIELDS = [
+  'large_category',
+  'medium_category',
+  'small_category',
+  'detail_category',
+  'product_category',
+  'product_usage',
+  'sale_price_type_name',
+  'indict_symbl',
+  'manufacturer_list',
+];
+const CARD_CONDITION_GROUNDING_MAX_VALUES_PER_FIELD = 15;
+
+export function collectConditionFieldValueSamples(rows) {
+  const rowList = Array.isArray(rows) ? rows : [];
+  const samples = {};
+
+  CARD_CONDITION_GROUNDING_FIELDS.forEach((field) => {
+    const values = new Set();
+
+    for (const row of rowList) {
+      if (values.size >= CARD_CONDITION_GROUNDING_MAX_VALUES_PER_FIELD) {
+        break;
+      }
+
+      const value = toTrimmedString(row?.[field]);
+
+      if (value) {
+        values.add(value);
+      }
+    }
+
+    if (values.size > 0) {
+      samples[field] = [...values];
+    }
+  });
+
+  return samples;
+}
 
 export const DEFAULT_CARD_STYLE = {
   schemaVersion: CARD_STYLE_SCHEMA_VERSION,
@@ -64,6 +127,7 @@ export const DEFAULT_CARD_STYLE = {
     defaultFontSize: 'medium',
     priceColorRole: 'brand',
   },
+  conditionalStyles: [],
 };
 
 const CARD_FIELD_COLOR_ROLE_VALUES = {
@@ -148,6 +212,103 @@ function normalizeFieldDefaults(field) {
   };
 }
 
+function normalizeConditionalShellOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const override = {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    borderColor: normalizeOptionalHex(source.borderColor),
+    shadow: CARD_SHADOW_OPTIONS.includes(source.shadow) ? source.shadow : '',
+    radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : '',
+  };
+
+  return Object.values(override).some(Boolean) ? override : null;
+}
+
+function normalizeConditionalHeaderOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const override = {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    titleColorHex: normalizeOptionalHex(source.titleColorHex),
+    letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : '',
+    fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : null,
+  };
+
+  return override.backgroundColor || override.titleColorHex || override.letterSpacing || override.fontWeight != null
+    ? override
+    : null;
+}
+
+function normalizeConditionalImageOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const fit = CARD_IMAGE_FIT_OPTIONS.includes(source.fit) ? source.fit : '';
+
+  return fit ? { fit } : null;
+}
+
+function normalizeConditionalInfoOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const override = {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    borderColor: normalizeOptionalHex(source.borderColor),
+    padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : '',
+    fieldGap: CARD_SPACING_OPTIONS.includes(source.fieldGap) ? source.fieldGap : '',
+  };
+
+  return Object.values(override).some(Boolean) ? override : null;
+}
+
+function normalizeConditionalFieldOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const priceColorRole = CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole) ? source.priceColorRole : '';
+
+  return priceColorRole ? { priceColorRole } : null;
+}
+
+function normalizeConditionalStyleRule(rule) {
+  const conditionField = CARD_CONDITION_FIELD_OPTIONS.includes(rule?.conditionField) ? rule.conditionField : '';
+  const conditionValue = toTrimmedString(rule?.conditionValue);
+
+  if (!conditionField || !conditionValue) {
+    return null;
+  }
+
+  const conditionOperator = CARD_CONDITION_OPERATOR_OPTIONS.includes(rule?.conditionOperator)
+    ? rule.conditionOperator
+    : 'contains';
+  const shell = normalizeConditionalShellOverride(rule?.shell);
+  const header = normalizeConditionalHeaderOverride(rule?.header);
+  const image = normalizeConditionalImageOverride(rule?.image);
+  const info = normalizeConditionalInfoOverride(rule?.info);
+  const field = normalizeConditionalFieldOverride(rule?.field);
+
+  if (!shell && !header && !image && !info && !field) {
+    return null;
+  }
+
+  return { conditionField, conditionOperator, conditionValue, shell, header, image, info, field };
+}
+
+export function normalizeConditionalStyleRules(rules) {
+  return (Array.isArray(rules) ? rules : [])
+    .map(normalizeConditionalStyleRule)
+    .filter(Boolean);
+}
+
 function buildDefaultLayoutPlanForCardsPerRow(cardsPerRow) {
   return {
     ...DEFAULT_CARD_LAYOUT_PLAN,
@@ -208,5 +369,6 @@ export function normalizeCardStyle(style) {
     image: normalizeImage(source.image),
     info: normalizeInfo(source.info),
     field: normalizeFieldDefaults(source.field),
+    conditionalStyles: normalizeConditionalStyleRules(source.conditionalStyles),
   };
 }

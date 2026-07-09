@@ -253,6 +253,7 @@ export default function StorefrontView({ config, productRows, officeName, nhName
         '--brand-color': view.brandColor,
         '--chip-accent': view.chipAccentColor,
         '--title-text-color': view.titleTextColorValue,
+        '--title-font-size': view.titleFontSizeValue,
         '--typography-heading-weight': view.typographyToneValue.headingWeight,
         '--typography-body-weight': view.typographyToneValue.bodyWeight,
         '--typography-letter-spacing': view.typographyToneValue.letterSpacing,

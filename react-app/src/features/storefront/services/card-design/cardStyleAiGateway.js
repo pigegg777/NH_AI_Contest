@@ -1,20 +1,8 @@
 import supabase from '../../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../../common/utils/text';
-import { normalizeCardAiDesignInput } from '../../model/card-design/cardAiDesignModel';
-import { normalizeCardStyle } from '../../model/card-design/cardStyleModel';
-import {
-  buildHeuristicCardAiExplanation,
-  buildHeuristicCardAiIntent,
-  normalizeOpenAiCardIntent,
-} from './cardStyleAiContract';
 
 const CARD_STYLE_AI_ENDPOINT = '/api/storefront-ai/card-style';
 const SESSION_EXPIRED_ERROR_MESSAGE = '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.';
-const DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 카드 디자인에 반영했습니다.';
-
-function isLocalHeuristicModeEnabled() {
-  return toTrimmedString(import.meta.env.VITE_STOREFRONT_AI_LOCAL_HEURISTIC) === 'true';
-}
 
 async function readErrorMessage(response) {
   try {
@@ -25,24 +13,7 @@ async function readErrorMessage(response) {
   }
 }
 
-export async function requestCardStyleAiIntent({
-  cardAiDesign,
-  visibleFields,
-  productCategoryName,
-  currentCardStyle,
-  officeCode,
-  history,
-} = {}) {
-  const normalizedInput = normalizeCardAiDesignInput(cardAiDesign);
-  const normalizedVisibleFields = Array.isArray(visibleFields) ? visibleFields : [];
-  const normalizedHistory = Array.isArray(history) ? history : [];
-
-  if (isLocalHeuristicModeEnabled()) {
-    const intent = buildHeuristicCardAiIntent({ cardAiDesign: normalizedInput, visibleFields: normalizedVisibleFields });
-
-    return { intent, explanation: buildHeuristicCardAiExplanation(intent), suggestion: null };
-  }
-
+export async function postCardStyleAiRequest(requestBody) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -58,25 +29,12 @@ export async function requestCardStyleAiIntent({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({
-      officeCode: toTrimmedString(officeCode),
-      cardAiDesign: normalizedInput,
-      visibleFields: normalizedVisibleFields,
-      productCategoryName: toTrimmedString(productCategoryName),
-      currentCardStyle: normalizeCardStyle(currentCardStyle),
-      history: normalizedHistory,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
   }
 
-  const body = await response.json();
-
-  return {
-    intent: normalizeOpenAiCardIntent(body?.intent, normalizedInput.targetScope),
-    explanation: toTrimmedString(body?.explanation) || DEFAULT_EXPLANATION_MESSAGE,
-    suggestion: toTrimmedString(body?.suggestion) || null,
-  };
+  return response.json();
 }

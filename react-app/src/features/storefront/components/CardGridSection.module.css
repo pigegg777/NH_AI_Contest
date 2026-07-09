@@ -90,6 +90,7 @@
 }
 
 .card {
+  container-type: inline-size;
   overflow: hidden;
   border: 1px solid var(--card-border-color, var(--corp-line));
   border-radius: 18px;
@@ -301,7 +302,7 @@
   text-underline-offset: 2px;
 }
 
-@media (max-width: 720px) {
+@container (max-width: 300px) {
   .cardImageLeft,
   .cardImageRight,
   .cardSideBySide {
@@ -312,8 +313,16 @@
     padding: 10px 12px 8px;
   }
 
-  .cardImageWrap {
+  .cardImageLeft .cardImageWrap,
+  .cardImageRight .cardImageWrap {
+    flex: none;
     padding: 12px 12px 0;
+  }
+
+  .cardImageLeft .cardImage,
+  .cardImageRight .cardImage {
+    height: var(--card-image-height, 120px);
+    width: 100%;
   }
 
   .cardBody {

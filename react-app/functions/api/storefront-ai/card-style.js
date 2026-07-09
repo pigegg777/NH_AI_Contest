@@ -1,11 +1,11 @@
-import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/cardAiDesignModel.js';
-import { normalizeCardStyle } from '../../../src/features/storefront/model/cardStyleModel.js';
+import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/card-design/cardAiDesignModel.js';
+import { normalizeCardStyle } from '../../../src/features/storefront/model/card-design/cardStyleModel.js';
 import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
 import {
   buildCardStyleOpenAiRequestBody,
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../../../src/features/storefront/services/card-design/cardStyleAiContract.js';
+} from '../../../src/features/storefront/model/card-design/cardStyleAiContract.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   RequestValidationError,
@@ -25,6 +25,7 @@ const REQUEST_BODY_ALLOWED_KEYS = [
   'cardAiDesign',
   'visibleFields',
   'productCategoryName',
+  'conditionFieldValueSamples',
   'currentCardStyle',
   'history',
 ];
@@ -43,6 +44,10 @@ export async function onRequestPost({ request, env }) {
 
     const visibleFields = Array.isArray(body.visibleFields) ? body.visibleFields : [];
     const productCategoryName = typeof body.productCategoryName === 'string' ? body.productCategoryName : '';
+    const conditionFieldValueSamples =
+      body.conditionFieldValueSamples && typeof body.conditionFieldValueSamples === 'object'
+        ? body.conditionFieldValueSamples
+        : {};
     const currentCardStyle = normalizeCardStyle(body.currentCardStyle);
     const history = Array.isArray(body.history) ? body.history : [];
     assertHistoryWithinLimits(history);
@@ -54,6 +59,7 @@ export async function onRequestPost({ request, env }) {
       cardAiDesign,
       visibleFields,
       productCategoryName,
+      conditionFieldValueSamples,
       openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
       currentCardStyle,
       history,

@@ -4,11 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { usePageAiDesign } from '../hooks/usePageAiDesign';
 import { DEFAULT_PAGE_AI_DESIGN } from '../model/page-design/pageAiDesignModel';
 import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
-import { requestPageStyleAiIntent } from '../services/page-design/pageStyleAiGateway';
-import { compilePageStyle } from '../services/page-design/pageStyleCompiler';
+import { requestPageStyleAiIntent } from '../model/page-design/pageStyleAiOrchestrator';
+import { compilePageStyle } from '../model/page-design/pageStyleCompiler';
 
-vi.mock('../services/page-design/pageStyleAiGateway', () => ({ requestPageStyleAiIntent: vi.fn() }));
-vi.mock('../services/page-design/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
+vi.mock('../model/page-design/pageStyleAiOrchestrator', () => ({ requestPageStyleAiIntent: vi.fn() }));
+vi.mock('../model/page-design/pageStyleCompiler', () => ({ compilePageStyle: vi.fn() }));
 
 describe('usePageAiDesign', () => {
   afterEach(() => {

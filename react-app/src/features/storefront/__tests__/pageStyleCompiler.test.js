@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { contrastRatio } from '../model/page-design/pageStyleColor';
 import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
-import { compilePageStyle } from '../services/page-design/pageStyleCompiler';
+import { compilePageStyle } from '../model/page-design/pageStyleCompiler';
 
 const BASE_INTENT = {
   palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },
@@ -138,6 +138,7 @@ describe('compilePageStyle scoped merges', () => {
         titleColorHex: '#0f172a',
         letterSpacing: '0.04em',
         fontWeight: 700,
+        titleFontSizeToken: 'lg',
       },
       search: {
         sizeToken: 'sm',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
-import { compileCardStyle } from '../services/card-design/cardStyleCompiler';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
 const FIELD_LABELS = { tax_price: '과세가격', zero_tax_price: '영세가격', spec: '규격' };
 
@@ -28,6 +28,62 @@ describe('compileCardStyle merges intent onto the previous style', () => {
     });
 
     expect(result.cardStyle.field.priceColorRole).toBe('muted');
+  });
+
+  it('replaces conditionalStyles with the intent array when provided', () => {
+    const rule = {
+      conditionField: 'medium_category',
+      conditionOperator: 'equals',
+      conditionValue: '종자',
+      shell: { backgroundColor: '#e6f7d9' },
+      header: null,
+      image: null,
+      info: null,
+      field: null,
+    };
+    const result = compileCardStyle({
+      intent: { conditionalStyles: [rule] },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      cardsPerRow: 2,
+      visibleFields: ['product_name'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.conditionalStyles).toEqual([
+      { ...rule, shell: { backgroundColor: '#e6f7d9', borderColor: '', shadow: '', radius: '' } },
+    ]);
+  });
+
+  it('keeps the previous conditionalStyles when the intent does not include any', () => {
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      conditionalStyles: [
+        {
+          conditionField: 'manufacturer_list',
+          conditionOperator: 'contains',
+          conditionValue: 'ACME',
+          shell: { radius: 'xl' },
+          header: null,
+          image: null,
+          info: null,
+          field: null,
+        },
+      ],
+    };
+    const result = compileCardStyle({
+      intent: { header: { fontWeight: 800 } },
+      previousCardStyle,
+      cardsPerRow: 2,
+      visibleFields: ['product_name'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.conditionalStyles).toEqual([
+      {
+        ...previousCardStyle.conditionalStyles[0],
+        shell: { backgroundColor: '', borderColor: '', shadow: '', radius: 'xl' },
+      },
+    ]);
   });
 
   it('keeps untouched sections unchanged from the previous style', () => {

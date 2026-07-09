@@ -4,11 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useCardAiDesign } from '../hooks/useCardAiDesign';
 import { DEFAULT_CARD_AI_DESIGN } from '../model/card-design/cardAiDesignModel';
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/cardStyleModel';
-import { requestCardStyleAiIntent } from '../services/card-design/cardStyleAiGateway';
-import { compileCardStyle } from '../services/card-design/cardStyleCompiler';
+import { requestCardStyleAiIntent } from '../model/card-design/cardStyleAiOrchestrator';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
-vi.mock('../services/card-design/cardStyleAiGateway', () => ({ requestCardStyleAiIntent: vi.fn() }));
-vi.mock('../services/card-design/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
+vi.mock('../model/card-design/cardStyleAiOrchestrator', () => ({ requestCardStyleAiIntent: vi.fn() }));
+vi.mock('../model/card-design/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
 
 describe('useCardAiDesign', () => {
   afterEach(() => {
@@ -97,6 +97,7 @@ describe('useCardAiDesign', () => {
       cardAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
       visibleFields: ['product_name', 'spec'],
       productCategoryName: 'Fertilizer Upload',
+      conditionFieldValueSamples: {},
       currentCardStyle: DEFAULT_CARD_STYLE,
       officeCode: undefined,
       history: [],

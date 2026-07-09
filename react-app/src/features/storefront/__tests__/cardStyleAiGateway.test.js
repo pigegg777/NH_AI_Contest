@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
-import { requestCardStyleAiIntent } from '../services/card-design/cardStyleAiGateway';
+import { postCardStyleAiRequest } from '../services/card-design/cardStyleAiGateway';
 
 vi.mock('../../../lib/supabaseClient', () => ({
   default: {
@@ -15,73 +14,31 @@ import supabase from '../../../lib/supabaseClient';
 
 afterEach(() => {
   vi.clearAllMocks();
-  vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
 
-describe('requestCardStyleAiIntent', () => {
-  it('uses the local heuristic and skips the network call when VITE_STOREFRONT_AI_LOCAL_HEURISTIC is true', async () => {
-    vi.stubEnv('VITE_STOREFRONT_AI_LOCAL_HEURISTIC', 'true');
-    const fetchSpy = vi.fn();
-    vi.stubGlobal('fetch', fetchSpy);
-
-    const result = await requestCardStyleAiIntent({
-      cardAiDesign: { prompt: 'make the title bolder and darker', targetScope: 'header' },
-      visibleFields: ['product_name'],
-      currentCardStyle: DEFAULT_CARD_STYLE,
-      officeCode: 'OFF-1',
-    });
-
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(result.intent.header).toEqual({ titleColorHex: '#111827', fontWeight: 800 });
-    expect(result.explanation).toBe('제목 영역을 요청하신 대로 변경했습니다.');
-    expect(result.suggestion).toBeNull();
-  });
-
+describe('postCardStyleAiRequest', () => {
   it('throws a clear error when there is no active session', async () => {
     supabase.auth.getSession.mockResolvedValue({ data: { session: null } });
 
-    await expect(
-      requestCardStyleAiIntent({
-        cardAiDesign: { prompt: 'warm' },
-        visibleFields: ['product_name'],
-        currentCardStyle: DEFAULT_CARD_STYLE,
-        officeCode: 'OFF-1',
-      }),
-    ).rejects.toThrow('로그인 정보가 만료되었습니다');
+    await expect(postCardStyleAiRequest({ officeCode: 'OFF-1' })).rejects.toThrow(
+      '로그인 정보가 만료되었습니다',
+    );
   });
 
-  it('posts to the same-origin endpoint with the bearer token, the history, and normalizes the response', async () => {
+  it('posts the given request body as-is to the same-origin endpoint with the bearer token and returns the parsed response', async () => {
     supabase.auth.getSession.mockResolvedValue({
       data: { session: { access_token: 'test-token' } },
     });
+    const responseBody = { intent: { header: { fontWeight: 800 } }, explanation: 'ok', suggestion: null };
     const fetchSpy = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        intent: {
-          structuralPresetRequest: null,
-          titleModeRequest: null,
-          layout: null,
-          shell: null,
-          header: { backgroundColor: null, titleColorHex: null, letterSpacing: null, fontWeight: 800 },
-          image: null,
-          info: null,
-          field: null,
-        },
-        explanation: '제목을 더 굵게 바꿨습니다.',
-        suggestion: '이미지도 같이 밝게 해보면 어울릴 것 같아요.',
-      }),
+      json: async () => responseBody,
     });
     vi.stubGlobal('fetch', fetchSpy);
 
-    const result = await requestCardStyleAiIntent({
-      cardAiDesign: { prompt: 'make the title bolder', targetScope: 'header' },
-      visibleFields: ['product_name', 'tax_price'],
-      productCategoryName: 'Fertilizer Upload',
-      currentCardStyle: DEFAULT_CARD_STYLE,
-      officeCode: 'OFF-1',
-      history: [{ role: 'user', text: '제목을 굵게 해줘' }],
-    });
+    const requestBody = { officeCode: 'OFF-1', cardAiDesign: { prompt: 'make it bold' } };
+    const result = await postCardStyleAiRequest(requestBody);
 
     expect(fetchSpy).toHaveBeenCalledWith(
       '/api/storefront-ai/card-style',
@@ -91,16 +48,10 @@ describe('requestCardStyleAiIntent', () => {
           Authorization: 'Bearer test-token',
           'Content-Type': 'application/json',
         }),
+        body: JSON.stringify(requestBody),
       }),
     );
-    const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
-    expect(sentBody.officeCode).toBe('OFF-1');
-    expect(sentBody.visibleFields).toEqual(['product_name', 'tax_price']);
-    expect(sentBody.productCategoryName).toBe('Fertilizer Upload');
-    expect(sentBody.history).toEqual([{ role: 'user', text: '제목을 굵게 해줘' }]);
-    expect(result.intent.header).toEqual({ fontWeight: 800 });
-    expect(result.explanation).toBe('제목을 더 굵게 바꿨습니다.');
-    expect(result.suggestion).toBe('이미지도 같이 밝게 해보면 어울릴 것 같아요.');
+    expect(result).toEqual(responseBody);
   });
 
   it('throws with the server error message when the response is not ok', async () => {
@@ -116,13 +67,8 @@ describe('requestCardStyleAiIntent', () => {
       }),
     );
 
-    await expect(
-      requestCardStyleAiIntent({
-        cardAiDesign: { prompt: 'warm' },
-        visibleFields: ['product_name'],
-        currentCardStyle: DEFAULT_CARD_STYLE,
-        officeCode: 'OFF-2',
-      }),
-    ).rejects.toThrow('officeCode does not match the authenticated user.');
+    await expect(postCardStyleAiRequest({ officeCode: 'OFF-2' })).rejects.toThrow(
+      'officeCode does not match the authenticated user.',
+    );
   });
 });

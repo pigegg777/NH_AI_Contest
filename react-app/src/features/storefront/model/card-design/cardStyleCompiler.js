@@ -8,18 +8,18 @@ import {
   resolveImageSizeFromDeltaSteps,
   resolveImageSizeRange,
   resolveStructuralPresetFromLayoutPlan,
-} from '../../model/card-design/cardCompositionModel';
+} from './cardCompositionModel';
 import {
   deriveLegacyCardLayoutPlan,
   normalizeCardLayoutPlan,
-} from '../../model/card-design/cardLayoutPlanModel';
-import { normalizeCardStyle } from '../../model/card-design/cardStyleModel';
+} from './cardLayoutPlanModel';
+import { normalizeCardStyle } from './cardStyleModel';
 import {
   contrastRatio,
   ensureReadableTextColor,
   mixHexColors,
   pickReadableTextColor,
-} from '../../model/page-design/pageStyleColor';
+} from '../page-design/pageStyleColor';
 
 const MIN_HEADER_CONTRAST_RATIO = 4.5;
 const HEADER_LOW_CONTRAST_WARNING =
@@ -326,6 +326,8 @@ export function compileCardStyle({
       : {}),
   };
 
+  const conditionalStyles = intent?.conditionalStyles ?? previous.conditionalStyles;
+
   const cardStyle = normalizeCardStyle({
     cardsPerRow: resolvedCardsPerRow,
     structuralPreset,
@@ -336,6 +338,7 @@ export function compileCardStyle({
     image,
     info,
     field,
+    conditionalStyles,
   });
 
   const previousFieldStyles = extractFieldStylesFromBodySlots(previousBodySlots);

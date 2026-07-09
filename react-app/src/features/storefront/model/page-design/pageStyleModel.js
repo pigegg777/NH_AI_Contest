@@ -4,12 +4,20 @@ export const PAGE_STYLE_SCHEMA_VERSION = 1;
 
 export const PAGE_STYLE_SEARCH_SIZE_TOKENS = ['sm', 'md', 'lg', 'xl'];
 export const PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS = ['soft', 'normal', 'strong'];
+export const PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS = ['sm', 'md', 'lg', 'xl'];
 
 export const PAGE_STYLE_SEARCH_SIZE_VALUES = {
   sm: { minHeight: '34px', fontSize: '0.82rem' },
   md: { minHeight: '40px', fontSize: '0.94rem' },
   lg: { minHeight: '46px', fontSize: '1rem' },
   xl: { minHeight: '52px', fontSize: '1.08rem' },
+};
+
+export const PAGE_STYLE_HEADER_TITLE_SIZE_VALUES = {
+  sm: '0.95rem',
+  md: '1.1rem',
+  lg: '1.25rem',
+  xl: '1.4rem',
 };
 
 export const PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES = {
@@ -21,7 +29,7 @@ export const PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES = {
 export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
   palette: { backgroundHex: '#ffffff', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' },
-  header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800 },
+  header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
   search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#d8e2dc', focusBorderColorHex: '#1d4a2e' },
   categoryChips: {
     backgroundHex: '#ffffff',
@@ -51,6 +59,9 @@ function normalizeHeader(header, backgroundHex) {
     titleColorHex: ensureReadableTextColor(candidateColor, backgroundHex),
     letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : DEFAULT_PAGE_STYLE.header.letterSpacing,
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : DEFAULT_PAGE_STYLE.header.fontWeight,
+    titleFontSizeToken: PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS.includes(source.titleFontSizeToken)
+      ? source.titleFontSizeToken
+      : DEFAULT_PAGE_STYLE.header.titleFontSizeToken,
   };
 }
 

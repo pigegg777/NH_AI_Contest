@@ -1,7 +1,7 @@
 import { startTransition, useEffect, useState } from 'react';
 
 import { toTrimmedString } from '../../../common/utils/text';
-import { fetchStorefrontConfig } from '../../storefront/services/storefront-config/storefrontConfigService';
+import { fetchStorefrontConfig } from '../../storefront/model/storefront-config/storefrontConfigOrchestrator';
 import {
   buildStorefrontPublicUrl,
   buildStorefrontQrAssets,

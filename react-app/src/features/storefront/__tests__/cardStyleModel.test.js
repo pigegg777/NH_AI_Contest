@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CARD_STYLE, normalizeCardStyle, resolveFieldColorRoleValue } from '../model/card-design/cardStyleModel';
+import {
+  collectConditionFieldValueSamples,
+  DEFAULT_CARD_STYLE,
+  normalizeCardStyle,
+  normalizeConditionalStyleRules,
+  resolveFieldColorRoleValue,
+} from '../model/card-design/cardStyleModel';
 
 describe('normalizeCardStyle', () => {
   it('keeps allowed values for every section and falls back to defaults otherwise', () => {
@@ -52,6 +58,7 @@ describe('normalizeCardStyle', () => {
       image: { fit: 'cover', sizePx: 160 },
       info: { backgroundColor: '', borderColor: '', padding: 'tight', radius: 'md', fieldGap: 'tight', fieldGroupGap: 'tight', alignment: 'center' },
       field: { defaultColorRole: 'muted', defaultFontWeight: 'bold', defaultFontSize: 'large', priceColorRole: 'red' },
+      conditionalStyles: [],
     });
   });
 
@@ -108,6 +115,96 @@ describe('normalizeCardStyle', () => {
     const style = normalizeCardStyle({ shell: { backgroundColor: '#0f172a' } });
 
     expect(style.header.backgroundColor).toBe(DEFAULT_CARD_STYLE.header.backgroundColor);
+  });
+});
+
+describe('normalizeConditionalStyleRules', () => {
+  it('keeps a valid rule with only recognized cosmetic overrides', () => {
+    const rules = normalizeConditionalStyleRules([
+      {
+        conditionField: 'medium_category',
+        conditionOperator: 'equals',
+        conditionValue: '종자',
+        shell: { backgroundColor: '#e6f7d9', spacing: 'relaxed' },
+        header: null,
+        image: null,
+        info: null,
+        field: { priceColorRole: 'green' },
+      },
+    ]);
+
+    expect(rules).toEqual([
+      {
+        conditionField: 'medium_category',
+        conditionOperator: 'equals',
+        conditionValue: '종자',
+        shell: { backgroundColor: '#e6f7d9', borderColor: '', shadow: '', radius: '' },
+        header: null,
+        image: null,
+        info: null,
+        field: { priceColorRole: 'green' },
+      },
+    ]);
+  });
+
+  it('drops rules with no condition field/value or no recognized style override', () => {
+    expect(
+      normalizeConditionalStyleRules([
+        { conditionField: '', conditionValue: '종자', shell: { backgroundColor: '#e6f7d9' } },
+        { conditionField: 'medium_category', conditionValue: '', shell: { backgroundColor: '#e6f7d9' } },
+        { conditionField: 'medium_category', conditionValue: '종자' },
+      ]),
+    ).toEqual([]);
+  });
+
+  it('defaults an invalid conditionOperator to contains (more forgiving than exact match) and ignores unrecognized keys like layout', () => {
+    const rules = normalizeConditionalStyleRules([
+      {
+        conditionField: 'manufacturer_list',
+        conditionOperator: 'greaterThan',
+        conditionValue: 'ACME',
+        layout: { cardsPerRow: 1 },
+        shell: { radius: 'xl' },
+      },
+    ]);
+
+    expect(rules[0].conditionOperator).toBe('contains');
+    expect(rules[0].layout).toBeUndefined();
+    expect(rules[0].shell).toEqual({ backgroundColor: '', borderColor: '', shadow: '', radius: 'xl' });
+  });
+
+  it('drops a rule whose conditionField is not in the allowed (non-numeric) list, like a price field', () => {
+    expect(
+      normalizeConditionalStyleRules([
+        { conditionField: 'tax_price', conditionValue: '10000', shell: { backgroundColor: '#e6f7d9' } },
+      ]),
+    ).toEqual([]);
+  });
+});
+
+describe('collectConditionFieldValueSamples', () => {
+  it('collects distinct non-empty values per grounding field, skipping free-text fields', () => {
+    const rows = [
+      { product_name: '꿀나라수박/200립', large_category: '시설원예자재', medium_category: '종자종묘', detail_category: '채소류' },
+      { product_name: '농협꿀참외/100립', large_category: '시설원예자재', medium_category: '종자종묘', detail_category: '채소류' },
+      { product_name: '고추지주대', large_category: '시설원예자재', medium_category: '농자재', detail_category: '기타' },
+    ];
+
+    const samples = collectConditionFieldValueSamples(rows);
+
+    expect(samples.large_category).toEqual(['시설원예자재']);
+    expect(samples.medium_category).toEqual(['종자종묘', '농자재']);
+    expect(samples.detail_category).toEqual(['채소류', '기타']);
+    expect(samples.product_name).toBeUndefined();
+  });
+
+  it('caps sample count per field and omits fields with no values, and is safe for missing/non-array rows', () => {
+    const manyRows = Array.from({ length: 30 }, (_, index) => ({ medium_category: `카테고리-${index}` }));
+
+    expect(collectConditionFieldValueSamples(manyRows).medium_category).toHaveLength(15);
+    expect(collectConditionFieldValueSamples([{ product_name: 'x' }]).medium_category).toBeUndefined();
+    expect(collectConditionFieldValueSamples(undefined)).toEqual({});
+    expect(collectConditionFieldValueSamples(null)).toEqual({});
   });
 });
 

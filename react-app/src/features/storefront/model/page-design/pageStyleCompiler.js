@@ -1,9 +1,9 @@
-import { normalizePageAiTargetScope } from '../../model/page-design/pageAiDesignModel';
+import { normalizePageAiTargetScope } from './pageAiDesignModel';
 import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../../model/page-design/pageStyleModel';
+} from './pageStyleModel';
 
 function resolvePalette(intentPalette, previousPalette) {
   if (!intentPalette) {
@@ -23,6 +23,8 @@ function resolveHeader(intentHeader, previousHeader) {
     titleColorHex: intentHeader?.titleColorHex ?? previousHeader.titleColorHex,
     letterSpacing: intentHeader?.letterSpacing ?? previousHeader.letterSpacing,
     fontWeight: intentHeader?.fontWeight ?? previousHeader.fontWeight,
+    titleFontSizeToken:
+      intentHeader?.titleFontSizeToken ?? previousHeader.titleFontSizeToken,
   };
 }
 

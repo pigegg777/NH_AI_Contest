@@ -7,7 +7,6 @@ import {
   normalizeCardsPerRow,
   normalizeTitleMode,
   reorderFieldSlots,
-  resolveImageSizeDeltaSteps,
   resolveImageSizeFromDeltaSteps,
   resolveImageSizeRange,
   resolveSectionOrderFromLayoutPlan,
@@ -98,15 +97,6 @@ describe('clampImageSizePx', () => {
     expect(clampImageSizePx(50, range)).toBe(80);
     expect(clampImageSizePx(500, range)).toBe(200);
     expect(clampImageSizePx('nope', range)).toBe(120);
-  });
-});
-
-describe('resolveImageSizeDeltaSteps', () => {
-  it('detects larger/smaller requests in Korean and English', () => {
-    expect(resolveImageSizeDeltaSteps('이미지를 조금 크게 해줘')).toBe(1);
-    expect(resolveImageSizeDeltaSteps('make the image larger')).toBe(1);
-    expect(resolveImageSizeDeltaSteps('이미지를 많이 줄여줘')).toBe(-2);
-    expect(resolveImageSizeDeltaSteps('no image change requested')).toBe(0);
   });
 });
 

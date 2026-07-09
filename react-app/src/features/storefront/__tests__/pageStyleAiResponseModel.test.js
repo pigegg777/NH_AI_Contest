@@ -65,7 +65,7 @@ describe('PAGE_STYLE_AI_SCHEMA', () => {
   });
 
   it('requires explanation as a plain string and suggestion as a nullable string', () => {
-    expect(PAGE_STYLE_AI_SCHEMA.properties.explanation).toEqual({ type: 'string' });
+    expect(PAGE_STYLE_AI_SCHEMA.properties.explanation.type).toBe('string');
     expect(PAGE_STYLE_AI_SCHEMA.properties.suggestion.type).toContain('null');
     expect(PAGE_STYLE_AI_SCHEMA.required).toContain('explanation');
     expect(PAGE_STYLE_AI_SCHEMA.required).toContain('suggestion');

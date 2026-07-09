@@ -1,4 +1,3 @@
-import { toTrimmedString } from '../../../../common/utils/text';
 import {
   deriveLegacyCardLayoutPlan,
   normalizeCardLayoutPlan,
@@ -134,32 +133,6 @@ export function clampImageSizePx(value, range) {
   }
 
   return Math.min(range.max, Math.max(range.min, numericValue));
-}
-
-export function resolveImageSizeDeltaSteps(promptText) {
-  const text = toTrimmedString(promptText).toLowerCase();
-
-  if (!text) {
-    return 0;
-  }
-
-  if (/(많이|훨씬|매우)\s*(크게|키워|늘려)|much (bigger|larger)/.test(text)) {
-    return 2;
-  }
-
-  if (/크게|키워|늘려|larger|bigger/.test(text)) {
-    return 1;
-  }
-
-  if (/(많이|훨씬|매우)\s*(작게|줄여)|much smaller/.test(text)) {
-    return -2;
-  }
-
-  if (/작게|줄여|smaller/.test(text)) {
-    return -1;
-  }
-
-  return 0;
 }
 
 export function resolveImageSizeFromDeltaSteps(previousPx, deltaSteps, range) {
