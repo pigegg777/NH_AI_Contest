@@ -17,7 +17,6 @@ describe('DEFAULT_PAGE_STYLE', () => {
   it('is an explicit white default, not a fallback branch', () => {
     expect(DEFAULT_PAGE_STYLE.schemaVersion).toBe(PAGE_STYLE_SCHEMA_VERSION);
     expect(DEFAULT_PAGE_STYLE.palette.backgroundHex).toBe('#ffffff');
-    expect(DEFAULT_PAGE_STYLE.palette.surfaceHex).toBe('#ffffff');
   });
 });
 

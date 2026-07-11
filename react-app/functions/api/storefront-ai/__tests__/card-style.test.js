@@ -133,9 +133,9 @@ describe('POST /api/storefront-ai/card-style', () => {
     expect(body.suggestion).toBe('이미지 섹션도 같이 밝게 해보면 어울릴 것 같아요.');
   });
 
-  it('returns 422 when history has more than 6 turns', async () => {
+  it('returns 422 when history has more than 12 turns', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
-    const history = Array.from({ length: 7 }, (_, index) => ({
+    const history = Array.from({ length: 13 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' : 'assistant',
       text: `turn ${index}`,
     }));

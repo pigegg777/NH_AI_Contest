@@ -35,41 +35,19 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  align-self: stretch;
 }
 
-.heroPanel,
 .previewPanel {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 14px;
   padding: 18px;
-  /* border: 1px solid var(--corp-line); */
-  /* border-radius: 20px; */
-  /* background: var(--corp-panel);
-  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.06); */
-}
-
-.heroPanel {
-  /* background:
-    radial-gradient(
-      circle at top right,
-      rgba(37, 99, 235, 0.12),
-      transparent 30%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.96),
-      rgba(247, 250, 255, 0.96)
-    ); */
-}
-
-.previewPanel {
   position: sticky;
   top: 16px;
 }
 
-.panelHeader,
 .previewHeader {
   display: flex;
   align-items: flex-start;
@@ -86,74 +64,12 @@
   color: var(--corp-primary);
 }
 
-.heroTitle {
-  margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
-  line-height: 1.05;
-  color: var(--corp-text);
-}
-
 .previewTitle {
   margin: 0;
   font-size: 1.06rem;
   justify-content: center;
   font-weight: 700;
   color: var(--corp-text);
-}
-
-.description {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--corp-muted);
-}
-
-.actions,
-.stepNavActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.stepNavActions {
-  justify-content: flex-end;
-}
-
-.primaryButton,
-.secondaryButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: var(--corp-radius);
-  font-size: 0.86rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.primaryButton {
-  border: none;
-  background: var(--corp-primary);
-  color: var(--corp-on-primary);
-}
-
-.secondaryButton {
-  border: 1px solid var(--corp-line);
-  background: var(--corp-panel);
-  color: var(--corp-text);
-}
-
-.primaryButton:disabled,
-.secondaryButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.primaryButton:focus-visible,
-.secondaryButton:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.24);
-  outline-offset: 2px;
 }
 
 .previewStage {

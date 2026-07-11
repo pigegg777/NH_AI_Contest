@@ -22,6 +22,24 @@ describe('compilePageStyle resolved output', () => {
   });
 });
 
+describe('compilePageStyle precedence: palette', () => {
+  it('keeps a previously customized accentHex when the intent only supplies backgroundHex', () => {
+    const previousPageStyle = {
+      ...DEFAULT_PAGE_STYLE,
+      palette: { backgroundHex: '#f8fafc', accentHex: '#7c3aed' },
+    };
+
+    const result = compilePageStyle({
+      // The AI nulls out fields it isn't changing this turn, per the system prompt contract.
+      intent: { palette: { backgroundHex: '#fff7ed', accentHex: null }, header: null, categoryChips: null, search: null },
+      previousPageStyle,
+    });
+
+    expect(result.palette.backgroundHex).toBe('#fff7ed');
+    expect(result.palette.accentHex).toBe('#7c3aed');
+  });
+});
+
 describe('compilePageStyle precedence: header/search', () => {
   it('uses the override when present', () => {
     const result = compilePageStyle({
@@ -83,9 +101,7 @@ describe('compilePageStyle sticky incremental edits', () => {
       ...DEFAULT_PAGE_STYLE,
       palette: {
         backgroundHex: '#f8fafc',
-        surfaceHex: '#ffffff',
         accentHex: '#1d4a2e',
-        textHex: '#173223',
       },
       header: {
         titleColorHex: '#173223',
@@ -130,9 +146,7 @@ describe('compilePageStyle scoped merges', () => {
       ...DEFAULT_PAGE_STYLE,
       palette: {
         backgroundHex: '#f8fafc',
-        surfaceHex: '#ffffff',
         accentHex: '#1d4a2e',
-        textHex: '#173223',
       },
       header: {
         titleColorHex: '#0f172a',

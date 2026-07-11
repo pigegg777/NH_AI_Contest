@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(29, 74, 46, 0.2);
   border-radius: 22px;
 }
 
@@ -28,12 +28,13 @@
 
 .inputRow {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 }
 
 .inputRow > label {
   flex: 1;
+  min-width: 0;
 }
 
 .sendButton {
@@ -41,15 +42,28 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 32px;
+  padding: 0 14px;
   border: none;
-  border-radius: var(--corp-radius);
+  border-radius: var(--corp-radius-pill);
   background: var(--corp-primary);
   color: var(--corp-on-primary);
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.sendButton:hover:not(:disabled) {
+  background: #163c25;
+}
+
+.sendButton:focus-visible {
+  outline: 3px solid rgba(29, 74, 46, 0.28);
+  outline-offset: 2px;
 }
 
 .sendButton:disabled {
@@ -62,15 +76,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius);
-  background: var(--corp-panel);
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: var(--corp-radius-pill);
+  background: #ffffff;
   color: var(--corp-text);
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.undoButton:hover {
+  border-color: rgba(29, 74, 46, 0.32);
+  background: rgba(239, 246, 255, 0.72);
+}
+
+.undoButton:focus-visible {
+  outline: 3px solid rgba(29, 74, 46, 0.18);
+  outline-offset: 2px;
 }
 
 .errorBox {

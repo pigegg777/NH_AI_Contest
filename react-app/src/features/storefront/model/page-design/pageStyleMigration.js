@@ -56,7 +56,7 @@ export function pageConfigNeedsPageStyleMigration(legacyPageConfig) {
 export function migrateLegacyPageConfigToPageStyle(legacyPageConfig) {
   const accentSeedHex = resolveLegacyAccentSeedHex(legacyPageConfig);
   const backgroundHex = mixHexColors(accentSeedHex, '#ffffff', 0.94);
-  const palette = { backgroundHex, surfaceHex: '#ffffff', accentHex: accentSeedHex, textHex: '#173223' };
+  const palette = { backgroundHex, accentHex: accentSeedHex };
   const typographyTone =
     LEGACY_TYPOGRAPHY_TONE_VALUES[legacyPageConfig?.theme?.typographyTone] || LEGACY_TYPOGRAPHY_TONE_VALUES.standard;
   const titleColorHex = resolveLegacyTitleColorHex(legacyPageConfig, accentSeedHex);

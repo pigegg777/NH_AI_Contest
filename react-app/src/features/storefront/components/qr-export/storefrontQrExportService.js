@@ -2,4 +2,4 @@ export {
   buildStorefrontPublicUrl,
   buildStorefrontQrAssets,
   printStorefrontQr,
-} from '../../../public-storefront/services/publicStorefrontQrService';
+} from '../../../../common/services/publicStorefrontQrService';

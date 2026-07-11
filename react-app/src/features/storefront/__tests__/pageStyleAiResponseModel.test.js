@@ -73,12 +73,11 @@ describe('PAGE_STYLE_AI_SCHEMA', () => {
 });
 
 describe('normalizePaletteIntent', () => {
-  it('derives a light background and readable text color from a bare accent hex', () => {
+  it('derives a light background from a bare accent hex', () => {
     const palette = normalizePaletteIntent({ accentHex: '#2563eb' }, '#1d4a2e');
 
     expect(palette.accentHex).toBe('#2563eb');
     expect(palette.backgroundHex).not.toBe('#2563eb');
-    expect(palette.textHex).toMatch(/^#[0-9a-f]{6}$/);
   });
 
   it('falls back to the provided fallback accent when accentHex is missing or invalid', () => {

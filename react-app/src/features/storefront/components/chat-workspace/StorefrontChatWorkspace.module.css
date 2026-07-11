@@ -1,0 +1,46 @@
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: min(90vh, 1400px);
+  padding: 18px;
+}
+
+.workspaceHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.5vw, 1.85rem);
+  line-height: 1.1;
+  color: var(--corp-text);
+}
+
+.composerShell {
+  padding-top: 4px;
+}
+
+.scaffoldPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px dashed rgba(100, 116, 139, 0.3);
+}
+
+.scaffoldLabel {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--corp-text);
+}
+
+.scaffoldText {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #6b7280;
+}

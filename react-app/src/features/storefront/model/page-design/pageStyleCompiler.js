@@ -1,3 +1,4 @@
+import { normalizeHexColor } from './pageStyleColor';
 import { normalizePageAiTargetScope } from './pageAiDesignModel';
 import {
   deriveCategoryChipsFromPalette,
@@ -10,12 +11,10 @@ function resolvePalette(intentPalette, previousPalette) {
     return previousPalette;
   }
 
-  return normalizePageStyle({
-    palette: {
-      ...previousPalette,
-      ...intentPalette,
-    },
-  }).palette;
+  return {
+    backgroundHex: normalizeHexColor(intentPalette.backgroundHex, previousPalette.backgroundHex),
+    accentHex: normalizeHexColor(intentPalette.accentHex, previousPalette.accentHex),
+  };
 }
 
 function resolveHeader(intentHeader, previousHeader) {

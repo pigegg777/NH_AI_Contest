@@ -8,40 +8,44 @@
 
 .sectionTitle {
   margin: 0;
-  padding: 14px 14px 0;
-  font-size: 1.06rem;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  padding: 10px 10px 0;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--corp-text);
 }
 
 .fieldTable {
   width: 100%;
-  min-width: 560px;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .fieldTable th,
 .fieldTable td {
-  padding: 5px 12px;
+  padding: 6px 8px;
   border-top: 1px solid rgba(17, 24, 39, 0.08);
-  text-align: left;
+  text-align: center;
   vertical-align: middle;
 }
 
 .fieldTable thead th {
   border-top: none;
   background: rgba(248, 250, 252, 0.96);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--corp-muted);
+  letter-spacing: 0.02em;
+  color: black;
 }
 
 .fieldTableHeading {
-  font-size: 0.88rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--corp-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fieldTableValueCell {
@@ -50,7 +54,7 @@
 
 .fieldTableValue {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   color: var(--corp-text);
   white-space: nowrap;
   overflow: hidden;
@@ -58,16 +62,17 @@
 }
 
 .fieldTableToggleCell {
-  width: 120px;
+  width: 66px;
 }
 
 .fieldToggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
+  gap: 4px;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--corp-text);
+  white-space: nowrap;
 }
 
 .fieldToggle input {
@@ -77,20 +82,10 @@
 .fieldDisabled {
   display: inline-flex;
   align-items: center;
-  font-size: 0.78rem;
+  font-size: 0.64rem;
   font-weight: 600;
   color: var(--corp-muted);
   opacity: 0.6;
   cursor: default;
-}
-
-@media (max-width: 980px) {
-  .fieldTable {
-    min-width: 100%;
-    table-layout: auto;
-  }
-
-  .fieldTableToggleCell {
-    width: auto;
-  }
+  white-space: nowrap;
 }

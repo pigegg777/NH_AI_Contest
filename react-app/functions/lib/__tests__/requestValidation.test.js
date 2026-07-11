@@ -126,8 +126,8 @@ describe('assertHistoryWithinLimits', () => {
     );
   });
 
-  it('rejects more than 6 turns with 422', () => {
-    const history = Array.from({ length: 7 }, (_, index) => ({
+  it('rejects more than 12 turns with 422', () => {
+    const history = Array.from({ length: 13 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' : 'assistant',
       text: `turn ${index}`,
     }));

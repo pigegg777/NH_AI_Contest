@@ -120,7 +120,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
         ],
         pageStyle: {
           schemaVersion: 1,
-          palette: { backgroundHex: '#f1f4f2', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' },
+          palette: { backgroundHex: '#f1f4f2', accentHex: '#1d4a2e' },
           header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
           search: { sizeToken: 'md', borderStrengthToken: 'soft', borderColorHex: '#bbc9c0', focusBorderColorHex: '#1d4a2e' },
           categoryChips: {

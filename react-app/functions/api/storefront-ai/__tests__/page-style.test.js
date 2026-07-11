@@ -140,9 +140,9 @@ describe('POST /api/storefront-ai/page-style', () => {
     expect(body.suggestion).toBe('검색창 테두리도 같이 강하게 해보면 어울릴 것 같아요.');
   });
 
-  it('returns 422 when history has more than 6 turns', async () => {
+  it('returns 422 when history has more than 12 turns', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
-    const history = Array.from({ length: 7 }, (_, index) => ({
+    const history = Array.from({ length: 13 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' : 'assistant',
       text: `turn ${index}`,
     }));

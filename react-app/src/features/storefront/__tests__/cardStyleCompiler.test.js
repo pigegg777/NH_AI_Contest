@@ -111,6 +111,126 @@ describe('compileCardStyle merges intent onto the previous style', () => {
 
     expect(result.cardStyle.header.fontWeight).toBe(800);
   });
+
+  it('keeps previously customized shell fields when the intent only touches one shell field', () => {
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      shell: {
+        backgroundColor: '#fff7ed',
+        borderColor: '#fdba74',
+        shadow: 'strong',
+        radius: 'md',
+        spacing: 'tight',
+      },
+    };
+    const result = compileCardStyle({
+      // AI nulls out every shell field it isn't changing, per the system prompt contract.
+      intent: { shell: { backgroundColor: null, borderColor: null, shadow: null, radius: 'xl', spacing: null } },
+      previousCardStyle,
+      cardsPerRow: 2,
+      visibleFields: ['product_name'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.shell).toEqual({
+      backgroundColor: '#fff7ed',
+      borderColor: '#fdba74',
+      shadow: 'strong',
+      radius: 'xl',
+      spacing: 'tight',
+    });
+  });
+
+  it('appends a new conditionalStyles rule instead of replacing previously set rules', () => {
+    const existingRule = {
+      conditionField: 'manufacturer_list',
+      conditionOperator: 'contains',
+      conditionValue: 'ACME',
+      shell: { backgroundColor: '#e6f7d9', borderColor: '', shadow: '', radius: '' },
+      header: null,
+      image: null,
+      info: null,
+      field: null,
+    };
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      conditionalStyles: [existingRule],
+    };
+    const newRule = {
+      conditionField: 'medium_category',
+      conditionOperator: 'equals',
+      conditionValue: '종자',
+      shell: { backgroundColor: '#fee2e2' },
+      header: null,
+      image: null,
+      info: null,
+      field: null,
+    };
+    const result = compileCardStyle({
+      intent: { conditionalStyles: [newRule] },
+      previousCardStyle,
+      cardsPerRow: 2,
+      visibleFields: ['product_name'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.conditionalStyles).toEqual([
+      existingRule,
+      { ...newRule, shell: { backgroundColor: '#fee2e2', borderColor: '', shadow: '', radius: '' } },
+    ]);
+  });
+
+  it('deep-merges an updated rule for the same condition instead of dropping its other overrides', () => {
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      conditionalStyles: [
+        {
+          conditionField: 'medium_category',
+          conditionOperator: 'equals',
+          conditionValue: '종자',
+          shell: { backgroundColor: '#e6f7d9', borderColor: '', shadow: '', radius: '' },
+          header: null,
+          image: null,
+          info: null,
+          field: null,
+        },
+      ],
+    };
+    const result = compileCardStyle({
+      // Same condition key, only adding a field override this turn; shell must survive.
+      intent: {
+        conditionalStyles: [
+          {
+            conditionField: 'medium_category',
+            conditionOperator: 'equals',
+            conditionValue: '종자',
+            shell: null,
+            header: null,
+            image: null,
+            info: null,
+            field: { priceColorRole: 'red' },
+          },
+        ],
+      },
+      previousCardStyle,
+      cardsPerRow: 2,
+      visibleFields: ['product_name'],
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.conditionalStyles).toEqual([
+      {
+        conditionField: 'medium_category',
+        conditionOperator: 'equals',
+        conditionValue: '종자',
+        shell: { backgroundColor: '#e6f7d9', borderColor: '', shadow: '', radius: '' },
+        header: null,
+        image: null,
+        info: null,
+        field: { priceColorRole: 'red' },
+      },
+    ]);
+  });
 });
 
 describe('compileCardStyle structural preset and title mode', () => {

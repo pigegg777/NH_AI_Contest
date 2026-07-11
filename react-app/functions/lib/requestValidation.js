@@ -1,6 +1,6 @@
 const MAX_PROMPT_LENGTH = 2000;
 const MAX_REQUEST_BODY_BYTES = 20000;
-const MAX_HISTORY_TURNS = 6;
+const MAX_HISTORY_TURNS = 12;
 const MAX_HISTORY_TURN_LENGTH = 500;
 
 export class RequestValidationError extends Error {

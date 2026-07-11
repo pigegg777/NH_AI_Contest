@@ -1,0 +1,66 @@
+.modeChoiceBubble {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.modeChoiceText {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  font-weight: 900;
+}
+
+.modeChoiceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.modeChoiceButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 20px;
+  border: 1px solid rgba(211, 240, 202, 0.92);
+  border-radius: 12px;
+  background: rgba(244, 252, 241, 0.92);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.modeChoiceButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(29, 74, 46, 0.34);
+  box-shadow: 0 12px 20px rgba(29, 74, 46, 0.08);
+}
+
+.modeChoiceButton:focus-visible {
+  outline: 3px solid rgba(29, 74, 46, 0.18);
+  outline-offset: 2px;
+}
+
+.modeChoiceLabel {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--corp-text);
+  margin-bottom: 5px;
+}
+
+.modeChoiceDescription {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  color: #6b7280;
+}
