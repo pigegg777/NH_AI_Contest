@@ -204,6 +204,55 @@ function buildRequestedGroupsFromLayoutPlan(layoutPlan, visibleFields) {
   ];
 }
 
+function getConditionalStyleRuleKey(rule) {
+  return `${rule?.conditionField ?? ''}::${rule?.conditionOperator ?? ''}::${rule?.conditionValue ?? ''}`;
+}
+
+function mergeConditionalStyleOverrideSection(previousSection, nextSection) {
+  return nextSection ?? previousSection ?? null;
+}
+
+function mergeConditionalStyleRule(previousRule, nextRule) {
+  return {
+    conditionField: nextRule.conditionField,
+    conditionOperator: nextRule.conditionOperator,
+    conditionValue: nextRule.conditionValue,
+    shell: mergeConditionalStyleOverrideSection(previousRule?.shell, nextRule.shell),
+    header: mergeConditionalStyleOverrideSection(previousRule?.header, nextRule.header),
+    image: mergeConditionalStyleOverrideSection(previousRule?.image, nextRule.image),
+    info: mergeConditionalStyleOverrideSection(previousRule?.info, nextRule.info),
+    field: mergeConditionalStyleOverrideSection(previousRule?.field, nextRule.field),
+  };
+}
+
+function mergeConditionalStyleRules(previousRules, nextRules) {
+  const previousList = Array.isArray(previousRules) ? previousRules : [];
+
+  if (!Array.isArray(nextRules)) {
+    return previousList;
+  }
+
+  const mergedRules = [...previousList];
+  const indexByKey = new Map(
+    mergedRules.map((rule, index) => [getConditionalStyleRuleKey(rule), index]),
+  );
+
+  nextRules.forEach((rule) => {
+    const key = getConditionalStyleRuleKey(rule);
+    const existingIndex = indexByKey.get(key);
+
+    if (existingIndex === undefined) {
+      indexByKey.set(key, mergedRules.length);
+      mergedRules.push(rule);
+      return;
+    }
+
+    mergedRules[existingIndex] = mergeConditionalStyleRule(mergedRules[existingIndex], rule);
+  });
+
+  return mergedRules;
+}
+
 function buildRequestedFieldOrderFromLayoutPlan(layoutPlan, visibleFields) {
   const fields = Array.isArray(visibleFields) ? visibleFields : [];
 
@@ -261,8 +310,11 @@ export function compileCardStyle({
   );
 
   const shell = {
-    ...previous.shell,
-    ...(intent?.shell ?? {}),
+    backgroundColor: intent?.shell?.backgroundColor ?? previous.shell.backgroundColor,
+    borderColor: intent?.shell?.borderColor ?? previous.shell.borderColor,
+    shadow: intent?.shell?.shadow ?? previous.shell.shadow,
+    radius: intent?.shell?.radius ?? previous.shell.radius,
+    spacing: intent?.shell?.spacing ?? previous.shell.spacing,
   };
 
   const requestedHeaderBackground =
@@ -326,7 +378,10 @@ export function compileCardStyle({
       : {}),
   };
 
-  const conditionalStyles = intent?.conditionalStyles ?? previous.conditionalStyles;
+  const conditionalStyles = mergeConditionalStyleRules(
+    previous.conditionalStyles,
+    intent?.conditionalStyles,
+  );
 
   const cardStyle = normalizeCardStyle({
     cardsPerRow: resolvedCardsPerRow,

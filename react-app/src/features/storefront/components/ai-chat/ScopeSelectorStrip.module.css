@@ -30,18 +30,18 @@
 }
 
 .scopeChip:hover {
-  border-color: rgba(37, 99, 235, 0.32);
+  border-color: rgba(29, 74, 46, 0.32);
   background: rgba(239, 246, 255, 0.72);
 }
 
 .scopeChip:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline: 3px solid rgba(29, 74, 46, 0.18);
   outline-offset: 2px;
-  border-color: #2563eb;
+  border-color: #1d4a2e;
 }
 
 .scopeChipActive {
-  border-color: #2563eb;
-  background: #2563eb;
+  border-color: #1d4a2e;
+  background: #1d4a2e;
   color: #ffffff;
 }

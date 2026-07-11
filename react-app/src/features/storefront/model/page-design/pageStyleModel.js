@@ -28,7 +28,7 @@ export const PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES = {
 
 export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
-  palette: { backgroundHex: '#ffffff', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' },
+  palette: { backgroundHex: '#ffffff', accentHex: '#1d4a2e' },
   header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
   search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#d8e2dc', focusBorderColorHex: '#1d4a2e' },
   categoryChips: {
@@ -45,9 +45,7 @@ function normalizePalette(palette) {
 
   return {
     backgroundHex: normalizeHexColor(source.backgroundHex, DEFAULT_PAGE_STYLE.palette.backgroundHex),
-    surfaceHex: normalizeHexColor(source.surfaceHex, DEFAULT_PAGE_STYLE.palette.surfaceHex),
     accentHex: normalizeHexColor(source.accentHex, DEFAULT_PAGE_STYLE.palette.accentHex),
-    textHex: normalizeHexColor(source.textHex, DEFAULT_PAGE_STYLE.palette.textHex),
   };
 }
 
@@ -113,7 +111,7 @@ export function deriveCategoryChipsFromPalette(palette) {
 
   return {
     backgroundHex,
-    textHex: ensureReadableTextColor(palette.textHex, backgroundHex),
+    textHex: ensureReadableTextColor('#173223', backgroundHex),
     borderColorHex: mixHexColors(palette.accentHex, '#ffffff', 0.7),
     activeBackgroundHex,
     activeTextHex: ensureReadableTextColor('#ffffff', activeBackgroundHex),

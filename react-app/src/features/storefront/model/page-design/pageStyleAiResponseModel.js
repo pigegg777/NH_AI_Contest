@@ -1,18 +1,13 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { PAGE_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE } from '../../config/page-design/pageStyleAiCopyConfig';
-import { HEX_COLOR_SCHEMA_PATTERN } from '../../config/page-design/pageStyleAiSchemaConfig';
-import {
-  isHexColor,
-  mixHexColors,
-  normalizeHexColor,
-  pickReadableTextColor,
-} from './pageStyleColor';
+import { isHexColor, mixHexColors, normalizeHexColor } from './pageStyleColor';
 import {
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from './pageStyleModel';
 
+const HEX_COLOR_SCHEMA_PATTERN = '^#[0-9a-fA-F]{6}$';
 const LETTER_SPACING_SCHEMA_PATTERN = '^normal$|^-?\\d+(\\.\\d+)?(em|rem|px)$';
 const HEADER_FONT_WEIGHT_TOKENS = [400, 500, 600, 700, 800, 900];
 
@@ -123,23 +118,13 @@ const NULLABLE_PALETTE_SCHEMA = {
       pattern: HEX_COLOR_SCHEMA_PATTERN,
       description: '페이지 전체 배경색 hex 코드. 보통 밝고 옅은 색.',
     },
-    surfaceHex: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '카드/패널 등 표면 배경색 hex 코드.',
-    },
     accentHex: {
       type: ['string', 'null'],
       pattern: HEX_COLOR_SCHEMA_PATTERN,
       description: '브랜드 강조색 hex 코드. 버튼, 활성 상태 등에 사용.',
     },
-    textHex: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '본문 기본 글자색 hex 코드. backgroundHex와 대비되게 선택.',
-    },
   },
-  required: ['backgroundHex', 'surfaceHex', 'accentHex', 'textHex'],
+  required: ['backgroundHex', 'accentHex'],
 };
 
 const EXPLANATION_SCHEMA_PATTERN = '^[\\s\\S]{1,200}$';
@@ -185,12 +170,7 @@ export function normalizePaletteIntent(rawPalette, fallbackAccentHex) {
 
   return {
     backgroundHex,
-    surfaceHex: normalizeHexColor(source.surfaceHex, '#ffffff'),
     accentHex,
-    textHex: normalizeHexColor(
-      source.textHex,
-      pickReadableTextColor(backgroundHex),
-    ),
   };
 }
 
@@ -199,12 +179,9 @@ function normalizePalettePatchIntent(rawPalette, fallbackAccentHex) {
     return null;
   }
 
-  const hasRecognizedHex = [
-    'backgroundHex',
-    'surfaceHex',
-    'accentHex',
-    'textHex',
-  ].some((key) => isHexColor(rawPalette[key]));
+  const hasRecognizedHex = ['backgroundHex', 'accentHex'].some((key) =>
+    isHexColor(rawPalette[key]),
+  );
 
   return hasRecognizedHex
     ? normalizePaletteIntent(rawPalette, fallbackAccentHex)

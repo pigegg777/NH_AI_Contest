@@ -21,7 +21,6 @@ export const CARD_SHADOW_OPTIONS = ['none', 'soft', 'strong'];
 export const CARD_RADIUS_OPTIONS = ['md', 'lg', 'xl'];
 export const CARD_SPACING_OPTIONS = ['tight', 'normal', 'relaxed'];
 export const CARD_IMAGE_FIT_OPTIONS = ['cover', 'contain'];
-export const CARD_INFO_ALIGNMENT_OPTIONS = ['start', 'center'];
 export const CARD_CONDITION_OPERATOR_OPTIONS = ['equals', 'contains'];
 export const CARD_CONDITION_FIELD_OPTIONS = [
   'product_name',
@@ -102,9 +101,7 @@ export const DEFAULT_CARD_STYLE = {
     backgroundColor: '#f8fafc',
     borderColor: '',
     padding: 'normal',
-    radius: 'lg',
     titleColorHex: '#111827',
-    fontSize: 'medium',
     letterSpacing: 'normal',
     fontWeight: 700,
   },
@@ -116,10 +113,8 @@ export const DEFAULT_CARD_STYLE = {
     backgroundColor: '',
     borderColor: '',
     padding: 'normal',
-    radius: 'lg',
     fieldGap: 'normal',
     fieldGroupGap: 'normal',
-    alignment: 'start',
   },
   field: {
     defaultColorRole: 'inherit',
@@ -169,9 +164,7 @@ function normalizeHeader(header) {
     backgroundColor,
     borderColor: normalizeOptionalHex(source.borderColor),
     padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : DEFAULT_CARD_STYLE.header.padding,
-    radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : DEFAULT_CARD_STYLE.header.radius,
     titleColorHex: normalizeHexColor(source.titleColorHex, DEFAULT_CARD_STYLE.header.titleColorHex),
-    fontSize: CARD_FIELD_FONT_SIZE_OPTIONS.includes(source.fontSize) ? source.fontSize : DEFAULT_CARD_STYLE.header.fontSize,
     letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : DEFAULT_CARD_STYLE.header.letterSpacing,
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : DEFAULT_CARD_STYLE.header.fontWeight,
   };
@@ -194,10 +187,8 @@ function normalizeInfo(info) {
     backgroundColor: normalizeOptionalHex(source.backgroundColor),
     borderColor: normalizeOptionalHex(source.borderColor),
     padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : DEFAULT_CARD_STYLE.info.padding,
-    radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : DEFAULT_CARD_STYLE.info.radius,
     fieldGap: CARD_SPACING_OPTIONS.includes(source.fieldGap) ? source.fieldGap : DEFAULT_CARD_STYLE.info.fieldGap,
     fieldGroupGap: CARD_SPACING_OPTIONS.includes(source.fieldGroupGap) ? source.fieldGroupGap : DEFAULT_CARD_STYLE.info.fieldGroupGap,
-    alignment: CARD_INFO_ALIGNMENT_OPTIONS.includes(source.alignment) ? source.alignment : DEFAULT_CARD_STYLE.info.alignment,
   };
 }
 

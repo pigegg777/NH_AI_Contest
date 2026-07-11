@@ -1,11 +1,11 @@
-import PublicStorefrontQrCard from '../../features/public-storefront/components/PublicStorefrontQrCard';
+import PublicStorefrontQrCard from '../components/PublicStorefrontQrCard';
 import styles from './DashboardPage.module.css';
 
 const COPY = {
-  dataEditorTitle: '상품 데이터 정리',
+  dataEditorTitle: '상품 데이터입력',
   dataEditorDescription:
     '업로드된 원본 데이터에서 고객에게 보여줄 상품 정보를 정리하고 저장합니다.',
-  storefrontTitle: 'AI 스토어프론트 만들기',
+  storefrontTitle: 'AI로 상품페이지 만들기',
   storefrontDescription:
     '공개 상품 페이지의 카드 구성과 문구를 AI와 함께 빠르게 다듬습니다.',
   dashboard: '대시보드',

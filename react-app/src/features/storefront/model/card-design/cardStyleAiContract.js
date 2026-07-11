@@ -153,11 +153,6 @@ const NULLABLE_INFO_SCHEMA = {
       enum: [...CARD_SPACING_OPTIONS, null],
       description: '상세정보 영역 내부 여백 토큰.',
     },
-    radius: {
-      type: ['string', 'null'],
-      enum: [...CARD_RADIUS_OPTIONS, null],
-      description: '상세정보 영역 모서리 둥글기 토큰.',
-    },
     fieldGap: {
       type: ['string', 'null'],
       enum: [...CARD_SPACING_OPTIONS, null],
@@ -183,7 +178,6 @@ const NULLABLE_INFO_SCHEMA = {
     'backgroundColor',
     'borderColor',
     'padding',
-    'radius',
     'fieldGap',
     'fieldGroupGap',
     'requestedGroups',
@@ -607,8 +601,6 @@ function normalizeInfoIntent(rawInfo) {
     intent.borderColor = normalizeHexColor(rawInfo.borderColor);
   if (CARD_SPACING_OPTIONS.includes(rawInfo.padding))
     intent.padding = rawInfo.padding;
-  if (CARD_RADIUS_OPTIONS.includes(rawInfo.radius))
-    intent.radius = rawInfo.radius;
   if (CARD_SPACING_OPTIONS.includes(rawInfo.fieldGap))
     intent.fieldGap = rawInfo.fieldGap;
   if (CARD_SPACING_OPTIONS.includes(rawInfo.fieldGroupGap))

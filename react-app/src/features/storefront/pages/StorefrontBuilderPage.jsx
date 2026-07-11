@@ -1,10 +1,16 @@
 import PublicStorefrontScreen from "../../public-storefront/components/PublicStorefrontScreen";
-import StorefrontConversationPanel from "../components/chat-builder/StorefrontConversationPanel";
+import StorefrontChatWorkspace from "../components/chat-workspace/StorefrontChatWorkspace";
 import { useStorefrontBuilder } from "../hooks/useStorefrontBuilder";
+import { useStorefrontChatSession } from "../hooks/useStorefrontChatSession";
 import styles from "./StorefrontBuilderPage.module.css";
 
 export default function StorefrontBuilderPage({ officeCode, nhName }) {
+  const session = useStorefrontChatSession();
   const builder = useStorefrontBuilder({ officeCode, nhName });
+  const previewConfig =
+    session.mode === "data" && builder.dataMode?.previewConfig
+      ? builder.dataMode.previewConfig
+      : builder.previewConfig;
 
   if (builder.status === "loading") {
     return (
@@ -30,7 +36,7 @@ export default function StorefrontBuilderPage({ officeCode, nhName }) {
     <div className={styles.page}>
       <div className={styles.workspace}>
         <div className={styles.leftColumn}>
-          <StorefrontConversationPanel builder={builder} />
+          <StorefrontChatWorkspace session={session} builder={builder} />
 
           {builder.status === "save-error" ? (
             <div className={styles.errorBox}>
@@ -56,7 +62,7 @@ export default function StorefrontBuilderPage({ officeCode, nhName }) {
               <div className={styles.previewDeviceSpeaker} />
               <div className={styles.previewDeviceScreen}>
                 <PublicStorefrontScreen
-                  config={builder.previewConfig}
+                  config={previewConfig}
                   productRows={builder.previewProductRows}
                   officeName={builder.officeName}
                   nhName={builder.nh_name}

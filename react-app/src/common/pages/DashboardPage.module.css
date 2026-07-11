@@ -151,7 +151,7 @@
   border-radius: var(--corp-radius-lg);
   box-shadow: var(--corp-shadow-sm);
   padding: 28px 28px 22px;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -202,37 +202,4 @@
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--corp-primary);
-}
-
-@media (max-width: 560px) {
-  .navbarInner {
-    padding: 14px 16px;
-  }
-
-  .content {
-    padding: 36px 16px 60px;
-    justify-content: flex-start;
-  }
-
-  .officeName {
-    width: 100%;
-    font-size: 1.05rem;
-  }
-
-  .greeting {
-    font-size: 1rem;
-  }
-
-  .systemTitle {
-    font-size: 1.5rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    max-width: 100%;
-  }
-
-  .welcome {
-    margin-bottom: 32px;
-  }
 }

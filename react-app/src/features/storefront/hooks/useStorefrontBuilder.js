@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { toTrimmedString } from "../../../common/utils/text";
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
@@ -26,12 +26,9 @@ import {
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
 import { usePageAiDesign } from "./usePageAiDesign";
-import { useUnifiedDesignSession } from "./useUnifiedDesignSession";
+import { useStorefrontChatSession } from "./useStorefrontChatSession";
 
-const FETCH_ERROR_MESSAGE = "We could not load the storefront builder.";
-const SAVE_ERROR_MESSAGE = "We could not save the storefront draft.";
-const DATA_SELECTION_STEP_INDEX = 1;
-const FINAL_STEP_INDEX = 2;
+const FETCH_ERROR_MESSAGE = "스토어프론트 빌더를 불러오지 못했습니다.";
 const MAX_SHARED_AI_HISTORY_MESSAGES = 12;
 
 function getInitialCategoryName(productEntries, existingConfig) {
@@ -55,17 +52,82 @@ function resolveScopeLabel(scopeOptions, scopeId) {
   return scopeOptions.find((option) => option.id === scopeId)?.label ?? "";
 }
 
-function buildSharedHistory(messages) {
+function cloneValue(value) {
+  if (value == null) {
+    return value;
+  }
+
+  return typeof structuredClone === "function"
+    ? structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
+}
+
+function buildSharedHistory(messages, mode) {
   return messages
+    .filter(
+      (message) =>
+        message?.kind === "chat-message" &&
+        typeof message?.text === "string" &&
+        (!mode || message?.mode === mode),
+    )
     .slice(-MAX_SHARED_AI_HISTORY_MESSAGES)
     .map((message) => ({ role: message.role, text: message.text }));
+}
+
+function buildSharedThreadMessage({
+  role,
+  mode,
+  targetLabel,
+  scope,
+  scopeLabel,
+  text,
+  suggestion,
+  warningMessage,
+}) {
+  return {
+    role,
+    kind: "chat-message",
+    mode,
+    target: mode,
+    targetLabel,
+    scope,
+    scopeLabel,
+    text,
+    suggestion,
+    warningMessage,
+  };
+}
+
+function buildAdvisoryReply({
+  officeName,
+  selectedProductCategoryName,
+  productEntries,
+  visibleFields,
+}) {
+  const resolvedOfficeName = toTrimmedString(officeName) || "이 스토어프론트";
+  const resolvedCategoryName =
+    toTrimmedString(selectedProductCategoryName) || "현재 카테고리";
+  const categoryCount = Array.isArray(productEntries) ? productEntries.length : 0;
+  const fieldCount = Array.isArray(visibleFields) ? visibleFields.length : 0;
+
+  return `${resolvedOfficeName}의 현재 스토어프론트 상태를 보면, ${resolvedCategoryName} 경험을 먼저 개선하는 것이 좋겠습니다. 현재 ${categoryCount}개의 카테고리가 등록되어 있고 현재 카드 레이아웃에는 ${fieldCount}개의 필드가 표시되어 있으니, 먼저 페이지 구조를 정리한 다음 가장 중요한 상품 정보가 카드에서 잘 보이도록 조정하는 것이 안전한 다음 단계입니다.`;
+}
+
+function resolveChatScopeLabel(mode, targetScope) {
+  if (mode === "page") {
+    return resolveScopeLabel(PAGE_AI_TARGET_SCOPE_OPTIONS, targetScope);
+  }
+
+  if (mode === "card") {
+    return resolveScopeLabel(CARD_AI_TARGET_SCOPE_OPTIONS, targetScope);
+  }
+
+  return "";
 }
 
 export function useStorefrontBuilder({ officeCode, nhName }) {
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState("");
-  const [hasStarted, setHasStarted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
   const [productEntries, setProductEntries] = useState([]);
   const [existingConfig, setExistingConfig] = useState(null);
   const [hiddenProducts, setHiddenProducts] = useState([]);
@@ -76,11 +138,24 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     useState("");
   const pageAi = usePageAiDesign({ officeCode });
   const cardAi = useCardAiDesign({ officeCode });
-  const unifiedDesign = useUnifiedDesignSession();
+  const chatSession = useStorefrontChatSession();
   const [navConfig, setNavConfig] = useState(DEFAULT_NAV_CONFIG);
   const [mobileUiTree, setMobileUiTree] = useState(() =>
     sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree),
   );
+  const [composerDrafts, setComposerDrafts] = useState({
+    page: "",
+    card: "",
+    advisory: "",
+  });
+  const [pendingComposerApply, setPendingComposerApply] = useState({
+    page: false,
+    card: false,
+  });
+  const pageModeDraftRef = useRef(null);
+  const cardModeDraftRef = useRef(null);
+  const previousChatModeRef = useRef(chatSession.mode);
+  const previousCardCategoryRef = useRef("");
 
   const allProductRows = flattenProductEntries(productEntries);
   const currentEntry =
@@ -102,6 +177,39 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     allowedScalarKeys: effectiveScalarKeys,
     initialFields: ["product_name"],
   });
+
+  function capturePageModeDraft() {
+    const baseline = cloneValue(pageAi.pageStyle);
+
+    pageModeDraftRef.current = baseline;
+    setComposerApplyPending("page", false);
+    pageAi.hydratePageStyle(baseline);
+  }
+
+  function captureCardModeDraft() {
+    const baseline = {
+      cardStyle: cloneValue(cardAi.cardStyle),
+      bodySlots: cloneValue(cardAi.bodySlots),
+    };
+
+    cardModeDraftRef.current = baseline;
+    setComposerApplyPending("card", false);
+    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots);
+  }
+
+  function setComposerDraft(mode, value) {
+    setComposerDrafts((current) => ({
+      ...current,
+      [mode]: value,
+    }));
+  }
+
+  function setComposerApplyPending(mode, value) {
+    setPendingComposerApply((current) => ({
+      ...current,
+      [mode]: value,
+    }));
+  }
 
   function markDirty() {
     setStatus((current) => (current === "saved" ? "ready" : current));
@@ -127,6 +235,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
     cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
+    cardModeDraftRef.current = {
+      cardStyle: cloneValue(resolvedDraft.cardStyle),
+      bodySlots: cloneValue(resolvedDraft.bodySlots),
+    };
   }
 
   useEffect(() => {
@@ -134,8 +246,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
     setStatus("loading");
     setErrorMessage("");
-    setHasStarted(false);
-    setCurrentStep(0);
 
     Promise.all([
       fetchOfficeProductDataEntries({ officeCode }),
@@ -180,10 +290,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
               normalizedPageConfig.categoryChips.variant,
           }),
         );
-        unifiedDesign.resetSession();
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
-        setHasStarted(true);
-        setCurrentStep(0);
         setStatus("ready");
       })
       .catch((error) => {
@@ -202,10 +309,33 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     };
   }, [officeCode]);
 
-  function startSession() {
-    setHasStarted(true);
-    setCurrentStep(0);
-  }
+  useEffect(() => {
+    if (chatSession.mode === previousChatModeRef.current) {
+      return;
+    }
+
+    if (chatSession.mode === "page") {
+      capturePageModeDraft();
+    }
+
+    if (chatSession.mode === "card") {
+      captureCardModeDraft();
+    }
+
+    previousChatModeRef.current = chatSession.mode;
+  }, [chatSession.mode]);
+
+  useEffect(() => {
+    if (
+      chatSession.mode === "card" &&
+      selectedProductCategoryName &&
+      selectedProductCategoryName !== previousCardCategoryRef.current
+    ) {
+      captureCardModeDraft();
+    }
+
+    previousCardCategoryRef.current = selectedProductCategoryName;
+  }, [chatSession.mode, selectedProductCategoryName]);
 
   function selectProductCategory(categoryName) {
     const isDifferentCategory =
@@ -213,107 +343,220 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       toTrimmedString(selectedProductCategoryName);
 
     if (!isDifferentCategory) {
-      setHasStarted(true);
-      setCurrentStep(DATA_SELECTION_STEP_INDEX);
       return;
     }
 
     markDirty();
-    unifiedDesign.resetSession();
     pageAi.discardPageAiDesignSession();
     cardAi.discardCardAiDesignSession();
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
-    setHasStarted(true);
-    setCurrentStep(DATA_SELECTION_STEP_INDEX);
   }
 
-  function undoAiChanges() {
-    markDirty();
-    cardAi.undoLastCardAiDesign();
-  }
+  function toggleDataModeField(field) {
+    const resolvedField =
+      typeof field === "string" ? { key: field, aliasKeys: [field] } : field;
+    const keys = resolvedField?.aliasKeys ?? [resolvedField?.key];
+    const isVisible = keys.some((key) => dataSelection.draft.includes(key));
+    const makeVisible = !isVisible;
 
-  function goNext() {
-    setCurrentStep((current) => {
-      if (current === DATA_SELECTION_STEP_INDEX && !dataSelection.isConfirmed) {
-        return current;
+    keys.forEach((key) => {
+      const isKeyVisible = dataSelection.draft.includes(key);
+
+      if (isKeyVisible !== makeVisible) {
+        dataSelection.toggleField(key);
       }
-
-      return Math.min(current + 1, FINAL_STEP_INDEX);
     });
   }
 
-  function confirmDataSelection() {
-    markDirty();
-    dataSelection.confirm();
-    setCurrentStep(FINAL_STEP_INDEX);
+  function exitDataMode() {
+    chatSession.returnToIdle();
   }
 
-  function goPrevious() {
-    setCurrentStep((current) => Math.max(current - 1, 0));
+  function buildDataModeCompletionSummary() {
+    return {
+      text: `${selectedProductCategoryName}의 표시 필드 ${dataSelection.draft.length}개가 적용되었습니다.`,
+    };
   }
 
-  function reopenCategorySelection() {
-    setCurrentStep(0);
+  function syncBuilderFromConfig(
+    config,
+    nextProductEntries = productEntries,
+    preferredCategoryName = selectedProductCategoryName,
+  ) {
+    const normalizedPageConfig = normalizePageConfig(config?.pageConfig);
+    const nextCategoryName =
+      preferredCategoryName || getInitialCategoryName(nextProductEntries, config);
+
+    pageAi.hydratePageStyle(normalizedPageConfig.pageStyle);
+    setMobileUiTree(sanitizeMobileUiTree(normalizedPageConfig.mobileUiTree));
+    setNavConfig(
+      normalizeNavConfig({
+        title: config?.navConfig?.title ?? normalizedPageConfig.nav.title,
+        subtitle:
+          config?.navConfig?.subtitle ?? normalizedPageConfig.nav.subtitle,
+        brandColor:
+          config?.navConfig?.brandColor ??
+          normalizedPageConfig.theme.brandColor,
+        searchPlaceholder:
+          config?.navConfig?.searchPlaceholder ??
+          normalizedPageConfig.searchSection.placeholder,
+        logoUrl:
+          config?.navConfig?.logoUrl ?? normalizedPageConfig.nav.logoUrl,
+        searchVariant:
+          config?.navConfig?.searchVariant ??
+          normalizedPageConfig.searchSection.variant,
+        categoryChipVariant:
+          config?.navConfig?.categoryChipVariant ??
+          normalizedPageConfig.categoryChips.variant,
+      }),
+    );
+
+    if (nextCategoryName) {
+      hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
+    }
   }
 
-  function reopenFieldSelection() {
-    setCurrentStep(DATA_SELECTION_STEP_INDEX);
+  function buildCurrentSavePayload({ cardFields = dataSelection.committed } = {}) {
+    return buildStorefrontSavePayload({
+      officeCode,
+      existingConfig,
+      hiddenProducts,
+      selectedProductCategoryName,
+      selectedMediumCategories,
+      representativeMediumCategory,
+      cardStyle: cardAi.cardStyle,
+      cardFields,
+      bodySlots: cardAi.bodySlots,
+      navConfig,
+      mobileUiTree,
+      pageStyle: pageAi.pageStyle,
+      allowedScalarKeys: effectiveScalarKeys,
+    });
   }
 
-  async function applyUnifiedAiDesign() {
-    const prompt = toTrimmedString(unifiedDesign.promptDraft);
-    const selectedTarget = unifiedDesign.selectedTarget;
-    const scopeOptions =
-      selectedTarget === "card"
-        ? CARD_AI_TARGET_SCOPE_OPTIONS
-        : PAGE_AI_TARGET_SCOPE_OPTIONS;
-    const targetScope =
-      selectedTarget === "card"
-        ? cardAi.cardAiDesign.targetScope
-        : pageAi.pageAiDesign.targetScope;
+  async function saveCompiledPayload(payload) {
+    await upsertStorefrontConfig(payload);
+    setExistingConfig(payload);
+    setHiddenProducts(payload.hiddenProducts ?? []);
+    syncBuilderFromConfig(payload);
+    setStatus("saved");
+  }
 
-    if (!prompt) {
-      if (selectedTarget === "card") {
-        await cardAi.applyCardAiDesign({
-          prompt,
-          targetScope,
-          visibleFields: dataSelection.committed,
-          fieldLabels: STOREFRONT_FIELD_LABELS,
-          productCategoryName: selectedProductCategoryName,
-          productRows: currentEntry?.rows,
-        });
-      } else {
-        await pageAi.applyPageAiDesign({
-          prompt,
-          targetScope,
-        });
-      }
+  function buildApplySummary(mode) {
+    if (mode === "data") {
+      return (
+        buildDataModeCompletionSummary()?.text ??
+        "표시 필드 변경 사항이 저장되었습니다."
+      );
+    }
 
+    if (mode === "card") {
+      return `${selectedProductCategoryName || "현재"} 카드 변경 사항이 저장되었습니다.`;
+    }
+
+    if (mode === "page") {
+      return "페이지 변경 사항이 저장되었습니다.";
+    }
+
+    return "스토어프론트 변경 사항이 저장되었습니다.";
+  }
+
+  async function applyCurrentModeDraft(
+    mode = chatSession.mode,
+    overrides = {},
+  ) {
+    const previousPayload = cloneValue(existingConfig);
+    const payload = buildCurrentSavePayload(overrides);
+    const summary = buildApplySummary(mode);
+
+    await saveCompiledPayload(payload);
+    setComposerApplyPending("page", false);
+    setComposerApplyPending("card", false);
+    pageModeDraftRef.current = null;
+    cardModeDraftRef.current = null;
+    chatSession.recordSuccessfulApply({
+      summary,
+      snapshot: {
+        mode,
+        payload: previousPayload,
+        summary,
+      },
+    });
+    chatSession.returnToIdle();
+  }
+
+  async function undoLastApply() {
+    const snapshot = chatSession.lastApplySnapshot;
+
+    if (!snapshot?.payload) {
       return;
     }
 
-    markDirty();
-    setHasStarted(true);
-    setCurrentStep(FINAL_STEP_INDEX);
+    await saveCompiledPayload(snapshot.payload);
+    chatSession.clearLastApplySnapshot();
+    chatSession.appendMessage(
+      buildSharedThreadMessage({
+        role: "assistant",
+        mode: snapshot.mode ?? "page",
+        text: "이전 스토어프론트 버전으로 복원했습니다.",
+      }),
+    );
+    chatSession.returnToIdle();
+  }
 
-    const targetLabel = selectedTarget === "card" ? "카드" : "페이지";
-    const scopeLabel = resolveScopeLabel(scopeOptions, targetScope);
-    const userMessage = unifiedDesign.createMessage({
+  async function sendComposerPrompt() {
+    const mode = chatSession.mode;
+    const prompt = toTrimmedString(composerDrafts[mode]);
+
+    if (!prompt) {
+      return;
+    }
+
+    const targetScope =
+      mode === "page"
+        ? pageAi.pageAiDesign.targetScope
+        : mode === "card"
+          ? cardAi.cardAiDesign.targetScope
+          : "";
+    const scopeLabel = resolveChatScopeLabel(mode, targetScope);
+    const targetLabel =
+      mode === "page" ? "Page" : mode === "card" ? "Card" : undefined;
+    const userMessage = buildSharedThreadMessage({
       role: "user",
-      target: selectedTarget,
+      mode,
       targetLabel,
       scope: targetScope,
       scopeLabel,
       text: prompt,
     });
-    const nextMessages = [...unifiedDesign.messages, userMessage];
+    const history = buildSharedHistory(
+      [...chatSession.messages, userMessage],
+      mode,
+    );
 
-    unifiedDesign.setMessages(nextMessages);
-    unifiedDesign.setPromptDraft("");
+    chatSession.appendMessage(userMessage);
+    setComposerDraft(mode, "");
 
-    const history = buildSharedHistory(nextMessages);
+    if (mode === "advisory") {
+      chatSession.appendMessage(
+        buildSharedThreadMessage({
+          role: "assistant",
+          mode,
+          text: buildAdvisoryReply({
+            officeName,
+            selectedProductCategoryName,
+            productEntries,
+            visibleFields: dataSelection.committed,
+          }),
+        }),
+      );
+      return;
+    }
+
+    markDirty();
+
     const result =
-      selectedTarget === "card"
+      mode === "card"
         ? await cardAi.applyCardAiDesign({
             prompt,
             targetScope,
@@ -330,166 +573,214 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           });
 
     if (!result?.ok) {
+      chatSession.appendMessage(
+        buildSharedThreadMessage({
+          role: "assistant",
+          mode,
+          text:
+            result?.error ??
+            (mode === "card"
+              ? cardAi.cardAiErrorMessage
+              : pageAi.pageAiErrorMessage) ??
+            "작업 공간 초안을 업데이트하지 못했습니다.",
+        }),
+      );
       return;
     }
 
-    unifiedDesign.setMessages((current) => [
-      ...current,
-      unifiedDesign.createMessage({
+    if (mode === "page" || mode === "card") {
+      setComposerApplyPending(mode, true);
+    }
+
+    chatSession.appendMessage(
+      buildSharedThreadMessage({
         role: "assistant",
-        target: selectedTarget,
-        targetLabel,
-        scope: targetScope,
-        scopeLabel,
+        mode,
+        scope: result.scope,
+        scopeLabel: resolveChatScopeLabel(mode, result.scope),
         text: result.explanation,
         suggestion: result.suggestion,
         warningMessage: result.warningMessage,
       }),
-    ]);
+    );
   }
 
-  async function saveDraft() {
-    setStatus("saving");
-    setErrorMessage("");
+  function discardCurrentModeDraft() {
+    const mode = chatSession.mode;
 
-    try {
-      const payload = buildStorefrontSavePayload({
-        officeCode,
-        existingConfig,
-        hiddenProducts,
-        selectedProductCategoryName,
-        selectedMediumCategories,
-        representativeMediumCategory,
-        cardStyle: cardAi.cardStyle,
-        cardFields: dataSelection.committed,
-        bodySlots: cardAi.bodySlots,
-        navConfig,
-        mobileUiTree,
-        pageStyle: pageAi.pageStyle,
-        allowedScalarKeys: effectiveScalarKeys,
-      });
+    if (mode === "page" && pageModeDraftRef.current) {
+      pageAi.hydratePageStyle(pageModeDraftRef.current);
+      pageModeDraftRef.current = null;
+    }
 
-      await upsertStorefrontConfig(payload);
-      setExistingConfig(payload);
-      setHiddenProducts(payload.hiddenProducts);
-      unifiedDesign.resetSession();
-      setCurrentStep(0);
-      setStatus("saved");
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : SAVE_ERROR_MESSAGE,
+    if (mode === "card" && cardModeDraftRef.current) {
+      cardAi.hydrateCardStyle(
+        cardModeDraftRef.current.cardStyle,
+        cardModeDraftRef.current.bodySlots,
       );
-      setStatus("save-error");
+      cardModeDraftRef.current = null;
+    }
+
+    if (mode === "page" || mode === "card") {
+      setComposerApplyPending(mode, false);
+    }
+
+    if (mode === "data" && !dataSelection.isConfirmed) {
+      dataSelection.reset(dataSelection.committed);
+    }
+
+    if (mode === "page" || mode === "card" || mode === "advisory") {
+      setComposerDraft(mode, "");
     }
   }
 
-  const previewCardFields =
-    currentStep === DATA_SELECTION_STEP_INDEX
-      ? dataSelection.draft
-      : dataSelection.committed;
+  function exitComposerMode() {
+    discardCurrentModeDraft();
+    chatSession.returnToIdle();
+  }
+
+  function switchMode(nextMode) {
+    discardCurrentModeDraft();
+    chatSession.chooseMode(nextMode);
+  }
 
   const previewBodySlots = cardAi.bodySlots;
 
-  const previewConfig = selectedProductCategoryName
-    ? buildStorefrontSavePayload({
-        officeCode,
-        existingConfig,
-        hiddenProducts,
-        selectedProductCategoryName,
-        selectedMediumCategories,
-        representativeMediumCategory,
-        cardStyle: cardAi.cardStyle,
-        cardFields: previewCardFields,
-        bodySlots: previewBodySlots,
-        navConfig,
-        mobileUiTree,
-        pageStyle: pageAi.pageStyle,
-        allowedScalarKeys: effectiveScalarKeys,
-      })
-    : {
-        officeCode,
-        pageConfig: normalizePageConfig({
-          ...existingConfig?.pageConfig,
+  function buildPreviewConfig(cardFields) {
+    return selectedProductCategoryName
+      ? buildStorefrontSavePayload({
+          officeCode,
+          existingConfig,
+          hiddenProducts,
+          selectedProductCategoryName,
+          selectedMediumCategories,
+          representativeMediumCategory,
+          cardStyle: cardAi.cardStyle,
+          cardFields,
+          bodySlots: previewBodySlots,
+          navConfig,
+          mobileUiTree,
           pageStyle: pageAi.pageStyle,
-        }),
-        navConfig: normalizeNavConfig(existingConfig?.navConfig),
-        categoryConfigs: existingConfig?.categoryConfigs ?? [],
-        hiddenProducts,
-      };
+          allowedScalarKeys: effectiveScalarKeys,
+        })
+      : {
+          officeCode,
+          pageConfig: normalizePageConfig({
+            ...existingConfig?.pageConfig,
+            pageStyle: pageAi.pageStyle,
+          }),
+          navConfig: normalizeNavConfig(existingConfig?.navConfig),
+          categoryConfigs: existingConfig?.categoryConfigs ?? [],
+          hiddenProducts,
+        };
+  }
 
-  const productCategoryStep = {
-    productCategoryOptions: productCategoryOptions.map((option) => {
-      const entry = productEntries.find(
-        (productEntry) => productEntry?.categoryName === option.categoryName,
-      );
+  const previewConfig = buildPreviewConfig(dataSelection.committed);
+  const dataModePreviewConfig = buildPreviewConfig(dataSelection.draft);
 
-      return {
-        ...option,
-        sourceFileName: toTrimmedString(entry?.sourceFileName),
-        updatedAt: entry?.updatedAt ?? null,
-      };
-    }),
-    selectedProductCategoryName,
-    selectProductCategory,
-  };
-
-  const dataSelectionStep = {
+  const dataMode = {
+    categoryTabs: productCategoryOptions.map((option) => ({
+      id: option.categoryName,
+      label: option.categoryName,
+      rowCount: option.rowCount,
+      hasDraft: option.hasDraft,
+    })),
+    selectedCategoryId: selectedProductCategoryName,
+    selectCategory: selectProductCategory,
     availableCategoryFields,
-    draftDataSelection: dataSelection.draft,
-    committedDataSelection: dataSelection.committed,
-    isDataSelectionConfirmed: dataSelection.isConfirmed,
-    toggleDraftField: dataSelection.toggleField,
-    confirmDataSelection,
+    draftFields: dataSelection.draft,
+    committedFields: dataSelection.committed,
+    toggleField: toggleDataModeField,
+    applyChanges: async () => {
+      const nextCommittedFields = [...dataSelection.draft];
+
+      markDirty();
+      dataSelection.confirm();
+      await applyCurrentModeDraft("data", {
+        cardFields: nextCommittedFields,
+      });
+    },
+    hasPendingChanges: !dataSelection.isConfirmed,
+    previewConfig: dataModePreviewConfig,
+    goBack: exitDataMode,
   };
 
-  const isCardTarget = unifiedDesign.selectedTarget === "card";
-  const unifiedDesignStep = {
-    selectedTarget: unifiedDesign.selectedTarget,
-    setSelectedTarget: unifiedDesign.setSelectedTarget,
-    promptDraft: unifiedDesign.promptDraft,
-    setPromptDraft: unifiedDesign.setPromptDraft,
-    messages: unifiedDesign.messages,
-    pageTargetScope: pageAi.pageAiDesign.targetScope,
-    cardTargetScope: cardAi.cardAiDesign.targetScope,
-    setPageTargetScope: pageAi.setTargetScope,
-    setCardTargetScope: cardAi.setTargetScope,
-    applyUnifiedAiDesign,
-    isApplying: isCardTarget
-      ? cardAi.isApplyingCardAiDesign
-      : pageAi.isApplyingPageAiDesign,
-    errorMessage: isCardTarget
-      ? cardAi.cardAiErrorMessage
-      : pageAi.pageAiErrorMessage,
-    canUndoAiChanges: cardAi.canUndoCardAiDesign,
-    undoAiChanges,
-    cardStyle: cardAi.cardStyle,
-    setCardsPerRow: cardAi.setCardsPerRow,
-    saveDraft,
-    status,
-    selectedProductCategoryName,
+  const cardMode = {
+    categoryTabs: dataMode.categoryTabs,
+    selectedCategoryId: dataMode.selectedCategoryId,
+    selectCategory: dataMode.selectCategory,
   };
 
-  const conversationFlow = {
-    reopenCategorySelection,
-    reopenFieldSelection,
-  };
+  const composerMode =
+    chatSession.mode === "page" ||
+    chatSession.mode === "card" ||
+    chatSession.mode === "advisory"
+      ? {
+          promptDraft: composerDrafts[chatSession.mode] ?? "",
+          setPromptDraft: (value) => setComposerDraft(chatSession.mode, value),
+          isApplying:
+            chatSession.mode === "page"
+              ? pageAi.isApplyingPageAiDesign
+              : chatSession.mode === "card"
+                ? cardAi.isApplyingCardAiDesign
+                : false,
+          errorMessage:
+            chatSession.mode === "page"
+              ? pageAi.pageAiErrorMessage
+              : chatSession.mode === "card"
+                ? cardAi.cardAiErrorMessage
+                : "",
+          canSend: Boolean(
+            toTrimmedString(composerDrafts[chatSession.mode] ?? ""),
+          ),
+          sendPrompt: sendComposerPrompt,
+          exitMode: exitComposerMode,
+          showApplyAction:
+            chatSession.mode === "page" || chatSession.mode === "card",
+          canApply:
+            chatSession.mode === "page"
+              ? pendingComposerApply.page
+              : chatSession.mode === "card"
+                ? pendingComposerApply.card
+                : false,
+          applyDraft: () => applyCurrentModeDraft(chatSession.mode),
+          targetOptions:
+            chatSession.mode === "page"
+              ? PAGE_AI_TARGET_SCOPE_OPTIONS
+              : chatSession.mode === "card"
+                ? CARD_AI_TARGET_SCOPE_OPTIONS
+                : [],
+          selectedTargetId:
+            chatSession.mode === "page"
+              ? pageAi.pageAiDesign.targetScope
+              : chatSession.mode === "card"
+                ? cardAi.cardAiDesign.targetScope
+                : "",
+          setTargetId:
+            chatSession.mode === "page"
+              ? pageAi.setTargetScope
+              : chatSession.mode === "card"
+                ? cardAi.setTargetScope
+                : () => {},
+        }
+      : null;
 
   return {
     status,
     errorMessage,
-    hasStarted,
-    currentStep,
     selectedProductCategoryName,
     previewConfig,
     previewProductRows: allProductRows,
     officeName,
     nh_name: toTrimmedString(nhName),
-    startSession,
-    goNext,
-    goPrevious,
-    productCategoryStep,
-    dataSelectionStep,
-    unifiedDesignStep,
-    conversationFlow,
+    chatSession,
+    dataMode,
+    cardMode,
+    composerMode,
+    buildCurrentSavePayload,
+    saveCompiledPayload,
+    applyCurrentModeDraft,
+    undoLastApply,
+    switchMode,
   };
 }
