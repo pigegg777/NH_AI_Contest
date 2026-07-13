@@ -90,6 +90,48 @@ const NULLABLE_CATEGORY_CHIPS_SCHEMA = {
   ],
 };
 
+const NULLABLE_PRODUCT_CATEGORY_CHIPS_SCHEMA = {
+  type: ['object', 'null'],
+  additionalProperties: false,
+  properties: {
+    backgroundHex: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description: '대분류(최상위 카테고리) 칩(비활성) 배경색 hex 코드.',
+    },
+    textHex: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description:
+        '대분류 칩(비활성) 글자색 hex 코드. 배경색과 대비되게 선택.',
+    },
+    borderColorHex: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description: '대분류 칩 테두리색 hex 코드.',
+    },
+    activeBackgroundHex: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description:
+        '선택된 대분류 칩 배경색 hex 코드. 보통 강조색(accent) 사용.',
+    },
+    activeTextHex: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description:
+        '선택된 대분류 칩 글자색 hex 코드. activeBackgroundHex와 대비되게 선택.',
+    },
+  },
+  required: [
+    'backgroundHex',
+    'textHex',
+    'borderColorHex',
+    'activeBackgroundHex',
+    'activeTextHex',
+  ],
+};
+
 const NULLABLE_SEARCH_SCHEMA = {
   type: ['object', 'null'],
   additionalProperties: false,
@@ -137,6 +179,7 @@ export const PAGE_STYLE_AI_SCHEMA = {
     palette: NULLABLE_PALETTE_SCHEMA,
     header: NULLABLE_HEADER_SCHEMA,
     categoryChips: NULLABLE_CATEGORY_CHIPS_SCHEMA,
+    productCategoryChips: NULLABLE_PRODUCT_CATEGORY_CHIPS_SCHEMA,
     search: NULLABLE_SEARCH_SCHEMA,
     explanation: {
       type: 'string',
@@ -155,6 +198,7 @@ export const PAGE_STYLE_AI_SCHEMA = {
     'palette',
     'header',
     'categoryChips',
+    'productCategoryChips',
     'search',
     'explanation',
     'suggestion',
@@ -238,6 +282,28 @@ export function normalizeCategoryChipsIntent(rawChips) {
   return Object.keys(intent).length > 0 ? intent : null;
 }
 
+export function normalizeProductCategoryChipsIntent(rawChips) {
+  if (!rawChips) {
+    return null;
+  }
+
+  const intent = {};
+
+  [
+    'backgroundHex',
+    'textHex',
+    'borderColorHex',
+    'activeBackgroundHex',
+    'activeTextHex',
+  ].forEach((key) => {
+    if (isHexColor(rawChips[key])) {
+      intent[key] = normalizeHexColor(rawChips[key]);
+    }
+  });
+
+  return Object.keys(intent).length > 0 ? intent : null;
+}
+
 export function normalizeSearchIntent(rawSearch) {
   if (!rawSearch) {
     return null;
@@ -267,6 +333,7 @@ function limitIntentToTargetScope(intent, targetScope) {
         palette: intent.palette,
         header: null,
         categoryChips: null,
+        productCategoryChips: null,
         search: null,
       };
     case 'header':
@@ -274,6 +341,7 @@ function limitIntentToTargetScope(intent, targetScope) {
         palette: null,
         header: intent.header,
         categoryChips: null,
+        productCategoryChips: null,
         search: null,
       };
     case 'categoryChips':
@@ -281,6 +349,15 @@ function limitIntentToTargetScope(intent, targetScope) {
         palette: null,
         header: null,
         categoryChips: intent.categoryChips,
+        productCategoryChips: null,
+        search: null,
+      };
+    case 'productCategoryChips':
+      return {
+        palette: null,
+        header: null,
+        categoryChips: null,
+        productCategoryChips: intent.productCategoryChips,
         search: null,
       };
     case 'search':
@@ -288,6 +365,7 @@ function limitIntentToTargetScope(intent, targetScope) {
         palette: null,
         header: null,
         categoryChips: null,
+        productCategoryChips: null,
         search: intent.search,
       };
     default:
@@ -305,6 +383,9 @@ export function normalizePageStyleAiIntent(
       palette: normalizePalettePatchIntent(payload?.palette, fallbackAccentHex),
       header: normalizeHeaderIntent(payload?.header),
       categoryChips: normalizeCategoryChipsIntent(payload?.categoryChips),
+      productCategoryChips: normalizeProductCategoryChipsIntent(
+        payload?.productCategoryChips,
+      ),
       search: normalizeSearchIntent(payload?.search),
     },
     targetScope,

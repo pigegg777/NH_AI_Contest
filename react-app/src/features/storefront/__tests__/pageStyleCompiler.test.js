@@ -8,6 +8,7 @@ const BASE_INTENT = {
   palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },
   header: null,
   categoryChips: null,
+  productCategoryChips: null,
   search: null,
 };
 
@@ -92,6 +93,28 @@ describe('compilePageStyle precedence: category chips', () => {
     });
 
     expect(result.categoryChips.activeBackgroundHex).toBe('#7c3aed');
+  });
+});
+
+describe('compilePageStyle precedence: product category chips', () => {
+  it('scopes an update to productCategoryChips only, leaving categoryChips untouched', () => {
+    const previousPageStyle = compilePageStyle({
+      intent: { ...BASE_INTENT, categoryChips: { activeBackgroundHex: '#7c3aed' } },
+      previousPageStyle: undefined,
+    });
+
+    const result = compilePageStyle({
+      intent: {
+        ...BASE_INTENT,
+        productCategoryChips: { activeBackgroundHex: '#ea580c' },
+      },
+      previousPageStyle,
+      targetScope: 'productCategoryChips',
+    });
+
+    expect(result.productCategoryChips.activeBackgroundHex).toBe('#ea580c');
+    expect(result.categoryChips).toEqual(previousPageStyle.categoryChips);
+    expect(result.palette).toEqual(previousPageStyle.palette);
   });
 });
 
@@ -217,7 +240,14 @@ describe('compilePageStyle property boundaries', () => {
   it('never leaks extra properties beyond the canonical pageStyle shape', () => {
     const result = compilePageStyle({ intent: BASE_INTENT, previousPageStyle: undefined });
 
-    expect(Object.keys(result).sort()).toEqual(['categoryChips', 'header', 'palette', 'schemaVersion', 'search']);
+    expect(Object.keys(result).sort()).toEqual([
+      'categoryChips',
+      'header',
+      'palette',
+      'productCategoryChips',
+      'schemaVersion',
+      'search',
+    ]);
     expect(Object.keys(result.search).sort()).toEqual(['borderColorHex', 'borderStrengthToken', 'focusBorderColorHex', 'sizeToken']);
   });
 

@@ -13,7 +13,12 @@ export const PAGE_AI_TARGET_SCOPE_OPTIONS = [
   },
   {
     id: 'categoryChips',
-    label: '카테고리 칩',
+    label: '중분류 칩',
+    detail: '배경색, 글자색, 테두리',
+  },
+  {
+    id: 'productCategoryChips',
+    label: '대분류 칩',
     detail: '배경색, 글자색, 테두리',
   },
   {

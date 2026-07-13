@@ -46,6 +46,7 @@ const SKILL_PACKS = {
     instructions: [
       'Set shell, header, image, info, and field styling within their approved properties only.',
       'Favor trustworthy agricultural-office presentation over flashy decoration.',
+      'Any text color you choose (e.g. header titleColorHex) must always contrast clearly against its own background color so it stays easily readable. Never pick a text color close to its background.',
     ].join(' '),
   },
   policy: {

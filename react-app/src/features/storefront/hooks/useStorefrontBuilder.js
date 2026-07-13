@@ -98,21 +98,6 @@ function buildSharedThreadMessage({
   };
 }
 
-function buildAdvisoryReply({
-  officeName,
-  selectedProductCategoryName,
-  productEntries,
-  visibleFields,
-}) {
-  const resolvedOfficeName = toTrimmedString(officeName) || "이 스토어프론트";
-  const resolvedCategoryName =
-    toTrimmedString(selectedProductCategoryName) || "현재 카테고리";
-  const categoryCount = Array.isArray(productEntries) ? productEntries.length : 0;
-  const fieldCount = Array.isArray(visibleFields) ? visibleFields.length : 0;
-
-  return `${resolvedOfficeName}의 현재 스토어프론트 상태를 보면, ${resolvedCategoryName} 경험을 먼저 개선하는 것이 좋겠습니다. 현재 ${categoryCount}개의 카테고리가 등록되어 있고 현재 카드 레이아웃에는 ${fieldCount}개의 필드가 표시되어 있으니, 먼저 페이지 구조를 정리한 다음 가장 중요한 상품 정보가 카드에서 잘 보이도록 조정하는 것이 안전한 다음 단계입니다.`;
-}
-
 function resolveChatScopeLabel(mode, targetScope) {
   if (mode === "page") {
     return resolveScopeLabel(PAGE_AI_TARGET_SCOPE_OPTIONS, targetScope);
@@ -146,11 +131,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const [composerDrafts, setComposerDrafts] = useState({
     page: "",
     card: "",
-    advisory: "",
+    autoDesign: "",
   });
   const [pendingComposerApply, setPendingComposerApply] = useState({
     page: false,
     card: false,
+    autoDesign: false,
   });
   const pageModeDraftRef = useRef(null);
   const cardModeDraftRef = useRef(null);
@@ -314,11 +300,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       return;
     }
 
-    if (chatSession.mode === "page") {
+    if (chatSession.mode === "page" || chatSession.mode === "autoDesign") {
       capturePageModeDraft();
     }
 
-    if (chatSession.mode === "card") {
+    if (chatSession.mode === "card" || chatSession.mode === "autoDesign") {
       captureCardModeDraft();
     }
 
@@ -327,7 +313,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   useEffect(() => {
     if (
-      chatSession.mode === "card" &&
+      (chatSession.mode === "card" || chatSession.mode === "autoDesign") &&
       selectedProductCategoryName &&
       selectedProductCategoryName !== previousCardCategoryRef.current
     ) {
@@ -458,6 +444,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       return "페이지 변경 사항이 저장되었습니다.";
     }
 
+    if (mode === "autoDesign") {
+      return "AI가 자동으로 정리한 디자인이 적용되었습니다.";
+    }
+
     return "스토어프론트 변경 사항이 저장되었습니다.";
   }
 
@@ -472,6 +462,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     await saveCompiledPayload(payload);
     setComposerApplyPending("page", false);
     setComposerApplyPending("card", false);
+    setComposerApplyPending("autoDesign", false);
     pageModeDraftRef.current = null;
     cardModeDraftRef.current = null;
     chatSession.recordSuccessfulApply({
@@ -537,17 +528,53 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     chatSession.appendMessage(userMessage);
     setComposerDraft(mode, "");
 
-    if (mode === "advisory") {
+    if (mode === "autoDesign") {
+      markDirty();
+
+      const [pageResult, cardResult] = await Promise.all([
+        pageAi.applyPageAiDesign({ prompt, targetScope: "", history }),
+        cardAi.applyCardAiDesign({
+          prompt,
+          targetScope: "",
+          history,
+          visibleFields: dataSelection.committed,
+          fieldLabels: STOREFRONT_FIELD_LABELS,
+          productCategoryName: selectedProductCategoryName,
+          productRows: currentEntry?.rows,
+        }),
+      ]);
+
+      const succeeded = [pageResult, cardResult].filter((result) => result?.ok);
+      const failed = [pageResult, cardResult].filter((result) => !result?.ok);
+
+      if (succeeded.length === 0) {
+        chatSession.appendMessage(
+          buildSharedThreadMessage({
+            role: "assistant",
+            mode,
+            text:
+              failed
+                .map((result) => result.error)
+                .filter(Boolean)
+                .join(" ") || "디자인을 자동으로 적용하지 못했습니다.",
+          }),
+        );
+        return;
+      }
+
+      setComposerApplyPending("autoDesign", true);
+
+      const text = [
+        ...succeeded.map((result) => result.explanation).filter(Boolean),
+        ...failed.map((result) => result.error).filter(Boolean),
+      ].join(" ");
+
       chatSession.appendMessage(
         buildSharedThreadMessage({
           role: "assistant",
           mode,
-          text: buildAdvisoryReply({
-            officeName,
-            selectedProductCategoryName,
-            productEntries,
-            visibleFields: dataSelection.committed,
-          }),
+          text,
+          warningMessage: cardResult?.warningMessage,
         }),
       );
       return;
@@ -608,12 +635,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   function discardCurrentModeDraft() {
     const mode = chatSession.mode;
 
-    if (mode === "page" && pageModeDraftRef.current) {
+    if ((mode === "page" || mode === "autoDesign") && pageModeDraftRef.current) {
       pageAi.hydratePageStyle(pageModeDraftRef.current);
       pageModeDraftRef.current = null;
     }
 
-    if (mode === "card" && cardModeDraftRef.current) {
+    if ((mode === "card" || mode === "autoDesign") && cardModeDraftRef.current) {
       cardAi.hydrateCardStyle(
         cardModeDraftRef.current.cardStyle,
         cardModeDraftRef.current.bodySlots,
@@ -621,7 +648,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       cardModeDraftRef.current = null;
     }
 
-    if (mode === "page" || mode === "card") {
+    if (mode === "page" || mode === "card" || mode === "autoDesign") {
       setComposerApplyPending(mode, false);
     }
 
@@ -629,7 +656,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       dataSelection.reset(dataSelection.committed);
     }
 
-    if (mode === "page" || mode === "card" || mode === "advisory") {
+    if (mode === "page" || mode === "card" || mode === "autoDesign") {
       setComposerDraft(mode, "");
     }
   }
@@ -714,7 +741,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const composerMode =
     chatSession.mode === "page" ||
     chatSession.mode === "card" ||
-    chatSession.mode === "advisory"
+    chatSession.mode === "autoDesign"
       ? {
           promptDraft: composerDrafts[chatSession.mode] ?? "",
           setPromptDraft: (value) => setComposerDraft(chatSession.mode, value),
@@ -723,26 +750,36 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
               ? pageAi.isApplyingPageAiDesign
               : chatSession.mode === "card"
                 ? cardAi.isApplyingCardAiDesign
-                : false,
+                : chatSession.mode === "autoDesign"
+                  ? pageAi.isApplyingPageAiDesign || cardAi.isApplyingCardAiDesign
+                  : false,
           errorMessage:
             chatSession.mode === "page"
               ? pageAi.pageAiErrorMessage
               : chatSession.mode === "card"
                 ? cardAi.cardAiErrorMessage
-                : "",
+                : chatSession.mode === "autoDesign"
+                  ? [pageAi.pageAiErrorMessage, cardAi.cardAiErrorMessage]
+                      .filter(Boolean)
+                      .join(" ")
+                  : "",
           canSend: Boolean(
             toTrimmedString(composerDrafts[chatSession.mode] ?? ""),
           ),
           sendPrompt: sendComposerPrompt,
           exitMode: exitComposerMode,
           showApplyAction:
-            chatSession.mode === "page" || chatSession.mode === "card",
+            chatSession.mode === "page" ||
+            chatSession.mode === "card" ||
+            chatSession.mode === "autoDesign",
           canApply:
             chatSession.mode === "page"
               ? pendingComposerApply.page
               : chatSession.mode === "card"
                 ? pendingComposerApply.card
-                : false,
+                : chatSession.mode === "autoDesign"
+                  ? pendingComposerApply.autoDesign
+                  : false,
           applyDraft: () => applyCurrentModeDraft(chatSession.mode),
           targetOptions:
             chatSession.mode === "page"

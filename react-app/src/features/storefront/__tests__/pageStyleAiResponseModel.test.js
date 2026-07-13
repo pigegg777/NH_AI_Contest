@@ -6,6 +6,7 @@ import {
   normalizePaletteIntent,
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
+  normalizeProductCategoryChipsIntent,
   normalizeSearchIntent,
   PAGE_STYLE_AI_SCHEMA,
 } from '../model/page-design/pageStyleAiResponseModel';
@@ -135,6 +136,26 @@ describe('normalizeCategoryChipsIntent', () => {
   });
 });
 
+describe('normalizeProductCategoryChipsIntent', () => {
+  it('returns null for empty input', () => {
+    expect(normalizeProductCategoryChipsIntent(null)).toBeNull();
+  });
+
+  it('keeps only the five approved chip properties', () => {
+    expect(
+      normalizeProductCategoryChipsIntent({
+        backgroundHex: '#ffffff',
+        activeBackgroundHex: '#1d4a2e',
+        chipShape: 'pill',
+        placement: 'top',
+      }),
+    ).toEqual({
+      backgroundHex: '#ffffff',
+      activeBackgroundHex: '#1d4a2e',
+    });
+  });
+});
+
 describe('normalizeSearchIntent', () => {
   it('returns null for empty input', () => {
     expect(normalizeSearchIntent(null)).toBeNull();
@@ -169,6 +190,7 @@ describe('normalizePageStyleAiIntent', () => {
           palette: { accentHex: '#2563eb' },
           header: { fontWeight: 800 },
           categoryChips: { textHex: '#111827' },
+          productCategoryChips: { textHex: '#334155' },
           search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
         },
         '#1d4a2e',
@@ -178,7 +200,30 @@ describe('normalizePageStyleAiIntent', () => {
       palette: null,
       header: null,
       categoryChips: null,
+      productCategoryChips: null,
       search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
+    });
+  });
+
+  it('limits the normalized payload to productCategoryChips when that scope is selected', () => {
+    expect(
+      normalizePageStyleAiIntent(
+        {
+          palette: { accentHex: '#2563eb' },
+          header: { fontWeight: 800 },
+          categoryChips: { textHex: '#111827' },
+          productCategoryChips: { textHex: '#334155' },
+          search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
+        },
+        '#1d4a2e',
+        'productCategoryChips',
+      ),
+    ).toEqual({
+      palette: null,
+      header: null,
+      categoryChips: null,
+      productCategoryChips: { textHex: '#334155' },
+      search: null,
     });
   });
 });

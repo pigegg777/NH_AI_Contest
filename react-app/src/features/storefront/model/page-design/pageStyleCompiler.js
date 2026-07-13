@@ -90,6 +90,43 @@ function resolveScopedCategoryChips(intentChips, previousChips) {
   };
 }
 
+function resolveProductCategoryChips(
+  intentChips,
+  previousChips,
+  palette,
+  shouldRefreshPaletteDefaults,
+) {
+  const paletteDefaults = deriveCategoryChipsFromPalette(palette);
+  const baseChips = shouldRefreshPaletteDefaults ? paletteDefaults : previousChips;
+
+  if (!intentChips && !shouldRefreshPaletteDefaults) {
+    return previousChips;
+  }
+
+  return {
+    backgroundHex: intentChips?.backgroundHex ?? baseChips.backgroundHex,
+    textHex: intentChips?.textHex ?? baseChips.textHex,
+    borderColorHex:
+      intentChips?.borderColorHex ?? baseChips.borderColorHex,
+    activeBackgroundHex:
+      intentChips?.activeBackgroundHex ?? baseChips.activeBackgroundHex,
+    activeTextHex:
+      intentChips?.activeTextHex ?? baseChips.activeTextHex,
+  };
+}
+
+function resolveScopedProductCategoryChips(intentChips, previousChips) {
+  return {
+    backgroundHex: intentChips?.backgroundHex ?? previousChips.backgroundHex,
+    textHex: intentChips?.textHex ?? previousChips.textHex,
+    borderColorHex:
+      intentChips?.borderColorHex ?? previousChips.borderColorHex,
+    activeBackgroundHex:
+      intentChips?.activeBackgroundHex ?? previousChips.activeBackgroundHex,
+    activeTextHex: intentChips?.activeTextHex ?? previousChips.activeTextHex,
+  };
+}
+
 export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
   const previous = normalizePageStyle(previousPageStyle);
   const normalizedTargetScope = normalizePageAiTargetScope(targetScope);
@@ -108,6 +145,12 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
         palette,
         hasPalettePatch,
       ),
+      productCategoryChips: resolveProductCategoryChips(
+        intent.productCategoryChips,
+        previous.productCategoryChips,
+        palette,
+        hasPalettePatch,
+      ),
     });
   }
 
@@ -119,6 +162,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
       header: previous.header,
       search: previous.search,
       categoryChips: previous.categoryChips,
+      productCategoryChips: previous.productCategoryChips,
     });
   }
 
@@ -128,6 +172,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
       header: resolveHeader(intent.header, previous.header),
       search: previous.search,
       categoryChips: previous.categoryChips,
+      productCategoryChips: previous.productCategoryChips,
     });
   }
 
@@ -140,6 +185,20 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
         intent.categoryChips,
         previous.categoryChips,
       ),
+      productCategoryChips: previous.productCategoryChips,
+    });
+  }
+
+  if (normalizedTargetScope === 'productCategoryChips') {
+    return normalizePageStyle({
+      palette: previous.palette,
+      header: previous.header,
+      search: previous.search,
+      categoryChips: previous.categoryChips,
+      productCategoryChips: resolveScopedProductCategoryChips(
+        intent.productCategoryChips,
+        previous.productCategoryChips,
+      ),
     });
   }
 
@@ -148,5 +207,6 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     header: previous.header,
     search: resolveScopedSearch(intent.search, previous.search),
     categoryChips: previous.categoryChips,
+    productCategoryChips: previous.productCategoryChips,
   });
 }

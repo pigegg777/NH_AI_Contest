@@ -2,7 +2,7 @@ import ChatMessageBubble from "../ai-chat/ChatMessageBubble";
 import ApplyResultBubble from "./ApplyResultBubble";
 import styles from "./StorefrontChatThread.module.css";
 
-const PLAIN_CHAT_MESSAGE_KINDS = new Set(["mode-transition", "chat-message"]);
+const PLAIN_CHAT_MESSAGE_KINDS = new Set(["chat-message"]);
 
 function renderMessage(message, options) {
   switch (message.kind) {
@@ -28,7 +28,7 @@ function renderMessage(message, options) {
 
 export default function StorefrontChatThread({ canUndo, onUndo, session }) {
   const visibleMessages = session.messages.filter(
-    (message) => message.kind !== "mode-choice",
+    (message) => message.kind !== "mode-choice" && message.kind !== "mode-transition",
   );
 
   return (

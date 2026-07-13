@@ -221,18 +221,20 @@ describe("StorefrontBuilderPage", () => {
     const cardButton = screen.getByRole("button", {
       name: "3. 카테고리별 상세 디자인 수정",
     });
-    const advisoryButton = screen.getByRole("button", {
-      name: "4. 통합 디자인 질문",
+    const autoDesignButton = screen.getByRole("button", {
+      name: "4. 통합 자동 디자인",
     });
 
     expect(pageButton).toBeInTheDocument();
     expect(dataButton).toBeInTheDocument();
     expect(cardButton).toBeInTheDocument();
-    expect(advisoryButton).toBeInTheDocument();
+    expect(autoDesignButton).toBeInTheDocument();
 
     await user.click(pageButton);
 
-    expect(await screen.findByText("page 모드로 전환했습니다.")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("storefront-chat-composer-dock"),
+    ).toBeInTheDocument();
     within(screen.getByTestId("storefront-mode-choice-bubble"))
       .getAllByRole("button")
       .forEach((button) => {
@@ -359,9 +361,24 @@ describe("StorefrontBuilderPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("returns a text-only advisory reply in the shared composer dock without apply controls", async () => {
+  it("applies both page and card style from one holistic prompt in auto-design mode", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    upsertStorefrontConfig.mockResolvedValue(undefined);
+    requestPageStyleAiIntent.mockResolvedValue({
+      intent: {
+        palette: {
+          accentHex: "#14532d",
+        },
+      },
+      explanation: "페이지 톤을 정리했습니다.",
+      suggestion: null,
+    });
+    requestCardStyleAiIntent.mockResolvedValue({
+      intent: {},
+      explanation: "카드 정보 영역을 정리했습니다.",
+      suggestion: null,
+    });
 
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
@@ -370,7 +387,7 @@ describe("StorefrontBuilderPage", () => {
 
     await user.click(
       screen.getByRole("button", {
-        name: /^4\./,
+        name: "4. 통합 자동 디자인",
       }),
     );
 
@@ -383,18 +400,27 @@ describe("StorefrontBuilderPage", () => {
 
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
-      "What should I improve first for this storefront?",
+      "가독성 있게 알아서 정리해줘",
     );
     await user.click(screen.getByTestId("storefront-chat-composer-send"));
 
     expect(
-      await screen.findByText(/현재 스토어프론트 상태/),
+      await screen.findByText(/페이지 톤을 정리했습니다\./),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", {
-        name: /apply/i,
-      }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText(/카드 정보 영역을 정리했습니다\./)).toBeInTheDocument();
+
+    const saveButton = await screen.findByRole("button", { name: "저장하기" });
+
+    expect(saveButton).toBeEnabled();
+
+    await user.click(saveButton);
+
+    expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+
+    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe(
+      "#14532d",
+    );
   });
 
   it("applies immediately and supports one-level undo from the assistant result bubble", async () => {

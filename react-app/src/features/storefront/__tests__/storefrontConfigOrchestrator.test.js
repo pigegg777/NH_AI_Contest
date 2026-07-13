@@ -130,6 +130,13 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             activeBackgroundHex: '#1d4a2e',
             activeTextHex: '#ffffff',
           },
+          productCategoryChips: {
+            backgroundHex: '#e4e9e6',
+            textHex: '#173223',
+            borderColorHex: '#bbc9c0',
+            activeBackgroundHex: '#1d4a2e',
+            activeTextHex: '#ffffff',
+          },
         },
       },
       navConfig: {

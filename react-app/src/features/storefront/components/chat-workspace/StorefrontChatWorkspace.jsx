@@ -10,7 +10,8 @@ export default function StorefrontChatWorkspace({ session, builder }) {
   const cardMode = builder?.cardMode;
   const composerMode = builder?.composerMode;
   const isDataMode = session.mode === 'data' && dataMode;
-  const isCardMode = session.mode === 'card' && cardMode;
+  const showCategoryTabs =
+    (session.mode === 'card' || session.mode === 'autoDesign') && cardMode;
   const modeChoiceMessage = session.messages.find(
     (message) => message.kind === 'mode-choice',
   );
@@ -50,7 +51,7 @@ export default function StorefrontChatWorkspace({ session, builder }) {
           <ChatComposerDock
             mode={session.mode}
             composer={composerMode}
-            categoryTabsMode={isCardMode ? cardMode : null}
+            categoryTabsMode={showCategoryTabs ? cardMode : null}
           />
         </div>
       ) : (
