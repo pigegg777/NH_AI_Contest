@@ -8,10 +8,14 @@
 }
 
 .hero {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: var(--page-top-spacing, 22px) 0 14px;
+  background: var(--page-bg, #f3f1ec);
 }
 
 .bodyShell {
@@ -223,10 +227,10 @@
 .productCategoryChip {
   min-height: 36px;
   padding: 0 16px;
-  border: 1px solid rgba(29, 74, 46, 0.14);
+  border: 1px solid var(--page-product-chip-border, rgba(29, 74, 46, 0.14));
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.86);
-  color: #355a30;
+  background: var(--page-product-chip-bg, rgba(255, 255, 255, 0.86));
+  color: var(--page-product-chip-text, #355a30);
   font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
@@ -253,17 +257,22 @@
 .productCategoryChipActive {
   border-color: color-mix(
     in srgb,
-    var(--brand-color, var(--corp-primary)) 48%,
+    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+      48%,
     rgba(29, 74, 46, 0.14)
   );
-  background: color-mix(
-    in srgb,
-    var(--brand-color, var(--corp-primary)) 12%,
-    #ffffff
+  background: var(
+    --page-product-chip-active-bg,
+    color-mix(in srgb, var(--brand-color, var(--corp-primary)) 12%, #ffffff)
   );
-  color: #173223;
+  color: var(--page-product-chip-active-text, #173223);
   box-shadow: 0 10px 22px
-    color-mix(in srgb, var(--brand-color, var(--corp-primary)) 18%, transparent);
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+        18%,
+      transparent
+    );
 }
 
 .brandBlock {
@@ -438,29 +447,23 @@
   border-radius: var(--search-radius, 999px);
 }
 
-.searchBoxOutlined {
-  border-color: color-mix(
-    in srgb,
-    var(--search-accent, var(--brand-color, var(--corp-primary))) 34%,
-    rgba(29, 74, 46, 0.18)
-  );
-}
-
-.searchBoxSoft {
-  border-color: rgba(29, 74, 46, 0.18);
-}
-
-
 .searchInput {
   flex: 1;
   min-width: 0;
   width: 100%;
-  /* border: 0; */
+  border: 0;
   outline: none;
   background: transparent;
   color: var(--search-accent, #173223);
   font-size: var(--search-font-size, var(--page-search-font-size, 0.94rem));
   text-align: center;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
 }
 
 .searchInput::placeholder {

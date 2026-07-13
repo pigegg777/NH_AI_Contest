@@ -8,11 +8,12 @@ const COPY = {
   storefrontTitle: 'AI로 상품페이지 만들기',
   storefrontDescription:
     '공개 상품 페이지의 카드 구성과 문구를 AI와 함께 빠르게 다듬습니다.',
-  dashboard: '대시보드',
+  dashboard: '',
   logout: '로그아웃',
   greetingPrefix: '안녕하세요, ',
   greetingSuffix: '님.',
   systemTitle: 'AI로 고객용 상품 페이지를 만들고 배포해 보세요',
+  featuresSectionLabel: '주요 기능',
   goTo: '바로가기',
   orgSeparator: ' · ',
 };
@@ -56,19 +57,19 @@ export default function DashboardPage({ user, onNavigate, onLogout }) {
 
       <div className={styles.content}>
         <div className={styles.welcome}>
-          {officeCode || officeLabel ? (
-            <div className={styles.officeSummary}>
+          {officeLabel || name ? (
+            <div className={styles.introRow}>
               {officeLabel ? (
-                <p className={styles.officeName}>{officeLabel}</p>
+                <span className={styles.officeName}>{officeLabel}</span>
+              ) : null}
+              {name ? (
+                <p className={styles.greeting}>
+                  {COPY.greetingPrefix}
+                  <strong className={styles.userName}>{name}</strong>
+                  {COPY.greetingSuffix}
+                </p>
               ) : null}
             </div>
-          ) : null}
-          {name ? (
-            <p className={styles.greeting}>
-              {COPY.greetingPrefix}
-              <strong className={styles.userName}>{name}</strong>
-              {COPY.greetingSuffix}
-            </p>
           ) : null}
           <h2 className={styles.systemTitle}>{COPY.systemTitle}</h2>
         </div>
@@ -80,21 +81,24 @@ export default function DashboardPage({ user, onNavigate, onLogout }) {
             nhName={user?.nh_name}
           />
 
-          <div className={styles.grid}>
-            {FEATURES.map(({ key, title, description }) => (
-              <button
-                key={key}
-                type="button"
-                className={styles.card}
-                onClick={() => onNavigate(key)}
-              >
-                <div className={styles.cardContent}>
-                  <h3 className={styles.cardTitle}>{title}</h3>
-                  <p className={styles.cardDesc}>{description}</p>
-                </div>
-                <span className={styles.cardAction}>{COPY.goTo}</span>
-              </button>
-            ))}
+          <div className={styles.featuresSection}>
+            <p className={styles.sectionLabel}>{COPY.featuresSectionLabel}</p>
+            <div className={styles.grid}>
+              {FEATURES.map(({ key, title, description }) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={styles.card}
+                  onClick={() => onNavigate(key)}
+                >
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.cardTitle}>{title}</h3>
+                    <p className={styles.cardDesc}>{description}</p>
+                  </div>
+                  <span className={styles.cardAction}>{COPY.goTo}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

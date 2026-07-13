@@ -1,23 +1,24 @@
 export const STOREFRONT_CHAT_MODE_OPTIONS = [
   {
+    id: 'autoDesign',
+    label: '1. 통합 자동 디자인',
+    description: 'AI에게 요청하면 알아서 AI가 디자인합니다.',
+  },
+
+  {
     id: 'page',
-    label: '1. 페이지 전반 디자인 수정',
+    label: '2. 페이지 전반 디자인 수정',
     description: '페이지 전반 스타일(배경색,분류칩) 수정.',
   },
   {
     id: 'data',
-    label: '2. 대분류별 보여줄 데이터 수정',
+    label: '3. 보여줄 데이터 수정',
     description: '영세가격,면세가격,분류등 보여줄 데이터를 선택',
   },
   {
     id: 'card',
-    label: '3. 대분류별 상세 디자인 수정',
+    label: '4. 상세 디자인 수정',
     description: '상품별 배경색,글자색등 상세 디자인 수정',
-  },
-  {
-    id: 'advisory',
-    label: '4. 통합 디자인 질문',
-    description: '적용 전 상담형 질문과 방향 점검을 진행합니다.',
   },
 ];
 
@@ -42,12 +43,12 @@ const STOREFRONT_CHAT_COMPOSER_COPY = {
     sendLabel: 'AI 요청하기',
     targetLabel: '수정 대상',
   },
-  advisory: {
-    title: '통합 디자인 질문',
+  autoDesign: {
+    title: '통합 자동 디자인',
     description:
-      '현재 적용 상태를 바탕으로 질문하고 다음 수정 방향을 점검합니다.',
+      '페이지 전반과 현재 카테고리 카드 디자인을 AI가 한 번에 정리합니다. 적용 전 미리보기로 확인하고, 저장은 직접 눌러야 반영됩니다.',
     placeholder:
-      '현재 스토어프론트 상태에 대해 궁금한 점이나 개선 방향을 입력하세요.',
+      '가독성 있게 정리해줘, 신뢰감 있게 바꿔줘 같은 전체 디자인 요청을 입력하세요.',
     discardLabel: '뒤로가기',
     sendLabel: 'AI 요청하기',
     targetLabel: '',

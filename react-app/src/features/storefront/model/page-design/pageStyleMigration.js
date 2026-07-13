@@ -62,6 +62,7 @@ export function migrateLegacyPageConfigToPageStyle(legacyPageConfig) {
   const titleColorHex = resolveLegacyTitleColorHex(legacyPageConfig, accentSeedHex);
   const searchDefaults = deriveSearchDefaultsFromPalette(palette);
   const categoryChips = deriveCategoryChipsFromPalette(palette);
+  const productCategoryChips = deriveCategoryChipsFromPalette(palette);
 
   return normalizePageStyle({
     palette,
@@ -76,5 +77,6 @@ export function migrateLegacyPageConfigToPageStyle(legacyPageConfig) {
         LEGACY_SEARCH_VARIANT_BORDER_STRENGTH_TOKENS[legacyPageConfig?.searchSection?.variant] || 'normal',
     },
     categoryChips,
+    productCategoryChips,
   });
 }

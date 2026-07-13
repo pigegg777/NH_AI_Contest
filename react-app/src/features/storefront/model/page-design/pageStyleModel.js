@@ -38,6 +38,13 @@ export const DEFAULT_PAGE_STYLE = {
     activeBackgroundHex: '#1d4a2e',
     activeTextHex: '#ffffff',
   },
+  productCategoryChips: {
+    backgroundHex: '#ffffff',
+    textHex: '#355a30',
+    borderColorHex: '#d8e2dc',
+    activeBackgroundHex: '#1d4a2e',
+    activeTextHex: '#ffffff',
+  },
 };
 
 function normalizePalette(palette) {
@@ -76,20 +83,28 @@ function normalizeSearch(search) {
   };
 }
 
-function normalizeCategoryChips(categoryChips) {
-  const source = categoryChips ?? {};
-  const backgroundHex = normalizeHexColor(source.backgroundHex, DEFAULT_PAGE_STYLE.categoryChips.backgroundHex);
-  const activeBackgroundHex = normalizeHexColor(source.activeBackgroundHex, DEFAULT_PAGE_STYLE.categoryChips.activeBackgroundHex);
-  const candidateTextHex = normalizeHexColor(source.textHex, DEFAULT_PAGE_STYLE.categoryChips.textHex);
-  const candidateActiveTextHex = normalizeHexColor(source.activeTextHex, DEFAULT_PAGE_STYLE.categoryChips.activeTextHex);
+function normalizeChips(chips, defaults) {
+  const source = chips ?? {};
+  const backgroundHex = normalizeHexColor(source.backgroundHex, defaults.backgroundHex);
+  const activeBackgroundHex = normalizeHexColor(source.activeBackgroundHex, defaults.activeBackgroundHex);
+  const candidateTextHex = normalizeHexColor(source.textHex, defaults.textHex);
+  const candidateActiveTextHex = normalizeHexColor(source.activeTextHex, defaults.activeTextHex);
 
   return {
     backgroundHex,
     textHex: ensureReadableTextColor(candidateTextHex, backgroundHex),
-    borderColorHex: normalizeHexColor(source.borderColorHex, DEFAULT_PAGE_STYLE.categoryChips.borderColorHex),
+    borderColorHex: normalizeHexColor(source.borderColorHex, defaults.borderColorHex),
     activeBackgroundHex,
     activeTextHex: ensureReadableTextColor(candidateActiveTextHex, activeBackgroundHex),
   };
+}
+
+function normalizeCategoryChips(categoryChips) {
+  return normalizeChips(categoryChips, DEFAULT_PAGE_STYLE.categoryChips);
+}
+
+function normalizeProductCategoryChips(productCategoryChips) {
+  return normalizeChips(productCategoryChips, DEFAULT_PAGE_STYLE.productCategoryChips);
 }
 
 export function normalizePageStyle(pageStyle) {
@@ -102,6 +117,7 @@ export function normalizePageStyle(pageStyle) {
     header: normalizeHeader(source.header, palette.backgroundHex),
     search: normalizeSearch(source.search),
     categoryChips: normalizeCategoryChips(source.categoryChips),
+    productCategoryChips: normalizeProductCategoryChips(source.productCategoryChips),
   };
 }
 

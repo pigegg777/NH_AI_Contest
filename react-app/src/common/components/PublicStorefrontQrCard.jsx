@@ -73,11 +73,12 @@ export default function PublicStorefrontQrCard({
 
   return (
     <section className={styles.card} data-testid="public-storefront-qr-card">
-      {/* <div className={styles.header}>
+      <div className={styles.header}>
         <div>
+          <p className={styles.eyebrow}>공유하기</p>
           <h2 className={styles.title}>고객용 QR</h2>
         </div>
-      </div> */}
+      </div>
 
       {qr.status === 'loading' ? (
         <div className={styles.content}>
@@ -179,22 +180,24 @@ export default function PublicStorefrontQrCard({
                 PNG 다운로드
               </a>
 
-              <button
-                type="button"
-                className={styles.secondaryAction}
-                data-testid="public-storefront-qr-copy-link"
-                onClick={handleCopyLink}
-              >
-                링크 복사
-              </button>
-              <button
-                type="button"
-                className={styles.secondaryAction}
-                data-testid="public-storefront-qr-print"
-                onClick={handlePrint}
-              >
-                출력
-              </button>
+              <div className={styles.secondaryActions}>
+                <button
+                  type="button"
+                  className={styles.secondaryAction}
+                  data-testid="public-storefront-qr-copy-link"
+                  onClick={handleCopyLink}
+                >
+                  링크 복사
+                </button>
+                <button
+                  type="button"
+                  className={styles.secondaryAction}
+                  data-testid="public-storefront-qr-print"
+                  onClick={handlePrint}
+                >
+                  출력
+                </button>
+              </div>
             </div>
           </div>
         </div>

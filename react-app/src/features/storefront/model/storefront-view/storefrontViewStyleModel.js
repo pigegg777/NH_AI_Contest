@@ -26,5 +26,12 @@ export function buildStorefrontViewCssVars(view) {
     '--page-chip-border': view.pageStyle.categoryChips.borderColorHex,
     '--page-chip-active-bg': view.pageStyle.categoryChips.activeBackgroundHex,
     '--page-chip-active-text': view.pageStyle.categoryChips.activeTextHex,
+    '--page-product-chip-bg': view.pageStyle.productCategoryChips.backgroundHex,
+    '--page-product-chip-text': view.pageStyle.productCategoryChips.textHex,
+    '--page-product-chip-border': view.pageStyle.productCategoryChips.borderColorHex,
+    '--page-product-chip-active-bg':
+      view.pageStyle.productCategoryChips.activeBackgroundHex,
+    '--page-product-chip-active-text':
+      view.pageStyle.productCategoryChips.activeTextHex,
   };
 }
