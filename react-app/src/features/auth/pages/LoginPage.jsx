@@ -11,7 +11,7 @@ export default function LoginPage({ onLogin, onGoRegister }) {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.badge}>NH</div>
-          <h1 className={styles.title}>NH 비료정보 시스템</h1>
+          <h1 className={styles.title}>NH AI경진대회 로그인</h1>
         </div>
         <hr className={styles.divider} />
 
