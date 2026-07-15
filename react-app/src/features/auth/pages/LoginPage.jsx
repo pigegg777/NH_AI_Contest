@@ -2,16 +2,17 @@ import { useLoginForm } from '../hooks/useLoginForm';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage({ onLogin, onGoRegister }) {
-  const { form, handleChange, handleSubmit, errorMessage, isSubmitting } = useLoginForm({
-    onLogin,
-  });
+  const { form, handleChange, handleSubmit, errorMessage, isSubmitting } =
+    useLoginForm({
+      onLogin,
+    });
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.badge}>NH</div>
-          <h1 className={styles.title}>NH AI경진대회 로그인</h1>
+          <h1 className={styles.title}>농협 AI 경진대회 로그인</h1>
         </div>
         <hr className={styles.divider} />
 
@@ -47,7 +48,11 @@ export default function LoginPage({ onLogin, onGoRegister }) {
             />
           </div>
 
-          <button type="submit" className={styles.button} disabled={isSubmitting}>
+          <button
+            type="submit"
+            className={styles.button}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? '로그인 중…' : '로그인'}
           </button>
 
@@ -58,7 +63,11 @@ export default function LoginPage({ onLogin, onGoRegister }) {
           ) : null}
         </form>
 
-        <button type="button" className={styles.linkButton} onClick={onGoRegister}>
+        <button
+          type="button"
+          className={styles.linkButton}
+          onClick={onGoRegister}
+        >
           계정이 없으신가요? 회원가입
         </button>
       </div>

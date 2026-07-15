@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 
-import { LinkCell, NoteCell, PriceCell, SelectionHeaderCheckbox, UsageCell } from './DataTableCells';
+import {
+  LinkCell,
+  NoteCell,
+  PriceCell,
+  SelectionHeaderCheckbox,
+  UsageCell,
+} from './DataTableCells';
 import {
   formatManufacturerList,
   formatPriceValue,
@@ -11,12 +17,12 @@ import {
 import styles from './DataTable.module.css';
 
 const SORT_ICON_ASC_SRC = new URL(
-  '../../../../../dist/assets/arrow-drop-up-line.png',
+  '../../assets/arrow-drop-up-line.png',
   import.meta.url,
 ).href;
 
 const SORT_ICON_DESC_SRC = new URL(
-  '../../../../../dist/assets/arrow-drop-down-line.png',
+  '../../assets/arrow-drop-down-line.png',
   import.meta.url,
 ).href;
 
@@ -49,7 +55,9 @@ function SortButton({ column, sortState, onSortChange }) {
   const nextDirection =
     !isActive || sortState.direction === 'desc' ? 'asc' : 'desc';
   const isDescending = isActive && sortState.direction === 'desc';
-  const sortIndicatorSrc = isDescending ? SORT_ICON_DESC_SRC : SORT_ICON_ASC_SRC;
+  const sortIndicatorSrc = isDescending
+    ? SORT_ICON_DESC_SRC
+    : SORT_ICON_ASC_SRC;
   const isMultilineLabel =
     column.key === 'img_url' || column.key === 'product_url';
 
@@ -57,10 +65,14 @@ function SortButton({ column, sortState, onSortChange }) {
     <button
       type="button"
       className={`${styles.sortButton} ${isActive ? styles.sortButtonActive : ''} ${isMultilineLabel ? styles.sortButtonMultiline : ''}`.trim()}
-      onClick={() => onSortChange({ key: column.key, direction: nextDirection })}
+      onClick={() =>
+        onSortChange({ key: column.key, direction: nextDirection })
+      }
     >
       <span
-        className={isMultilineLabel ? styles.sortButtonLabelMultiline : undefined}
+        className={
+          isMultilineLabel ? styles.sortButtonLabelMultiline : undefined
+        }
       >
         {renderSortButtonLabel(column)}
       </span>
@@ -90,15 +102,25 @@ function renderCellContent(row, key, onPriceChange) {
   }
 
   if (key === 'product_url') {
-    return <LinkCell href={row.product_url} ariaLabel={`product-${row.row_id}`} />;
+    return (
+      <LinkCell href={row.product_url} ariaLabel={`product-${row.row_id}`} />
+    );
   }
 
   if (key === 'product_usage') {
-    return <UsageCell usage={row.product_usage} productName={row.product_name} rowId={row.row_id} />;
+    return (
+      <UsageCell
+        usage={row.product_usage}
+        productName={row.product_name}
+        rowId={row.row_id}
+      />
+    );
   }
 
   if (PRICE_COLUMN_KEYS.has(key)) {
-    return <PriceCell row={row} columnKey={key} onPriceChange={onPriceChange} />;
+    return (
+      <PriceCell row={row} columnKey={key} onPriceChange={onPriceChange} />
+    );
   }
 
   if (NUMERIC_FORMAT_COLUMN_KEYS.has(key)) {
@@ -119,20 +141,32 @@ export function DataTable({
   onNoteChange,
   onPriceChange,
 }) {
-  const visibleRowIds = useMemo(() => rows.map((row) => row.row_id).filter(Boolean), [rows]);
-  const selectedCount = useMemo(() => rows.filter((row) => row.shadow === true).length, [rows]);
+  const visibleRowIds = useMemo(
+    () => rows.map((row) => row.row_id).filter(Boolean),
+    [rows],
+  );
+  const selectedCount = useMemo(
+    () => rows.filter((row) => row.shadow === true).length,
+    [rows],
+  );
   const allSelected = rows.length > 0 && selectedCount === rows.length;
   const isPartiallySelected = selectedCount > 0 && selectedCount < rows.length;
 
   if (rows.length === 0) {
-    return <div className={styles.emptyState}>표시할 집계 결과가 없습니다.</div>;
+    return (
+      <div className={styles.emptyState}>표시할 집계 결과가 없습니다.</div>
+    );
   }
 
   return (
     <div className={styles.tableWrap}>
       <table
         className={styles.table}
-        data-mode={tableNameMode === 'fertilizer' || tableNameMode === 'pesticide' ? tableNameMode : 'default'}
+        data-mode={
+          tableNameMode === 'fertilizer' || tableNameMode === 'pesticide'
+            ? tableNameMode
+            : 'default'
+        }
       >
         <thead>
           <tr>
@@ -148,7 +182,11 @@ export function DataTable({
 
             {columns.map((column) =>
               column.key === 'note' ? (
-                <th key={column.key} data-col={column.key} className={styles.noteHeader}>
+                <th
+                  key={column.key}
+                  data-col={column.key}
+                  className={styles.noteHeader}
+                >
                   {column.label}
                 </th>
               ) : (
@@ -163,7 +201,11 @@ export function DataTable({
                         : 'descending'
                   }
                 >
-                  <SortButton column={column} sortState={sortState} onSortChange={onSortChange} />
+                  <SortButton
+                    column={column}
+                    sortState={sortState}
+                    onSortChange={onSortChange}
+                  />
                 </th>
               ),
             )}
@@ -190,7 +232,11 @@ export function DataTable({
 
               {columns.map((column) =>
                 column.key === 'note' ? (
-                  <td key={`${row.row_id}-note`} data-col={column.key} className={styles.noteCell}>
+                  <td
+                    key={`${row.row_id}-note`}
+                    data-col={column.key}
+                    className={styles.noteCell}
+                  >
                     <NoteCell row={row} onNoteChange={onNoteChange} />
                   </td>
                 ) : (
