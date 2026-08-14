@@ -25,6 +25,23 @@ describe('ExcelUploadPanel', () => {
     expect(screen.getByTestId('excel-upload-dropzone')).toBeInTheDocument();
     expect(screen.getByText('파일 경고')).toBeInTheDocument();
     expect(screen.getByText('행 경고')).toBeInTheDocument();
+    expect(screen.queryByText('표시할 경고가 없습니다')).not.toBeInTheDocument();
+  });
+
+  it('shows an empty-state message in the right column when there are no warnings', () => {
+    render(
+      <ExcelUploadPanel
+        onWorkbookChange={vi.fn()}
+        isLoading={false}
+        loadingErrorMessage=""
+        fileWarnings={[]}
+        warningRows={[]}
+      />
+    );
+
+    expect(screen.getByText('표시할 경고가 없습니다')).toBeInTheDocument();
+    expect(screen.queryByText('파일 경고')).not.toBeInTheDocument();
+    expect(screen.queryByText('행 경고')).not.toBeInTheDocument();
   });
 
   it('forwards dropped files to onWorkbookChange using the same event shape as the file input', () => {

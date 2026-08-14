@@ -191,6 +191,18 @@
   color: var(--corp-primary);
 }
 
+.emptyState {
+  margin: 0;
+  padding: 24px 12px;
+  border: 1px dashed var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: var(--corp-surface-muted);
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
 @media (max-width: 760px) {
   .tabColumns {
     grid-template-columns: 1fr;

@@ -68,6 +68,10 @@ function WarningRowsPanel({ rows }) {
   );
 }
 
+function EmptyWarningsState() {
+  return <p className={styles.emptyState}>표시할 경고가 없습니다</p>;
+}
+
 function DropzoneArea({ onWorkbookChange }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -110,6 +114,9 @@ export function ExcelUploadPanel({
   fileWarnings,
   warningRows = [],
 }) {
+  const hasNoWarnings =
+    (!fileWarnings || fileWarnings.length === 0) && warningRows.length === 0;
+
   return onWorkbookChange ? (
     <div className={styles.tabColumns}>
       <div className={styles.tabColumnLeft}>
@@ -149,8 +156,14 @@ export function ExcelUploadPanel({
       </div>
 
       <div className={styles.tabColumnRight}>
-        <FileWarningsPanel warnings={fileWarnings} />
-        <WarningRowsPanel rows={warningRows} />
+        {hasNoWarnings ? (
+          <EmptyWarningsState />
+        ) : (
+          <>
+            <FileWarningsPanel warnings={fileWarnings} />
+            <WarningRowsPanel rows={warningRows} />
+          </>
+        )}
       </div>
     </div>
   ) : null;
