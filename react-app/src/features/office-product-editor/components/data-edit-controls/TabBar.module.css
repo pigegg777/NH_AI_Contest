@@ -1,0 +1,33 @@
+.tabBar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.tabButton {
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--corp-muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color var(--corp-transition),
+    border-color var(--corp-transition);
+}
+
+.tabButton:hover {
+  color: var(--corp-text);
+}
+
+.tabButtonActive {
+  color: var(--corp-primary);
+  border-bottom-color: var(--corp-primary);
+}
+
+.tabButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
