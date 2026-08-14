@@ -146,6 +146,17 @@
   min-width: 0;
 }
 
+.autoAnalysisBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--corp-primary-soft);
+}
+
+.autoAnalysisBlock .desc {
+  margin: 0;
+}
+
 .promptBlock {
   display: flex;
   flex-direction: column;

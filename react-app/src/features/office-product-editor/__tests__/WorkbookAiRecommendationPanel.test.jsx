@@ -59,12 +59,33 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    const heading = screen.getByRole('heading', { name: '자연어로 요청하기' });
+    const heading = screen.getByRole('heading', { name: '💬 자연어로 요청하기' });
     const textarea = screen.getByPlaceholderText(
       '예: 마진율이 낮은 상품 위주로 검토해줘'
     );
 
     expect(heading).toBeInTheDocument();
-    expect(textarea).toHaveAccessibleName('자연어로 요청하기');
+    expect(textarea).toHaveAccessibleName('💬 자연어로 요청하기');
+  });
+
+  it('renders the auto-analysis button inside its own labeled section, separate from the prompt', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+      />
+    );
+
+    const autoAnalysisHeading = screen.getByRole('heading', { name: '⚙️ 자동 분석' });
+    const promptHeading = screen.getByRole('heading', { name: '💬 자연어로 요청하기' });
+    const analyzeButton = screen.getByRole('button', { name: 'AI 분석하기' });
+
+    expect(autoAnalysisHeading).toBeInTheDocument();
+    expect(promptHeading).toBeInTheDocument();
+    expect(autoAnalysisHeading.compareDocumentPosition(analyzeButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(autoAnalysisHeading.compareDocumentPosition(promptHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

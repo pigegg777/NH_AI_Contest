@@ -70,7 +70,7 @@ function NaturalLanguagePromptInput() {
     <section className={`${styles.panel} ${styles.compactPanel} ${styles.promptBlock}`}>
       <div className={styles.panelHeader}>
         <h4 id="ai-natural-language-prompt-label" className={styles.panelTitle}>
-          자연어로 요청하기
+          💬 자연어로 요청하기
         </h4>
       </div>
       <textarea
@@ -104,17 +104,24 @@ export function WorkbookAiRecommendationPanel({
     <div className={styles.tabColumns}>
       <div className={styles.tabColumnLeft}>
         <h3 className={styles.sectionTitle}>AI 분석</h3>
-        <p className={styles.desc}>
-          업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
-        </p>
-        <button
-          type="button"
-          className={styles.aiButton}
-          onClick={onAiAnalyze}
-          disabled={aiDisabled || !hasRows || aiIsLoading}
-        >
-          AI 분석하기
-        </button>
+
+        <section className={`${styles.panel} ${styles.compactPanel} ${styles.autoAnalysisBlock}`}>
+          <div className={styles.panelHeader}>
+            <h4 className={styles.panelTitle}>⚙️ 자동 분석</h4>
+          </div>
+          <p className={styles.desc}>
+            업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
+          </p>
+          <button
+            type="button"
+            className={styles.aiButton}
+            onClick={onAiAnalyze}
+            disabled={aiDisabled || !hasRows || aiIsLoading}
+          >
+            AI 분석하기
+          </button>
+        </section>
+
         <NaturalLanguagePromptInput />
       </div>
 
