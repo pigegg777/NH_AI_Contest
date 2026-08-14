@@ -35,6 +35,7 @@ describe('DataEditorSection', () => {
     expect(
       screen.queryByRole('button', { name: 'AI 분석하기' })
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId('excel-upload-dropzone')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'AI 분석' }));
 
@@ -42,5 +43,11 @@ describe('DataEditorSection', () => {
       screen.getByRole('button', { name: 'AI 분석하기' })
     ).toBeInTheDocument();
     expect(screen.queryByText('📂 파일 선택')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('excel-upload-dropzone')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('예: 마진율이 낮은 상품 위주로 검토해줘')
+    ).toBeInTheDocument();
   });
 });

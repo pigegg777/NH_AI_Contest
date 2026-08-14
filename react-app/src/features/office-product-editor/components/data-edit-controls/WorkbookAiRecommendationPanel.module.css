@@ -163,7 +163,7 @@
   padding: 10px 12px;
   border: 1px solid var(--corp-line);
   border-radius: var(--corp-radius);
-  background: white;
+  background: var(--corp-panel);
   color: var(--corp-text);
   font-size: 0.82rem;
   font-family: inherit;
