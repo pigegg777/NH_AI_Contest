@@ -67,19 +67,22 @@ function NaturalLanguagePromptInput() {
   const [promptDraft, setPromptDraft] = useState('');
 
   return (
-    <div className={styles.promptBlock}>
-      <label className={styles.promptLabel} htmlFor="ai-natural-language-prompt">
-        자연어로 요청하기
-      </label>
+    <section className={`${styles.panel} ${styles.compactPanel} ${styles.promptBlock}`}>
+      <div className={styles.panelHeader}>
+        <h4 id="ai-natural-language-prompt-label" className={styles.panelTitle}>
+          자연어로 요청하기
+        </h4>
+      </div>
       <textarea
         id="ai-natural-language-prompt"
+        aria-labelledby="ai-natural-language-prompt-label"
         className={styles.promptInput}
         value={promptDraft}
         onChange={(event) => setPromptDraft(event.target.value)}
         placeholder="예: 마진율이 낮은 상품 위주로 검토해줘"
         rows={5}
       />
-    </div>
+    </section>
   );
 }
 
@@ -104,7 +107,6 @@ export function WorkbookAiRecommendationPanel({
         <p className={styles.desc}>
           업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
         </p>
-        <NaturalLanguagePromptInput />
         <button
           type="button"
           className={styles.aiButton}
@@ -113,6 +115,7 @@ export function WorkbookAiRecommendationPanel({
         >
           AI 분석하기
         </button>
+        <NaturalLanguagePromptInput />
       </div>
 
       <div className={styles.tabColumnRight}>

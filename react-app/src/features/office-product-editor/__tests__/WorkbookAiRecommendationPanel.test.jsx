@@ -47,4 +47,24 @@ describe('WorkbookAiRecommendationPanel', () => {
 
     expect(screen.getByText('가격 확인 필요')).toBeInTheDocument();
   });
+
+  it('renders the natural language prompt as a distinct labeled section from the analyze button', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+      />
+    );
+
+    const heading = screen.getByRole('heading', { name: '자연어로 요청하기' });
+    const textarea = screen.getByPlaceholderText(
+      '예: 마진율이 낮은 상품 위주로 검토해줘'
+    );
+
+    expect(heading).toBeInTheDocument();
+    expect(textarea).toHaveAccessibleName('자연어로 요청하기');
+  });
 });
