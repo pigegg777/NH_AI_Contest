@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 import recStyles from './WorkbookAiRecommendations.module.css';
 
@@ -62,6 +63,26 @@ export function WorkbookAiRecommendations({
   );
 }
 
+function NaturalLanguagePromptInput() {
+  const [promptDraft, setPromptDraft] = useState('');
+
+  return (
+    <div className={styles.promptBlock}>
+      <label className={styles.promptLabel} htmlFor="ai-natural-language-prompt">
+        자연어로 요청하기
+      </label>
+      <textarea
+        id="ai-natural-language-prompt"
+        className={styles.promptInput}
+        value={promptDraft}
+        onChange={(event) => setPromptDraft(event.target.value)}
+        placeholder="예: 마진율이 낮은 상품 위주로 검토해줘"
+        rows={5}
+      />
+    </div>
+  );
+}
+
 export function WorkbookAiRecommendationPanel({
   onAiAnalyze,
   aiDisabled,
@@ -77,31 +98,37 @@ export function WorkbookAiRecommendationPanel({
     aiIsLoading || aiAnalysisMode !== 'idle' || aiRecommendations.length > 0;
 
   return (
-    <>
-      <h3 className={styles.sectionTitle}>AI 분석</h3>
-      <p className={styles.desc}>
-        업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
-      </p>
-      <button
-        type="button"
-        className={styles.aiButton}
-        onClick={onAiAnalyze}
-        disabled={aiDisabled || !hasRows || aiIsLoading}
-      >
-        AI 분석하기
-      </button>
-      {showPanel ? (
-        <div className={styles.recommendSection}>
-          <WorkbookAiRecommendations
-            recommendations={aiRecommendations}
-            isLoading={aiIsLoading}
-            analysisMode={aiAnalysisMode}
-            analysisMessage={aiAnalysisMessage}
-            activeRecommendationId={aiActiveRecommendationId}
-            onRecommendationSelect={onAiRecommendationSelect}
-          />
-        </div>
-      ) : null}
-    </>
+    <div className={styles.tabColumns}>
+      <div className={styles.tabColumnLeft}>
+        <h3 className={styles.sectionTitle}>AI 분석</h3>
+        <p className={styles.desc}>
+          업로드한 데이터를 AI가 분석하여 가격과 품목명 관련 추천 사항을 제공합니다.
+        </p>
+        <NaturalLanguagePromptInput />
+        <button
+          type="button"
+          className={styles.aiButton}
+          onClick={onAiAnalyze}
+          disabled={aiDisabled || !hasRows || aiIsLoading}
+        >
+          AI 분석하기
+        </button>
+      </div>
+
+      <div className={styles.tabColumnRight}>
+        {showPanel ? (
+          <div className={styles.recommendSection}>
+            <WorkbookAiRecommendations
+              recommendations={aiRecommendations}
+              isLoading={aiIsLoading}
+              analysisMode={aiAnalysisMode}
+              analysisMessage={aiAnalysisMessage}
+              activeRecommendationId={aiActiveRecommendationId}
+              onRecommendationSelect={onAiRecommendationSelect}
+            />
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }

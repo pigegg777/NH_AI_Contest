@@ -130,3 +130,53 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.tabColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.tabColumnLeft,
+.tabColumnRight {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.promptBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.promptLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.promptInput {
+  padding: 10px 12px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: white;
+  color: var(--corp-text);
+  font-size: 0.82rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.promptInput:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+@media (max-width: 760px) {
+  .tabColumns {
+    grid-template-columns: 1fr;
+  }
+}
