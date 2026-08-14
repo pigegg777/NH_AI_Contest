@@ -3,36 +3,15 @@
   display: contents;
 }
 
-/* ─── Top control bar (spans full 2-col page grid) ──────── */
-.controlBar {
+/* ─── Tab panel wrapper (spans full 2-col page grid) ────── */
+.tabPanelWrap {
   grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  align-items: start;
-  /* border: 1px solid var(--corp-line); */
-  border-radius: var(--corp-radius-sm);
-  padding: 0px;
-  /* background-color: white; */
 }
 
-.controlColWide {
-  min-width: 0;
+.tabPanel {
   border: 1px solid var(--corp-line);
   border-radius: var(--corp-radius-sm);
   padding: 16px;
+  margin-top: 8px;
   background: white;
-}
-
-.uploadSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ─── Responsive ──────────────────────────────────────────── */
-@media (max-width: 760px) {
-  .controlBar {
-    grid-template-columns: 1fr;
-  }
 }
