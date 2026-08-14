@@ -535,6 +535,9 @@ describe('OfficeProductEditorPage', () => {
     await user.click(screen.getAllByRole('button', { name: /자재/i })[0]);
 
     expect(screen.getByText('📂 파일 선택')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('tab', { name: 'AI 분석' }));
+
     expect(screen.getByRole('button', { name: 'AI 분석하기' })).toBeDisabled();
   });
 
