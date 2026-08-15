@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractStructuredPayload } from '../services/openai/openAiJsonRequest';
+import { extractStructuredPayload, extractWebSearchQueries } from '../services/openai/openAiJsonRequest';
 
 describe('extractStructuredPayload', () => {
   it('reads output_parsed directly when present', () => {
@@ -44,5 +44,45 @@ describe('extractStructuredPayload', () => {
   it('returns null when nothing structured can be found', () => {
     expect(extractStructuredPayload({})).toBeNull();
     expect(extractStructuredPayload({ output: [{ type: 'reasoning' }] })).toBeNull();
+  });
+});
+
+describe('extractWebSearchQueries', () => {
+  it('collects queries from web_search_call action.queries arrays', () => {
+    expect(
+      extractWebSearchQueries({
+        output: [
+          { type: 'reasoning' },
+          {
+            type: 'web_search_call',
+            action: { type: 'search', queries: ['사과 부사 5kg', '사과 시세'], query: '사과 부사 5kg' },
+          },
+        ],
+      }),
+    ).toEqual(['사과 부사 5kg', '사과 시세']);
+  });
+
+  it('falls back to action.query when queries is absent', () => {
+    expect(
+      extractWebSearchQueries({
+        output: [{ type: 'web_search_call', action: { type: 'search', query: '사과 부사 5kg' } }],
+      }),
+    ).toEqual(['사과 부사 5kg']);
+  });
+
+  it('dedupes and trims across multiple web_search_call items', () => {
+    expect(
+      extractWebSearchQueries({
+        output: [
+          { type: 'web_search_call', action: { queries: ['사과 부사 5kg', '  '] } },
+          { type: 'web_search_call', action: { queries: ['사과 부사 5kg', '사과 시세'] } },
+        ],
+      }),
+    ).toEqual(['사과 부사 5kg', '사과 시세']);
+  });
+
+  it('returns an empty array when there is no output or no web_search_call items', () => {
+    expect(extractWebSearchQueries({})).toEqual([]);
+    expect(extractWebSearchQueries({ output: [{ type: 'message' }] })).toEqual([]);
   });
 });

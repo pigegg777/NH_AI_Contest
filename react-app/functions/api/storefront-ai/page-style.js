@@ -54,7 +54,7 @@ export async function onRequestPost({ request, env }) {
     let payload;
 
     try {
-      payload = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY);
+      ({ payload } = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY));
     } catch (error) {
       return errorResponse(
         error instanceof Error ? error.message : 'OpenAI request failed.',

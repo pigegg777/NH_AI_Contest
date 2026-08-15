@@ -22,7 +22,7 @@ export const STOREFRONT_FIELD_LABELS = {
   sale_price_type_name: '가격 유형',
   exempt_tax_price: '면세가격',
   price_subsidy: '보조금',
-  product_nutirent: '성분',
+  nutirent: '성분',
   indict_symbl: '작용기작',
   product_usage: '작물별 용도',
   product_category: '용도',
@@ -43,7 +43,7 @@ export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'small_category',
   'detail_category',
   'nutrient',
-  'product_nutirent',
+  'nutirent',
   'product_url',
 ];
 

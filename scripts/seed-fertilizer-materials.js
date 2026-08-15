@@ -51,7 +51,7 @@ dataRows.forEach((row) => {
     result.push({
       product_code: code,
       product_name: String(name).trim(),
-      product_nutirent: nutrient,
+      nutirent: nutrient,
       product_category: category,
       product_usage: [],
       updated_at: null,

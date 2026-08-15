@@ -10,7 +10,7 @@ const AVAILABLE_FIELDS = [
   { key: 'large_category', label: '대분류', exampleValue: 'Fertilizer', isSelectable: true },
   { key: 'medium_category', label: '중분류', exampleValue: 'Premium', isSelectable: true },
   { key: 'nutrient', label: '주요 성분', exampleValue: '18-18-18', isSelectable: true },
-  { key: 'product_nutirent', label: '성분', exampleValue: 'N-P-K', isSelectable: true },
+  { key: 'nutirent', label: '성분', exampleValue: 'N-P-K', isSelectable: true },
 ];
 
 describe('groupAvailableFields', () => {
@@ -22,16 +22,16 @@ describe('groupAvailableFields', () => {
     expect(groups.description.map((f) => f.key)).toEqual(['product_name', 'spec', 'nutrient']);
   });
 
-  it('consolidates nutrient and product_nutirent into a single "important ingredient" row when both exist', () => {
+  it('consolidates nutrient and nutirent into a single "important ingredient" row when both exist', () => {
     const groups = groupAvailableFields(AVAILABLE_FIELDS);
     const consolidated = groups.description.find((f) => f.key === 'nutrient');
 
     expect(consolidated.label).toBe('중요 성분');
-    expect(consolidated.aliasKeys).toEqual(['nutrient', 'product_nutirent']);
+    expect(consolidated.aliasKeys).toEqual(['nutrient', 'nutirent']);
   });
 
   it('does not consolidate when only one nutrient-like field is available', () => {
-    const onlyNutrient = AVAILABLE_FIELDS.filter((f) => f.key !== 'product_nutirent');
+    const onlyNutrient = AVAILABLE_FIELDS.filter((f) => f.key !== 'nutirent');
     const groups = groupAvailableFields(onlyNutrient);
     const field = groups.description.find((f) => f.key === 'nutrient');
 

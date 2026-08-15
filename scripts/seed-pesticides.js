@@ -12,7 +12,7 @@ const OUTPUT_PATH = path.join(__dirname, '..', 'data', 'pesticides-seed.json');
 const COL = {
   product_code: 2,
   product_name: 10, // 상표명칭
-  product_nutirent: 11, // 품목명칭
+  nutirent: 11, // 품목명칭
   product_category: 14, // 농약용도명
   updated_at: 16, // 수정일자 (YYYYMMDD)
 };
@@ -50,8 +50,8 @@ for (const row of dataRows) {
   result.push({
     product_code,
     product_name: row[COL.product_name] != null ? String(row[COL.product_name]).trim() : null,
-    product_nutirent:
-      row[COL.product_nutirent] != null ? String(row[COL.product_nutirent]).trim() : null,
+    nutirent:
+      row[COL.nutirent] != null ? String(row[COL.nutirent]).trim() : null,
     product_category:
       row[COL.product_category] != null ? String(row[COL.product_category]).trim() : null,
     product_usage: [],

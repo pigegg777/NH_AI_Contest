@@ -34,7 +34,7 @@ export const CARD_CONDITION_FIELD_OPTIONS = [
   'product_url',
   'note',
   'sale_price_type_name',
-  'product_nutirent',
+  'nutirent',
   'indict_symbl',
   'product_usage',
   'product_category',
