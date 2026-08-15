@@ -4,6 +4,7 @@ import { useActiveCategoryData } from './sidebar-catalog/useActiveCategoryData';
 import { useOfficeProductDataCatalog } from './office-product-data/useOfficeProductDataCatalog';
 import { useOfficeProductDataDeletion } from './office-product-data/useOfficeProductDataDeletion';
 import { useWorkbookAiRecommendationState } from './ai-recommendations/useWorkbookAiRecommendationState';
+import { useBulkNoteWriterState } from './bulk-note/useBulkNoteWriterState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
@@ -71,6 +72,13 @@ export function useOfficeProductEditorState(user) {
     effectiveFingerprint,
     user?.office_code,
     tableNameMode,
+  );
+
+  const bulkNoteWriterState = useBulkNoteWriterState(
+    user?.office_code,
+    tableState.mergedRows,
+    tableNameMode,
+    tableState.updateNote,
   );
 
   const saveState = useWorkbookSave({
@@ -210,6 +218,10 @@ export function useOfficeProductEditorState(user) {
       activeRecommendationId: aiState.activeRecommendationId,
       handleAnalyze: aiState.handleAnalyze,
       handleRecommendationSelect: aiState.handleRecommendationSelect,
+      bulkNoteWriter: {
+        ...bulkNoteWriterState,
+        rows: tableState.mergedRows,
+      },
     },
 
     save: {
