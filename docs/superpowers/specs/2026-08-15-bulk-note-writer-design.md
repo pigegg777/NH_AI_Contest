@@ -24,10 +24,16 @@ Third sub-tab in the existing `AI_ANALYSIS_SUB_TABS` inside `WorkbookAiRecommend
 1. User types an instruction into a textarea (same 1-line/row-layout pattern as the other two sub-tabs)
    and clicks **매칭 미리보기**.
 2. Client calls `analyzeBulkNoteMatches(mergedRows, { officeCode, tableNameMode, instruction })`, which:
-   - Reuses the existing `serializeWorkbookRowsForAiReview(rows, tableNameMode)` (from
-     `model/ai-recommendations/workbookAiRequestBodyModel.js`) to trim rows to AI-relevant fields
-     (`row_id`, `product_name`, `spec`, category fields, prices, current `note`) and cap the count at the
-     existing `MAX_WORKBOOK_AI_ROWS` (500) — no new serializer needed.
+   - Trims rows to the fields this feature actually needs — `row_id`, `product_name`, `spec`,
+     `medium_category`, `small_category`, `detail_category`, `product_category`, `note`, `tax_price`,
+     `zero_tax_price`, `exempt_tax_price` — via a small dedicated serializer
+     (`serializeRowsForBulkNoteReview`) in `bulkNoteRequestBodyModel.js`. **Correction from an earlier
+     draft of this spec:** the existing `serializeWorkbookRowsForAiReview` (duplicate-recommendation
+     feature) cannot be reused as-is — its column allowlist (`getAiReviewColumnKeys`) only includes
+     product/price fields, not the category or note fields this feature depends on for condition-matching
+     and preview, and widening that shared allowlist would change what the unrelated recommendation
+     feature sends to OpenAI. Only the row-count cap constant, `MAX_WORKBOOK_AI_ROWS` (from
+     `model/ai-recommendations/workbookAiRequestBodyModel.js`), is reused.
    - POSTs to `/api/bulk-note/analyze` with `{ officeCode, tableNameMode, instruction, rows }`.
 3. The function calls OpenAI with a prompt instructing it to: read the rows, interpret the instruction as
    a condition + a literal note phrase, and return every matching row's `row_id` paired with that note
@@ -58,7 +64,7 @@ Mirrors the existing `market-research` and `ai-recommendations` feature layout:
 functions/api/bulk-note/analyze.js                              (+ __tests__/analyze.test.js)
 src/features/office-product-editor/model/bulk-note/
   bulkNoteWriterPrompt.js
-  bulkNoteRequestBodyModel.js        (schema + request body, mirrors marketResearchRequestBodyModel.js)
+  bulkNoteRequestBodyModel.js        (schema + request body + serializeRowsForBulkNoteReview)
   bulkNoteMatchModel.js              (normalizes AI response, drops unknown row_ids)
   bulkNoteAnalysisModel.js           (client orchestration, mirrors workbookAiAnalysisModel.js)
 src/features/office-product-editor/services/bulk-note/
@@ -78,7 +84,7 @@ Request body (server-built, mirrors `buildMarketResearchRequestBody`):
     { role: 'system', content: <prompt> },
     { role: 'user', content: JSON.stringify({
         table_name_mode, instruction,
-        rows: serializeWorkbookRowsForAiReview(rows, tableNameMode),
+        rows: serializeRowsForBulkNoteReview(rows),
       }) },
   ],
   text: { format: { type: 'json_schema', strict: true, schema: BULK_NOTE_SCHEMA } },
