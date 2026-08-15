@@ -100,8 +100,8 @@
   width: 90px;
 }
 
-.table th[data-col='product_nutirent'],
-.table td[data-col='product_nutirent'] {
+.table th[data-col='nutirent'],
+.table td[data-col='nutirent'] {
   width: 144px;
 }
 

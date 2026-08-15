@@ -21,6 +21,7 @@ export async function requestWorkbookAiRecommendations({
   officeCode,
   rows,
   tableNameMode,
+  userHint,
 }) {
   const {
     data: { session },
@@ -40,6 +41,7 @@ export async function requestWorkbookAiRecommendations({
     body: JSON.stringify({
       officeCode: toTrimmedString(officeCode),
       tableNameMode: toTrimmedString(tableNameMode),
+      userHint: toTrimmedString(userHint),
       rows: Array.isArray(rows) ? rows : [],
       supabaseUrl: LOCAL_SUPABASE_URL,
       supabasePublishableKey: LOCAL_SUPABASE_PUBLISHABLE_KEY,

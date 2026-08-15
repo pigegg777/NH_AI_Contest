@@ -19,12 +19,12 @@ const STATIC_LOOKUP_SOURCE = {
   pesticide: {
     tableName: 'static_pesticide',
     select:
-      'product_code,product_nutirent,product_category,product_usage,indict_symbl',
+      'product_code,nutirent,product_category,product_usage,indict_symbl',
     errorMessage: '정적 농약 데이터 조회에 실패했습니다.',
     normalizeRow(row, productCode) {
       return {
         product_code: productCode,
-        product_nutirent: row.product_nutirent ?? null,
+        nutirent: row.nutirent ?? null,
         product_category: row.product_category ?? null,
         product_usage: Array.isArray(row.product_usage)
           ? row.product_usage

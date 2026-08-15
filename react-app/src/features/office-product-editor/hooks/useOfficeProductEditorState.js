@@ -4,12 +4,14 @@ import { useActiveCategoryData } from './sidebar-catalog/useActiveCategoryData';
 import { useOfficeProductDataCatalog } from './office-product-data/useOfficeProductDataCatalog';
 import { useOfficeProductDataDeletion } from './office-product-data/useOfficeProductDataDeletion';
 import { useWorkbookAiRecommendationState } from './ai-recommendations/useWorkbookAiRecommendationState';
+import { useMarketResearchState } from './market-research/useMarketResearchState';
 import { useBulkNoteWriterState } from './bulk-note/useBulkNoteWriterState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
+import { filterRowsByActiveRecommendation } from '../model/ai-recommendations/workbookAiRecommendationRowFilterModel';
 import { shouldUseStaticDataMerge } from '../model/static-data-merge/staticDataMergeModel';
 import {
   readStoredOfficeProductEditorDraft,
@@ -74,6 +76,8 @@ export function useOfficeProductEditorState(user) {
     tableNameMode,
   );
 
+  const marketResearchState = useMarketResearchState(user?.office_code, tableState.annotatedRows);
+
   const bulkNoteWriterState = useBulkNoteWriterState(
     user?.office_code,
     tableState.mergedRows,
@@ -102,6 +106,21 @@ export function useOfficeProductEditorState(user) {
   );
 
   const canUploadFile = toTrimmedString(saveState.resolvedCategoryName).length > 0;
+
+  const visibleTableRows = useMemo(
+    () =>
+      filterRowsByActiveRecommendation(
+        tableState.rows,
+        aiState.recommendations,
+        aiState.activeRecommendationId,
+      ),
+    [tableState.rows, aiState.recommendations, aiState.activeRecommendationId],
+  );
+
+  function handleResetFilters() {
+    tableState.resetFilters();
+    aiState.clearActiveRecommendation();
+  }
 
   function handleCatalogCardSelect(card) {
     if (!selection.isCardSelected(card)) {
@@ -194,7 +213,7 @@ export function useOfficeProductEditorState(user) {
     },
 
     table: {
-      rows: tableState.rows,
+      rows: visibleTableRows,
       warningRows: tableState.warningRows,
       searchQuery: tableState.searchQuery,
       onSearchQueryChange: tableState.setSearchQuery,
@@ -203,7 +222,7 @@ export function useOfficeProductEditorState(user) {
       sortState: tableState.sortState,
       onSortChange: tableState.setSortState,
       onFilterChange: tableState.handleFilterChange,
-      onResetFilters: tableState.resetFilters,
+      onResetFilters: handleResetFilters,
       onShadowToggle: tableState.toggleShadow,
       onVisibleRowsShadowChange: tableState.setShadowForRows,
       onNoteChange: tableState.updateNote,
@@ -218,6 +237,7 @@ export function useOfficeProductEditorState(user) {
       activeRecommendationId: aiState.activeRecommendationId,
       handleAnalyze: aiState.handleAnalyze,
       handleRecommendationSelect: aiState.handleRecommendationSelect,
+      marketResearch: marketResearchState,
       bulkNoteWriter: {
         ...bulkNoteWriterState,
         rows: tableState.mergedRows,

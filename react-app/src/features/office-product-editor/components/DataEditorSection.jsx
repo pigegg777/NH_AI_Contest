@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useActiveCategoryCtx, useAiCtx, useExtractionCtx, useTableCtx } from '../contexts/editorContexts';
 import { TabBar } from './data-edit-controls/TabBar';
-import { ExcelUploadPanel } from './data-edit-controls/ExcelUploadPanel';
-import { WorkbookAiRecommendationPanel } from './data-edit-controls/WorkbookAiRecommendationPanel';
+import { ExcelUploadPanel } from './data-edit-controls/excel-upload/ExcelUploadPanel';
+import { WorkbookAiRecommendationPanel } from './data-edit-controls/workbook-ai-recommendation/WorkbookAiRecommendationPanel';
 import styles from './DataEditorSection.module.css';
 
 const TABS = [
@@ -23,6 +23,8 @@ export function DataEditorSection() {
     activeRecommendationId: aiActiveRecommendationId,
     handleAnalyze: onAiAnalyze,
     handleRecommendationSelect: onAiRecommendationSelect,
+    marketResearch,
+    bulkNoteWriter,
   } = useAiCtx();
 
   return (
@@ -50,6 +52,8 @@ export function DataEditorSection() {
               aiAnalysisMessage={aiAnalysisMessage}
               aiActiveRecommendationId={aiActiveRecommendationId}
               onAiRecommendationSelect={onAiRecommendationSelect}
+              marketResearch={marketResearch}
+              bulkNoteWriter={bulkNoteWriter}
             />
           )}
         </div>

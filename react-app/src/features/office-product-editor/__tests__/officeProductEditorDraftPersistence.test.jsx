@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fetchOfficeProductDataCatalog = vi.fn();
@@ -132,5 +132,55 @@ describe('OfficeProductEditor draft persistence', () => {
       });
     });
     expect(await screen.findByText('Alpha')).toBeInTheDocument();
+  });
+
+  it('restores AI recommendations and the market research report on mount without re-running either', async () => {
+    writeDraft({
+      selection: buildSelectionDraft(),
+      extraction: buildExtractionDraft(),
+    });
+    globalThis.sessionStorage.setItem(
+      'office-product-editor:ai-recommendations:draft-fingerprint',
+      JSON.stringify({
+        version: 1,
+        recommendations: [
+          {
+            id: 'rec-1',
+            title: '가격 확인 필요',
+            reason: '동일 상품 가격 상이',
+            relatedRowIds: ['A100__01'],
+          },
+        ],
+        analysisMode: 'openai',
+        analysisMessage: '',
+        activeRecommendationId: null,
+      }),
+    );
+    globalThis.sessionStorage.setItem(
+      'office-product-editor:market-research:OFF-1',
+      JSON.stringify({
+        version: 1,
+        activeQuery: '사과 부사 5kg',
+        mode: 'openai',
+        report: {
+          understoodQuery: '사과 부사 5kg 온라인 판매가 조사',
+          clarificationNeeded: null,
+          dataFound: true,
+          priceRange: { minKrw: 13800, maxKrw: 29900, unit: 'KRW per 5kg box' },
+          priceSources: [],
+        },
+        message: '',
+      }),
+    );
+
+    render(<OfficeProductEditorPage user={USER} />);
+
+    await screen.findByText('Alpha');
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 분석' }));
+
+    expect(await screen.findByText('가격 확인 필요')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: '시장조사' }));
+    expect(screen.getByText('사과 부사 5kg 온라인 판매가 조사')).toBeInTheDocument();
   });
 });

@@ -22,7 +22,7 @@ describe('static pesticide merge model', () => {
         {
           A100: {
             product_code: 'A100',
-            product_nutirent: '클로르페나피르 액상수화제',
+            nutirent: '클로르페나피르 액상수화제',
             product_category: '살충',
             product_usage: [
               {
@@ -41,7 +41,7 @@ describe('static pesticide merge model', () => {
     ).toEqual([
       expect.objectContaining({
         row_id: 'A100__01',
-        product_nutirent: '클로르페나피르 액상수화제',
+        nutirent: '클로르페나피르 액상수화제',
         product_category: '살충',
         product_usage: [
           expect.objectContaining({ cropName: '고추' }),
@@ -50,7 +50,7 @@ describe('static pesticide merge model', () => {
       }),
       expect.objectContaining({
         row_id: 'B200__01',
-        product_nutirent: null,
+        nutirent: null,
         product_category: null,
         product_usage: [],
         indict_symbl: null,

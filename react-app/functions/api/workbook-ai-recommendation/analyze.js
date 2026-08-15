@@ -1,9 +1,12 @@
-import { buildWorkbookAiRequestBody } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRequestBodyModel.js';
+import {
+  buildWorkbookAiRequestBody,
+  MAX_WORKBOOK_AI_ROWS,
+} from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRequestBodyModel.js';
 import {
   normalizeOpenAiRecommendations,
   sortWorkbookAiRecommendations,
 } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRecommendationListModel.js';
-import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRecommendationPrompt.js';
+import { buildWorkbookAiAnalysisPrompt } from '../../../src/features/office-product-editor/model/ai-recommendations/workbookAiRecommendationPrompt.js';
 import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
@@ -16,16 +19,17 @@ import {
 import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.js';
 import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
 const REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
   'tableNameMode',
   'rows',
+  'userHint',
   'supabaseUrl',
   'supabasePublishableKey',
 ];
-const MAX_ROWS = 500;
 const MAX_REQUEST_BODY_BYTES = 300000;
+const MAX_USER_HINT_LENGTH = 500;
 
 function toOptionalTrimmedString(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -79,9 +83,13 @@ export async function onRequestPost({ request, env }) {
       typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
     const tableNameMode =
       typeof body.tableNameMode === 'string' ? body.tableNameMode.trim() : '';
+    const userHint = toOptionalTrimmedString(body.userHint).slice(
+      0,
+      MAX_USER_HINT_LENGTH,
+    );
     assertOfficeCodePresent(officeCode);
 
-    const rows = Array.isArray(body.rows) ? body.rows.slice(0, MAX_ROWS) : [];
+    const rows = Array.isArray(body.rows) ? body.rows.slice(0, MAX_WORKBOOK_AI_ROWS) : [];
 
     if (rows.length === 0) {
       return jsonResponse({ recommendations: [] });
@@ -102,13 +110,14 @@ export async function onRequestPost({ request, env }) {
       rows,
       tableNameMode,
       openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
-      prompt: WORKBOOK_AI_ANALYSIS_PROMPT,
+      prompt: buildWorkbookAiAnalysisPrompt(tableNameMode),
+      userHint,
     });
 
     let payload;
 
     try {
-      payload = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY);
+      ({ payload } = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY));
     } catch (error) {
       return errorResponse(
         error instanceof Error ? error.message : 'OpenAI request failed.',
@@ -127,9 +136,7 @@ export async function onRequestPost({ request, env }) {
       payload.recommendations,
       rows,
     );
-    const recommendations = sortWorkbookAiRecommendations(
-      openAiRecommendations,
-    );
+    const recommendations = sortWorkbookAiRecommendations(openAiRecommendations);
 
     return jsonResponse({ recommendations });
   } catch (error) {

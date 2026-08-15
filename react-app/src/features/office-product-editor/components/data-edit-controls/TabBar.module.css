@@ -5,12 +5,12 @@
 }
 
 .tabButton {
-  padding: 10px 16px;
+  padding: 5px 16px;
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--corp-muted);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition:

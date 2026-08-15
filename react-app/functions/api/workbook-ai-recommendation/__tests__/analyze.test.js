@@ -19,6 +19,13 @@ const sampleRows = [
     tax_price: 1000,
     zero_tax_price: 1200,
   },
+  {
+    row_id: 'B200__01',
+    product_code: 'B200',
+    product_name: 'Alpha Fertilizer',
+    tax_price: 950,
+    zero_tax_price: 1200,
+  },
 ];
 
 function buildSupabaseStub({ user = { id: 'user-1' }, officeCode = 'OFF-1' } = {}) {
@@ -222,6 +229,23 @@ describe('POST /api/workbook-ai-recommendation/analyze', () => {
     expect(response.status).toBe(502);
   });
 
+  it('uses GPT-5.6 Luna by default', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ output_parsed: { recommendations: [] } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await onRequestPost({
+      request: buildRequest({ officeCode: 'OFF-1', rows: sampleRows }),
+      env: TEST_ENV,
+    });
+
+    expect(response.status).toBe(200);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).model).toBe('gpt-5.6-luna');
+  });
+
   it('returns 200 with normalized, sorted recommendations on success', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
     vi.stubGlobal(
@@ -232,16 +256,14 @@ describe('POST /api/workbook-ai-recommendation/analyze', () => {
           output_parsed: {
             recommendations: [
               {
-                severity: 'low',
-                title: '낮은 우선순위',
-                reason: '검토 필요',
-                relatedRowIds: ['A100__01'],
+                title: '영세단가가 과세단가보다 높습니다',
+                reason: 'A100__01은 1000원, B200__01은 950원으로 과세단가가 상이합니다.',
+                relatedRowIds: ['A100__01', 'B200__01'],
               },
               {
-                severity: 'high',
-                title: '영세단가가 과세단가보다 높습니다',
-                reason: 'A100__01에서 영세단가가 과세단가보다 높게 책정되어 있습니다.',
-                relatedRowIds: ['A100__01'],
+                title: '낮은 우선순위',
+                reason: '검토 필요',
+                relatedRowIds: ['A100__01', 'B200__01'],
               },
             ],
           },
@@ -255,7 +277,41 @@ describe('POST /api/workbook-ai-recommendation/analyze', () => {
 
     expect(response.status).toBe(200);
     expect(body.recommendations).toHaveLength(2);
-    expect(body.recommendations[0].severity).toBe('high');
-    expect(body.recommendations[1].severity).toBe('low');
+    expect(body.recommendations[0].title).toBe('낮은 우선순위');
+    expect(body.recommendations[1].title).toBe('영세단가가 과세단가보다 높습니다');
+  });
+
+  it('keeps an OpenAI-returned recommendation even when its rows have identical prices', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    const equalPriceRows = [
+      { row_id: 'A100__01', product_code: 'A100', product_name: 'Alpha', tax_price: 1000, zero_tax_price: 1200 },
+      { row_id: 'B200__01', product_code: 'B200', product_name: 'Alpha', tax_price: 1000, zero_tax_price: 1200 },
+    ];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          output_parsed: {
+            recommendations: [
+              {
+                groupType: 'same_product',
+                title: '중복 의심',
+                reason: '이름이 동일합니다.',
+                relatedRowIds: ['A100__01', 'B200__01'],
+              },
+            ],
+          },
+        }),
+      }),
+    );
+    const request = buildRequest({ officeCode: 'OFF-1', rows: equalPriceRows });
+
+    const response = await onRequestPost({ request, env: TEST_ENV });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.recommendations).toHaveLength(1);
+    expect(body.recommendations[0].title).toBe('중복 의심');
   });
 });

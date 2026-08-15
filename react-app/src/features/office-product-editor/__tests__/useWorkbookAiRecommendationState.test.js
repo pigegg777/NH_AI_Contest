@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useWorkbookAiRecommendationState } from '../hooks/ai-recommendations/useWorkbookAiRecommendationState';
 import { analyzeWorkbookAiRecommendations } from '../model/ai-recommendations/workbookAiAnalysisModel';
@@ -20,7 +20,7 @@ const mergedRows = [
 
 const mockRecommendation = {
   id: 'rec-1',
-  severity: 'medium',
+  groupType: 'same_product',
   title: '가격 확인',
   reason: '이전 가격이 현재 값보다 더 높습니다',
   relatedRowIds: ['B200__02'],
@@ -37,6 +37,10 @@ function createDeferred() {
 
   return { promise, resolve, reject };
 }
+
+beforeEach(() => {
+  globalThis.sessionStorage.clear();
+});
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -255,5 +259,74 @@ describe('useWorkbookAiRecommendationState', () => {
     expect(result.current.recommendations).toEqual([]);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.activeRecommendationId).toBe(null);
+  });
+
+  it('persists recommendations to sessionStorage after a successful analysis', async () => {
+    analyzeWorkbookAiRecommendations.mockResolvedValue({
+      mode: 'openai',
+      recommendations: [mockRecommendation],
+    });
+
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1', 'fertilizer'),
+    );
+
+    await act(async () => {
+      await result.current.handleAnalyze();
+    });
+
+    const stored = JSON.parse(
+      globalThis.sessionStorage.getItem('office-product-editor:ai-recommendations:workbook-a'),
+    );
+    expect(stored.recommendations).toEqual([mockRecommendation]);
+    expect(stored.analysisMode).toBe('openai');
+  });
+
+  it('restores recommendations from sessionStorage for the same workbook fingerprint on mount', () => {
+    globalThis.sessionStorage.setItem(
+      'office-product-editor:ai-recommendations:workbook-a',
+      JSON.stringify({
+        version: 1,
+        recommendations: [mockRecommendation],
+        analysisMode: 'openai',
+        analysisMessage: '',
+        activeRecommendationId: 'rec-1',
+      }),
+    );
+
+    const { result } = renderHook(() =>
+      useWorkbookAiRecommendationState(mergedRows, 'workbook-a', 'OFF-1', 'fertilizer'),
+    );
+
+    expect(result.current.recommendations).toEqual([mockRecommendation]);
+    expect(result.current.analysisMode).toBe('openai');
+    expect(result.current.activeRecommendationId).toBe('rec-1');
+    expect(analyzeWorkbookAiRecommendations).not.toHaveBeenCalled();
+  });
+
+  it('does not restore a different workbook fingerprint state after the fingerprint changes', () => {
+    globalThis.sessionStorage.setItem(
+      'office-product-editor:ai-recommendations:workbook-a',
+      JSON.stringify({
+        version: 1,
+        recommendations: [mockRecommendation],
+        analysisMode: 'openai',
+        analysisMessage: '',
+        activeRecommendationId: 'rec-1',
+      }),
+    );
+
+    const { result, rerender } = renderHook(
+      ({ workbookFingerprint }) =>
+        useWorkbookAiRecommendationState(mergedRows, workbookFingerprint, 'OFF-1', 'fertilizer'),
+      { initialProps: { workbookFingerprint: 'workbook-a' } },
+    );
+
+    expect(result.current.recommendations).toEqual([mockRecommendation]);
+
+    rerender({ workbookFingerprint: 'workbook-b' });
+
+    expect(result.current.recommendations).toEqual([]);
+    expect(result.current.analysisMode).toBe('idle');
   });
 });

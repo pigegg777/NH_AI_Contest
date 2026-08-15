@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildWorkbookAiRequestBody } from '../model/ai-recommendations/workbookAiRequestBodyModel';
-import { WORKBOOK_AI_ANALYSIS_PROMPT } from '../model/ai-recommendations/workbookAiRecommendationPrompt';
+import { buildWorkbookAiAnalysisPrompt } from '../model/ai-recommendations/workbookAiRecommendationPrompt';
 import { extractStructuredPayload } from '../../storefront/services/openai/openAiJsonRequest';
 
 describe('workbook AI recommendation payload model', () => {
   it('builds the OpenAI request body with the separated prompt', () => {
+    const fertilizerPrompt = buildWorkbookAiAnalysisPrompt('fertilizer');
     const requestBody = buildWorkbookAiRequestBody({
       tableNameMode: 'fertilizer',
       rows: [
@@ -13,30 +14,35 @@ describe('workbook AI recommendation payload model', () => {
           row_id: 'A100__01',
           product_code: 'A100',
           product_name: 'Alpha',
-          manufacturer_list: [{ manufacturer_name: 'NH' }],
+          spec: '20kg',
         },
       ],
       openAiModel: 'gpt-4.1-mini',
-      prompt: WORKBOOK_AI_ANALYSIS_PROMPT,
+      prompt: fertilizerPrompt,
+      userHint: '  필름과 비닐은 같은 상품으로 봐주세요  ',
     });
     const userPayload = JSON.parse(requestBody.input[1].content);
 
     expect(requestBody.model).toBe('gpt-4.1-mini');
-    expect(requestBody.input[0].content).toBe(WORKBOOK_AI_ANALYSIS_PROMPT);
+    expect(requestBody.input[0].content).toBe(fertilizerPrompt);
+    expect(fertilizerPrompt).toContain('nutrient');
+    expect(fertilizerPrompt).not.toContain('indict_symbl');
+    expect(fertilizerPrompt).toContain('user_hint');
     expect(userPayload.analysis_scope).toBe('all_rows');
     expect(userPayload.table_name_mode).toBe('fertilizer');
+    expect(userPayload.user_hint).toBe('필름과 비닐은 같은 상품으로 봐주세요');
     expect(userPayload.rows).toEqual([
       expect.objectContaining({
         row_id: 'A100__01',
         product_code: 'A100',
         product_name: 'Alpha',
-        manufacturer_list: [{ manufacturer_name: 'NH' }],
+        spec: '20kg',
       }),
     ]);
     expect(requestBody.input[1].content).not.toContain('manufacturer_code');
     expect(requestBody.input[1].content).not.toContain('rule_based_findings');
     expect(requestBody.text.format.schema.properties.recommendations.items.required).toEqual([
-      'severity',
+      'groupType',
       'title',
       'reason',
       'relatedRowIds',

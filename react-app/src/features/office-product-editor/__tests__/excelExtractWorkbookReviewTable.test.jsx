@@ -152,7 +152,7 @@ describe('excel extract workbook review table', () => {
       rows: [
         {
           ...rows[0],
-          product_nutirent: 'chlorfenapyr',
+          nutirent: 'chlorfenapyr',
           product_category: 'insecticide',
           product_usage: [
             {
@@ -168,7 +168,7 @@ describe('excel extract workbook review table', () => {
         },
         {
           ...rows[1],
-          product_nutirent: null,
+          nutirent: null,
           product_category: null,
           product_usage: [],
           indict_symbl: null,
@@ -181,7 +181,7 @@ describe('excel extract workbook review table', () => {
       'selection',
       ...getTableColumnsByMode('pesticide').map((column) => column.key),
     ]);
-    expect(renderedColumnKeys).toContain('product_nutirent');
+    expect(renderedColumnKeys).toContain('nutirent');
     expect(renderedColumnKeys).toContain('product_category');
     expect(renderedColumnKeys).toContain('product_usage');
     expect(renderedColumnKeys).toContain('indict_symbl');

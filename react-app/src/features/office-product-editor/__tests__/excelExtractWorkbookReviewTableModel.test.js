@@ -117,7 +117,7 @@ describe('excel extract workbook review table model', () => {
     const defaultKeys = DEFAULT_TABLE_COLUMNS.map((column) => column.key);
 
     expect(pesticideKeys.slice(0, defaultKeys.length)).toEqual(defaultKeys);
-    expect(pesticideKeys).toContain('product_nutirent');
+    expect(pesticideKeys).toContain('nutirent');
     expect(pesticideKeys).toContain('product_category');
     expect(pesticideKeys).toContain('product_usage');
     expect(pesticideKeys).toContain('indict_symbl');

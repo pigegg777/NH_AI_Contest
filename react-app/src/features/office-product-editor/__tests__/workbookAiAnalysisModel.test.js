@@ -40,14 +40,14 @@ describe('workbookAiAnalysisModel', () => {
     expect(
       createAiRecommendation({
         id: 'rec-1',
-        severity: 'high',
+        groupType: 'same_product',
         title: '가격 확인',
         reason: '행 검토 필요',
         relatedRowIds: ['A100__01', 'A100__01'],
       }),
     ).toEqual({
       id: 'rec-1',
-      severity: 'high',
+      groupType: 'same_product',
       title: '가격 확인',
       reason: '행 검토 필요',
       relatedRowIds: ['A100__01'],
@@ -75,7 +75,31 @@ describe('workbookAiAnalysisModel', () => {
     expect(requestWorkbookAiRecommendations).toHaveBeenCalledWith({
       officeCode: 'OFF-1',
       tableNameMode: 'fertilizer',
-      rows: sampleRows,
+      userHint: undefined,
+      rows: [
+        {
+          row_id: 'A100__01',
+          product_code: 'A100',
+          product_name: 'Alpha Fertilizer',
+          spec: '20kg',
+          sale_price_type_name: '',
+          zero_tax_price: 1200,
+          tax_price: 1000,
+          exempt_tax_price: null,
+          nutrient: 'N-P-K',
+        },
+        {
+          row_id: 'B200__01',
+          product_code: 'B200',
+          product_name: 'Alpha Fertilizer',
+          spec: '20kg',
+          sale_price_type_name: '',
+          zero_tax_price: 900,
+          tax_price: 980,
+          exempt_tax_price: null,
+          nutrient: 'N-P-K',
+        },
+      ],
     });
     expect(result.recommendations).toEqual([
       {
@@ -85,6 +109,40 @@ describe('workbookAiAnalysisModel', () => {
         relatedRowIds: ['A100__01', 'B200__01', 'A100__01'],
       },
     ]);
+  });
+
+  it('strips bulky fields like a pesticide row\'s merged product_usage before sending', async () => {
+    requestWorkbookAiRecommendations.mockResolvedValue({ recommendations: [] });
+
+    const pesticideRows = [
+      {
+        row_id: 'P100__01',
+        product_code: 'P100',
+        product_name: '스미치온유제',
+        spec: '100ml',
+        tax_price: 5000,
+        zero_tax_price: 6000,
+        product_category: '살균제',
+        product_usage: Array.from({ length: 50 }, (_, i) => ({
+          cropName: `작물${i}`,
+          diseaseWeedName: `병해충${i}`,
+          pestiUse: '사용법',
+          dilutUnit: '1000',
+          useSuittime: '수확 7일 전',
+          useNum: '3',
+        })),
+      },
+    ];
+
+    await analyzeWorkbookAiRecommendations(pesticideRows, {
+      officeCode: 'OFF-1',
+      tableNameMode: 'pesticide',
+    });
+
+    const sentRows = requestWorkbookAiRecommendations.mock.calls.at(-1)[0].rows;
+    expect(sentRows).toHaveLength(1);
+    expect(sentRows[0]).not.toHaveProperty('product_usage');
+    expect(sentRows[0].product_category).toBe('살균제');
   });
 
   it('returns no recommendations when officeCode is empty', async () => {

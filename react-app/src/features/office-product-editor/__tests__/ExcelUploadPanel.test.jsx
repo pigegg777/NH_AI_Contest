@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { ExcelUploadPanel } from '../components/data-edit-controls/ExcelUploadPanel';
+import { ExcelUploadPanel } from '../components/data-edit-controls/excel-upload/ExcelUploadPanel';
 
 describe('ExcelUploadPanel', () => {
   it('renders upload controls on the left and warnings on the right', () => {

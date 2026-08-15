@@ -1,0 +1,148 @@
+.marketResearchReport {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: white;
+}
+
+.marketResearchQuery {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.marketResearchStatus {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.marketResearchPriceRange {
+  margin: 0;
+  padding: 7px 9px;
+  border-radius: var(--corp-radius-sm);
+  background: rgba(29, 74, 46, 0.07);
+  color: var(--corp-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.marketResearchSources {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.marketResearchSources li {
+  padding: 8px 0;
+  border-top: 1px solid var(--corp-line);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: var(--corp-text);
+}
+
+.marketResearchSources li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.marketResearchSources a {
+  color: var(--corp-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.marketResearchSources a:hover {
+  color: var(--corp-text);
+}
+
+.priceComparison {
+  padding: 8px 9px;
+  border-radius: var(--corp-radius-sm);
+  background: rgba(57, 57, 199, 0.08);
+}
+
+.priceComparisonTitle {
+  margin: 0 0 4px;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.priceComparisonRow {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.priceComparisonNote {
+  margin: 4px 0 0;
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.marketResearchQueries {
+  padding-top: 8px;
+  border-top: 1px solid var(--corp-line);
+}
+
+.marketResearchQueriesTitle {
+  margin: 0 0 4px;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.marketResearchQueryList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.marketResearchQueryChip {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--corp-surface-muted);
+  color: var(--corp-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.marketResearchNews {
+  padding-top: 8px;
+  border-top: 1px solid var(--corp-line);
+}
+
+.marketResearchNewsTitle {
+  margin: 0 0 4px;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.marketResearchNewsSummary {
+  margin: 2px 0 0;
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.marketResearchNewsMeta {
+  display: block;
+  margin-top: 2px;
+  color: var(--corp-muted);
+  font-size: 0.66rem;
+}
