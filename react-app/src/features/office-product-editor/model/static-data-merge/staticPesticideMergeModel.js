@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 
 const EMPTY_STATIC_PESTICIDE_FIELDS = Object.freeze({
-  product_nutirent: null,
+  nutirent: null,
   product_category: null,
   product_usage: [],
   indict_symbl: null,
@@ -35,7 +35,7 @@ export function mergeRowsWithStaticPesticide(rows, lookup) {
 
     return {
       ...row,
-      product_nutirent: staticPesticideRow.product_nutirent ?? null,
+      nutirent: staticPesticideRow.nutirent ?? null,
       product_category: staticPesticideRow.product_category ?? null,
       product_usage: staticPesticideRow.product_usage ?? [],
       indict_symbl: staticPesticideRow.indict_symbl ?? null,

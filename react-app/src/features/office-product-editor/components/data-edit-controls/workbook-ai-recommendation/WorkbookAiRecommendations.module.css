@@ -37,40 +37,12 @@
 }
 
 .recommendationGrid {
-  /* display: flex;
-  flex-wrap: wrap;
-  gap: 6px; */
   display: grid;
   grid-template-rows: repeat(1, auto);
   grid-auto-flow: column;
   gap: 6px;
   overflow-x: auto;
   padding-bottom: 4px;
-}
-
-.recommendationCard {
-  /* flex: 1 1 220px;
-  max-width: 320px;
-  padding: 6px 9px;
-  border: 1px solid var(--corp-line);
-  border-radius: var(--corp-radius-sm);
-  background: var(--corp-panel);
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    background var(--corp-transition),
-    border-color var(--corp-transition); */
-  min-width: 310px;
-  padding: 6px 9px;
-  border: 1px solid rgba(154, 52, 18, 0.14);
-  border-radius: var(--corp-radius-sm);
-  background: hsl(190, 30%, 96%);
-  text-align: left;
-}
-
-.recommendationCard:hover {
-  background: var(--corp-surface-muted);
 }
 
 .recommendationCardActive {
@@ -90,13 +62,6 @@
   font-size: 0.74rem;
 }
 
-.recommendationSeverity {
-  color: var(--corp-primary);
-  font-size: 0.64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .recommendationReason {
   margin: 3px 0 0;
   color: var(--corp-muted);
@@ -110,4 +75,40 @@
   color: var(--corp-text);
   font-size: 0.68rem;
   font-weight: 700;
+}
+
+.statusMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.statusMessage::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: aiRecommendSpin 0.7s linear infinite;
+}
+
+@keyframes aiRecommendSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusMessage::before {
+    animation: none;
+  }
 }

@@ -1,12 +1,6 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { createAiRecommendation } from './workbookAiRecommendationModel';
 
-const SEVERITY_PRIORITY = {
-  high: 0,
-  medium: 1,
-  low: 2,
-};
-
 export function normalizeOpenAiRecommendations(recommendations, rows) {
   if (!Array.isArray(recommendations)) {
     return [];
@@ -32,10 +26,15 @@ export function normalizeOpenAiRecommendations(recommendations, rows) {
     );
 }
 
+const GROUP_TYPE_PRIORITY = {
+  same_product: 0,
+  similar_product: 1,
+};
+
 export function sortWorkbookAiRecommendations(recommendations) {
   return [...recommendations].sort((left, right) => {
-    const leftPriority = SEVERITY_PRIORITY[left.severity] ?? 99;
-    const rightPriority = SEVERITY_PRIORITY[right.severity] ?? 99;
+    const leftPriority = GROUP_TYPE_PRIORITY[left.groupType] ?? 99;
+    const rightPriority = GROUP_TYPE_PRIORITY[right.groupType] ?? 99;
 
     if (leftPriority !== rightPriority) {
       return leftPriority - rightPriority;

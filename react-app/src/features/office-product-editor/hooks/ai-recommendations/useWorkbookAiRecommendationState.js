@@ -1,6 +1,10 @@
 import { startTransition, useEffect, useRef, useState } from 'react';
 
 import { analyzeWorkbookAiRecommendations } from '../../model/ai-recommendations/workbookAiAnalysisModel';
+import {
+  readStoredWorkbookAiRecommendationState,
+  writeStoredWorkbookAiRecommendationState,
+} from '../../model/ai-recommendations/workbookAiRecommendationStorageModel';
 
 export function useWorkbookAiRecommendationState(
   mergedRows,
@@ -13,20 +17,49 @@ export function useWorkbookAiRecommendationState(
   const [analysisMessage, setAnalysisMessage] = useState('');
   const [activeRecommendationId, setActiveRecommendationId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const activeRequestIdRef = useRef(0);
   const isAnalyzingRef = useRef(false);
 
   useEffect(() => {
     activeRequestIdRef.current += 1;
     isAnalyzingRef.current = false;
-    setRecommendations([]);
-    setAnalysisMode('idle');
-    setAnalysisMessage('');
-    setActiveRecommendationId(null);
     setIsLoading(false);
+    setIsHydrated(false);
+
+    const stored = readStoredWorkbookAiRecommendationState(
+      globalThis.sessionStorage,
+      workbookFingerprint,
+    );
+
+    setRecommendations(stored?.recommendations ?? []);
+    setAnalysisMode(stored?.analysisMode ?? 'idle');
+    setAnalysisMessage(stored?.analysisMessage ?? '');
+    setActiveRecommendationId(stored?.activeRecommendationId ?? null);
+    setIsHydrated(true);
   }, [workbookFingerprint]);
 
-  async function handleAnalyze() {
+  useEffect(() => {
+    if (!isHydrated) {
+      return;
+    }
+
+    writeStoredWorkbookAiRecommendationState(globalThis.sessionStorage, workbookFingerprint, {
+      recommendations,
+      analysisMode,
+      analysisMessage,
+      activeRecommendationId,
+    });
+  }, [
+    recommendations,
+    analysisMode,
+    analysisMessage,
+    activeRecommendationId,
+    isHydrated,
+    workbookFingerprint,
+  ]);
+
+  async function handleAnalyze(userHint) {
     if (isAnalyzingRef.current) {
       return;
     }
@@ -47,6 +80,7 @@ export function useWorkbookAiRecommendationState(
       const result = await analyzeWorkbookAiRecommendations(mergedRows, {
         officeCode,
         tableNameMode,
+        userHint,
       });
 
       if (activeRequestIdRef.current !== requestId) {
@@ -84,6 +118,10 @@ export function useWorkbookAiRecommendationState(
     );
   }
 
+  function clearActiveRecommendation() {
+    setActiveRecommendationId(null);
+  }
+
   return {
     recommendations,
     isLoading,
@@ -92,5 +130,6 @@ export function useWorkbookAiRecommendationState(
     activeRecommendationId,
     handleAnalyze,
     handleRecommendationSelect,
+    clearActiveRecommendation,
   };
 }

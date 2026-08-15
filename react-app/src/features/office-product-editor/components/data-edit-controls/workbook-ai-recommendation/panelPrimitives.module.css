@@ -1,0 +1,74 @@
+.panel {
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.compactPanel {
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-surface-muted);
+  box-shadow: none;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.aiSubTabPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.promptRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.promptInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+  font-size: 0.82rem;
+  font-family: inherit;
+  resize: none;
+}
+
+.promptInput:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.recommendationCard {
+  min-width: 310px;
+  padding: 6px 9px;
+  border: 1px solid rgba(154, 52, 18, 0.14);
+  border-radius: var(--corp-radius-sm);
+  background: hsl(190, 30%, 96%);
+  text-align: left;
+}
+
+.recommendationCard:hover {
+  background: var(--corp-surface-muted);
+}

@@ -39,7 +39,7 @@ export const MOBILE_UI_HELPER_TYPES = ['noticeBanner', 'highlightBox', 'ctaButto
 const REMOVED_MOBILE_UI_BLOCK_TYPES = new Set(['productCategoryNav', 'mobileCategoryBar']);
 
 export const PRICE_FIELD_KEYS = ['zero_tax_price', 'tax_price', 'exempt_tax_price', 'price_subsidy'];
-export const NUTRIENT_FIELD_KEYS = ['nutrient', 'product_nutirent'];
+export const NUTRIENT_FIELD_KEYS = ['nutrient', 'nutirent'];
 
 const DEFAULT_BLOCK_PROPS = {
   hero: {},

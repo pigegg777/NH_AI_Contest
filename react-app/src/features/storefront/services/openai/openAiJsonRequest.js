@@ -60,6 +60,30 @@ export function extractStructuredPayload(responseBody) {
   return null;
 }
 
+export function extractWebSearchQueries(responseBody) {
+  if (!Array.isArray(responseBody?.output)) {
+    return [];
+  }
+
+  const queries = [];
+
+  for (const outputItem of responseBody.output) {
+    if (outputItem?.type !== 'web_search_call') {
+      continue;
+    }
+
+    const action = outputItem.action;
+
+    if (Array.isArray(action?.queries)) {
+      queries.push(...action.queries);
+    } else if (typeof action?.query === 'string') {
+      queries.push(action.query);
+    }
+  }
+
+  return [...new Set(queries.map((query) => toTrimmedString(query)).filter(Boolean))];
+}
+
 async function readOpenAiError(response) {
   try {
     const errorBody = await response.json();
@@ -105,5 +129,8 @@ export async function requestOpenAiJson(requestBody, openAiApiKey) {
     throw new Error('OpenAI returned an unreadable structured response.');
   }
 
-  return structuredPayload;
+  return {
+    payload: structuredPayload,
+    webSearchQueries: extractWebSearchQueries(responseBody),
+  };
 }

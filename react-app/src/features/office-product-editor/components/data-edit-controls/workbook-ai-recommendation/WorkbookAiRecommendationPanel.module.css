@@ -1,0 +1,13 @@
+.aiSubTabs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0 0 3px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  letter-spacing: -0.01em;
+}
