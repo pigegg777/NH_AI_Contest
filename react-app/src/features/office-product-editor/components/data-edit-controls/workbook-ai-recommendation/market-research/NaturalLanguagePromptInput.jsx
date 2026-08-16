@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import primitives from './panelPrimitives.module.css';
+import primitives from '../shared/panelPrimitives.module.css';
 import styles from './NaturalLanguagePromptInput.module.css';
 
 export function NaturalLanguagePromptInput({ marketResearch }) {

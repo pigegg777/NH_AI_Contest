@@ -1,4 +1,4 @@
-import primitives from './panelPrimitives.module.css';
+import primitives from '../shared/panelPrimitives.module.css';
 import styles from './WorkbookAiRecommendations.module.css';
 
 export function WorkbookAiRecommendations({

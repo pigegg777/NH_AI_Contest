@@ -1,5 +1,5 @@
 import { MarketResearchReportBody } from './MarketResearchReportBody';
-import primitives from './panelPrimitives.module.css';
+import primitives from '../shared/panelPrimitives.module.css';
 import styles from './MarketResearchPanel.module.css';
 
 export function MarketResearchPanel({ marketResearch }) {

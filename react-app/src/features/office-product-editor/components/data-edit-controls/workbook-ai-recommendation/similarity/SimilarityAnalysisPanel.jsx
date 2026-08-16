@@ -1,5 +1,5 @@
 import { WorkbookAiRecommendations } from './WorkbookAiRecommendations';
-import primitives from './panelPrimitives.module.css';
+import primitives from '../shared/panelPrimitives.module.css';
 import styles from './SimilarityAnalysisPanel.module.css';
 
 export function SimilarityAnalysisPanel({

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { TabBar } from '../TabBar';
-import { SimilarityAnalysisPanel } from './SimilarityAnalysisPanel';
-import { NaturalLanguagePromptInput } from './NaturalLanguagePromptInput';
-import { MarketResearchPanel } from './MarketResearchPanel';
-import { BulkNoteWriterPanel } from './BulkNoteWriterPanel';
+import { SimilarityAnalysisPanel } from './similarity/SimilarityAnalysisPanel';
+import { NaturalLanguagePromptInput } from './market-research/NaturalLanguagePromptInput';
+import { MarketResearchPanel } from './market-research/MarketResearchPanel';
+import { BulkNoteWriterPanel } from './bulk-note/BulkNoteWriterPanel';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 
 const AI_ANALYSIS_SUB_TABS = [
