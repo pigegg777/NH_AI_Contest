@@ -1,5 +1,5 @@
-import { normalizeCardStyle } from '../model/card-design/cardStyleModel';
-import { resolveSectionOrderFromLayoutPlan } from '../model/card-design/cardCompositionModel';
+import { normalizeCardStyle } from '../model/card-design/style/cardStyleModel';
+import { resolveSectionOrderFromLayoutPlan } from '../model/card-design/style/cardCompositionModel';
 import { buildResolvedInfoSlots } from '../model/card-grid-section/cardGridSlotModel';
 import { buildShellCssVars } from '../model/card-grid-section/cardGridFieldStyleModel';
 import {
@@ -62,9 +62,13 @@ export default function CardGridSection({
             product?.row_id ||
             product?.product_code ||
             `${product?.product_name ?? 'product'}-${product?.spec ?? index}`;
+          const generatedImageForProduct =
+            section?.generatedCategoryImages?.[product?.medium_category] ?? null;
+          const resolvedImageSrc = product?.img_url || generatedImageForProduct?.imageDataUri || '';
+          const isAiGeneratedImage = !product?.img_url && Boolean(generatedImageForProduct);
           const hasImage =
             visibleFields.includes('img_url') &&
-            Boolean(product?.img_url) &&
+            Boolean(resolvedImageSrc) &&
             sectionOrder.includes('image');
           const isSideImage =
             hasImage &&
@@ -88,6 +92,8 @@ export default function CardGridSection({
               <CardImageSection
                 key="image"
                 product={product}
+                imageSrc={resolvedImageSrc}
+                isAiGenerated={isAiGeneratedImage}
                 cardStyle={resolvedStyle}
                 fitOverride={activeConditionalStyle?.image?.fit}
               />
