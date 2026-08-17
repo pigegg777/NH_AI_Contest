@@ -32,8 +32,7 @@ export async function requestOpenAiImage(prompt, apiKey, { model = DEFAULT_IMAGE
     body: JSON.stringify({
       model,
       prompt,
-      size: '1024x1024',
-      response_format: 'b64_json',
+      size: '512x512',
     }),
   });
 

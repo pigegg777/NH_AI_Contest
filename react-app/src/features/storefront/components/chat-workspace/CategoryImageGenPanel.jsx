@@ -9,6 +9,7 @@ export default function CategoryImageGenPanel({
   onGenerate,
 }) {
   const [promptDrafts, setPromptDrafts] = useState({});
+  const [errorMessages, setErrorMessages] = useState({});
 
   if (!Array.isArray(mediumCategories) || mediumCategories.length === 0) {
     return null;
@@ -22,6 +23,7 @@ export default function CategoryImageGenPanel({
           const generated = generatedCategoryImages?.[mediumCategory];
           const isGenerating = Boolean(isGeneratingCategoryImage?.[mediumCategory]);
           const inputId = `category-image-prompt-${mediumCategory}`;
+          const errorMessage = errorMessages[mediumCategory];
 
           return (
             <li key={mediumCategory} className={styles.row}>
@@ -47,14 +49,32 @@ export default function CategoryImageGenPanel({
                     setPromptDrafts((current) => ({ ...current, [mediumCategory]: event.target.value }))
                   }
                 />
+                {errorMessage ? <p className={styles.errorMessage}>{errorMessage}</p> : null}
               </div>
               <button
                 type="button"
                 className={styles.generateButton}
                 disabled={isGenerating}
-                onClick={() =>
-                  onGenerate(mediumCategory, { promptOverride: promptDrafts[mediumCategory] ?? '' })
-                }
+                onClick={async () => {
+                  const result = await onGenerate(mediumCategory, {
+                    promptOverride: promptDrafts[mediumCategory] ?? '',
+                  });
+
+                  if (result && result.ok === false) {
+                    setErrorMessages((current) => ({ ...current, [mediumCategory]: result.error }));
+                  } else {
+                    setErrorMessages((current) => {
+                      if (!(mediumCategory in current)) {
+                        return current;
+                      }
+
+                      const next = { ...current };
+                      delete next[mediumCategory];
+
+                      return next;
+                    });
+                  }
+                }}
               >
                 {isGenerating ? '생성 중...' : `${mediumCategory} 이미지 생성`}
               </button>

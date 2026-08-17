@@ -67,7 +67,7 @@ export default function CardGridSection({
           const resolvedImageSrc = product?.img_url || generatedImageForProduct?.imageDataUri || '';
           const isAiGeneratedImage = !product?.img_url && Boolean(generatedImageForProduct);
           const hasImage =
-            visibleFields.includes('img_url') &&
+            (visibleFields.includes('img_url') || isAiGeneratedImage) &&
             Boolean(resolvedImageSrc) &&
             sectionOrder.includes('image');
           const isSideImage =

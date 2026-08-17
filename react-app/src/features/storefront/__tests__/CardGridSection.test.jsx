@@ -168,6 +168,26 @@ describe('CardGridSection generatedCategoryImages fallback', () => {
     expect(screen.getByText('AI 생성 이미지')).toBeInTheDocument();
   });
 
+  it('renders the generated image even when img_url is not a selected visible field', () => {
+    render(
+      <CardGridSection
+        section={{
+          products: [{ row_id: 'p1', product_name: '무이미지 상품', medium_category: '복합비료' }],
+          generatedCategoryImages: {
+            복합비료: { imageDataUri: 'data:image/png;base64,abc', isAiGenerated: true },
+          },
+        }}
+        fields={['product_name']}
+        cardStyle={DEFAULT_CARD_STYLE}
+        sectionId="test-section-image-fallback-no-field"
+      />,
+    );
+
+    const image = screen.getByRole('img', { name: '무이미지 상품' });
+    expect(image).toHaveAttribute('src', 'data:image/png;base64,abc');
+    expect(screen.getByText('AI 생성 이미지')).toBeInTheDocument();
+  });
+
   it('prefers the real img_url over the generated fallback and shows no badge when img_url is present', () => {
     render(
       <CardGridSection

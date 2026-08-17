@@ -29,7 +29,6 @@ describe('requestOpenAiImage', () => {
     );
     const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
     expect(sentBody.prompt).toBe('a bag of fertilizer, studio photo style');
-    expect(sentBody.response_format).toBe('b64_json');
     expect(result).toEqual({ imageDataUri: 'data:image/png;base64,ZmFrZS1wbmc=' });
   });
 

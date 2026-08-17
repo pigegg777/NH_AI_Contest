@@ -65,6 +65,24 @@ describe('CategoryImageGenPanel', () => {
     expect(screen.getByRole('button', { name: '유기질비료 이미지 생성' })).toBeEnabled();
   });
 
+  it('shows an error message for the category when generation fails', async () => {
+    const onGenerate = vi.fn().mockResolvedValue({ ok: false, error: '이미지 생성에 실패했습니다.' });
+    const user = userEvent.setup();
+
+    render(
+      <CategoryImageGenPanel
+        mediumCategories={['복합비료']}
+        generatedCategoryImages={{}}
+        isGeneratingCategoryImage={{}}
+        onGenerate={onGenerate}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: '복합비료 이미지 생성' }));
+
+    expect(await screen.findByText('이미지 생성에 실패했습니다.')).toBeInTheDocument();
+  });
+
   it('shows a thumbnail preview once a generated image exists for the category', () => {
     render(
       <CategoryImageGenPanel
