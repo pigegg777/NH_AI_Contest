@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { TabBar } from '../TabBar';
-import { SimilarityAnalysisPanel } from './similarity/SimilarityAnalysisPanel';
-import { NaturalLanguagePromptInput } from './market-research/NaturalLanguagePromptInput';
-import { MarketResearchPanel } from './market-research/MarketResearchPanel';
-import { BulkNoteWriterPanel } from './bulk-note/BulkNoteWriterPanel';
+import { AiSimilarityExtractionPanel } from './ai-similarity-extraction/AiSimilarityExtractionPanel';
+import { AiMarketResearchPromptInput } from './ai-market-research/AiMarketResearchPromptInput';
+import { AiMarketResearchPanel } from './ai-market-research/AiMarketResearchPanel';
+import { AiBulkNoteWriterPanel } from './ai-bulk-note/AiBulkNoteWriterPanel';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 
 const AI_ANALYSIS_SUB_TABS = [
@@ -39,7 +39,7 @@ export function WorkbookAiRecommendationPanel({
       />
 
       {activeSubTabId === 'similarity' ? (
-        <SimilarityAnalysisPanel
+        <AiSimilarityExtractionPanel
           analysisHint={analysisHint}
           onAnalysisHintChange={setAnalysisHint}
           onAiAnalyze={onAiAnalyze}
@@ -56,14 +56,14 @@ export function WorkbookAiRecommendationPanel({
 
       {activeSubTabId === 'marketResearch' ? (
         <div className={styles.aiSubTabPanel}>
-          <NaturalLanguagePromptInput marketResearch={marketResearch} />
-          <MarketResearchPanel marketResearch={marketResearch} />
+          <AiMarketResearchPromptInput marketResearch={marketResearch} />
+          <AiMarketResearchPanel marketResearch={marketResearch} />
         </div>
       ) : null}
 
       {activeSubTabId === 'bulkNote' ? (
         <div className={styles.aiSubTabPanel}>
-          <BulkNoteWriterPanel bulkNoteWriter={bulkNoteWriter} />
+          <AiBulkNoteWriterPanel bulkNoteWriter={bulkNoteWriter} />
         </div>
       ) : null}
     </div>

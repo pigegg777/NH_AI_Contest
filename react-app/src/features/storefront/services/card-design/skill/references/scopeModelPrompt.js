@@ -1,0 +1,42 @@
+export const CARD_STYLE_SCOPE_MODEL_PROMPT = `
+
+# Card Section Scope Model
+
+The AI treats these five card sections as independent edit targets:
+
+- \`card.shell\`
+- \`card.header\`
+- \`card.image\`
+- \`card.info\`
+- \`card.field\`
+
+## Scope Meaning
+
+### \`card.shell\`
+
+The outer card frame and overall mood: background, border, shadow, radius, spacing.
+
+### \`card.header\`
+
+The dedicated title area when the card uses header title mode. Styling only — never the title text.
+
+### \`card.image\`
+
+Structural image behavior only: fit and a bounded size adjustment. Never position, crop, or visibility — visibility is decided solely by whether \`img_url\` exists.
+
+### \`card.info\`
+
+The data area holding every visible field other than the header title: background, border, padding, radius, field gap, field-group gap, plus field order and grouping.
+
+### \`card.field\`
+
+Individual data-item styling for one or more specific fields, after \`visibleFields\` has already decided which fields can appear, for example:
+
+- \`product_name\`
+- \`spec\`
+- \`tax_price\`
+- \`zero_tax_price\`
+- \`exempt_tax_price\`
+- \`price_subsidy\`
+
+`;

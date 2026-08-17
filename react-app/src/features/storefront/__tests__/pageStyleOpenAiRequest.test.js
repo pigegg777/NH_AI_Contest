@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { buildPageStyleOpenAiRequestBody } from '../model/page-design/pageStyleOpenAiRequest';
+import { buildPageStyleOpenAiRequestBody } from '../model/page-design/ai-request/pageStyleOpenAiRequest';
 
 afterEach(() => {
   vi.clearAllMocks();

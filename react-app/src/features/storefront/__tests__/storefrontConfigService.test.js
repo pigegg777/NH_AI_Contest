@@ -21,28 +21,31 @@ describe('storefrontConfigService.fetchOfficeConfigRows', () => {
     expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('returns the raw office row and category rows exactly as supabase returned them, with no normalization', async () => {
-    const rawOfficeRow = { office_code: 'OFF-1', page_config: { anything: 'goes' }, hidden_products: null, updated_at: 't' };
-    const rawCategoryRows = [{ product_category_name: 'X', category_config: { anything: 'goes' } }];
+  it('returns the raw office row and its embedded category_detail_config exactly as supabase returned them', async () => {
+    const rawCategoryRows = [{ product_category_name: 'X', updated_at: 't', category_config: { anything: 'goes' } }];
+    const rawOfficeRow = {
+      office_code: 'OFF-1',
+      page_config: { anything: 'goes' },
+      hidden_products: null,
+      category_detail_config: rawCategoryRows,
+      updated_at: 't',
+    };
     const maybeSingle = vi.fn().mockResolvedValue({ data: rawOfficeRow, error: null });
-    const officeEq = vi.fn(() => ({ maybeSingle }));
-    const officeSelect = vi.fn(() => ({ eq: officeEq }));
-    const categoryOrder = vi.fn().mockResolvedValue({ data: rawCategoryRows, error: null });
-    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
-    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
+    const eq = vi.fn(() => ({ maybeSingle }));
+    const select = vi.fn(() => ({ eq }));
 
     supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') return { select: officeSelect };
-      if (tableName === 'office_page_category_configs') return { select: categorySelect };
+      if (tableName === 'office_page_config') return { select };
       throw new Error(`Unexpected table: ${tableName}`);
     });
 
     const result = await fetchOfficeConfigRows({ officeCode: 'OFF-1' });
 
+    expect(select).toHaveBeenCalledWith('office_code, page_config, hidden_products, category_detail_config, updated_at');
     expect(result).toEqual({ officeRow: rawOfficeRow, categoryRows: rawCategoryRows });
   });
 
-  it('skips the category query and returns an empty category list when no office row exists', async () => {
+  it('returns an empty category list when no office row exists', async () => {
     const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
     const eq = vi.fn(() => ({ maybeSingle }));
     const select = vi.fn(() => ({ eq }));
@@ -55,6 +58,24 @@ describe('storefrontConfigService.fetchOfficeConfigRows', () => {
     const result = await fetchOfficeConfigRows({ officeCode: 'OFF-1' });
 
     expect(result).toEqual({ officeRow: null, categoryRows: [] });
+  });
+
+  it('defaults categoryRows to an empty array when category_detail_config is missing', async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: { office_code: 'OFF-1', page_config: {}, hidden_products: [], category_detail_config: null, updated_at: 't' },
+      error: null,
+    });
+    const eq = vi.fn(() => ({ maybeSingle }));
+    const select = vi.fn(() => ({ eq }));
+
+    supabase.from.mockImplementation((tableName) => {
+      if (tableName === 'office_page_config') return { select };
+      throw new Error(`Unexpected table: ${tableName}`);
+    });
+
+    const result = await fetchOfficeConfigRows({ officeCode: 'OFF-1' });
+
+    expect(result.categoryRows).toEqual([]);
   });
 });
 
@@ -71,29 +92,16 @@ describe('storefrontConfigService.saveOfficeConfigRows', () => {
     expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('upserts the page config and category rows exactly as given, then deletes stale category names', async () => {
-    const officeUpsert = vi.fn().mockResolvedValue({ error: null });
-    const categorySelectEq = vi.fn().mockResolvedValue({
-      data: [{ product_category_name: 'Obsolete' }, { product_category_name: 'Kept' }],
-      error: null,
-    });
-    const categorySelect = vi.fn(() => ({ eq: categorySelectEq }));
-    const categoryUpsert = vi.fn().mockResolvedValue({ error: null });
-    const categoryDeleteIn = vi.fn().mockResolvedValue({ error: null });
-    const categoryDeleteEq = vi.fn(() => ({ in: categoryDeleteIn }));
-    const categoryDelete = vi.fn(() => ({ eq: categoryDeleteEq }));
+  it('upserts the page config, hidden products, and category_detail_config in one office_page_config row', async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
 
     supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') return { upsert: officeUpsert };
-      if (tableName === 'office_page_category_configs') {
-        return { select: categorySelect, upsert: categoryUpsert, delete: categoryDelete };
-      }
-
+      if (tableName === 'office_page_config') return { upsert };
       throw new Error(`Unexpected table: ${tableName}`);
     });
 
     const pageConfigPayload = { anything: 'goes' };
-    const categoryRows = [{ office_code: 'OFF-1', product_category_name: 'Kept', sort_order: 0, category_config: {} }];
+    const categoryRows = [{ product_category_name: 'Kept', updated_at: 't', category_config: {} }];
 
     await saveOfficeConfigRows({
       officeCode: 'OFF-1',
@@ -102,23 +110,22 @@ describe('storefrontConfigService.saveOfficeConfigRows', () => {
       categoryRows,
     });
 
-    expect(officeUpsert).toHaveBeenCalledWith(
-      { office_code: 'OFF-1', page_config: pageConfigPayload, hidden_products: [{ product_name: 'Hidden' }] },
+    expect(upsert).toHaveBeenCalledWith(
+      {
+        office_code: 'OFF-1',
+        page_config: pageConfigPayload,
+        hidden_products: [{ product_name: 'Hidden' }],
+        category_detail_config: categoryRows,
+      },
       { onConflict: 'office_code' },
     );
-    expect(categoryUpsert).toHaveBeenCalledWith(categoryRows, { onConflict: 'office_code,product_category_name' });
-    expect(categoryDeleteIn).toHaveBeenCalledWith('product_category_name', ['Obsolete']);
   });
 
-  it('skips the category upsert call when given no category rows', async () => {
-    const officeUpsert = vi.fn().mockResolvedValue({ error: null });
-    const categorySelectEq = vi.fn().mockResolvedValue({ data: [], error: null });
-    const categorySelect = vi.fn(() => ({ eq: categorySelectEq }));
-    const categoryUpsert = vi.fn();
+  it('writes an empty category_detail_config array when given no category rows', async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: null });
 
     supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') return { upsert: officeUpsert };
-      if (tableName === 'office_page_category_configs') return { select: categorySelect, upsert: categoryUpsert };
+      if (tableName === 'office_page_config') return { upsert };
       throw new Error(`Unexpected table: ${tableName}`);
     });
 
@@ -129,6 +136,22 @@ describe('storefrontConfigService.saveOfficeConfigRows', () => {
       categoryRows: [],
     });
 
-    expect(categoryUpsert).not.toHaveBeenCalled();
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ category_detail_config: [] }),
+      { onConflict: 'office_code' },
+    );
+  });
+
+  it('throws when the upsert fails', async () => {
+    const upsert = vi.fn().mockResolvedValue({ error: { message: 'boom' } });
+
+    supabase.from.mockImplementation((tableName) => {
+      if (tableName === 'office_page_config') return { upsert };
+      throw new Error(`Unexpected table: ${tableName}`);
+    });
+
+    await expect(
+      saveOfficeConfigRows({ officeCode: 'OFF-1', pageConfigPayload: {}, hiddenProducts: [], categoryRows: [] }),
+    ).rejects.toThrow('boom');
   });
 });

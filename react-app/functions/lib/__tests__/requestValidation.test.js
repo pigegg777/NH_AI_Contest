@@ -4,10 +4,12 @@ import {
   RequestValidationError,
   assertHistoryWithinLimits,
   assertOfficeCodePresent,
-  assertPostJsonRequest,
   assertPromptWithinLimit,
   pickAllowedKeys,
-  readJsonBody,
+  readOfficeCode,
+  readValidatedJsonBody,
+  toOptionalTrimmedString,
+  withRequestErrorHandling,
 } from '../requestValidation';
 
 function buildRequest({ method = 'POST', contentType = 'application/json', body = '{}', contentLength } = {}) {
@@ -27,38 +29,32 @@ function buildRequest({ method = 'POST', contentType = 'application/json', body 
   return new Request('https://example.com/api/storefront-ai/page-style', options);
 }
 
-describe('assertPostJsonRequest', () => {
-  it('passes for a POST request with a JSON content type', () => {
-    expect(() => assertPostJsonRequest(buildRequest())).not.toThrow();
-  });
-
-  it('rejects non-POST methods with 405', () => {
-    expect(() => assertPostJsonRequest(buildRequest({ method: 'GET' }))).toThrow(
+describe('readValidatedJsonBody', () => {
+  it('rejects non-POST methods with 405 without reading the body', async () => {
+    await expect(readValidatedJsonBody(buildRequest({ method: 'GET' }))).rejects.toEqual(
       expect.objectContaining({ status: 405 }),
     );
   });
 
-  it('rejects a non-JSON content type with 422', () => {
-    expect(() => assertPostJsonRequest(buildRequest({ contentType: 'text/plain' }))).toThrow(
-      expect.objectContaining({ status: 422 }),
-    );
+  it('rejects a non-JSON content type with 422', async () => {
+    await expect(
+      readValidatedJsonBody(buildRequest({ contentType: 'text/plain' })),
+    ).rejects.toEqual(expect.objectContaining({ status: 422 }));
   });
-});
 
-describe('readJsonBody', () => {
   it('parses a small valid JSON body', async () => {
-    const body = await readJsonBody(buildRequest({ body: '{"officeCode":"OFF-1"}' }));
+    const body = await readValidatedJsonBody(buildRequest({ body: '{"officeCode":"OFF-1"}' }));
     expect(body).toEqual({ officeCode: 'OFF-1' });
   });
 
   it('rejects an oversized body via content-length with 413', async () => {
-    await expect(readJsonBody(buildRequest({ contentLength: 999999 }))).rejects.toEqual(
+    await expect(readValidatedJsonBody(buildRequest({ contentLength: 999999 }))).rejects.toEqual(
       expect.objectContaining({ status: 413 }),
     );
   });
 
   it('rejects invalid JSON with 422', async () => {
-    await expect(readJsonBody(buildRequest({ body: 'not json' }))).rejects.toEqual(
+    await expect(readValidatedJsonBody(buildRequest({ body: 'not json' }))).rejects.toEqual(
       expect.objectContaining({ status: 422 }),
     );
   });
@@ -92,6 +88,83 @@ describe('assertOfficeCodePresent', () => {
 
   it('passes for a non-empty officeCode', () => {
     expect(() => assertOfficeCodePresent('OFF-1')).not.toThrow();
+  });
+});
+
+describe('readOfficeCode', () => {
+  it('trims a valid officeCode and returns it', () => {
+    expect(readOfficeCode({ officeCode: '  OFF-1  ' })).toBe('OFF-1');
+  });
+
+  it('rejects a missing officeCode with 422', () => {
+    expect(() => readOfficeCode({})).toThrow(expect.objectContaining({ status: 422 }));
+  });
+
+  it('rejects a non-string officeCode with 422', () => {
+    expect(() => readOfficeCode({ officeCode: 42 })).toThrow(
+      expect.objectContaining({ status: 422 }),
+    );
+  });
+
+  it('rejects a whitespace-only officeCode with 422', () => {
+    expect(() => readOfficeCode({ officeCode: '   ' })).toThrow(
+      expect.objectContaining({ status: 422 }),
+    );
+  });
+});
+
+describe('toOptionalTrimmedString', () => {
+  it('trims a string value', () => {
+    expect(toOptionalTrimmedString('  hi  ')).toBe('hi');
+  });
+
+  it('returns an empty string for non-string values', () => {
+    expect(toOptionalTrimmedString(undefined)).toBe('');
+    expect(toOptionalTrimmedString(null)).toBe('');
+    expect(toOptionalTrimmedString(42)).toBe('');
+  });
+});
+
+describe('withRequestErrorHandling', () => {
+  it('returns the wrapped handler result unchanged on success', async () => {
+    const handler = withRequestErrorHandling(async () => new Response('ok', { status: 200 }));
+
+    const response = await handler({});
+
+    expect(response.status).toBe(200);
+  });
+
+  it('maps a thrown RequestValidationError to its own status and message', async () => {
+    const handler = withRequestErrorHandling(async () => {
+      throw new RequestValidationError('officeCode is required.', 422);
+    });
+
+    const response = await handler({});
+    const body = await response.json();
+
+    expect(response.status).toBe(422);
+    expect(body).toEqual({ error: 'officeCode is required.' });
+  });
+
+  it('maps any other thrown error to a generic 500', async () => {
+    const handler = withRequestErrorHandling(async () => {
+      throw new Error('boom');
+    });
+
+    const response = await handler({});
+    const body = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(body).toEqual({ error: 'Unexpected server error.' });
+  });
+
+  it('passes the context object through to the wrapped handler', async () => {
+    const handler = withRequestErrorHandling(async (context) => {
+      expect(context).toEqual({ request: 'req', env: 'env' });
+      return new Response('ok');
+    });
+
+    await handler({ request: 'req', env: 'env' });
   });
 });
 

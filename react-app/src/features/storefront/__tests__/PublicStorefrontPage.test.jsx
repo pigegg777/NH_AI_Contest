@@ -6,7 +6,7 @@ import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/cardStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/style/cardStyleModel';
 import { fetchStorefrontConfig } from '../model/storefront-config/storefrontConfigOrchestrator';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
@@ -378,7 +378,8 @@ describe('PublicStorefrontPage', () => {
         theme: { brandColor: '#2563eb', backgroundTone: 'sky' },
         nav: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', logoUrl: '' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'outlined' },
-        categoryChips: { enabled: true, sticky: true, variant: 'filled' },
+        categoryChips: { enabled: true, sticky: true },
+        pageStyle: { categoryChips: { variant: 'filled' } },
       },
       navConfig: {
         title: 'NH Demo Storefront',
@@ -387,7 +388,6 @@ describe('PublicStorefrontPage', () => {
         searchPlaceholder: 'Search products',
         logoUrl: '',
         searchVariant: 'outlined',
-        categoryChipVariant: 'filled',
       },
       categoryConfigs: [
         {

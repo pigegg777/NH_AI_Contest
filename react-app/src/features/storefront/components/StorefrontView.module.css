@@ -221,17 +221,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: var(--page-product-chip-gap, 10px);
 }
 
 .productCategoryChip {
-  min-height: 36px;
-  padding: 0 16px;
+  min-height: var(--page-product-chip-height, 36px);
+  padding: 0 var(--page-product-chip-padding-inline, 16px);
   border: 1px solid var(--page-product-chip-border, rgba(29, 74, 46, 0.14));
-  border-radius: 999px;
+  border-radius: var(--page-product-chip-radius, 999px);
   background: var(--page-product-chip-bg, rgba(255, 255, 255, 0.86));
   color: var(--page-product-chip-text, #355a30);
-  font-size: 0.82rem;
+  font-size: var(--page-product-chip-font-size, 0.82rem);
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
@@ -244,12 +244,9 @@
 }
 
 .productCategoryChip:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--brand-color, var(--corp-primary)) 36%,
-    rgba(29, 74, 46, 0.14)
-  );
-  color: var(--brand-color, #1d4a2e);
+  background: var(--page-product-chip-hover-bg, var(--page-product-chip-bg, rgba(255, 255, 255, 0.86)));
+  border-color: var(--page-product-chip-hover-border, color-mix(in srgb, var(--brand-color, var(--corp-primary)) 36%, rgba(29, 74, 46, 0.14)));
+  color: var(--page-product-chip-hover-text, var(--brand-color, #1d4a2e));
   box-shadow: 0 8px 18px rgba(20, 33, 25, 0.08);
   transform: translateY(-1px);
 }
@@ -519,7 +516,7 @@
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
-  gap: var(--category-chip-gap, 18px);
+  gap: var(--page-chip-gap, 18px);
   margin-top: -2px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -535,15 +532,15 @@
 .categoryChip {
   position: relative;
   flex: 0 0 auto;
-  min-height: var(--category-chip-height, 32px);
-  padding: 0 14px;
+  min-height: var(--page-chip-height, 32px);
+  padding: 0 var(--page-chip-padding-inline, 14px);
   border-width: 1px;
   border-style: solid;
   border-color: var(--page-chip-border, rgba(29, 74, 46, 0.16));
-  border-radius: var(--category-chip-radius, 999px);
+  border-radius: var(--page-chip-radius, 999px);
   background: var(--page-chip-bg, #ffffff);
   color: var(--page-chip-text, #5f6d5b);
-  font-size: var(--category-chip-font-size, 0.8rem);
+  font-size: var(--page-chip-font-size, 0.8rem);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -567,8 +564,9 @@
 }
 
 .categoryChip:hover {
-  color: #355a30;
-  border-color: rgba(29, 74, 46, 0.28);
+  background: var(--page-chip-hover-bg, var(--page-chip-bg, #ffffff));
+  color: var(--page-chip-hover-text, #355a30);
+  border-color: var(--page-chip-hover-border, rgba(29, 74, 46, 0.28));
   box-shadow: 0 3px 8px rgba(20, 33, 25, 0.1);
 }
 
@@ -584,7 +582,7 @@
 }
 
 .categoryWrapSoft .categoryChip:hover {
-  border-color: rgba(29, 74, 46, 0.28);
+  border-color: var(--page-chip-hover-border, rgba(29, 74, 46, 0.28));
   box-shadow: 0 3px 10px rgba(20, 33, 25, 0.11);
 }
 
@@ -660,6 +658,65 @@
           var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
         )
         30%,
+      transparent
+    );
+}
+
+.productCategoryWrapSoft .productCategoryChip {
+  background: var(--page-product-chip-bg, #ffffff);
+  border-color: rgba(29, 74, 46, 0.14);
+}
+
+.productCategoryWrapSoft .productCategoryChipActive {
+  background: color-mix(
+    in srgb,
+    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 14%,
+    #ffffff
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 40%,
+    #dfe9dc
+  );
+  color: var(--page-product-chip-active-text, #173223);
+  box-shadow: 0 4px 12px
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 22%,
+      transparent
+    );
+}
+
+.productCategoryWrapOutline .productCategoryChip {
+  background: var(--page-product-chip-bg, #ffffff);
+  border-color: rgba(29, 74, 46, 0.16);
+}
+
+.productCategoryWrapOutline .productCategoryChipActive {
+  background: var(--page-product-chip-bg, #ffffff);
+  border-color: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
+  color: var(--page-product-chip-active-text, #173223);
+  box-shadow: 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 24%,
+      transparent
+    );
+}
+
+.productCategoryWrapFilled .productCategoryChip {
+  background: var(--page-product-chip-bg, #ffffff);
+  border-color: rgba(29, 74, 46, 0.16);
+}
+
+.productCategoryWrapFilled .productCategoryChipActive {
+  background: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
+  border-color: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
+  color: var(--page-product-chip-active-text, #ffffff);
+  box-shadow: 0 10px 20px
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 30%,
       transparent
     );
 }
@@ -793,23 +850,23 @@
   }
 
   .categoryWrap {
-    gap: var(--category-chip-gap, 14px);
+    gap: var(--page-chip-gap, 14px);
   }
 
   .productCategoryWrap {
-    gap: 8px;
+    gap: var(--page-product-chip-gap, 8px);
   }
 
   .productCategoryChip {
-    min-height: 34px;
-    padding: 0 14px;
-    font-size: 0.78rem;
+    min-height: var(--page-product-chip-height, 34px);
+    padding: 0 var(--page-product-chip-padding-inline, 14px);
+    font-size: var(--page-product-chip-font-size, 0.78rem);
   }
 
   .categoryChip {
-    min-height: var(--category-chip-height, 30px);
-    padding: 0 12px;
-    font-size: var(--category-chip-font-size, 0.74rem);
+    min-height: var(--page-chip-height, 30px);
+    padding: 0 var(--page-chip-padding-inline, 12px);
+    font-size: var(--page-chip-font-size, 0.74rem);
   }
 
   .categoryChip:not(:last-child)::after {

@@ -9,7 +9,7 @@ import {
   normalizeProductCategoryChipsIntent,
   normalizeSearchIntent,
   PAGE_STYLE_AI_SCHEMA,
-} from '../model/page-design/pageStyleAiResponseModel';
+} from '../model/page-design/ai-response/pageStyleAiResponseModel';
 
 function collectStrictModeViolations(schema, path = []) {
   if (!schema || typeof schema !== 'object') return [];
@@ -121,7 +121,7 @@ describe('normalizeCategoryChipsIntent', () => {
     expect(normalizeCategoryChipsIntent(null)).toBeNull();
   });
 
-  it('keeps only the five approved chip properties', () => {
+  it('drops unapproved properties and invalid tokens', () => {
     expect(
       normalizeCategoryChipsIntent({
         backgroundHex: '#ffffff',
@@ -134,6 +134,39 @@ describe('normalizeCategoryChipsIntent', () => {
       activeBackgroundHex: '#1d4a2e',
     });
   });
+
+  it('keeps hover colors and shape tokens', () => {
+    expect(
+      normalizeCategoryChipsIntent({
+        hoverBackgroundHex: '#f4f7f5',
+        hoverTextHex: '#355a30',
+        hoverBorderHex: '#a9c2af',
+        variant: 'filled',
+        sizeToken: 'lg',
+        radiusToken: 'square',
+        gapToken: 'tight',
+      }),
+    ).toEqual({
+      hoverBackgroundHex: '#f4f7f5',
+      hoverTextHex: '#355a30',
+      hoverBorderHex: '#a9c2af',
+      variant: 'filled',
+      sizeToken: 'lg',
+      radiusToken: 'square',
+      gapToken: 'tight',
+    });
+  });
+
+  it('rejects tokens outside the approved enums', () => {
+    expect(
+      normalizeCategoryChipsIntent({
+        variant: 'glossy',
+        sizeToken: 'huge',
+        radiusToken: 'circle',
+        gapToken: 'none',
+      }),
+    ).toBeNull();
+  });
 });
 
 describe('normalizeProductCategoryChipsIntent', () => {
@@ -141,7 +174,7 @@ describe('normalizeProductCategoryChipsIntent', () => {
     expect(normalizeProductCategoryChipsIntent(null)).toBeNull();
   });
 
-  it('keeps only the five approved chip properties', () => {
+  it('drops unapproved properties and invalid tokens', () => {
     expect(
       normalizeProductCategoryChipsIntent({
         backgroundHex: '#ffffff',
@@ -153,6 +186,19 @@ describe('normalizeProductCategoryChipsIntent', () => {
       backgroundHex: '#ffffff',
       activeBackgroundHex: '#1d4a2e',
     });
+  });
+
+  it('accepts matching values for both scopes, supporting explicit "make them the same" requests', () => {
+    const sharedIntent = {
+      backgroundHex: '#f4f7f5',
+      variant: 'outline',
+      sizeToken: 'sm',
+      radiusToken: 'rounded',
+      gapToken: 'relaxed',
+    };
+
+    expect(normalizeCategoryChipsIntent(sharedIntent)).toEqual(sharedIntent);
+    expect(normalizeProductCategoryChipsIntent(sharedIntent)).toEqual(sharedIntent);
   });
 });
 

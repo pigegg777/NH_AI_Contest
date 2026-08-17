@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
-import { requestCardStyleAiIntent } from "../model/card-design/cardStyleAiOrchestrator";
-import { requestPageStyleAiIntent } from "../model/page-design/pageStyleAiOrchestrator";
+import { requestCardStyleAiIntent } from "../model/card-design/ai-request/cardStyleAiOrchestrator";
+import { requestPageStyleAiIntent } from "../model/page-design/ai-request/pageStyleAiOrchestrator";
 import StorefrontBuilderPage from "../pages/StorefrontBuilderPage";
 import {
   fetchStorefrontConfig,
@@ -23,11 +23,11 @@ vi.mock("../model/storefront-config/storefrontConfigOrchestrator", () => ({
   upsertStorefrontConfig: vi.fn(),
 }));
 
-vi.mock("../model/page-design/pageStyleAiOrchestrator", () => ({
+vi.mock("../model/page-design/ai-request/pageStyleAiOrchestrator", () => ({
   requestPageStyleAiIntent: vi.fn(),
 }));
 
-vi.mock("../model/card-design/cardStyleAiOrchestrator", () => ({
+vi.mock("../model/card-design/ai-request/cardStyleAiOrchestrator", () => ({
   requestCardStyleAiIntent: vi.fn(),
 }));
 

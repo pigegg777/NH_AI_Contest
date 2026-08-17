@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { analyzeWorksheetStructure } from '../model/excel-extranction/worksheetStructureModel';
 

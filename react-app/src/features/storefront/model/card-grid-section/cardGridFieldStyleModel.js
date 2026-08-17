@@ -1,4 +1,4 @@
-import { resolveFieldColorRoleValue } from '../card-design/cardStyleModel';
+import { resolveFieldColorRoleValue } from '../card-design/style/cardStyleModel';
 
 export const PRICE_FIELD_SET = new Set([
   'zero_tax_price',

@@ -1,17 +1,17 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { toTrimmedString } from '../../../common/utils/text';
 import { useActiveCategoryData } from './sidebar-catalog/useActiveCategoryData';
 import { useOfficeProductDataCatalog } from './office-product-data/useOfficeProductDataCatalog';
 import { useOfficeProductDataDeletion } from './office-product-data/useOfficeProductDataDeletion';
-import { useWorkbookAiRecommendationState } from './ai-recommendations/useWorkbookAiRecommendationState';
-import { useMarketResearchState } from './market-research/useMarketResearchState';
-import { useBulkNoteWriterState } from './bulk-note/useBulkNoteWriterState';
+import { useAiSimilarityExtractionState } from './ai-similarity-extraction/useAiSimilarityExtractionState';
+import { useAiMarketResearchState } from './ai-market-research/useAiMarketResearchState';
+import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
-import { filterRowsByActiveRecommendation } from '../model/ai-recommendations/workbookAiRecommendationRowFilterModel';
+import { filterRowsByActiveAiSimilarityExtractionMatch } from '../model/ai-similarity-extraction/aiSimilarityExtractionRowFilterModel';
 import { shouldUseStaticDataMerge } from '../model/static-data-merge/staticDataMergeModel';
 import {
   readStoredOfficeProductEditorDraft,
@@ -69,16 +69,16 @@ export function useOfficeProductEditorState(user) {
     },
   );
 
-  const aiState = useWorkbookAiRecommendationState(
+  const aiState = useAiSimilarityExtractionState(
     tableState.annotatedRows,
     effectiveFingerprint,
     user?.office_code,
     tableNameMode,
   );
 
-  const marketResearchState = useMarketResearchState(user?.office_code, tableState.annotatedRows);
+  const marketResearchState = useAiMarketResearchState(user?.office_code, tableState.annotatedRows);
 
-  const bulkNoteWriterState = useBulkNoteWriterState(
+  const bulkNoteWriterState = useAiBulkNoteWriterState(
     user?.office_code,
     tableState.mergedRows,
     tableNameMode,
@@ -100,16 +100,20 @@ export function useOfficeProductEditorState(user) {
       ? '저장하려면 먼저 사이드바에서 카테고리를 선택하세요.'
       : '';
 
-  const { cards, registeredCount } = buildOfficeProductDataCatalogModel(
-    officeProductCatalog.items,
-    selection.pendingCustomCategories,
+  const { cards, registeredCount } = useMemo(
+    () =>
+      buildOfficeProductDataCatalogModel(
+        officeProductCatalog.items,
+        selection.pendingCustomCategories,
+      ),
+    [officeProductCatalog.items, selection.pendingCustomCategories],
   );
 
   const canUploadFile = toTrimmedString(saveState.resolvedCategoryName).length > 0;
 
   const visibleTableRows = useMemo(
     () =>
-      filterRowsByActiveRecommendation(
+      filterRowsByActiveAiSimilarityExtractionMatch(
         tableState.rows,
         aiState.recommendations,
         aiState.activeRecommendationId,
@@ -122,28 +126,39 @@ export function useOfficeProductEditorState(user) {
     aiState.clearActiveRecommendation();
   }
 
-  function handleCatalogCardSelect(card) {
-    if (!selection.isCardSelected(card)) {
-      extraction.resetWorkbook();
-    }
-    selection.handleCatalogSelect(card);
-  }
-
-  function handleCatalogCardDelete(card) {
-    if (card?.isPendingCustom) {
-      const isDeletingActivePendingCard = selection.isCardSelected(card);
-
-      selection.handlePendingCustomCategoryDelete(card.categoryName);
-
-      if (isDeletingActivePendingCard) {
+  const handleCatalogCardSelect = useCallback(
+    (card) => {
+      if (!selection.isCardSelected(card)) {
         extraction.resetWorkbook();
       }
+      selection.handleCatalogSelect(card);
+    },
+    [selection.isCardSelected, selection.handleCatalogSelect, extraction.resetWorkbook],
+  );
 
-      return;
-    }
+  const handleCatalogCardDelete = useCallback(
+    (card) => {
+      if (card?.isPendingCustom) {
+        const isDeletingActivePendingCard = selection.isCardSelected(card);
 
-    void deletion.handleCatalogCardDelete(card);
-  }
+        selection.handlePendingCustomCategoryDelete(card.categoryName);
+
+        if (isDeletingActivePendingCard) {
+          extraction.resetWorkbook();
+        }
+
+        return;
+      }
+
+      void deletion.handleCatalogCardDelete(card);
+    },
+    [
+      selection.isCardSelected,
+      selection.handlePendingCustomCategoryDelete,
+      extraction.resetWorkbook,
+      deletion.handleCatalogCardDelete,
+    ],
+  );
 
   useEffect(() => {
     writeStoredOfficeProductEditorDraft(globalThis.sessionStorage, draftOfficeCode, {
@@ -170,6 +185,93 @@ export function useOfficeProductEditorState(user) {
     selection.tableNameMode,
   ]);
 
+  const activeCategoryValue = useMemo(
+    () => ({
+      isRegisteredProductDataLoading: activeCategoryData.isRegisteredProductDataLoading,
+      registeredProductDataErrorMessage: activeCategoryData.registeredProductDataErrorMessage,
+    }),
+    [
+      activeCategoryData.isRegisteredProductDataLoading,
+      activeCategoryData.registeredProductDataErrorMessage,
+    ],
+  );
+
+  const catalogValue = useMemo(
+    () => ({
+      cards,
+      registeredCount,
+      isLoading: officeProductCatalog.isLoading,
+      errorMessage: officeProductCatalog.errorMessage,
+      isCardSelected: selection.isCardSelected,
+      onCardSelect: handleCatalogCardSelect,
+      onCardDelete: handleCatalogCardDelete,
+    }),
+    [
+      cards,
+      registeredCount,
+      officeProductCatalog.isLoading,
+      officeProductCatalog.errorMessage,
+      selection.isCardSelected,
+      handleCatalogCardSelect,
+      handleCatalogCardDelete,
+    ],
+  );
+
+  const extractionValue = useMemo(
+    () => ({
+      result: extraction.result,
+      selectedFileName: extraction.selectedFileName,
+      handleWorkbookChange: extraction.handleWorkbookChange,
+      processFile: extraction.processFile,
+    }),
+    [
+      extraction.result,
+      extraction.selectedFileName,
+      extraction.handleWorkbookChange,
+      extraction.processFile,
+    ],
+  );
+
+  const uploadValue = useMemo(
+    () => ({
+      canUploadFile,
+      tableNameCardProps: {
+        customTableName: selection.customTableName,
+        onTableNameChange: selection.handleCustomTableNameChange,
+        showsTableNameInput: selection.showsCustomTableNameInput,
+        validationError: selection.tableNameValidationError,
+        onCreateTable: selection.handleCreateCustomTable,
+      },
+    }),
+    [
+      canUploadFile,
+      selection.customTableName,
+      selection.handleCustomTableNameChange,
+      selection.showsCustomTableNameInput,
+      selection.tableNameValidationError,
+      selection.handleCreateCustomTable,
+    ],
+  );
+
+  const saveValue = useMemo(
+    () => ({
+      canSave: saveState.canSave,
+      isSaving: saveState.isSaving,
+      saveErrorMessage: saveState.saveErrorMessage,
+      saveSuccessMessage: saveState.saveSuccessMessage,
+      saveDisabledMessage,
+      handleSave: saveState.handleSave,
+    }),
+    [
+      saveState.canSave,
+      saveState.isSaving,
+      saveState.saveErrorMessage,
+      saveState.saveSuccessMessage,
+      saveDisabledMessage,
+      saveState.handleSave,
+    ],
+  );
+
   return {
     tableNameMode,
     showsCustomTableNameInput: selection.showsCustomTableNameInput,
@@ -179,38 +281,13 @@ export function useOfficeProductEditorState(user) {
     bannerStatusVariant: activeCategoryData.bannerStatusVariant,
 
     isViewingRegisteredData: activeCategoryData.isViewingRegisteredData,
-    activeCategory: {
-      isRegisteredProductDataLoading: activeCategoryData.isRegisteredProductDataLoading,
-      registeredProductDataErrorMessage: activeCategoryData.registeredProductDataErrorMessage,
-    },
+    activeCategory: activeCategoryValue,
 
-    catalog: {
-      cards,
-      registeredCount,
-      isLoading: officeProductCatalog.isLoading,
-      errorMessage: officeProductCatalog.errorMessage,
-      isCardSelected: selection.isCardSelected,
-      onCardSelect: handleCatalogCardSelect,
-      onCardDelete: handleCatalogCardDelete,
-    },
+    catalog: catalogValue,
 
-    extraction: {
-      result: extraction.result,
-      selectedFileName: extraction.selectedFileName,
-      handleWorkbookChange: extraction.handleWorkbookChange,
-      processFile: extraction.processFile,
-    },
+    extraction: extractionValue,
 
-    upload: {
-      canUploadFile,
-      tableNameCardProps: {
-        customTableName: selection.customTableName,
-        onTableNameChange: selection.handleCustomTableNameChange,
-        showsTableNameInput: selection.showsCustomTableNameInput,
-        validationError: selection.tableNameValidationError,
-        onCreateTable: selection.handleCreateCustomTable,
-      },
-    },
+    upload: uploadValue,
 
     table: {
       rows: visibleTableRows,
@@ -244,13 +321,6 @@ export function useOfficeProductEditorState(user) {
       },
     },
 
-    save: {
-      canSave: saveState.canSave,
-      isSaving: saveState.isSaving,
-      saveErrorMessage: saveState.saveErrorMessage,
-      saveSuccessMessage: saveState.saveSuccessMessage,
-      saveDisabledMessage,
-      handleSave: saveState.handleSave,
-    },
+    save: saveValue,
   };
 }

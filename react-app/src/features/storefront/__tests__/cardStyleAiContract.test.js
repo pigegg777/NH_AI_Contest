@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { buildCardStyleOpenAiRequestBody } from '../model/card-design/ai-request/cardStyleAiRequest';
+import { CARD_STYLE_AI_SCHEMA } from '../model/card-design/ai-response/cardStyleAiResponseSchema';
 import {
-  buildCardStyleOpenAiRequestBody,
-  CARD_STYLE_AI_SCHEMA,
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../model/card-design/cardStyleAiContract';
+} from '../model/card-design/ai-response/cardStyleAiResponseNormalizer';
 
 function collectStrictModeViolations(schema, path = []) {
   if (!schema || typeof schema !== 'object') return [];

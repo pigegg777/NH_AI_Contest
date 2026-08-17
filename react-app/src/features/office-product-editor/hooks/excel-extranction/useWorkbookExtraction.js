@@ -1,4 +1,4 @@
-import { startTransition, useReducer } from 'react';
+import { startTransition, useCallback, useReducer } from 'react';
 import { extractSalesPriceSheetData } from '../../model/excel-extranction/workbookExtractionModel';
 import { readWorkbookSheet } from '../../services/workbookSheetReader';
 
@@ -55,7 +55,7 @@ export function useWorkbookExtraction(initialDraft = null) {
     sanitizeInitialExtractionState,
   );
 
-  async function processFile(file) {
+  const processFile = useCallback(async (file) => {
     if (!file) {
       return;
     }
@@ -75,16 +75,19 @@ export function useWorkbookExtraction(initialDraft = null) {
     } catch {
       dispatch({ type: 'EXTRACTION_FAILED' });
     }
-  }
+  }, []);
 
-  async function handleWorkbookChange(event) {
-    const [file] = event.target.files ?? [];
-    await processFile(file);
-  }
+  const handleWorkbookChange = useCallback(
+    async (event) => {
+      const [file] = event.target.files ?? [];
+      await processFile(file);
+    },
+    [processFile],
+  );
 
-  function resetWorkbook() {
+  const resetWorkbook = useCallback(() => {
     dispatch({ type: 'RESET' });
-  }
+  }, []);
 
   return {
     selectedFileName: state.selectedFileName,

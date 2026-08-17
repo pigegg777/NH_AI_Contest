@@ -1,5 +1,5 @@
-import { hasRenderableValue } from '../card-design/cardFieldRenderModel';
-import { buildFieldSlots } from '../card-design/cardCompositionModel';
+import { hasRenderableValue } from '../card-design/style/cardFieldRenderModel';
+import { buildFieldSlots } from '../card-design/style/cardCompositionModel';
 import {
   STOREFRONT_FIELD_LABELS,
   sortFieldKeysByDisplayOrder,

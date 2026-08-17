@@ -1,4 +1,4 @@
-﻿import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useOfficeProductDataCatalog } from '../hooks/office-product-data/useOfficeProductDataCatalog';

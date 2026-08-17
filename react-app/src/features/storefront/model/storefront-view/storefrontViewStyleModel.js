@@ -1,7 +1,30 @@
 import {
+  PAGE_STYLE_CHIP_GAP_VALUES,
+  PAGE_STYLE_CHIP_RADIUS_VALUES,
+  PAGE_STYLE_CHIP_SIZE_VALUES,
   PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES,
   PAGE_STYLE_SEARCH_SIZE_VALUES,
-} from '../page-design/pageStyleModel';
+} from '../page-design/page-style/pageStyleModel';
+
+function buildChipCssVars(prefix, chips) {
+  const size = PAGE_STYLE_CHIP_SIZE_VALUES[chips.sizeToken];
+
+  return {
+    [`--${prefix}-bg`]: chips.backgroundHex,
+    [`--${prefix}-text`]: chips.textHex,
+    [`--${prefix}-border`]: chips.borderColorHex,
+    [`--${prefix}-active-bg`]: chips.activeBackgroundHex,
+    [`--${prefix}-active-text`]: chips.activeTextHex,
+    [`--${prefix}-hover-bg`]: chips.hoverBackgroundHex,
+    [`--${prefix}-hover-text`]: chips.hoverTextHex,
+    [`--${prefix}-hover-border`]: chips.hoverBorderHex,
+    [`--${prefix}-height`]: size.minHeight,
+    [`--${prefix}-font-size`]: size.fontSize,
+    [`--${prefix}-padding-inline`]: size.paddingInline,
+    [`--${prefix}-radius`]: PAGE_STYLE_CHIP_RADIUS_VALUES[chips.radiusToken],
+    [`--${prefix}-gap`]: PAGE_STYLE_CHIP_GAP_VALUES[chips.gapToken],
+  };
+}
 
 export function buildStorefrontViewCssVars(view) {
   return {
@@ -21,17 +44,7 @@ export function buildStorefrontViewCssVars(view) {
       PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES[view.pageStyle.search.borderStrengthToken],
     '--page-search-border-color': view.pageStyle.search.borderColorHex,
     '--page-search-focus-border-color': view.pageStyle.search.focusBorderColorHex,
-    '--page-chip-bg': view.pageStyle.categoryChips.backgroundHex,
-    '--page-chip-text': view.pageStyle.categoryChips.textHex,
-    '--page-chip-border': view.pageStyle.categoryChips.borderColorHex,
-    '--page-chip-active-bg': view.pageStyle.categoryChips.activeBackgroundHex,
-    '--page-chip-active-text': view.pageStyle.categoryChips.activeTextHex,
-    '--page-product-chip-bg': view.pageStyle.productCategoryChips.backgroundHex,
-    '--page-product-chip-text': view.pageStyle.productCategoryChips.textHex,
-    '--page-product-chip-border': view.pageStyle.productCategoryChips.borderColorHex,
-    '--page-product-chip-active-bg':
-      view.pageStyle.productCategoryChips.activeBackgroundHex,
-    '--page-product-chip-active-text':
-      view.pageStyle.productCategoryChips.activeTextHex,
+    ...buildChipCssVars('page-chip', view.pageStyle.categoryChips),
+    ...buildChipCssVars('page-product-chip', view.pageStyle.productCategoryChips),
   };
 }

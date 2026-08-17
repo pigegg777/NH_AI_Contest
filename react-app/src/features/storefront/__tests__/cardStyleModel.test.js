@@ -6,7 +6,7 @@ import {
   normalizeCardStyle,
   normalizeConditionalStyleRules,
   resolveFieldColorRoleValue,
-} from '../model/card-design/cardStyleModel';
+} from '../model/card-design/style/cardStyleModel';
 
 describe('normalizeCardStyle', () => {
   it('keeps allowed values for every section and falls back to defaults otherwise', () => {

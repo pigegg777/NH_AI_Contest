@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../model/page-design/pageStyleColor';
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
-import { compilePageStyle } from '../model/page-design/pageStyleCompiler';
+import { contrastRatio } from '../model/shared/pageStyleColor';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/page-style/pageStyleModel';
+import { compilePageStyle } from '../model/page-design/page-style/pageStyleCompiler';
 
 const BASE_INTENT = {
   palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },
@@ -72,7 +72,7 @@ describe('compilePageStyle precedence: header/search', () => {
 });
 
 describe('compilePageStyle precedence: category chips', () => {
-  it('re-derives chip colors from the new palette even when a previous custom chip style existed, if no override is given this time', () => {
+  it('keeps chip colors unchanged when only the palette changes', () => {
     const previousPageStyle = compilePageStyle({
       intent: { ...BASE_INTENT, categoryChips: { activeBackgroundHex: '#7c3aed' } },
       previousPageStyle: undefined,
@@ -83,7 +83,7 @@ describe('compilePageStyle precedence: category chips', () => {
     const nextIntent = { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, categoryChips: null };
     const result = compilePageStyle({ intent: nextIntent, previousPageStyle });
 
-    expect(result.categoryChips.activeBackgroundHex).toBe('#ea580c');
+    expect(result.categoryChips.activeBackgroundHex).toBe('#7c3aed');
   });
 
   it('uses the chip override when present instead of the palette-derived default', () => {
@@ -93,6 +93,45 @@ describe('compilePageStyle precedence: category chips', () => {
     });
 
     expect(result.categoryChips.activeBackgroundHex).toBe('#7c3aed');
+  });
+
+  it('keeps a customized chip style across a palette-only change', () => {
+    const previousPageStyle = compilePageStyle({
+      intent: { ...BASE_INTENT, categoryChips: { variant: 'filled', sizeToken: 'lg', radiusToken: 'square', gapToken: 'tight' } },
+      previousPageStyle: undefined,
+    });
+
+    const nextIntent = { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, categoryChips: null };
+    const result = compilePageStyle({ intent: nextIntent, previousPageStyle });
+
+    expect(result.categoryChips.variant).toBe('filled');
+    expect(result.categoryChips.sizeToken).toBe('lg');
+    expect(result.categoryChips.radiusToken).toBe('square');
+    expect(result.categoryChips.gapToken).toBe('tight');
+    expect(result.categoryChips.activeBackgroundHex).toBe('#1d4a2e');
+  });
+});
+
+describe('compilePageStyle precedence: product category chips', () => {
+  it('keeps product category chip colors unchanged when only the palette changes', () => {
+    const previousPageStyle = compilePageStyle({
+      intent: {
+        ...BASE_INTENT,
+        productCategoryChips: { activeBackgroundHex: '#7c3aed' },
+      },
+      previousPageStyle: undefined,
+    });
+
+    const result = compilePageStyle({
+      intent: {
+        ...BASE_INTENT,
+        palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' },
+        productCategoryChips: null,
+      },
+      previousPageStyle,
+    });
+
+    expect(result.productCategoryChips.activeBackgroundHex).toBe('#7c3aed');
   });
 });
 
@@ -138,6 +177,7 @@ describe('compilePageStyle sticky incremental edits', () => {
         focusBorderColorHex: '#173223',
       },
       categoryChips: {
+        ...DEFAULT_PAGE_STYLE.categoryChips,
         backgroundHex: '#eef6f0',
         textHex: '#2d4a36',
         borderColorHex: '#8aa391',
@@ -184,6 +224,7 @@ describe('compilePageStyle scoped merges', () => {
         focusBorderColorHex: '#0f172a',
       },
       categoryChips: {
+        ...DEFAULT_PAGE_STYLE.categoryChips,
         backgroundHex: '#eff6ff',
         textHex: '#1e3a8a',
         borderColorHex: '#93c5fd',
@@ -251,12 +292,15 @@ describe('compilePageStyle property boundaries', () => {
     expect(Object.keys(result.search).sort()).toEqual(['borderColorHex', 'borderStrengthToken', 'focusBorderColorHex', 'sizeToken']);
   });
 
-  it('search border/focus color always tracks the current palette, ignoring any stray color fields on the intent', () => {
+  it('keeps search colors unchanged when only its size is requested', () => {
     const result = compilePageStyle({
       intent: { ...BASE_INTENT, search: { sizeToken: 'lg' } },
       previousPageStyle: undefined,
     });
 
-    expect(result.search.borderColorHex).not.toBe(DEFAULT_PAGE_STYLE.search.borderColorHex);
+    expect(result.search.borderColorHex).toBe(DEFAULT_PAGE_STYLE.search.borderColorHex);
+    expect(result.search.focusBorderColorHex).toBe(
+      DEFAULT_PAGE_STYLE.search.focusBorderColorHex,
+    );
   });
 });

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import supabase from '../../../lib/supabaseClient';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/cardStyleModel';
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/page-style/pageStyleModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../model/storefront-config/storefrontConfigOrchestrator';
 
 vi.mock('../../../lib/supabaseClient', () => ({
@@ -10,6 +10,22 @@ vi.mock('../../../lib/supabaseClient', () => ({
     from: vi.fn(),
   },
 }));
+
+function mockOfficeConfigSelect(data) {
+  const maybeSingle = vi.fn().mockResolvedValue({ data, error: null });
+  const eq = vi.fn(() => ({ maybeSingle }));
+  const select = vi.fn(() => ({ eq }));
+
+  supabase.from.mockImplementation((tableName) => {
+    if (tableName === 'office_page_config') {
+      return { select };
+    }
+
+    throw new Error(`Unexpected table: ${tableName}`);
+  });
+
+  return select;
+}
 
 describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
   afterEach(() => {
@@ -24,48 +40,29 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
   });
 
   it('returns null when no office config row exists', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
-    const eq = vi.fn(() => ({ maybeSingle }));
-    const select = vi.fn(() => ({ eq }));
-
-    supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') {
-        return { select };
-      }
-
-      throw new Error(`Unexpected table: ${tableName}`);
-    });
+    const select = mockOfficeConfigSelect(null);
 
     const result = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
 
     expect(result).toBeNull();
-    expect(select).toHaveBeenCalledWith('office_code, page_config, hidden_products, updated_at');
+    expect(select).toHaveBeenCalledWith('office_code, page_config, hidden_products, category_detail_config, updated_at');
   });
 
-  it('normalizes the office page config and category rows into the new product-category builder shape', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        office_code: 'OFF-1',
-        page_config: {
-          schemaVersion: 1,
-          theme: { brandColor: '#1d4a2e' },
-          nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
-          searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
-          categoryChips: { enabled: true, sticky: true },
-        },
-        hidden_products: [{ product_name: 'Hidden', spec: '20kg' }],
-        updated_at: '2026-06-15T00:00:00Z',
+  it('normalizes the office page config and category_detail_config into the product-category builder shape', async () => {
+    mockOfficeConfigSelect({
+      office_code: 'OFF-1',
+      page_config: {
+        schemaVersion: 1,
+        theme: { brandColor: '#1d4a2e' },
+        nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
+        categoryChips: { enabled: true, sticky: true },
       },
-      error: null,
-    });
-    const officeEq = vi.fn(() => ({ maybeSingle }));
-    const officeSelect = vi.fn(() => ({ eq: officeEq }));
-
-    const categoryOrder = vi.fn().mockResolvedValue({
-      data: [
+      hidden_products: [{ product_name: 'Hidden', spec: '20kg' }],
+      category_detail_config: [
         {
-          office_code: 'OFF-1',
           product_category_name: 'Fertilizer Upload',
+          updated_at: '2026-06-15T00:00:00Z',
           category_config: {
             schemaVersion: 1,
             displayName: 'Fertilizer Upload',
@@ -78,25 +75,9 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
               style: { layout: 'compact', accentColor: '#2563eb', fontSize: 'large', cardsPerRow: 2 },
             },
           },
-          sort_order: 0,
-          updated_at: '2026-06-15T00:00:00Z',
         },
       ],
-      error: null,
-    });
-    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
-    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
-
-    supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') {
-        return { select: officeSelect };
-      }
-
-      if (tableName === 'office_page_category_configs') {
-        return { select: categorySelect };
-      }
-
-      throw new Error(`Unexpected table: ${tableName}`);
+      updated_at: '2026-06-15T00:00:00Z',
     });
 
     const result = await fetchStorefrontConfig({ officeCode: ' OFF-1 ' });
@@ -108,7 +89,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
         theme: { brandColor: '#1d4a2e' },
         nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
-        categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+        categoryChips: { enabled: true, sticky: true },
         mobileUiTree: [
           { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
           { id: 'product-category-nav', type: 'productCategoryNav', slot: 'top', enabled: true, props: {} },
@@ -129,6 +110,13 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             borderColorHex: '#bbc9c0',
             activeBackgroundHex: '#1d4a2e',
             activeTextHex: '#ffffff',
+            hoverBackgroundHex: '#d6ded9',
+            hoverTextHex: '#173223',
+            hoverBorderHex: '#99aea1',
+            variant: 'soft',
+            sizeToken: 'md',
+            radiusToken: 'pill',
+            gapToken: 'relaxed',
           },
           productCategoryChips: {
             backgroundHex: '#e4e9e6',
@@ -136,6 +124,13 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             borderColorHex: '#bbc9c0',
             activeBackgroundHex: '#1d4a2e',
             activeTextHex: '#ffffff',
+            hoverBackgroundHex: '#d6ded9',
+            hoverTextHex: '#173223',
+            hoverBorderHex: '#99aea1',
+            variant: 'soft',
+            sizeToken: 'md',
+            radiusToken: 'pill',
+            gapToken: 'normal',
           },
         },
       },
@@ -146,17 +141,15 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
         brandColor: '#1d4a2e',
         searchPlaceholder: 'Search products',
         searchVariant: 'pill',
-        categoryChipVariant: 'soft',
       },
       categoryConfigs: [
         {
-          officeCode: 'OFF-1',
           productCategoryName: 'Fertilizer Upload',
-          sortOrder: 0,
           categoryConfig: {
             schemaVersion: 1,
             displayName: 'Fertilizer Upload',
             sourceCategoryName: 'Fertilizer Upload',
+            generatedCategoryImages: {},
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
             cardDesign: {
@@ -178,30 +171,20 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
   });
 
   it('normalizes a legacy pre-design-tokens row without throwing, defaulting the new tokens', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        office_code: 'OFF-1',
-        page_config: {
-          schemaVersion: 1,
-          theme: { brandColor: '#1d4a2e' },
-          nav: { title: 'Legacy guide', subtitle: '', logoUrl: '' },
-          searchSection: { enabled: true, placeholder: 'Search products' },
-          categoryChips: { enabled: true, sticky: true },
-        },
-        hidden_products: [],
-        updated_at: '2026-01-01T00:00:00Z',
+    mockOfficeConfigSelect({
+      office_code: 'OFF-1',
+      page_config: {
+        schemaVersion: 1,
+        theme: { brandColor: '#1d4a2e' },
+        nav: { title: 'Legacy guide', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products' },
+        categoryChips: { enabled: true, sticky: true },
       },
-      error: null,
-    });
-    const officeEq = vi.fn(() => ({ maybeSingle }));
-    const officeSelect = vi.fn(() => ({ eq: officeEq }));
-
-    const categoryOrder = vi.fn().mockResolvedValue({
-      data: [
+      hidden_products: [],
+      category_detail_config: [
         {
-          office_code: 'OFF-1',
           product_category_name: 'Fertilizer Upload',
-          sort_order: 0,
+          updated_at: '2026-01-01T00:00:00Z',
           category_config: {
             schemaVersion: 1,
             displayName: 'Fertilizer Upload',
@@ -214,24 +197,9 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
               style: { layout: 'grid', accentColor: '#1d4a2e', fontSize: 'medium', cardsPerRow: 2 },
             },
           },
-          updated_at: '2026-01-01T00:00:00Z',
         },
       ],
-      error: null,
-    });
-    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
-    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
-
-    supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') {
-        return { select: officeSelect };
-      }
-
-      if (tableName === 'office_page_category_configs') {
-        return { select: categorySelect };
-      }
-
-      throw new Error(`Unexpected table: ${tableName}`);
+      updated_at: '2026-01-01T00:00:00Z',
     });
 
     const config = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
@@ -241,32 +209,19 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
   });
 
   it('migrates a legacy page_config with no pageStyle into a resolved pageStyle on read', async () => {
-    const maybeSingle = vi.fn().mockResolvedValue({
-      data: {
-        office_code: 'OFF-1',
-        page_config: {
-          schemaVersion: 1,
-          designDirection: 'trust',
-          theme: { brandColor: '#2563eb', backgroundTone: 'sky', titleTextColor: 'ink', typographyTone: 'bold' },
-          nav: { title: 'Demo', subtitle: '', logoUrl: '' },
-          searchSection: { enabled: true, placeholder: 'Search products', variant: 'outlined' },
-          categoryChips: { enabled: true, sticky: true },
-        },
-        hidden_products: [],
-        updated_at: '2026-06-15T00:00:00Z',
+    mockOfficeConfigSelect({
+      office_code: 'OFF-1',
+      page_config: {
+        schemaVersion: 1,
+        designDirection: 'trust',
+        theme: { brandColor: '#2563eb', backgroundTone: 'sky', titleTextColor: 'ink', typographyTone: 'bold' },
+        nav: { title: 'Demo', subtitle: '', logoUrl: '' },
+        searchSection: { enabled: true, placeholder: 'Search products', variant: 'outlined' },
+        categoryChips: { enabled: true, sticky: true },
       },
-      error: null,
-    });
-    const officeEq = vi.fn(() => ({ maybeSingle }));
-    const officeSelect = vi.fn(() => ({ eq: officeEq }));
-    const categoryOrder = vi.fn().mockResolvedValue({ data: [], error: null });
-    const categoryEq = vi.fn(() => ({ order: categoryOrder }));
-    const categorySelect = vi.fn(() => ({ eq: categoryEq }));
-
-    supabase.from.mockImplementation((tableName) => {
-      if (tableName === 'office_page_config') return { select: officeSelect };
-      if (tableName === 'office_page_category_configs') return { select: categorySelect };
-      throw new Error(`Unexpected table: ${tableName}`);
+      hidden_products: [],
+      category_detail_config: [],
+      updated_at: '2026-06-15T00:00:00Z',
     });
 
     const result = await fetchStorefrontConfig({ officeCode: 'OFF-1' });
@@ -280,6 +235,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
 describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
   afterEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
   });
 
   it('throws without calling supabase when officeCode is empty', async () => {
@@ -296,32 +252,15 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
     expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('writes office page config and per-product-category rows while deleting stale categories', async () => {
-    const officeUpsert = vi.fn().mockResolvedValue({ error: null });
-    const categorySelectEq = vi.fn().mockResolvedValue({
-      data: [
-        { product_category_name: 'Obsolete Upload' },
-        { product_category_name: 'Fertilizer Upload' },
-      ],
-      error: null,
-    });
-    const categorySelect = vi.fn(() => ({ eq: categorySelectEq }));
-    const categoryUpsert = vi.fn().mockResolvedValue({ error: null });
-    const categoryDeleteIn = vi.fn().mockResolvedValue({ error: null });
-    const categoryDeleteEq = vi.fn(() => ({ in: categoryDeleteIn }));
-    const categoryDelete = vi.fn(() => ({ eq: categoryDeleteEq }));
+  it('writes page config, hidden products, and category_detail_config in a single office_page_config upsert', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-17T00:00:00Z'));
+
+    const upsert = vi.fn().mockResolvedValue({ error: null });
 
     supabase.from.mockImplementation((tableName) => {
       if (tableName === 'office_page_config') {
-        return { upsert: officeUpsert };
-      }
-
-      if (tableName === 'office_page_category_configs') {
-        return {
-          select: categorySelect,
-          upsert: categoryUpsert,
-          delete: categoryDelete,
-        };
+        return { upsert };
       }
 
       throw new Error(`Unexpected table: ${tableName}`);
@@ -346,7 +285,6 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
       categoryConfigs: [
         {
           productCategoryName: 'Fertilizer Upload',
-          sortOrder: 0,
           categoryConfig: {
             schemaVersion: 1,
             displayName: 'Fertilizer Upload',
@@ -364,7 +302,7 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
       hiddenProducts: [{ product_name: 'Hidden', spec: '20kg' }],
     });
 
-    expect(officeUpsert).toHaveBeenCalledWith(
+    expect(upsert).toHaveBeenCalledWith(
       {
         office_code: 'OFF-1',
         page_config: {
@@ -372,7 +310,7 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
           theme: { brandColor: '#1d4a2e' },
           nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
           searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
-          categoryChips: { enabled: true, sticky: true, variant: 'soft' },
+          categoryChips: { enabled: true, sticky: true },
           mobileUiTree: [
             { id: 'hero', type: 'hero', slot: 'top', enabled: true, props: {} },
             { id: 'product-category-nav', type: 'productCategoryNav', slot: 'top', enabled: true, props: {} },
@@ -385,31 +323,27 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
           pageStyle: DEFAULT_PAGE_STYLE,
         },
         hidden_products: [{ product_name: 'Hidden', spec: '20kg' }],
+        category_detail_config: [
+          {
+            product_category_name: 'Fertilizer Upload',
+            updated_at: '2026-08-17T00:00:00.000Z',
+            category_config: {
+              schemaVersion: 1,
+              displayName: 'Fertilizer Upload',
+              sourceCategoryName: 'Fertilizer Upload',
+              generatedCategoryImages: {},
+              selectedMediumCategories: ['Premium', 'Starter'],
+              representativeMediumCategory: 'Premium',
+              cardDesign: {
+                visibleFields: ['product_name', 'tax_price', 'nutrient'],
+                cardStyle: normalizeCardStyle({ ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' }),
+                bodySlots: [],
+              },
+            },
+          },
+        ],
       },
       { onConflict: 'office_code' },
     );
-    expect(categoryUpsert).toHaveBeenCalledWith(
-      [
-        {
-          office_code: 'OFF-1',
-          product_category_name: 'Fertilizer Upload',
-          sort_order: 0,
-          category_config: {
-            schemaVersion: 1,
-            displayName: 'Fertilizer Upload',
-            sourceCategoryName: 'Fertilizer Upload',
-            selectedMediumCategories: ['Premium', 'Starter'],
-            representativeMediumCategory: 'Premium',
-            cardDesign: {
-              visibleFields: ['product_name', 'tax_price', 'nutrient'],
-              cardStyle: normalizeCardStyle({ ...DEFAULT_CARD_STYLE, cardsPerRow: 1, structuralPreset: 'image-left' }),
-              bodySlots: [],
-            },
-          },
-        },
-      ],
-      { onConflict: 'office_code,product_category_name' },
-    );
-    expect(categoryDeleteIn).toHaveBeenCalledWith('product_category_name', ['Obsolete Upload']);
   });
 });

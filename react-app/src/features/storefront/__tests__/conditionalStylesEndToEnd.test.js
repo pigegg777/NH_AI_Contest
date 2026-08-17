@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
-import { normalizeOpenAiCardIntent } from '../model/card-design/cardStyleAiContract';
-import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
+import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
+import { normalizeOpenAiCardIntent } from '../model/card-design/ai-response/cardStyleAiResponseNormalizer';
+import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
 
 const FIELD_LABELS = { tax_price: '과세가격', medium_category: '소분류' };
 

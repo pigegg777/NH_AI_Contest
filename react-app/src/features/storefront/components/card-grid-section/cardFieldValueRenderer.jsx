@@ -1,4 +1,4 @@
-import { formatFieldDisplayValue } from '../../model/card-design/cardFieldRenderModel';
+import { formatFieldDisplayValue } from '../../model/card-design/style/cardFieldRenderModel';
 import { isUrlValue } from '../../model/card-grid-section/cardGridFieldStyleModel';
 import styles from '../CardGridSection.module.css';
 

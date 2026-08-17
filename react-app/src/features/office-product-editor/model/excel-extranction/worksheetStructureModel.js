@@ -1,4 +1,4 @@
-﻿import { hasTrimmedText } from '../../../../common/utils/text';
+import { hasTrimmedText } from '../../../../common/utils/text';
 import { getCell, normalizeHeaderCell } from '../../utils/worksheetCellUtils';
 
 const HEADER_SCAN_LIMIT = 30;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../model/page-design/pageStyleColor';
-import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../model/page-design/pageStyleMigration';
+import { contrastRatio } from '../model/shared/pageStyleColor';
+import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../model/page-design/page-style/pageStyleMigration';
 
 describe('pageConfigNeedsPageStyleMigration', () => {
   it('is false for an empty config or one that already has pageStyle', () => {

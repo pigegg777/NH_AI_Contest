@@ -1,23 +1,24 @@
 export const STOREFRONT_CHAT_MODE_OPTIONS = [
   {
+    id: 'data',
+    label: '대분류별 표시할 데이터선택',
+    description: '영세가격,면세가격,분류등 보여줄 데이터를 선택',
+  },
+  {
     id: 'autoDesign',
-    label: '1. 통합 자동 디자인',
-    description: 'AI에게 요청하면 알아서 AI가 디자인합니다.',
+    label: 'AI 통합 자동 디자인',
+    description: 'AI에게 변경요청시 일괄수정',
   },
 
   {
     id: 'page',
-    label: '2. 페이지 전반 디자인 수정',
-    description: '페이지 전반 스타일(배경색,분류칩) 수정.',
+    label: 'AI 공통 요소 디자인 수정',
+    description: '페이지 배경색,검색창,분류칩 수정.',
   },
-  {
-    id: 'data',
-    label: '3. 보여줄 데이터 수정',
-    description: '영세가격,면세가격,분류등 보여줄 데이터를 선택',
-  },
+
   {
     id: 'card',
-    label: '4. 상세 디자인 수정',
+    label: 'AI 대분류별 상세디자인 수정',
     description: '상품별 배경색,글자색등 상세 디자인 수정',
   },
 ];

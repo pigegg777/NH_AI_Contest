@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_PAGE_AI_DESIGN,
   normalizePageAiDesignInput,
-} from '../model/page-design/pageAiDesignModel';
+} from '../model/page-design/ai-request/pageAiDesignModel';
 
 describe('DEFAULT_PAGE_AI_DESIGN', () => {
   it('starts with one empty prompt', () => {

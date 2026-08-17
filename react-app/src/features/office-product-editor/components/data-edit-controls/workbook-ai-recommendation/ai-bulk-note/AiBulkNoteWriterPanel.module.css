@@ -1,0 +1,206 @@
+.panelBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desc {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.previewButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 18px;
+  border-radius: var(--corp-radius);
+  border: 1px solid rgba(29, 74, 46, 0.6);
+  background: rgb(57, 57, 199);
+  color: var(--corp-on-primary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.previewButton:hover:not(:disabled) {
+  background: rgb(117, 117, 236);
+}
+
+.previewButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.previewButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.previewBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 9px;
+  border-radius: var(--corp-radius-sm);
+  background: rgba(29, 74, 46, 0.05);
+}
+
+.matchCount {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.matchList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.matchItem {
+  padding: 6px 0;
+  border-top: 1px solid var(--corp-line);
+}
+
+.matchItem:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.matchHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--corp-text);
+}
+
+.matchSpec {
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+}
+
+.matchNoteDiff {
+  margin: 2px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.matchOldNote {
+  color: var(--corp-muted);
+  text-decoration: line-through;
+}
+
+.matchArrow {
+  color: var(--corp-muted);
+}
+
+.matchNewNote {
+  color: var(--corp-primary);
+  font-weight: 700;
+}
+
+.previewActions {
+  display: flex;
+  gap: 6px;
+}
+
+.applyButton {
+  padding: 6px 16px;
+  border-radius: var(--corp-radius);
+  border: 1px solid rgba(29, 74, 46, 0.6);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelButton {
+  padding: 6px 16px;
+  border-radius: var(--corp-radius);
+  border: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.referenceSheetRow {
+  display: flex;
+  align-items: center;
+}
+
+.referenceSheetUploadButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--corp-radius);
+  border: 1px dashed var(--corp-line);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.referenceSheetFileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.referenceSheetInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: var(--corp-radius);
+  background: rgba(29, 74, 46, 0.05);
+}
+
+.referenceSheetLabel {
+  color: var(--corp-text);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.referenceSheetRemoveButton {
+  padding: 2px 10px;
+  border-radius: var(--corp-radius);
+  border: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.referenceSheetErrorMessage {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}

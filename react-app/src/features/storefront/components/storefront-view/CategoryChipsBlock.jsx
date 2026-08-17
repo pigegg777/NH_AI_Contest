@@ -11,13 +11,15 @@ export default function CategoryChipsBlock({ view, elementKey }) {
     return null;
   }
 
+  const categoryChipVariant = view.pageStyle.categoryChips.variant;
+
   return (
     <div className={styles.categoryChipsSection}>
       <p className={styles.selectionLabel}>중분류 선택</p>
       <div
-        className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[view.categoryChipVariant] || ''}`}
+        className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[categoryChipVariant] || ''}`}
         data-testid="storefront-category-chips"
-        data-chip-variant={view.categoryChipVariant}
+        data-chip-variant={categoryChipVariant}
         data-category-layout="single-row-scroll"
         data-chip-size="compact"
       >

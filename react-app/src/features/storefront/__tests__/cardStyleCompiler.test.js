@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
-import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
+import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
+import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
 
 const FIELD_LABELS = { tax_price: '과세가격', zero_tax_price: '영세가격', spec: '규격' };
 

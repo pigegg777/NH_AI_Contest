@@ -140,7 +140,7 @@ describe('OfficeProductEditor draft persistence', () => {
       extraction: buildExtractionDraft(),
     });
     globalThis.sessionStorage.setItem(
-      'office-product-editor:ai-recommendations:draft-fingerprint',
+      'office-product-editor:ai-similarity-extraction:draft-fingerprint',
       JSON.stringify({
         version: 1,
         recommendations: [
@@ -157,7 +157,7 @@ describe('OfficeProductEditor draft persistence', () => {
       }),
     );
     globalThis.sessionStorage.setItem(
-      'office-product-editor:market-research:OFF-1',
+      'office-product-editor:ai-market-research:OFF-1',
       JSON.stringify({
         version: 1,
         activeQuery: '사과 부사 5kg',

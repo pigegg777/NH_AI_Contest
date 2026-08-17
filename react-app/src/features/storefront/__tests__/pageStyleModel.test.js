@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../model/page-design/pageStyleColor';
+import { contrastRatio } from '../model/shared/pageStyleColor';
 import {
   DEFAULT_PAGE_STYLE,
+  PAGE_STYLE_CHIP_GAP_TOKENS,
+  PAGE_STYLE_CHIP_GAP_VALUES,
+  PAGE_STYLE_CHIP_RADIUS_TOKENS,
+  PAGE_STYLE_CHIP_RADIUS_VALUES,
+  PAGE_STYLE_CHIP_SIZE_TOKENS,
+  PAGE_STYLE_CHIP_SIZE_VALUES,
+  PAGE_STYLE_CHIP_VARIANT_TOKENS,
   PAGE_STYLE_SCHEMA_VERSION,
   PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS,
   PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES,
@@ -11,7 +18,7 @@ import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../model/page-design/pageStyleModel';
+} from '../model/page-design/page-style/pageStyleModel';
 
 describe('DEFAULT_PAGE_STYLE', () => {
   it('is an explicit white default, not a fallback branch', () => {
@@ -33,6 +40,28 @@ describe('token tables', () => {
   it('exposes a border width for every border strength token', () => {
     PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS.forEach((token) => {
       expect(PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES[token]).toEqual(expect.any(String));
+    });
+  });
+
+  it('exposes a height/fontSize/padding triple for every chip size token', () => {
+    PAGE_STYLE_CHIP_SIZE_TOKENS.forEach((token) => {
+      expect(PAGE_STYLE_CHIP_SIZE_VALUES[token]).toMatchObject({
+        minHeight: expect.any(String),
+        fontSize: expect.any(String),
+        paddingInline: expect.any(String),
+      });
+    });
+  });
+
+  it('exposes a radius value for every chip radius token', () => {
+    PAGE_STYLE_CHIP_RADIUS_TOKENS.forEach((token) => {
+      expect(PAGE_STYLE_CHIP_RADIUS_VALUES[token]).toEqual(expect.any(String));
+    });
+  });
+
+  it('exposes a gap value for every chip gap token', () => {
+    PAGE_STYLE_CHIP_GAP_TOKENS.forEach((token) => {
+      expect(PAGE_STYLE_CHIP_GAP_VALUES[token]).toEqual(expect.any(String));
     });
   });
 });
@@ -93,6 +122,46 @@ describe('deriveCategoryChipsFromPalette', () => {
     expect(contrastRatio(chips.textHex, chips.backgroundHex)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(chips.activeTextHex, chips.activeBackgroundHex)).toBeGreaterThanOrEqual(4.5);
     expect(chips.activeBackgroundHex).toBe('#1d4a2e');
+  });
+
+  it('also derives a readable hover color set', () => {
+    const chips = deriveCategoryChipsFromPalette({ backgroundHex: '#ffffff', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' });
+
+    expect(contrastRatio(chips.hoverTextHex, chips.hoverBackgroundHex)).toBeGreaterThanOrEqual(4.5);
+    expect(chips.hoverBackgroundHex).not.toBe(chips.backgroundHex);
+  });
+});
+
+describe('normalizePageStyle chip tokens', () => {
+  it('defaults variant/sizeToken/radiusToken/gapToken and rejects invalid tokens', () => {
+    const result = normalizePageStyle({
+      categoryChips: { variant: 'not-a-variant', sizeToken: 'huge', radiusToken: 'circle', gapToken: 'none' },
+    });
+
+    expect(result.categoryChips.variant).toBe(DEFAULT_PAGE_STYLE.categoryChips.variant);
+    expect(result.categoryChips.sizeToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.sizeToken);
+    expect(result.categoryChips.radiusToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.radiusToken);
+    expect(result.categoryChips.gapToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.gapToken);
+  });
+
+  it('keeps valid chip tokens and hover colors, letting categoryChips and productCategoryChips be set identically', () => {
+    const sharedChips = {
+      backgroundHex: '#f4f7f5',
+      hoverBackgroundHex: '#e4ece6',
+      hoverTextHex: '#173223',
+      hoverBorderHex: '#a9c2af',
+      variant: 'outline',
+      sizeToken: 'lg',
+      radiusToken: 'square',
+      gapToken: 'tight',
+    };
+
+    const result = normalizePageStyle({ categoryChips: sharedChips, productCategoryChips: sharedChips });
+
+    expect(result.categoryChips.variant).toBe('outline');
+    expect(result.categoryChips.hoverBackgroundHex).toBe('#e4ece6');
+    expect(result.productCategoryChips.variant).toBe('outline');
+    expect(result.productCategoryChips.hoverBackgroundHex).toBe('#e4ece6');
   });
 });
 

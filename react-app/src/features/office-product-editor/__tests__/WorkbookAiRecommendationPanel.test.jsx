@@ -492,6 +492,109 @@ describe('WorkbookAiRecommendationPanel', () => {
     expect(screen.getByText('조건에 맞는 상품을 찾지 못했습니다.')).toBeInTheDocument();
   });
 
+  it('uploads a reference sheet and can remove it again', () => {
+    const handleUploadReferenceSheet = vi.fn();
+    const handleRemoveReferenceSheet = vi.fn();
+    const { rerender } = render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        bulkNoteWriter={{
+          rows: [],
+          isLoading: false,
+          mode: 'idle',
+          matches: [],
+          unmatchedReason: null,
+          message: '',
+          appliedCount: 0,
+          referenceSheet: null,
+          referenceSheetError: null,
+          handlePreview: vi.fn(),
+          handleApply: vi.fn(),
+          handleClear: vi.fn(),
+          handleUploadReferenceSheet,
+          handleRemoveReferenceSheet,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+
+    const file = new File(['dummy'], 'ref.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    fireEvent.change(screen.getByLabelText('📎 참고 엑셀 업로드'), { target: { files: [file] } });
+
+    expect(handleUploadReferenceSheet).toHaveBeenCalledWith(file);
+
+    rerender(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        bulkNoteWriter={{
+          rows: [],
+          isLoading: false,
+          mode: 'idle',
+          matches: [],
+          unmatchedReason: null,
+          message: '',
+          appliedCount: 0,
+          referenceSheet: { fileName: 'ref.xlsx', sheetName: 'Sheet1', rows: [['a'], ['b']] },
+          referenceSheetError: null,
+          handlePreview: vi.fn(),
+          handleApply: vi.fn(),
+          handleClear: vi.fn(),
+          handleUploadReferenceSheet,
+          handleRemoveReferenceSheet,
+        }}
+      />
+    );
+
+    expect(screen.getByText('📎 ref.xlsx · Sheet1 · 2행')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '제거' }));
+
+    expect(handleRemoveReferenceSheet).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the reference sheet upload error message', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        bulkNoteWriter={{
+          rows: [],
+          isLoading: false,
+          mode: 'idle',
+          matches: [],
+          unmatchedReason: null,
+          message: '',
+          appliedCount: 0,
+          referenceSheet: null,
+          referenceSheetError: '참고 엑셀은 500행 이하만 지원합니다.',
+          handlePreview: vi.fn(),
+          handleApply: vi.fn(),
+          handleClear: vi.fn(),
+          handleUploadReferenceSheet: vi.fn(),
+          handleRemoveReferenceSheet: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+
+    expect(screen.getByText('참고 엑셀은 500행 이하만 지원합니다.')).toBeInTheDocument();
+  });
+
   it('disables the 매칭 미리보기 button while the instruction textarea is empty', () => {
     render(
       <WorkbookAiRecommendationPanel
