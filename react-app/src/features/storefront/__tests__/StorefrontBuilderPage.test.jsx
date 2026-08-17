@@ -321,6 +321,34 @@ describe("StorefrontBuilderPage", () => {
     expect(screen.getByText("카드 디자인 작업 공간")).toBeInTheDocument();
     expect(upsertStorefrontConfig).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "저장하기" })).toBeDisabled();
+
+    requestCardStyleAiIntent.mockResolvedValue({
+      intent: {},
+      explanation: "Card updated.",
+      suggestion: null,
+    });
+
+    await user.type(
+      screen.getByTestId("storefront-chat-composer-input"),
+      "카드 색상을 바꿔줘",
+    );
+    await user.click(screen.getByTestId("storefront-chat-composer-send"));
+
+    await user.click(await screen.findByRole("button", { name: "저장하기" }));
+
+    expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+
+    // The common-elements AI draft ("#14532d") from earlier in this test was
+    // never applied, so switching tabs away from it must have reverted the
+    // page style back to its original, unmodified value before this
+    // (unrelated, card-design) save happened.
+    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe(
+      "#1d4a2e",
+    );
+    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).not.toBe(
+      "#14532d",
+    );
   });
 
   it("applies through 저장하기 and supports one-level undo via 되돌리기", async () => {

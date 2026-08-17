@@ -34,18 +34,6 @@ const STOREFRONT_DESIGN_TARGET_COMPOSER_COPY = {
   },
 };
 
-export function getStorefrontChatScaffoldCopy(mode) {
-  if (mode === 'idle') {
-    return '수정하고 싶은 작업을 선택해주세요.';
-  }
-
-  if (mode === 'data') {
-    return '카테고리 데이터와 노출 필드를 이 작업 공간 안에서 계속 조정할 수 있습니다.';
-  }
-
-  return '선택한 작업에 맞는 입력 영역이 여기에서 이어집니다.';
-}
-
 export function getStorefrontDesignComposerCopy(designTarget) {
   return STOREFRONT_DESIGN_TARGET_COMPOSER_COPY[designTarget] ?? null;
 }

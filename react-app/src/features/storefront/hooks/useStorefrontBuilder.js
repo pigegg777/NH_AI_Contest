@@ -63,13 +63,13 @@ function cloneValue(value) {
     : JSON.parse(JSON.stringify(value));
 }
 
-function buildSharedHistory(messages, mode) {
+function buildSharedHistory(messages, designTarget) {
   return messages
     .filter(
       (message) =>
         message?.kind === "chat-message" &&
         typeof message?.text === "string" &&
-        (!mode || message?.mode === mode),
+        (!designTarget || message?.designTarget === designTarget),
     )
     .slice(-MAX_SHARED_AI_HISTORY_MESSAGES)
     .map((message) => ({ role: message.role, text: message.text }));
@@ -78,6 +78,7 @@ function buildSharedHistory(messages, mode) {
 function buildSharedThreadMessage({
   role,
   mode,
+  designTarget,
   targetLabel,
   scope,
   scopeLabel,
@@ -90,6 +91,7 @@ function buildSharedThreadMessage({
     kind: "chat-message",
     mode,
     target: mode,
+    designTarget,
     targetLabel,
     scope,
     scopeLabel,
@@ -141,7 +143,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const commonDraftRef = useRef(null);
   const categoryDraftRef = useRef(null);
   const previousChatModeRef = useRef(chatSession.mode);
-  const previousCardCategoryRef = useRef("");
+  const previousCategoryRef = useRef("");
 
   const allProductRows = flattenProductEntries(productEntries);
   const currentEntry =
@@ -313,12 +315,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       chatSession.mode === "design" &&
       designTarget === "category" &&
       selectedProductCategoryName &&
-      selectedProductCategoryName !== previousCardCategoryRef.current
+      selectedProductCategoryName !== previousCategoryRef.current
     ) {
       captureCategoryDraft();
     }
 
-    previousCardCategoryRef.current = selectedProductCategoryName;
+    previousCategoryRef.current = selectedProductCategoryName;
   }, [chatSession.mode, designTarget, selectedProductCategoryName]);
 
   function selectProductCategory(categoryName) {
@@ -533,10 +535,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         ? pageAi.pageAiDesign.targetScope
         : cardAi.cardAiDesign.targetScope;
     const scopeLabel = resolveChatScopeLabel(designTarget, targetScope);
-    const targetLabel = designTarget === "common" ? "Page" : "Card";
+    const targetLabel = designTarget === "common" ? "공통 요소" : "카드";
     const userMessage = buildSharedThreadMessage({
       role: "user",
       mode,
+      designTarget,
       targetLabel,
       scope: targetScope,
       scopeLabel,
@@ -544,7 +547,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     });
     const history = buildSharedHistory(
       [...chatSession.messages, userMessage],
-      mode,
+      designTarget,
     );
 
     chatSession.appendMessage(userMessage);
@@ -573,6 +576,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         buildSharedThreadMessage({
           role: "assistant",
           mode,
+          designTarget,
           text:
             result?.error ??
             (designTarget === "category"
@@ -590,6 +594,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       buildSharedThreadMessage({
         role: "assistant",
         mode,
+        designTarget,
         scope: result.scope,
         scopeLabel: resolveChatScopeLabel(designTarget, result.scope),
         text: result.explanation,
