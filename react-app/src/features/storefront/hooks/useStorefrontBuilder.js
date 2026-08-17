@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { toTrimmedString } from "../../../common/utils/text";
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
-import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/cardAiDesignModel";
-import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/pageAiDesignModel";
+import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
+import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -176,11 +176,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     const baseline = {
       cardStyle: cloneValue(cardAi.cardStyle),
       bodySlots: cloneValue(cardAi.bodySlots),
+      generatedCategoryImages: cloneValue(cardAi.generatedCategoryImages),
     };
 
     cardModeDraftRef.current = baseline;
     setComposerApplyPending("card", false);
-    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots);
+    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots, baseline.generatedCategoryImages);
   }
 
   function setComposerDraft(mode, value) {
@@ -220,10 +221,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       resolvedDraft.cardFields,
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
-    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
+    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots, resolvedDraft.generatedCategoryImages);
     cardModeDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
       bodySlots: cloneValue(resolvedDraft.bodySlots),
+      generatedCategoryImages: cloneValue(resolvedDraft.generatedCategoryImages),
     };
   }
 
@@ -271,9 +273,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             searchVariant:
               config?.navConfig?.searchVariant ??
               normalizedPageConfig.searchSection.variant,
-            categoryChipVariant:
-              config?.navConfig?.categoryChipVariant ??
-              normalizedPageConfig.categoryChips.variant,
           }),
         );
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
@@ -391,9 +390,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         searchVariant:
           config?.navConfig?.searchVariant ??
           normalizedPageConfig.searchSection.variant,
-        categoryChipVariant:
-          config?.navConfig?.categoryChipVariant ??
-          normalizedPageConfig.categoryChips.variant,
       }),
     );
 
@@ -417,6 +413,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
       allowedScalarKeys: effectiveScalarKeys,
+      generatedCategoryImages: cardAi.generatedCategoryImages,
     });
   }
 
@@ -644,6 +641,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       cardAi.hydrateCardStyle(
         cardModeDraftRef.current.cardStyle,
         cardModeDraftRef.current.bodySlots,
+        cardModeDraftRef.current.generatedCategoryImages,
       );
       cardModeDraftRef.current = null;
     }
@@ -689,6 +687,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           mobileUiTree,
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
+          generatedCategoryImages: cardAi.generatedCategoryImages,
         })
       : {
           officeCode,
@@ -736,6 +735,20 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     categoryTabs: dataMode.categoryTabs,
     selectedCategoryId: dataMode.selectedCategoryId,
     selectCategory: dataMode.selectCategory,
+    mediumCategories: selectedMediumCategories,
+    generatedCategoryImages: cardAi.generatedCategoryImages,
+    isGeneratingCategoryImage: cardAi.isGeneratingCategoryImage,
+    generateCategoryImage: (mediumCategory, options) =>
+      cardAi.generateCategoryImage(mediumCategory, {
+        ...options,
+        representativeProductFields: (() => {
+          const representativeRow = (currentEntry?.rows ?? []).find(
+            (row) => row?.medium_category === mediumCategory,
+          );
+
+          return { spec: representativeRow?.spec, nutrient: representativeRow?.nutrient };
+        })(),
+      }),
   };
 
   const composerMode =
