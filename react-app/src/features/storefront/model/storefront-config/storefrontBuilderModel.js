@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/cardStyleMigration';
-import { normalizeCardStyle } from '../card-design/cardStyleModel';
-import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/pageStyleModel';
+import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
+import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/page-style/pageStyleModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
@@ -149,7 +149,6 @@ export const DEFAULT_NAV_CONFIG = {
   searchPlaceholder: '상품 검색',
   logoUrl: '',
   searchVariant: 'pill',
-  categoryChipVariant: 'soft',
 };
 
 export const DEFAULT_PAGE_CONFIG = {
@@ -171,7 +170,6 @@ export const DEFAULT_PAGE_CONFIG = {
   categoryChips: {
     enabled: true,
     sticky: true,
-    variant: DEFAULT_NAV_CONFIG.categoryChipVariant,
   },
   mobileUiTree: buildDefaultMobileUiTree(),
 };
@@ -186,6 +184,29 @@ function uniqueStrings(values) {
   );
 }
 
+export function normalizeGeneratedCategoryImages(value) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const result = {};
+
+  Object.keys(source).forEach((mediumCategory) => {
+    const entry = source[mediumCategory];
+    const imageDataUri = typeof entry?.imageDataUri === 'string' ? entry.imageDataUri : '';
+
+    if (!imageDataUri.startsWith('data:image/')) {
+      return;
+    }
+
+    result[mediumCategory] = {
+      imageDataUri,
+      prompt: typeof entry?.prompt === 'string' ? entry.prompt : '',
+      isAiGenerated: true,
+      generatedAt: typeof entry?.generatedAt === 'string' ? entry.generatedAt : new Date().toISOString(),
+    };
+  });
+
+  return result;
+}
+
 export function normalizeNavConfig(navConfig) {
   const source = navConfig ?? {};
 
@@ -198,9 +219,6 @@ export function normalizeNavConfig(navConfig) {
     searchVariant: ['pill', 'outlined', 'soft'].includes(source.searchVariant)
       ? source.searchVariant
       : DEFAULT_NAV_CONFIG.searchVariant,
-    categoryChipVariant: ['filled', 'outline', 'soft'].includes(source.categoryChipVariant)
-      ? source.categoryChipVariant
-      : DEFAULT_NAV_CONFIG.categoryChipVariant,
   };
 }
 
@@ -265,9 +283,6 @@ export function normalizePageConfig(pageConfig) {
     categoryChips: {
       enabled: areCategoryChipsEnabled,
       sticky: sourceCategoryChips.sticky ?? true,
-      variant: ['filled', 'outline', 'soft'].includes(sourceCategoryChips.variant)
-        ? sourceCategoryChips.variant
-        : DEFAULT_PAGE_CONFIG.categoryChips.variant,
     },
     mobileUiTree: normalizeMobileUiTree(source.mobileUiTree, {
       searchEnabled: isSearchEnabled,
@@ -304,6 +319,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
       cardStyle: normalizedCardStyle,
       bodySlots,
     },
+    generatedCategoryImages: normalizeGeneratedCategoryImages(source.generatedCategoryImages),
   };
 }
 
@@ -311,11 +327,7 @@ export function normalizeCategoryConfigRow(row) {
   const productCategoryName = toTrimmedString(row?.productCategoryName ?? row?.product_category_name);
 
   return {
-    officeCode: toTrimmedString(row?.officeCode ?? row?.office_code),
     productCategoryName,
-    sortOrder: Number.isFinite(Number(row?.sortOrder ?? row?.sort_order))
-      ? Number(row?.sortOrder ?? row?.sort_order)
-      : 0,
     categoryConfig: normalizeCategoryConfig(row?.categoryConfig ?? row?.category_config, productCategoryName),
     updatedAt: row?.updatedAt ?? row?.updated_at ?? null,
   };
@@ -379,6 +391,7 @@ export function resolveCategoryDraft({
     cardFields: normalizeCardFields(existingCategoryConfig.cardDesign.visibleFields, effectiveScalarKeys),
     cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.cardStyle),
     bodySlots: existingCategoryConfig.cardDesign.bodySlots,
+    generatedCategoryImages: existingCategoryConfig.generatedCategoryImages,
   };
 }
 
@@ -391,6 +404,7 @@ export function buildCategoryConfigRow({
   cardStyle,
   bodySlots,
   allowedScalarKeys,
+  generatedCategoryImages,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
   const existingRow = findCategoryConfigRow(existingConfig?.categoryConfigs, normalizedProductCategoryName);
@@ -406,6 +420,10 @@ export function buildCategoryConfigRow({
         cardStyle,
         bodySlots,
       },
+      generatedCategoryImages: {
+        ...normalizeGeneratedCategoryImages(existingRow?.categoryConfig?.generatedCategoryImages),
+        ...normalizeGeneratedCategoryImages(generatedCategoryImages),
+      },
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -413,9 +431,6 @@ export function buildCategoryConfigRow({
 
   return {
     productCategoryName: normalizedProductCategoryName,
-    sortOrder:
-      existingRow?.sortOrder ??
-      (Array.isArray(existingConfig?.categoryConfigs) ? existingConfig.categoryConfigs.length : 0),
     categoryConfig: nextCategoryConfig,
   };
 }
@@ -425,19 +440,20 @@ function mergeCategoryConfigRows(existingRows, nextRow) {
     .map((row) => normalizeCategoryConfigRow(row))
     .filter((row) => row.productCategoryName);
   const normalizedNextRow = normalizeCategoryConfigRow(nextRow);
-  const nextRows = rows.filter(
-    (row) => row.productCategoryName !== normalizedNextRow.productCategoryName,
+  const existingIndex = rows.findIndex(
+    (row) => row.productCategoryName === normalizedNextRow.productCategoryName,
   );
 
-  nextRows.push(normalizedNextRow);
+  if (existingIndex === -1) {
+    rows.push(normalizedNextRow);
+  } else {
+    rows[existingIndex] = normalizedNextRow;
+  }
 
-  return nextRows
-    .sort((left, right) => left.sortOrder - right.sortOrder)
-    .map((row, index) => ({
-      productCategoryName: row.productCategoryName,
-      sortOrder: Number.isFinite(row.sortOrder) ? row.sortOrder : index,
-      categoryConfig: row.categoryConfig,
-    }));
+  return rows.map((row) => ({
+    productCategoryName: row.productCategoryName,
+    categoryConfig: row.categoryConfig,
+  }));
 }
 
 export function flattenProductEntries(productEntries) {
@@ -463,6 +479,7 @@ export function buildStorefrontSavePayload({
   mobileUiTree,
   pageStyle,
   allowedScalarKeys,
+  generatedCategoryImages,
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
   const resolvedNavConfig = normalizeNavConfig({ ...(existingConfig?.navConfig ?? {}), ...(navConfig ?? {}) });
@@ -494,7 +511,6 @@ export function buildStorefrontSavePayload({
     categoryChips: {
       ...basePageConfig.categoryChips,
       enabled: categoryChipsBlock ? categoryChipsBlock.enabled : basePageConfig.categoryChips.enabled,
-      variant: resolvedNavConfig.categoryChipVariant,
     },
     mobileUiTree: nextMobileUiTree,
   });
@@ -507,6 +523,7 @@ export function buildStorefrontSavePayload({
     cardStyle: normalizeCardStyle(cardStyle),
     bodySlots,
     allowedScalarKeys,
+    generatedCategoryImages,
   });
 
   return {

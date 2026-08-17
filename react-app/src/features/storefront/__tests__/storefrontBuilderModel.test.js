@@ -5,13 +5,14 @@ import {
   buildStorefrontSavePayload,
   resolveCategoryDraft,
   normalizeCategoryConfig,
+  normalizeGeneratedCategoryImages,
   normalizePageConfig,
   normalizeCardFields,
   deriveAvailableCategoryFields,
   STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/storefront-config/storefrontBuilderModel';
-import { DEFAULT_CARD_STYLE } from '../model/card-design/cardStyleModel';
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/pageStyleModel';
+import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/page-style/pageStyleModel';
 
 describe('categoryConfig cardStyle', () => {
   it('normalizes a missing cardDesign to the default cardStyle', () => {
@@ -220,5 +221,138 @@ describe('deriveAvailableCategoryFields', () => {
     ]);
 
     expect(fields.find((field) => field.key === 'other_structured_field').isSelectable).toBe(false);
+  });
+});
+
+describe('normalizeGeneratedCategoryImages', () => {
+  it('keeps a valid entry and stamps isAiGenerated true', () => {
+    const result = normalizeGeneratedCategoryImages({
+      복합비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'x', generatedAt: '2026-08-17T00:00:00.000Z' },
+    });
+
+    expect(result).toEqual({
+      복합비료: {
+        imageDataUri: 'data:image/png;base64,abc',
+        prompt: 'x',
+        isAiGenerated: true,
+        generatedAt: '2026-08-17T00:00:00.000Z',
+      },
+    });
+  });
+
+  it('drops entries whose imageDataUri is not a data:image/ URI', () => {
+    expect(
+      normalizeGeneratedCategoryImages({ 복합비료: { imageDataUri: 'https://example.com/a.png' } }),
+    ).toEqual({});
+  });
+
+  it('returns an empty object for non-object or missing input', () => {
+    expect(normalizeGeneratedCategoryImages(undefined)).toEqual({});
+    expect(normalizeGeneratedCategoryImages(null)).toEqual({});
+    expect(normalizeGeneratedCategoryImages([])).toEqual({});
+  });
+});
+
+describe('normalizeCategoryConfig generatedCategoryImages', () => {
+  it('carries a valid generatedCategoryImages map through unchanged', () => {
+    const config = normalizeCategoryConfig({
+      generatedCategoryImages: {
+        복합비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'x', generatedAt: '2026-08-17T00:00:00.000Z' },
+      },
+    });
+
+    expect(config.generatedCategoryImages).toEqual({
+      복합비료: {
+        imageDataUri: 'data:image/png;base64,abc',
+        prompt: 'x',
+        isAiGenerated: true,
+        generatedAt: '2026-08-17T00:00:00.000Z',
+      },
+    });
+  });
+
+  it('defaults to an empty object when absent', () => {
+    expect(normalizeCategoryConfig({}).generatedCategoryImages).toEqual({});
+  });
+});
+
+describe('buildCategoryConfigRow generatedCategoryImages merge', () => {
+  it('merges a new entry onto the existing map instead of replacing it', () => {
+    const existingConfig = {
+      categoryConfigs: [
+        {
+          productCategoryName: 'Fertilizer Upload',
+          categoryConfig: {
+            generatedCategoryImages: {
+              유기질비료: { imageDataUri: 'data:image/png;base64,old', prompt: 'old', isAiGenerated: true, generatedAt: '2026-08-01T00:00:00.000Z' },
+            },
+          },
+        },
+      ],
+    };
+
+    const row = buildCategoryConfigRow({
+      productCategoryName: 'Fertilizer Upload',
+      existingConfig,
+      selectedMediumCategories: ['복합비료', '유기질비료'],
+      representativeMediumCategory: '복합비료',
+      cardFields: ['product_name'],
+      cardStyle: {},
+      bodySlots: [],
+      generatedCategoryImages: {
+        복합비료: { imageDataUri: 'data:image/png;base64,new', prompt: 'new', generatedAt: '2026-08-17T00:00:00.000Z' },
+      },
+    });
+
+    expect(Object.keys(row.categoryConfig.generatedCategoryImages).sort()).toEqual(['복합비료', '유기질비료']);
+    expect(row.categoryConfig.generatedCategoryImages.유기질비료.imageDataUri).toBe('data:image/png;base64,old');
+    expect(row.categoryConfig.generatedCategoryImages.복합비료.imageDataUri).toBe('data:image/png;base64,new');
+  });
+});
+
+describe('resolveCategoryDraft generatedCategoryImages', () => {
+  it('surfaces the saved generatedCategoryImages map', () => {
+    const draft = resolveCategoryDraft({
+      productCategoryName: 'Fertilizer Upload',
+      productEntries: [{ categoryName: 'Fertilizer Upload', rows: [{ medium_category: '복합비료' }] }],
+      existingConfig: {
+        categoryConfigs: [
+          {
+            productCategoryName: 'Fertilizer Upload',
+            categoryConfig: {
+              generatedCategoryImages: {
+                복합비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'x', generatedAt: '2026-08-17T00:00:00.000Z' },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    expect(draft.generatedCategoryImages.복합비료.imageDataUri).toBe('data:image/png;base64,abc');
+  });
+});
+
+describe('buildStorefrontSavePayload generatedCategoryImages', () => {
+  it('threads generatedCategoryImages into the saved category row', () => {
+    const payload = buildStorefrontSavePayload({
+      officeCode: 'OFF-1',
+      existingConfig: null,
+      hiddenProducts: [],
+      selectedProductCategoryName: 'Fertilizer Upload',
+      selectedMediumCategories: ['복합비료'],
+      representativeMediumCategory: '복합비료',
+      cardStyle: {},
+      cardFields: ['product_name'],
+      navConfig: {},
+      mobileUiTree: [],
+      generatedCategoryImages: {
+        복합비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'x', generatedAt: '2026-08-17T00:00:00.000Z' },
+      },
+    });
+
+    expect(
+      payload.categoryConfigs[0].categoryConfig.generatedCategoryImages.복합비료.imageDataUri,
+    ).toBe('data:image/png;base64,abc');
   });
 });
