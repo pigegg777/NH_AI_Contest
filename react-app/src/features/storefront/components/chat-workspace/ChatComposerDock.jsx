@@ -1,9 +1,10 @@
+import CategoryImageGenPanel from './CategoryImageGenPanel';
 import CategoryTabs from './CategoryTabs';
 import DesignTargetChipsBubble from './DesignTargetChipsBubble';
 import { getStorefrontComposerCopy } from './storefrontChatModes';
 import styles from './ChatComposerDock.module.css';
 
-export default function ChatComposerDock({ mode, composer, categoryTabsMode }) {
+export default function ChatComposerDock({ mode, composer, categoryTabsMode, categoryImageMode }) {
   const copy = getStorefrontComposerCopy(mode);
 
   if (!copy || !composer) {
@@ -59,6 +60,15 @@ export default function ChatComposerDock({ mode, composer, categoryTabsMode }) {
           onSelectTarget={composer.setTargetId}
         />
       </div>
+
+      {categoryImageMode ? (
+        <CategoryImageGenPanel
+          mediumCategories={categoryImageMode.mediumCategories}
+          generatedCategoryImages={categoryImageMode.generatedCategoryImages}
+          isGeneratingCategoryImage={categoryImageMode.isGeneratingCategoryImage}
+          onGenerate={categoryImageMode.generateCategoryImage}
+        />
+      ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <label

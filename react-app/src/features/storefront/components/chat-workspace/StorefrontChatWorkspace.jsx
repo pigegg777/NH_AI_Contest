@@ -52,6 +52,7 @@ export default function StorefrontChatWorkspace({ session, builder }) {
             mode={session.mode}
             composer={composerMode}
             categoryTabsMode={showCategoryTabs ? cardMode : null}
+            categoryImageMode={session.mode === 'card' ? cardMode : null}
           />
         </div>
       ) : (
