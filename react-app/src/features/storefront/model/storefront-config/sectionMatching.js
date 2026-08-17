@@ -85,6 +85,7 @@ export function buildSections(categoryConfigs, productRows) {
         cardStyle: categoryConfig.cardDesign?.cardStyle,
         bodySlots: categoryConfig.cardDesign?.bodySlots,
         representativeMediumCategory: categoryConfig.representativeMediumCategory || '',
+        generatedCategoryImages: categoryConfig.generatedCategoryImages || {},
         products,
       };
     })
