@@ -51,6 +51,20 @@ describe('CategoryImageGenPanel', () => {
     expect(screen.getByRole('button', { name: '생성 중...' })).toBeDisabled();
   });
 
+  it('disables only the generating category\'s button, leaving other categories independently enabled', () => {
+    render(
+      <CategoryImageGenPanel
+        mediumCategories={['복합비료', '유기질비료']}
+        generatedCategoryImages={{}}
+        isGeneratingCategoryImage={{ 복합비료: true }}
+        onGenerate={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: '생성 중...' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '유기질비료 이미지 생성' })).toBeEnabled();
+  });
+
   it('shows a thumbnail preview once a generated image exists for the category', () => {
     render(
       <CategoryImageGenPanel
