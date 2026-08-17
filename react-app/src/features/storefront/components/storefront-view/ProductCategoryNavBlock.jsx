@@ -1,16 +1,25 @@
 import styles from '../StorefrontView.module.css';
 
+const PRODUCT_CHIP_VARIANT_CLASS_NAMES = {
+  filled: styles.productCategoryWrapFilled,
+  outline: styles.productCategoryWrapOutline,
+  soft: styles.productCategoryWrapSoft,
+};
+
 export default function ProductCategoryNavBlock({ view, elementKey }) {
   if (view.catalogSectionEntries.length === 0) {
     return null;
   }
 
+  const productCategoryChipVariant = view.pageStyle.productCategoryChips.variant;
+
   return (
     <div className={styles.productCategorySection}>
       <p className={styles.selectionLabel}>대분류 선택</p>
       <div
-        className={styles.productCategoryWrap}
+        className={`${styles.productCategoryWrap} ${PRODUCT_CHIP_VARIANT_CLASS_NAMES[productCategoryChipVariant] || ''}`}
         data-testid="storefront-product-category-chips"
+        data-chip-variant={productCategoryChipVariant}
       >
         {view.catalogSectionEntries.map(({ sectionId, sectionName }) => (
           <button

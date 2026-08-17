@@ -1,10 +1,9 @@
 import CategoryTabs from './CategoryTabs';
 import DesignTargetChipsBubble from './DesignTargetChipsBubble';
-import { getStorefrontComposerCopy } from './storefrontChatModes';
 import styles from './ChatComposerDock.module.css';
 
-export default function ChatComposerDock({ mode, composer, categoryTabsMode }) {
-  const copy = getStorefrontComposerCopy(mode);
+export default function ChatComposerDock({ composer, categoryTabsMode }) {
+  const copy = composer?.copy;
 
   if (!copy || !composer) {
     return null;

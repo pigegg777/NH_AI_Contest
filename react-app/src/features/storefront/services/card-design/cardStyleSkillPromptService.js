@@ -1,10 +1,10 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import storefrontDesignSkillMarkdown from '../../card-design-skill/skillMarkdown.json';
-import storefrontEditableRegionsMarkdown from '../../card-design-skill/references/editableRegionsMarkdown.json';
-import storefrontExamplesMarkdown from '../../card-design-skill/references/examplesMarkdown.json';
-import storefrontFieldGroupingRulesMarkdown from '../../card-design-skill/references/fieldGroupingRulesMarkdown.json';
-import storefrontOutputContractMarkdown from '../../card-design-skill/references/outputContractMarkdown.json';
-import storefrontScopeModelMarkdown from '../../card-design-skill/references/scopeModelMarkdown.json';
+import { CARD_STYLE_SKILL_PROMPT } from './skill/skillPrompt';
+import { CARD_STYLE_EDITABLE_REGIONS_PROMPT } from './skill/references/editableRegionsPrompt';
+import { CARD_STYLE_EXAMPLES_PROMPT } from './skill/references/examplesPrompt';
+import { CARD_STYLE_FIELD_GROUPING_RULES_PROMPT } from './skill/references/fieldGroupingRulesPrompt';
+import { CARD_STYLE_OUTPUT_CONTRACT_PROMPT } from './skill/references/outputContractPrompt';
+import { CARD_STYLE_SCOPE_MODEL_PROMPT } from './skill/references/scopeModelPrompt';
 
 const SKILL_PACKS = {
   'base-system': {
@@ -85,12 +85,12 @@ const CARD_DESIGN_FORCED_REFERENCE_PROMPT = [
   'Always consult the bundled local card-design-edit skill below before interpreting the user request.',
   'Treat these references as mandatory constraints for every request, not optional hints.',
   '',
-  storefrontDesignSkillMarkdown,
-  storefrontScopeModelMarkdown,
-  storefrontFieldGroupingRulesMarkdown,
-  storefrontEditableRegionsMarkdown,
-  storefrontOutputContractMarkdown,
-  storefrontExamplesMarkdown,
+  CARD_STYLE_SKILL_PROMPT,
+  CARD_STYLE_SCOPE_MODEL_PROMPT,
+  CARD_STYLE_FIELD_GROUPING_RULES_PROMPT,
+  CARD_STYLE_EDITABLE_REGIONS_PROMPT,
+  CARD_STYLE_OUTPUT_CONTRACT_PROMPT,
+  CARD_STYLE_EXAMPLES_PROMPT,
 ]
   .map((part) => toTrimmedString(part))
   .filter(Boolean)

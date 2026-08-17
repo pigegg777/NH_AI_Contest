@@ -4,7 +4,7 @@ import {
   normalizeNavConfig,
   normalizePageConfig,
 } from './storefrontBuilderModel';
-import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../page-design/pageStyleMigration';
+import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../page-design/page-style/pageStyleMigration';
 import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../../services/storefront-config/storefrontConfigService';
 
 function toArray(value) {
@@ -69,14 +69,15 @@ function buildPageConfigPayload({ navConfig, pageConfig }) {
   });
 }
 
-function buildCategoryRows({ officeCode, categoryConfigs }) {
+function buildCategoryRows({ categoryConfigs }) {
+  const stamp = new Date().toISOString();
+
   return toArray(categoryConfigs)
-    .map((row, index) => normalizeCategoryConfigRow({ ...row, sortOrder: row?.sortOrder ?? index }))
+    .map((row) => normalizeCategoryConfigRow(row))
     .filter((row) => row.productCategoryName)
-    .map((row, index) => ({
-      office_code: officeCode,
+    .map((row) => ({
       product_category_name: row.productCategoryName,
-      sort_order: Number.isFinite(row.sortOrder) ? row.sortOrder : index,
+      updated_at: stamp,
       category_config: row.categoryConfig,
     }));
 }
@@ -101,10 +102,7 @@ export async function upsertStorefrontConfig({
   }
 
   const pageConfigPayload = buildPageConfigPayload({ navConfig, pageConfig });
-  const categoryRows = buildCategoryRows({
-    officeCode: normalizedOfficeCode,
-    categoryConfigs,
-  });
+  const categoryRows = buildCategoryRows({ categoryConfigs });
 
   await saveOfficeConfigRows({
     officeCode: normalizedOfficeCode,

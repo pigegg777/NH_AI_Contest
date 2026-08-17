@@ -25,6 +25,7 @@ export function DataEditorSection() {
     handleRecommendationSelect: onAiRecommendationSelect,
     marketResearch,
     bulkNoteWriter,
+    categoryImageGeneration,
   } = useAiCtx();
 
   return (
@@ -54,6 +55,7 @@ export function DataEditorSection() {
               onAiRecommendationSelect={onAiRecommendationSelect}
               marketResearch={marketResearch}
               bulkNoteWriter={bulkNoteWriter}
+              categoryImageGeneration={categoryImageGeneration}
             />
           )}
         </div>

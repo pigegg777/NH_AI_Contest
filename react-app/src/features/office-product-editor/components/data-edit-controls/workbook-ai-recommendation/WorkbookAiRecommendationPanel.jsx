@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { TabBar } from '../TabBar';
-import { SimilarityAnalysisPanel } from './SimilarityAnalysisPanel';
-import { NaturalLanguagePromptInput } from './NaturalLanguagePromptInput';
-import { MarketResearchPanel } from './MarketResearchPanel';
-import { BulkNoteWriterPanel } from './BulkNoteWriterPanel';
+import { AiSimilarityExtractionPanel } from './ai-similarity-extraction/AiSimilarityExtractionPanel';
+import { AiMarketResearchPromptInput } from './ai-market-research/AiMarketResearchPromptInput';
+import { AiMarketResearchPanel } from './ai-market-research/AiMarketResearchPanel';
+import { AiBulkNoteWriterPanel } from './ai-bulk-note/AiBulkNoteWriterPanel';
+import { AiCategoryImageGenerationPanel } from './ai-category-image/AiCategoryImageGenerationPanel';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 
 const AI_ANALYSIS_SUB_TABS = [
   { id: 'similarity', label: '유사상품분석' },
   { id: 'marketResearch', label: '시장조사' },
   { id: 'bulkNote', label: '일괄비고작성' },
+  { id: 'categoryImage', label: '대체 이미지 생성' },
 ];
 
 export function WorkbookAiRecommendationPanel({
@@ -24,6 +26,7 @@ export function WorkbookAiRecommendationPanel({
   onAiRecommendationSelect,
   marketResearch,
   bulkNoteWriter,
+  categoryImageGeneration,
 }) {
   const [analysisHint, setAnalysisHint] = useState('');
   const [activeSubTabId, setActiveSubTabId] = useState('similarity');
@@ -39,7 +42,7 @@ export function WorkbookAiRecommendationPanel({
       />
 
       {activeSubTabId === 'similarity' ? (
-        <SimilarityAnalysisPanel
+        <AiSimilarityExtractionPanel
           analysisHint={analysisHint}
           onAnalysisHintChange={setAnalysisHint}
           onAiAnalyze={onAiAnalyze}
@@ -56,14 +59,20 @@ export function WorkbookAiRecommendationPanel({
 
       {activeSubTabId === 'marketResearch' ? (
         <div className={styles.aiSubTabPanel}>
-          <NaturalLanguagePromptInput marketResearch={marketResearch} />
-          <MarketResearchPanel marketResearch={marketResearch} />
+          <AiMarketResearchPromptInput marketResearch={marketResearch} />
+          <AiMarketResearchPanel marketResearch={marketResearch} />
         </div>
       ) : null}
 
       {activeSubTabId === 'bulkNote' ? (
         <div className={styles.aiSubTabPanel}>
-          <BulkNoteWriterPanel bulkNoteWriter={bulkNoteWriter} />
+          <AiBulkNoteWriterPanel bulkNoteWriter={bulkNoteWriter} />
+        </div>
+      ) : null}
+
+      {activeSubTabId === 'categoryImage' ? (
+        <div className={styles.aiSubTabPanel}>
+          <AiCategoryImageGenerationPanel categoryImageGeneration={categoryImageGeneration} />
         </div>
       ) : null}
     </div>

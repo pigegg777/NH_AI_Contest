@@ -1,4 +1,4 @@
-import { startTransition } from 'react';
+import { startTransition, useCallback } from 'react';
 
 import { toTrimmedString } from '../../../../common/utils/text';
 import { fetchOfficeProductDataCatalog } from '../../services/office-product-data/officeProductDataReadService';
@@ -14,20 +14,26 @@ export function useOfficeProductDataCatalog(user) {
     { enabled: Boolean(officeCode), initialData: [], defaultErrorMessage: DEFAULT_ERROR_MESSAGE },
   );
 
-  function removeItem(categoryName) {
-    startTransition(() => {
-      setData((current) => current.filter((item) => item.categoryName !== categoryName));
-    });
-  }
+  const removeItem = useCallback(
+    (categoryName) => {
+      startTransition(() => {
+        setData((current) => current.filter((item) => item.categoryName !== categoryName));
+      });
+    },
+    [setData],
+  );
 
-  function upsertItem(item) {
-    startTransition(() => {
-      setData((current) => [
-        item,
-        ...current.filter((existing) => existing.categoryName !== item.categoryName),
-      ]);
-    });
-  }
+  const upsertItem = useCallback(
+    (item) => {
+      startTransition(() => {
+        setData((current) => [
+          item,
+          ...current.filter((existing) => existing.categoryName !== item.categoryName),
+        ]);
+      });
+    },
+    [setData],
+  );
 
   return { items, isLoading, errorMessage, removeItem, upsertItem };
 }

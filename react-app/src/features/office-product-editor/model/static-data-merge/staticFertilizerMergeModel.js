@@ -1,4 +1,4 @@
-﻿import { toTrimmedString } from '../../../../common/utils/text';
+import { toTrimmedString } from '../../../../common/utils/text';
 
 const EMPTY_STATIC_FERTILIZER_FIELDS = Object.freeze({
   img_url: null,

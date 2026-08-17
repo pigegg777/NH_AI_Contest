@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { toNullableTrimmedString, toTrimmedString } from '../../../../common/utils/text';
 import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
@@ -18,6 +18,11 @@ export function useWorkbookSave({
   const [isSaving, setIsSaving] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
   const [saveSuccessMessage, setSaveSuccessMessage] = useState('');
+  const rowsToSaveRef = useRef(rowsToSave);
+
+  useEffect(() => {
+    rowsToSaveRef.current = rowsToSave;
+  }, [rowsToSave]);
 
   const resolvedCategoryName = resolveActiveCategoryName(
     tableNameMode,
@@ -38,7 +43,7 @@ export function useWorkbookSave({
     setIsSaving(false);
   }, [workbookFingerprint]);
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!canSave || isSaving) {
       return;
     }
@@ -48,13 +53,14 @@ export function useWorkbookSave({
     setSaveSuccessMessage('');
 
     try {
+      const currentRowsToSave = rowsToSaveRef.current;
       const savedData = await saveOfficeProductData({
         user,
-        rows: rowsToSave,
+        rows: currentRowsToSave,
         categoryName: resolvedCategoryName,
         sourceFileName: selectedFileName,
       });
-      const savedRowCount = savedData?.row_count ?? rowsToSave.length;
+      const savedRowCount = savedData?.row_count ?? currentRowsToSave.length;
       setSaveSuccessMessage(`${resolvedCategoryName} 데이터 ${savedRowCount}건을 저장했습니다.`);
       onSaved?.({
         id: savedData?.id ?? null,
@@ -70,7 +76,7 @@ export function useWorkbookSave({
     } finally {
       setIsSaving(false);
     }
-  }
+  }, [canSave, isSaving, user, resolvedCategoryName, selectedFileName, onSaved]);
 
   return {
     resolvedCategoryName,

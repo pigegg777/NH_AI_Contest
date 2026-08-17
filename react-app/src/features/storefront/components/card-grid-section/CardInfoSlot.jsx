@@ -1,4 +1,4 @@
-import { hasRenderableValue } from '../../model/card-design/cardFieldRenderModel';
+import { hasRenderableValue } from '../../model/card-design/style/cardFieldRenderModel';
 import CardFieldSlot from './CardFieldSlot';
 import CardInlineGroupSlot from './CardInlineGroupSlot';
 import CardStackGroupSlot from './CardStackGroupSlot';

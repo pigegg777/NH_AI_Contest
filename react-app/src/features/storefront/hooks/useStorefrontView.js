@@ -12,7 +12,7 @@ import {
   buildUniqueMediumCategories,
   filterHiddenProducts,
 } from '../model/storefront-config/sectionMatching';
-import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/pageStyleModel';
+import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/page-style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import {
   MOBILE_UI_HELPER_TYPES,
@@ -201,10 +201,6 @@ export function useStorefrontView({
     config?.navConfig?.searchVariant ||
     resolvedPageConfig.searchSection.variant ||
     'pill';
-  const categoryChipVariant =
-    config?.navConfig?.categoryChipVariant ||
-    resolvedPageConfig.categoryChips.variant ||
-    'soft';
 
   const sectionHeaderBlocks = mobileUiTree.filter(
     (block) =>
@@ -309,7 +305,6 @@ export function useStorefrontView({
     subtitle,
     searchPlaceholder,
     searchVariant,
-    categoryChipVariant,
     canRenderDesktopCategoryRail,
     hasRenderableSections,
     canRenderEmptyState,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { toTrimmedString } from '../../../../common/utils/text';
 import {
@@ -49,10 +49,13 @@ export function useWorkbookCatalogSelection({
     ? activeCustomCategoryName
     : '';
 
-  const existingCategoryNames = [
-    ...officeProductCatalogItems.map((item) => item.categoryName),
-    ...pendingCustomCategories,
-  ];
+  const existingCategoryNames = useMemo(
+    () => [
+      ...officeProductCatalogItems.map((item) => item.categoryName),
+      ...pendingCustomCategories,
+    ],
+    [officeProductCatalogItems, pendingCustomCategories],
+  );
 
   const tableNameValidationError =
     showsCustomTableNameInput && submitAttempted
@@ -63,12 +66,12 @@ export function useWorkbookCatalogSelection({
           : '')
       : '';
 
-  function handleCustomTableNameChange(event) {
+  const handleCustomTableNameChange = useCallback((event) => {
     setCustomTableName(event.target.value);
     setSubmitAttempted(false);
-  }
+  }, []);
 
-  function handleCreateCustomTable() {
+  const handleCreateCustomTable = useCallback(() => {
     if (!showsCustomTableNameInput) {
       return;
     }
@@ -90,42 +93,48 @@ export function useWorkbookCatalogSelection({
         : [...previous, validation.normalizedCategoryName],
     );
     setCustomTableName('');
-  }
+  }, [showsCustomTableNameInput, customTableName, existingCategoryNames]);
 
-  function handlePendingCustomCategoryDelete(categoryName) {
-    const normalizedCategoryName = toTrimmedString(categoryName);
+  const handlePendingCustomCategoryDelete = useCallback(
+    (categoryName) => {
+      const normalizedCategoryName = toTrimmedString(categoryName);
 
-    if (normalizedCategoryName.length === 0) {
-      return;
-    }
+      if (normalizedCategoryName.length === 0) {
+        return;
+      }
 
-    setPendingCustomCategories((previous) =>
-      previous.filter((name) => name !== normalizedCategoryName),
-    );
-    setSubmitAttempted(false);
+      setPendingCustomCategories((previous) =>
+        previous.filter((name) => name !== normalizedCategoryName),
+      );
+      setSubmitAttempted(false);
 
-    if (activeCustomCategoryName === normalizedCategoryName) {
-      setTableNameMode('custom');
-      setActiveCustomCategoryName('');
-    }
-  }
+      if (activeCustomCategoryName === normalizedCategoryName) {
+        setTableNameMode('custom');
+        setActiveCustomCategoryName('');
+      }
+    },
+    [activeCustomCategoryName],
+  );
 
-  function isCardSelected(card) {
-    if (card.isAdd) {
-      return tableNameMode === 'custom' && !isShowingExistingCustomCategory;
-    }
+  const isCardSelected = useCallback(
+    (card) => {
+      if (card.isAdd) {
+        return tableNameMode === 'custom' && !isShowingExistingCustomCategory;
+      }
 
-    if (card.selectionMode) {
-      return card.selectionMode === tableNameMode;
-    }
+      if (card.selectionMode) {
+        return card.selectionMode === tableNameMode;
+      }
 
-    return (
-      isShowingExistingCustomCategory &&
-      activeCustomCategoryName === card.categoryName
-    );
-  }
+      return (
+        isShowingExistingCustomCategory &&
+        activeCustomCategoryName === card.categoryName
+      );
+    },
+    [tableNameMode, isShowingExistingCustomCategory, activeCustomCategoryName],
+  );
 
-  function handleCatalogSelect(card) {
+  const handleCatalogSelect = useCallback((card) => {
     if (card.isAdd) {
       setTableNameMode('custom');
       setActiveCustomCategoryName('');
@@ -142,7 +151,7 @@ export function useWorkbookCatalogSelection({
 
     setTableNameMode('custom');
     setActiveCustomCategoryName(card.categoryName);
-  }
+  }, []);
 
   return {
     tableNameMode,

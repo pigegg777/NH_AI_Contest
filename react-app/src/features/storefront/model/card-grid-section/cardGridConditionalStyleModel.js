@@ -1,4 +1,4 @@
-import { resolveFieldColorRoleValue } from '../card-design/cardStyleModel';
+import { resolveFieldColorRoleValue } from '../card-design/style/cardStyleModel';
 import { resolveCssColor } from './cardGridFieldStyleModel';
 
 const CARD_RADIUS_PX_VALUES = { md: '14px', lg: '18px', xl: '24px' };

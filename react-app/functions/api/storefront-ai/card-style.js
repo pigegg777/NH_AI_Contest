@@ -1,25 +1,23 @@
-import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/card-design/cardAiDesignModel.js';
-import { normalizeCardStyle } from '../../../src/features/storefront/model/card-design/cardStyleModel.js';
-import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
+import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/card-design/ai-request/cardAiDesignModel.js';
+import { normalizeCardStyle } from '../../../src/features/storefront/model/card-design/style/cardStyleModel.js';
+import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
+import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront/model/card-design/ai-request/cardStyleAiRequest.js';
 import {
-  buildCardStyleOpenAiRequestBody,
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../../../src/features/storefront/model/card-design/cardStyleAiContract.js';
+} from '../../../src/features/storefront/model/card-design/ai-response/cardStyleAiResponseNormalizer.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
-  RequestValidationError,
   assertHistoryWithinLimits,
-  assertOfficeCodePresent,
-  assertPostJsonRequest,
   assertPromptWithinLimit,
   pickAllowedKeys,
-  readJsonBody,
+  readOfficeCode,
+  readValidatedJsonBody,
+  withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
-import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.js';
-import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
+import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-4.1-mini';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
 const REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
   'cardAiDesign',
@@ -30,30 +28,32 @@ const REQUEST_BODY_ALLOWED_KEYS = [
   'history',
 ];
 
-export async function onRequestPost({ request, env }) {
-  try {
-    assertPostJsonRequest(request);
-
-    const rawBody = await readJsonBody(request);
+export const onRequestPost = withRequestErrorHandling(
+  async ({ request, env }) => {
+    const rawBody = await readValidatedJsonBody(request);
     const body = pickAllowedKeys(rawBody, REQUEST_BODY_ALLOWED_KEYS);
-    const officeCode = typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
-    assertOfficeCodePresent(officeCode);
+    const officeCode = readOfficeCode(body);
 
     const cardAiDesign = normalizeCardAiDesignInput(body.cardAiDesign);
     assertPromptWithinLimit(cardAiDesign.prompt);
 
-    const visibleFields = Array.isArray(body.visibleFields) ? body.visibleFields : [];
-    const productCategoryName = typeof body.productCategoryName === 'string' ? body.productCategoryName : '';
+    const visibleFields = Array.isArray(body.visibleFields)
+      ? body.visibleFields
+      : [];
+    const productCategoryName =
+      typeof body.productCategoryName === 'string'
+        ? body.productCategoryName
+        : '';
     const conditionFieldValueSamples =
-      body.conditionFieldValueSamples && typeof body.conditionFieldValueSamples === 'object'
+      body.conditionFieldValueSamples &&
+      typeof body.conditionFieldValueSamples === 'object'
         ? body.conditionFieldValueSamples
         : {};
     const currentCardStyle = normalizeCardStyle(body.currentCardStyle);
     const history = Array.isArray(body.history) ? body.history : [];
     assertHistoryWithinLimits(history);
 
-    const { supabase, user } = await requireAuthenticatedSupabaseUser(request, env);
-    await assertOfficeOwnership({ supabase, authUserId: user.id, officeCode });
+    await requireOwnedOffice({ request, env, officeCode });
 
     const requestBody = buildCardStyleOpenAiRequestBody({
       cardAiDesign,
@@ -70,18 +70,15 @@ export async function onRequestPost({ request, env }) {
     try {
       ({ payload } = await requestOpenAiJson(requestBody, env.OPENAI_API_KEY));
     } catch (error) {
-      return errorResponse(error instanceof Error ? error.message : 'OpenAI request failed.', 502);
+      return errorResponse(
+        error instanceof Error ? error.message : 'OpenAI request failed.',
+        502,
+      );
     }
 
     const intent = normalizeOpenAiCardIntent(payload, cardAiDesign.targetScope);
     const { explanation, suggestion } = normalizeOpenAiCardExplanation(payload);
 
     return jsonResponse({ intent, explanation, suggestion });
-  } catch (error) {
-    if (error instanceof RequestValidationError) {
-      return errorResponse(error.message, error.status);
-    }
-
-    return errorResponse('Unexpected server error.', 500);
-  }
-}
+  },
+);

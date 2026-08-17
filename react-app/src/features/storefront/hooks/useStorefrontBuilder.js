@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { toTrimmedString } from "../../../common/utils/text";
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
-import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/cardAiDesignModel";
-import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/pageAiDesignModel";
+import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
+import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -23,6 +23,7 @@ import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
 } from "../model/storefront-config/storefrontConfigOrchestrator";
+import { getStorefrontDesignComposerCopy } from "../components/chat-workspace/storefrontChatModes";
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
 import { usePageAiDesign } from "./usePageAiDesign";
@@ -62,13 +63,13 @@ function cloneValue(value) {
     : JSON.parse(JSON.stringify(value));
 }
 
-function buildSharedHistory(messages, mode) {
+function buildSharedHistory(messages, designTarget) {
   return messages
     .filter(
       (message) =>
         message?.kind === "chat-message" &&
         typeof message?.text === "string" &&
-        (!mode || message?.mode === mode),
+        (!designTarget || message?.designTarget === designTarget),
     )
     .slice(-MAX_SHARED_AI_HISTORY_MESSAGES)
     .map((message) => ({ role: message.role, text: message.text }));
@@ -77,6 +78,7 @@ function buildSharedHistory(messages, mode) {
 function buildSharedThreadMessage({
   role,
   mode,
+  designTarget,
   targetLabel,
   scope,
   scopeLabel,
@@ -89,6 +91,7 @@ function buildSharedThreadMessage({
     kind: "chat-message",
     mode,
     target: mode,
+    designTarget,
     targetLabel,
     scope,
     scopeLabel,
@@ -98,12 +101,12 @@ function buildSharedThreadMessage({
   };
 }
 
-function resolveChatScopeLabel(mode, targetScope) {
-  if (mode === "page") {
+function resolveChatScopeLabel(designTarget, targetScope) {
+  if (designTarget === "common") {
     return resolveScopeLabel(PAGE_AI_TARGET_SCOPE_OPTIONS, targetScope);
   }
 
-  if (mode === "card") {
+  if (designTarget === "category") {
     return resolveScopeLabel(CARD_AI_TARGET_SCOPE_OPTIONS, targetScope);
   }
 
@@ -128,20 +131,19 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const [mobileUiTree, setMobileUiTree] = useState(() =>
     sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree),
   );
+  const [designTarget, setDesignTarget] = useState("common");
   const [composerDrafts, setComposerDrafts] = useState({
-    page: "",
-    card: "",
-    autoDesign: "",
+    common: "",
+    category: "",
   });
   const [pendingComposerApply, setPendingComposerApply] = useState({
-    page: false,
-    card: false,
-    autoDesign: false,
+    common: false,
+    category: false,
   });
-  const pageModeDraftRef = useRef(null);
-  const cardModeDraftRef = useRef(null);
+  const commonDraftRef = useRef(null);
+  const categoryDraftRef = useRef(null);
   const previousChatModeRef = useRef(chatSession.mode);
-  const previousCardCategoryRef = useRef("");
+  const previousCategoryRef = useRef("");
 
   const allProductRows = flattenProductEntries(productEntries);
   const currentEntry =
@@ -164,23 +166,24 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     initialFields: ["product_name"],
   });
 
-  function capturePageModeDraft() {
+  function captureCommonDraft() {
     const baseline = cloneValue(pageAi.pageStyle);
 
-    pageModeDraftRef.current = baseline;
-    setComposerApplyPending("page", false);
+    commonDraftRef.current = baseline;
+    setComposerApplyPending("common", false);
     pageAi.hydratePageStyle(baseline);
   }
 
-  function captureCardModeDraft() {
+  function captureCategoryDraft() {
     const baseline = {
       cardStyle: cloneValue(cardAi.cardStyle),
       bodySlots: cloneValue(cardAi.bodySlots),
+      generatedCategoryImages: cloneValue(cardAi.generatedCategoryImages),
     };
 
-    cardModeDraftRef.current = baseline;
-    setComposerApplyPending("card", false);
-    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots);
+    categoryDraftRef.current = baseline;
+    setComposerApplyPending("category", false);
+    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots, baseline.generatedCategoryImages);
   }
 
   function setComposerDraft(mode, value) {
@@ -220,10 +223,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       resolvedDraft.cardFields,
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
-    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
-    cardModeDraftRef.current = {
+    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots, resolvedDraft.generatedCategoryImages);
+    categoryDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
       bodySlots: cloneValue(resolvedDraft.bodySlots),
+      generatedCategoryImages: cloneValue(resolvedDraft.generatedCategoryImages),
     };
   }
 
@@ -271,9 +275,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             searchVariant:
               config?.navConfig?.searchVariant ??
               normalizedPageConfig.searchSection.variant,
-            categoryChipVariant:
-              config?.navConfig?.categoryChipVariant ??
-              normalizedPageConfig.categoryChips.variant,
           }),
         );
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
@@ -300,12 +301,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       return;
     }
 
-    if (chatSession.mode === "page" || chatSession.mode === "autoDesign") {
-      capturePageModeDraft();
-    }
-
-    if (chatSession.mode === "card" || chatSession.mode === "autoDesign") {
-      captureCardModeDraft();
+    if (chatSession.mode === "design") {
+      setDesignTarget("common");
+      captureCommonDraft();
+      captureCategoryDraft();
     }
 
     previousChatModeRef.current = chatSession.mode;
@@ -313,15 +312,16 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   useEffect(() => {
     if (
-      (chatSession.mode === "card" || chatSession.mode === "autoDesign") &&
+      chatSession.mode === "design" &&
+      designTarget === "category" &&
       selectedProductCategoryName &&
-      selectedProductCategoryName !== previousCardCategoryRef.current
+      selectedProductCategoryName !== previousCategoryRef.current
     ) {
-      captureCardModeDraft();
+      captureCategoryDraft();
     }
 
-    previousCardCategoryRef.current = selectedProductCategoryName;
-  }, [chatSession.mode, selectedProductCategoryName]);
+    previousCategoryRef.current = selectedProductCategoryName;
+  }, [chatSession.mode, designTarget, selectedProductCategoryName]);
 
   function selectProductCategory(categoryName) {
     const isDifferentCategory =
@@ -336,6 +336,39 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     pageAi.discardPageAiDesignSession();
     cardAi.discardCardAiDesignSession();
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
+  }
+
+  function selectDesignTarget(targetId) {
+    if (targetId === "common") {
+      if (designTarget === "common") {
+        return;
+      }
+
+      if (categoryDraftRef.current) {
+        cardAi.hydrateCardStyle(
+          categoryDraftRef.current.cardStyle,
+          categoryDraftRef.current.bodySlots,
+          categoryDraftRef.current.generatedCategoryImages,
+        );
+      }
+
+      setComposerApplyPending("category", false);
+      setComposerDraft("category", "");
+      setDesignTarget("common");
+      return;
+    }
+
+    if (designTarget === "common") {
+      if (commonDraftRef.current) {
+        pageAi.hydratePageStyle(commonDraftRef.current);
+      }
+
+      setComposerApplyPending("common", false);
+      setComposerDraft("common", "");
+      setDesignTarget("category");
+    }
+
+    selectProductCategory(targetId);
   }
 
   function toggleDataModeField(field) {
@@ -391,9 +424,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         searchVariant:
           config?.navConfig?.searchVariant ??
           normalizedPageConfig.searchSection.variant,
-        categoryChipVariant:
-          config?.navConfig?.categoryChipVariant ??
-          normalizedPageConfig.categoryChips.variant,
       }),
     );
 
@@ -417,6 +447,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
       allowedScalarKeys: effectiveScalarKeys,
+      generatedCategoryImages: cardAi.generatedCategoryImages,
     });
   }
 
@@ -428,7 +459,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setStatus("saved");
   }
 
-  function buildApplySummary(mode) {
+  function buildApplySummary(mode, target) {
     if (mode === "data") {
       return (
         buildDataModeCompletionSummary()?.text ??
@@ -436,16 +467,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       );
     }
 
-    if (mode === "card") {
+    if (mode === "design" && target === "category") {
       return `${selectedProductCategoryName || "현재"} 카드 변경 사항이 저장되었습니다.`;
     }
 
-    if (mode === "page") {
-      return "페이지 변경 사항이 저장되었습니다.";
-    }
-
-    if (mode === "autoDesign") {
-      return "AI가 자동으로 정리한 디자인이 적용되었습니다.";
+    if (mode === "design" && target === "common") {
+      return "공통 요소 변경 사항이 저장되었습니다.";
     }
 
     return "스토어프론트 변경 사항이 저장되었습니다.";
@@ -457,14 +484,13 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   ) {
     const previousPayload = cloneValue(existingConfig);
     const payload = buildCurrentSavePayload(overrides);
-    const summary = buildApplySummary(mode);
+    const summary = buildApplySummary(mode, designTarget);
 
     await saveCompiledPayload(payload);
-    setComposerApplyPending("page", false);
-    setComposerApplyPending("card", false);
-    setComposerApplyPending("autoDesign", false);
-    pageModeDraftRef.current = null;
-    cardModeDraftRef.current = null;
+    setComposerApplyPending("common", false);
+    setComposerApplyPending("category", false);
+    commonDraftRef.current = null;
+    categoryDraftRef.current = null;
     chatSession.recordSuccessfulApply({
       summary,
       snapshot: {
@@ -488,7 +514,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     chatSession.appendMessage(
       buildSharedThreadMessage({
         role: "assistant",
-        mode: snapshot.mode ?? "page",
+        mode: snapshot.mode ?? "design",
         text: "이전 스토어프론트 버전으로 복원했습니다.",
       }),
     );
@@ -497,24 +523,23 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   async function sendComposerPrompt() {
     const mode = chatSession.mode;
-    const prompt = toTrimmedString(composerDrafts[mode]);
+    const draftKey = designTarget === "common" ? "common" : "category";
+    const prompt = toTrimmedString(composerDrafts[draftKey]);
 
     if (!prompt) {
       return;
     }
 
     const targetScope =
-      mode === "page"
+      designTarget === "common"
         ? pageAi.pageAiDesign.targetScope
-        : mode === "card"
-          ? cardAi.cardAiDesign.targetScope
-          : "";
-    const scopeLabel = resolveChatScopeLabel(mode, targetScope);
-    const targetLabel =
-      mode === "page" ? "Page" : mode === "card" ? "Card" : undefined;
+        : cardAi.cardAiDesign.targetScope;
+    const scopeLabel = resolveChatScopeLabel(designTarget, targetScope);
+    const targetLabel = designTarget === "common" ? "공통 요소" : "카드";
     const userMessage = buildSharedThreadMessage({
       role: "user",
       mode,
+      designTarget,
       targetLabel,
       scope: targetScope,
       scopeLabel,
@@ -522,68 +547,15 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     });
     const history = buildSharedHistory(
       [...chatSession.messages, userMessage],
-      mode,
+      designTarget,
     );
 
     chatSession.appendMessage(userMessage);
-    setComposerDraft(mode, "");
-
-    if (mode === "autoDesign") {
-      markDirty();
-
-      const [pageResult, cardResult] = await Promise.all([
-        pageAi.applyPageAiDesign({ prompt, targetScope: "", history }),
-        cardAi.applyCardAiDesign({
-          prompt,
-          targetScope: "",
-          history,
-          visibleFields: dataSelection.committed,
-          fieldLabels: STOREFRONT_FIELD_LABELS,
-          productCategoryName: selectedProductCategoryName,
-          productRows: currentEntry?.rows,
-        }),
-      ]);
-
-      const succeeded = [pageResult, cardResult].filter((result) => result?.ok);
-      const failed = [pageResult, cardResult].filter((result) => !result?.ok);
-
-      if (succeeded.length === 0) {
-        chatSession.appendMessage(
-          buildSharedThreadMessage({
-            role: "assistant",
-            mode,
-            text:
-              failed
-                .map((result) => result.error)
-                .filter(Boolean)
-                .join(" ") || "디자인을 자동으로 적용하지 못했습니다.",
-          }),
-        );
-        return;
-      }
-
-      setComposerApplyPending("autoDesign", true);
-
-      const text = [
-        ...succeeded.map((result) => result.explanation).filter(Boolean),
-        ...failed.map((result) => result.error).filter(Boolean),
-      ].join(" ");
-
-      chatSession.appendMessage(
-        buildSharedThreadMessage({
-          role: "assistant",
-          mode,
-          text,
-          warningMessage: cardResult?.warningMessage,
-        }),
-      );
-      return;
-    }
-
+    setComposerDraft(draftKey, "");
     markDirty();
 
     const result =
-      mode === "card"
+      designTarget === "category"
         ? await cardAi.applyCardAiDesign({
             prompt,
             targetScope,
@@ -604,9 +576,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         buildSharedThreadMessage({
           role: "assistant",
           mode,
+          designTarget,
           text:
             result?.error ??
-            (mode === "card"
+            (designTarget === "category"
               ? cardAi.cardAiErrorMessage
               : pageAi.pageAiErrorMessage) ??
             "작업 공간 초안을 업데이트하지 못했습니다.",
@@ -615,16 +588,15 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       return;
     }
 
-    if (mode === "page" || mode === "card") {
-      setComposerApplyPending(mode, true);
-    }
+    setComposerApplyPending(draftKey, true);
 
     chatSession.appendMessage(
       buildSharedThreadMessage({
         role: "assistant",
         mode,
+        designTarget,
         scope: result.scope,
-        scopeLabel: resolveChatScopeLabel(mode, result.scope),
+        scopeLabel: resolveChatScopeLabel(designTarget, result.scope),
         text: result.explanation,
         suggestion: result.suggestion,
         warningMessage: result.warningMessage,
@@ -635,29 +607,29 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   function discardCurrentModeDraft() {
     const mode = chatSession.mode;
 
-    if ((mode === "page" || mode === "autoDesign") && pageModeDraftRef.current) {
-      pageAi.hydratePageStyle(pageModeDraftRef.current);
-      pageModeDraftRef.current = null;
-    }
+    if (mode === "design") {
+      if (commonDraftRef.current) {
+        pageAi.hydratePageStyle(commonDraftRef.current);
+        commonDraftRef.current = null;
+      }
 
-    if ((mode === "card" || mode === "autoDesign") && cardModeDraftRef.current) {
-      cardAi.hydrateCardStyle(
-        cardModeDraftRef.current.cardStyle,
-        cardModeDraftRef.current.bodySlots,
-      );
-      cardModeDraftRef.current = null;
-    }
+      if (categoryDraftRef.current) {
+        cardAi.hydrateCardStyle(
+          categoryDraftRef.current.cardStyle,
+          categoryDraftRef.current.bodySlots,
+          categoryDraftRef.current.generatedCategoryImages,
+        );
+        categoryDraftRef.current = null;
+      }
 
-    if (mode === "page" || mode === "card" || mode === "autoDesign") {
-      setComposerApplyPending(mode, false);
+      setComposerApplyPending("common", false);
+      setComposerApplyPending("category", false);
+      setComposerDraft("common", "");
+      setComposerDraft("category", "");
     }
 
     if (mode === "data" && !dataSelection.isConfirmed) {
       dataSelection.reset(dataSelection.committed);
-    }
-
-    if (mode === "page" || mode === "card" || mode === "autoDesign") {
-      setComposerDraft(mode, "");
     }
   }
 
@@ -689,6 +661,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           mobileUiTree,
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
+          generatedCategoryImages: cardAi.generatedCategoryImages,
         })
       : {
           officeCode,
@@ -732,73 +705,63 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     goBack: exitDataMode,
   };
 
-  const cardMode = {
-    categoryTabs: dataMode.categoryTabs,
-    selectedCategoryId: dataMode.selectedCategoryId,
-    selectCategory: dataMode.selectCategory,
+  const designMode = {
+    categoryTabs: [
+      { id: "common", label: "공통 요소" },
+      ...dataMode.categoryTabs,
+    ],
+    selectedCategoryId: designTarget === "common" ? "common" : selectedProductCategoryName,
+    selectCategory: selectDesignTarget,
+    mediumCategories: selectedMediumCategories,
+    generatedCategoryImages: cardAi.generatedCategoryImages,
+    isGeneratingCategoryImage: cardAi.isGeneratingCategoryImage,
+    generateCategoryImage: (mediumCategory, options) =>
+      cardAi.generateCategoryImage(mediumCategory, {
+        ...options,
+        representativeProductFields: (() => {
+          const representativeRow = (currentEntry?.rows ?? []).find(
+            (row) => row?.medium_category === mediumCategory,
+          );
+
+          return { spec: representativeRow?.spec, nutrient: representativeRow?.nutrient };
+        })(),
+      }),
   };
 
+  const composerDraftKey = designTarget === "common" ? "common" : "category";
+
   const composerMode =
-    chatSession.mode === "page" ||
-    chatSession.mode === "card" ||
-    chatSession.mode === "autoDesign"
+    chatSession.mode === "design"
       ? {
-          promptDraft: composerDrafts[chatSession.mode] ?? "",
-          setPromptDraft: (value) => setComposerDraft(chatSession.mode, value),
+          copy: getStorefrontDesignComposerCopy(designTarget),
+          promptDraft: composerDrafts[composerDraftKey] ?? "",
+          setPromptDraft: (value) => setComposerDraft(composerDraftKey, value),
           isApplying:
-            chatSession.mode === "page"
+            designTarget === "common"
               ? pageAi.isApplyingPageAiDesign
-              : chatSession.mode === "card"
-                ? cardAi.isApplyingCardAiDesign
-                : chatSession.mode === "autoDesign"
-                  ? pageAi.isApplyingPageAiDesign || cardAi.isApplyingCardAiDesign
-                  : false,
+              : cardAi.isApplyingCardAiDesign,
           errorMessage:
-            chatSession.mode === "page"
+            designTarget === "common"
               ? pageAi.pageAiErrorMessage
-              : chatSession.mode === "card"
-                ? cardAi.cardAiErrorMessage
-                : chatSession.mode === "autoDesign"
-                  ? [pageAi.pageAiErrorMessage, cardAi.cardAiErrorMessage]
-                      .filter(Boolean)
-                      .join(" ")
-                  : "",
+              : cardAi.cardAiErrorMessage,
           canSend: Boolean(
-            toTrimmedString(composerDrafts[chatSession.mode] ?? ""),
+            toTrimmedString(composerDrafts[composerDraftKey] ?? ""),
           ),
           sendPrompt: sendComposerPrompt,
           exitMode: exitComposerMode,
-          showApplyAction:
-            chatSession.mode === "page" ||
-            chatSession.mode === "card" ||
-            chatSession.mode === "autoDesign",
-          canApply:
-            chatSession.mode === "page"
-              ? pendingComposerApply.page
-              : chatSession.mode === "card"
-                ? pendingComposerApply.card
-                : chatSession.mode === "autoDesign"
-                  ? pendingComposerApply.autoDesign
-                  : false,
+          showApplyAction: true,
+          canApply: pendingComposerApply[composerDraftKey],
           applyDraft: () => applyCurrentModeDraft(chatSession.mode),
           targetOptions:
-            chatSession.mode === "page"
+            designTarget === "common"
               ? PAGE_AI_TARGET_SCOPE_OPTIONS
-              : chatSession.mode === "card"
-                ? CARD_AI_TARGET_SCOPE_OPTIONS
-                : [],
+              : CARD_AI_TARGET_SCOPE_OPTIONS,
           selectedTargetId:
-            chatSession.mode === "page"
+            designTarget === "common"
               ? pageAi.pageAiDesign.targetScope
-              : chatSession.mode === "card"
-                ? cardAi.cardAiDesign.targetScope
-                : "",
+              : cardAi.cardAiDesign.targetScope,
           setTargetId:
-            chatSession.mode === "page"
-              ? pageAi.setTargetScope
-              : chatSession.mode === "card"
-                ? cardAi.setTargetScope
-                : () => {},
+            designTarget === "common" ? pageAi.setTargetScope : cardAi.setTargetScope,
         }
       : null;
 
@@ -812,7 +775,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     nh_name: toTrimmedString(nhName),
     chatSession,
     dataMode,
-    cardMode,
+    designMode,
     composerMode,
     buildCurrentSavePayload,
     saveCompiledPayload,

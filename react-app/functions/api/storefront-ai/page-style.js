@@ -1,38 +1,32 @@
-import {
-  PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
-} from '../../../src/features/storefront/config/page-design/pageStyleAiOpenAiConfig.js';
-import {
-  PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS,
-} from '../../../src/features/storefront/config/page-design/pageStyleAiHttpConfig.js';
-import { normalizePageAiDesignInput } from '../../../src/features/storefront/model/page-design/pageAiDesignModel.js';
+import { PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS } from '../../../src/features/storefront/config/page-design/pageStyleAiHttpConfig.js';
+import { normalizePageAiDesignInput } from '../../../src/features/storefront/model/page-design/ai-request/pageAiDesignModel.js';
 import {
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
-} from '../../../src/features/storefront/model/page-design/pageStyleAiResponseModel.js';
-import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/pageStyleModel.js';
-import { requestOpenAiJson } from '../../../src/features/storefront/services/openai/openAiJsonRequest.js';
-import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/model/page-design/pageStyleOpenAiRequest.js';
+} from '../../../src/features/storefront/model/page-design/ai-response/pageStyleAiResponseModel.js';
+import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/page-style/pageStyleModel.js';
+import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
+import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/model/page-design/ai-request/pageStyleOpenAiRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
-  RequestValidationError,
   assertHistoryWithinLimits,
-  assertOfficeCodePresent,
-  assertPostJsonRequest,
   assertPromptWithinLimit,
   pickAllowedKeys,
-  readJsonBody,
+  readOfficeCode,
+  readValidatedJsonBody,
+  withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
-import { requireAuthenticatedSupabaseUser } from '../../lib/supabaseServerAuth.js';
-import { assertOfficeOwnership } from '../../lib/officeOwnershipGuard.js';
+import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
 
-export async function onRequestPost({ request, env }) {
-  try {
-    assertPostJsonRequest(request);
-
-    const rawBody = await readJsonBody(request);
-    const body = pickAllowedKeys(rawBody, PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS);
-    const officeCode = typeof body.officeCode === 'string' ? body.officeCode.trim() : '';
-    assertOfficeCodePresent(officeCode);
+const PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
+export const onRequestPost = withRequestErrorHandling(
+  async ({ request, env }) => {
+    const rawBody = await readValidatedJsonBody(request);
+    const body = pickAllowedKeys(
+      rawBody,
+      PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS,
+    );
+    const officeCode = readOfficeCode(body);
 
     const pageAiDesign = normalizePageAiDesignInput(body.pageAiDesign);
     assertPromptWithinLimit(pageAiDesign.prompt);
@@ -41,12 +35,11 @@ export async function onRequestPost({ request, env }) {
     const history = Array.isArray(body.history) ? body.history : [];
     assertHistoryWithinLimits(history);
 
-    const { supabase, user } = await requireAuthenticatedSupabaseUser(request, env);
-    await assertOfficeOwnership({ supabase, authUserId: user.id, officeCode });
+    await requireOwnedOffice({ request, env, officeCode });
 
     const requestBody = buildPageStyleOpenAiRequestBody({
       pageAiDesign,
-      openAiModel: env.OPENAI_MODEL || PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
+      openAiModel: PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
       currentPageStyle,
       history,
     });
@@ -67,14 +60,9 @@ export async function onRequestPost({ request, env }) {
       currentPageStyle.palette.accentHex,
       pageAiDesign.targetScope,
     );
-    const { explanation, suggestion } = normalizePageStyleAiExplanation(payload);
+    const { explanation, suggestion } =
+      normalizePageStyleAiExplanation(payload);
 
     return jsonResponse({ intent, explanation, suggestion });
-  } catch (error) {
-    if (error instanceof RequestValidationError) {
-      return errorResponse(error.message, error.status);
-    }
-
-    return errorResponse('Unexpected server error.', 500);
-  }
-}
+  },
+);
