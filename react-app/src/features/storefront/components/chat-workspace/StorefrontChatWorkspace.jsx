@@ -2,16 +2,15 @@ import FieldSelectionDock from './FieldSelectionDock';
 import ChatComposerDock from './ChatComposerDock';
 import ModeChoiceBubble from './ModeChoiceBubble';
 import StorefrontChatThread from './StorefrontChatThread';
-import { getStorefrontChatScaffoldCopy } from './storefrontChatModes';
 import styles from './StorefrontChatWorkspace.module.css';
 
 export default function StorefrontChatWorkspace({ session, builder }) {
   const dataMode = builder?.dataMode;
-  const cardMode = builder?.cardMode;
+  const designMode = builder?.designMode;
   const composerMode = builder?.composerMode;
   const isDataMode = session.mode === 'data' && dataMode;
-  const showCategoryTabs =
-    (session.mode === 'card' || session.mode === 'autoDesign') && cardMode;
+  const isDesignMode = session.mode === 'design' && designMode;
+  const isCategoryDesignTarget = isDesignMode && designMode.selectedCategoryId !== 'common';
   const modeChoiceMessage = session.messages.find(
     (message) => message.kind === 'mode-choice',
   );
@@ -49,18 +48,13 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       ) : composerMode ? (
         <div className={styles.composerShell}>
           <ChatComposerDock
-            mode={session.mode}
             composer={composerMode}
-            categoryTabsMode={showCategoryTabs ? cardMode : null}
-            categoryImageMode={session.mode === 'card' ? cardMode : null}
+            categoryTabsMode={isDesignMode ? designMode : null}
+            categoryImageMode={isCategoryDesignTarget ? designMode : null}
           />
         </div>
       ) : (
-        <div className={styles.scaffoldPanel}>
-          {/* <p className={styles.scaffoldText}>
-            {getStorefrontChatScaffoldCopy(session.mode)}
-          </p> */}
-        </div>
+        <div className={styles.scaffoldPanel} />
       )}
     </section>
   );
