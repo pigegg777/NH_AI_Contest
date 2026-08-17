@@ -87,7 +87,7 @@ const EXISTING_CONFIG = {
       placeholder: "Search products",
       variant: "pill",
     },
-    categoryChips: { enabled: true, sticky: true, variant: "soft" },
+    categoryChips: { enabled: true, sticky: true },
   },
   navConfig: {
     title: "Existing guide",
@@ -96,13 +96,10 @@ const EXISTING_CONFIG = {
     searchPlaceholder: "Search products",
     logoUrl: "",
     searchVariant: "pill",
-    categoryChipVariant: "soft",
   },
   categoryConfigs: [
     {
-      officeCode: "OFF-1",
       productCategoryName: "Fertilizer Upload",
-      sortOrder: 0,
       categoryConfig: {
         schemaVersion: 1,
         displayName: "Fertilizer Upload",
@@ -123,9 +120,7 @@ const EXISTING_CONFIG = {
       updatedAt: "2026-06-15T00:00:00Z",
     },
     {
-      officeCode: "OFF-1",
       productCategoryName: "Pesticide Upload",
-      sortOrder: 1,
       categoryConfig: {
         schemaVersion: 1,
         displayName: "Pesticide Upload",
@@ -184,120 +179,54 @@ describe("StorefrontBuilderPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("mounts the Task 2 chat workspace shell and keeps the preview mounted", async () => {
+  it("shows exactly the data and design mode-choice buttons", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
+    const bubble = await screen.findByTestId("storefront-mode-choice-bubble");
+
     expect(
-      await screen.findByTestId("storefront-chat-workspace"),
+      within(bubble).getByRole("button", { name: "대분류별 표시할 데이터선택" }),
     ).toBeInTheDocument();
-    expect(screen.getByTestId("storefront-chat-thread")).toBeInTheDocument();
     expect(
-      screen.getByTestId("storefront-mode-choice-bubble"),
+      within(bubble).getByRole("button", { name: "AI 디자인 수정" }),
     ).toBeInTheDocument();
-    expect(screen.getByTestId("mobile-preview-device")).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("start-storefront-builder"),
-    ).not.toBeInTheDocument();
+    expect(within(bubble).getAllByRole("button")).toHaveLength(2);
   });
 
-  it("shows the approved mode-choice buttons and switches into the selected mode", async () => {
+  it("enters design mode on the common-elements tab by default and renders the page-style composer", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    await screen.findByTestId("storefront-mode-choice-bubble");
-
-    const pageButton = screen.getByRole("button", {
-      name: "1. 페이지 전반 디자인 수정",
-    });
-    const dataButton = screen.getByRole("button", {
-      name: "2. 카테고리별 데이터 수정",
-    });
-    const cardButton = screen.getByRole("button", {
-      name: "3. 카테고리별 상세 디자인 수정",
-    });
-    const autoDesignButton = screen.getByRole("button", {
-      name: "4. 통합 자동 디자인",
-    });
-
-    expect(pageButton).toBeInTheDocument();
-    expect(dataButton).toBeInTheDocument();
-    expect(cardButton).toBeInTheDocument();
-    expect(autoDesignButton).toBeInTheDocument();
-
-    await user.click(pageButton);
+    await user.click(
+      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+    );
 
     expect(
       await screen.findByTestId("storefront-chat-composer-dock"),
     ).toBeInTheDocument();
-    within(screen.getByTestId("storefront-mode-choice-bubble"))
-      .getAllByRole("button")
-      .forEach((button) => {
-        expect(button).not.toBeDisabled();
-      });
+    expect(screen.getByText("공통 요소 디자인 작업 공간")).toBeInTheDocument();
+
+    const tabs = screen.getByTestId("storefront-sticky-category-tabs");
+
+    expect(within(tabs).getByRole("tab", { name: "공통 요소" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(
+      within(tabs).getByRole("tab", { name: "Fertilizer Upload" }),
+    ).toHaveAttribute("aria-selected", "false");
+    expect(
+      within(tabs).getByRole("tab", { name: "Pesticide Upload" }),
+    ).toHaveAttribute("aria-selected", "false");
   });
 
-  it("keeps mode 2 inside the chat workspace with sticky category tabs and the field-selection dock", async () => {
-    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
-    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
-
-    const user = userEvent.setup();
-    render(<StorefrontBuilderPage officeCode="OFF-1" />);
-
-    await screen.findByTestId("storefront-chat-workspace");
-
-    await user.click(
-      screen.getByRole("button", {
-        name: /^2\./,
-      }),
-    );
-
-    expect(
-      await screen.findByTestId("storefront-sticky-category-tabs"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("storefront-field-selection-dock"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("storefront-chat-composer-dock"),
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId("storefront-chat-workspace")).toBeInTheDocument();
-    const pinnedModeChoiceBubble = screen.getByTestId(
-      "storefront-mode-choice-bubble",
-    );
-    within(pinnedModeChoiceBubble)
-      .getAllByRole("button")
-      .forEach((button) => {
-        expect(button).not.toBeDisabled();
-      });
-    expect(
-      screen.getByTestId("data-field-row-tax_price"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("data-field-row-zero_tax_price"),
-    ).not.toBeInTheDocument();
-
-    await user.click(
-      screen.getByRole("tab", {
-        name: "Pesticide Upload",
-      }),
-    );
-
-    expect(screen.getByTestId("storefront-chat-workspace")).toBeInTheDocument();
-    expect(
-      await screen.findByTestId("data-field-row-zero_tax_price"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("data-field-row-tax_price"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("uses the shared composer dock for page mode and appends the mocked assistant explanation", async () => {
+  it("sends a common-elements prompt through requestPageStyleAiIntent and shows the reply", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestPageStyleAiIntent.mockResolvedValue({
@@ -309,19 +238,13 @@ describe("StorefrontBuilderPage", () => {
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    await screen.findByTestId("storefront-chat-workspace");
-
     await user.click(
-      screen.getByRole("button", {
-        name: /^1\./,
-      }),
+      await screen.findByRole("button", { name: "AI 디자인 수정" }),
     );
 
-    expect(
-      await screen.findByTestId("storefront-chat-composer-dock"),
-    ).toBeInTheDocument();
-
-    const composerInput = screen.getByTestId("storefront-chat-composer-input");
+    const composerInput = await screen.findByTestId(
+      "storefront-chat-composer-input",
+    );
     await user.type(composerInput, "Refresh the page tone and search area.");
     await user.click(screen.getByTestId("storefront-chat-composer-send"));
 
@@ -331,9 +254,10 @@ describe("StorefrontBuilderPage", () => {
       ),
     ).toBeInTheDocument();
     expect(requestPageStyleAiIntent).toHaveBeenCalledTimes(1);
+    expect(requestCardStyleAiIntent).not.toHaveBeenCalled();
   });
 
-  it("keeps sticky category tabs visible in card mode while rendering the shared composer dock", async () => {
+  it("switches to a category tab and sends a card-design prompt through requestCardStyleAiIntent", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     requestCardStyleAiIntent.mockResolvedValue({
@@ -345,94 +269,66 @@ describe("StorefrontBuilderPage", () => {
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    await screen.findByTestId("storefront-chat-workspace");
-
     await user.click(
-      screen.getByRole("button", {
-        name: /^3\./,
-      }),
+      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+    );
+    await user.click(
+      await screen.findByRole("tab", { name: "Fertilizer Upload" }),
     );
 
+    expect(screen.getByText("카드 디자인 작업 공간")).toBeInTheDocument();
+
+    const composerInput = screen.getByTestId("storefront-chat-composer-input");
+    await user.type(composerInput, "Make the price field bold.");
+    await user.click(screen.getByTestId("storefront-chat-composer-send"));
+
     expect(
-      await screen.findByTestId("storefront-sticky-category-tabs"),
+      await screen.findByText("Card styling updated for the selected category."),
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("storefront-chat-composer-dock"),
-    ).toBeInTheDocument();
+    expect(requestCardStyleAiIntent).toHaveBeenCalledTimes(1);
+    expect(requestPageStyleAiIntent).not.toHaveBeenCalled();
   });
 
-  it("applies both page and card style from one holistic prompt in auto-design mode", async () => {
+  it("discards an unapplied draft instead of saving it when switching tabs", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
-    upsertStorefrontConfig.mockResolvedValue(undefined);
     requestPageStyleAiIntent.mockResolvedValue({
-      intent: {
-        palette: {
-          accentHex: "#14532d",
-        },
-      },
+      intent: { palette: { accentHex: "#14532d" } },
       explanation: "페이지 톤을 정리했습니다.",
-      suggestion: null,
-    });
-    requestCardStyleAiIntent.mockResolvedValue({
-      intent: {},
-      explanation: "카드 정보 영역을 정리했습니다.",
       suggestion: null,
     });
 
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    await screen.findByTestId("storefront-chat-workspace");
-
     await user.click(
-      screen.getByRole("button", {
-        name: "4. 통합 자동 디자인",
-      }),
+      await screen.findByRole("button", { name: "AI 디자인 수정" }),
     );
-
-    expect(
-      await screen.findByTestId("storefront-chat-composer-dock"),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId("storefront-field-selection-dock"),
-    ).not.toBeInTheDocument();
-
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
-      "가독성 있게 알아서 정리해줘",
+      "초록 느낌으로 정리해줘",
     );
     await user.click(screen.getByTestId("storefront-chat-composer-send"));
 
     expect(
-      await screen.findByText(/페이지 톤을 정리했습니다\./),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/카드 정보 영역을 정리했습니다\./)).toBeInTheDocument();
+      await screen.findByRole("button", { name: "저장하기" }),
+    ).toBeEnabled();
 
-    const saveButton = await screen.findByRole("button", { name: "저장하기" });
-
-    expect(saveButton).toBeEnabled();
-
-    await user.click(saveButton);
-
-    expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
-    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
-
-    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe(
-      "#14532d",
+    await user.click(
+      screen.getByRole("tab", { name: "Fertilizer Upload" }),
     );
+
+    expect(screen.getByText("카드 디자인 작업 공간")).toBeInTheDocument();
+    expect(upsertStorefrontConfig).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "저장하기" })).toBeDisabled();
   });
 
-  it("applies immediately and supports one-level undo from the assistant result bubble", async () => {
+  it("applies through 저장하기 and supports one-level undo via 되돌리기", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
     upsertStorefrontConfig.mockResolvedValue(undefined);
     requestPageStyleAiIntent.mockResolvedValue({
-      intent: {
-        palette: {
-          accentHex: "#14532d",
-        },
-      },
+      intent: { palette: { accentHex: "#14532d" } },
       explanation: "페이지 톤을 정리했습니다.",
       suggestion: null,
     });
@@ -441,26 +337,28 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" nhName="NH" />);
 
     await user.click(
-      await screen.findByRole("button", {
-        name: "1. 페이지 전반 디자인 수정",
-      }),
+      await screen.findByRole("button", { name: "AI 디자인 수정" }),
     );
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
       "초록 느낌으로 정리해줘",
     );
     await user.click(screen.getByTestId("storefront-chat-composer-send"));
-    await user.click(await screen.findByRole("button", { name: "적용" }));
+    await user.click(await screen.findByRole("button", { name: "저장하기" }));
 
     expect(upsertStorefrontConfig).toHaveBeenCalledTimes(1);
-    expect(
-      await screen.findByRole("button", { name: "되돌리기" }),
-    ).toBeInTheDocument();
+    const savedPayload = upsertStorefrontConfig.mock.calls[0][0];
+
+    expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe("#14532d");
+
+    const undoButton = await screen.findByRole("button", { name: "되돌리기" });
+
+    expect(undoButton).toBeInTheDocument();
     expect(
       screen.getAllByTestId("storefront-mode-choice-bubble").length,
     ).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("button", { name: "되돌리기" }));
+    await user.click(undoButton);
 
     expect(upsertStorefrontConfig).toHaveBeenCalledTimes(2);
     expect(
@@ -468,45 +366,37 @@ describe("StorefrontBuilderPage", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("switches mode directly from the pinned mode-choice bubble and discards an unapplied draft instead of saving it", async () => {
+  it("keeps data mode working: category tabs, per-category field toggles, and 저장하기", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
-    requestPageStyleAiIntent.mockResolvedValue({
-      intent: {
-        palette: {
-          accentHex: "#14532d",
-        },
-      },
-      explanation: "페이지 톤을 정리했습니다.",
-      suggestion: null,
-    });
 
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
       await screen.findByRole("button", {
-        name: "1. 페이지 전반 디자인 수정",
+        name: "대분류별 표시할 데이터선택",
       }),
     );
-    await user.type(
-      screen.getByTestId("storefront-chat-composer-input"),
-      "초록 느낌으로 정리해줘",
-    );
-    await user.click(screen.getByTestId("storefront-chat-composer-send"));
 
-    expect(await screen.findByRole("button", { name: "적용" })).toBeEnabled();
+    expect(
+      await screen.findByTestId("storefront-field-selection-dock"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("storefront-chat-composer-dock"),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("data-field-row-tax_price")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("data-field-row-zero_tax_price"),
+    ).not.toBeInTheDocument();
 
-    const cardButton = screen.getByRole("button", {
-      name: "3. 카테고리별 상세 디자인 수정",
-    });
+    await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
 
-    expect(cardButton).not.toBeDisabled();
-
-    await user.click(cardButton);
-
-    expect(await screen.findByText("카드 디자인 작업 공간")).toBeInTheDocument();
-    expect(upsertStorefrontConfig).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();
+    expect(
+      await screen.findByTestId("data-field-row-zero_tax_price"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("data-field-row-tax_price"),
+    ).not.toBeInTheDocument();
   });
 });
