@@ -6,6 +6,7 @@ import { useOfficeProductDataDeletion } from './office-product-data/useOfficePro
 import { useAiSimilarityExtractionState } from './ai-similarity-extraction/useAiSimilarityExtractionState';
 import { useAiMarketResearchState } from './ai-market-research/useAiMarketResearchState';
 import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterState';
+import { useAiCategoryImageGenerationState } from './ai-category-image/useAiCategoryImageGenerationState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
@@ -83,6 +84,12 @@ export function useOfficeProductEditorState(user) {
     tableState.mergedRows,
     tableNameMode,
     tableState.updateNote,
+  );
+
+  const categoryImageGenerationState = useAiCategoryImageGenerationState(
+    user?.office_code,
+    tableState.mergedRows,
+    activeCategoryData.activeCategoryName,
   );
 
   const saveState = useWorkbookSave({
@@ -319,6 +326,7 @@ export function useOfficeProductEditorState(user) {
         ...bulkNoteWriterState,
         rows: tableState.mergedRows,
       },
+      categoryImageGeneration: categoryImageGenerationState,
     },
 
     save: saveValue,

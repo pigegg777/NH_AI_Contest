@@ -622,4 +622,133 @@ describe('WorkbookAiRecommendationPanel', () => {
 
     expect(screen.getByRole('button', { name: '매칭 미리보기' })).toBeDisabled();
   });
+
+  it('switches to the 대체 이미지 생성 sub-tab and lists medium categories', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        categoryImageGeneration={{
+          mediumCategories: ['비료', '농약'],
+          generatedCategoryImages: {},
+          isGeneratingCategoryImage: {},
+          errorMessages: {},
+          generateCategoryImage: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+
+    expect(screen.getByRole('tab', { name: '대체 이미지 생성' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText('비료')).toBeInTheDocument();
+    expect(screen.getByText('농약')).toBeInTheDocument();
+  });
+
+  it('requests image generation with the typed prompt override for the chosen category', () => {
+    const generateCategoryImage = vi.fn();
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        categoryImageGeneration={{
+          mediumCategories: ['비료'],
+          generatedCategoryImages: {},
+          isGeneratingCategoryImage: {},
+          errorMessages: {},
+          generateCategoryImage,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+
+    const promptInput = screen.getByPlaceholderText('원하는 이미지 스타일을 직접 입력 (선택)');
+    fireEvent.change(promptInput, { target: { value: '따뜻한 느낌' } });
+    fireEvent.click(screen.getByRole('button', { name: '이미지 생성' }));
+
+    expect(generateCategoryImage).toHaveBeenCalledWith('비료', { promptOverride: '따뜻한 느낌' });
+  });
+
+  it('shows a loading label and disables the button while a category image is generating', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        categoryImageGeneration={{
+          mediumCategories: ['비료'],
+          generatedCategoryImages: {},
+          isGeneratingCategoryImage: { 비료: true },
+          errorMessages: {},
+          generateCategoryImage: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+
+    const generatingButton = screen.getByRole('button', { name: '생성 중...' });
+    expect(generatingButton).toBeDisabled();
+  });
+
+  it('shows an already-generated thumbnail and offers a regenerate action', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        categoryImageGeneration={{
+          mediumCategories: ['비료'],
+          generatedCategoryImages: {
+            비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'p', isAiGenerated: true },
+          },
+          isGeneratingCategoryImage: {},
+          errorMessages: {},
+          generateCategoryImage: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+
+    expect(screen.getByRole('img', { name: '비료 대체 이미지' })).toHaveAttribute(
+      'src',
+      'data:image/png;base64,abc',
+    );
+    expect(screen.getByRole('button', { name: '다시 생성' })).toBeInTheDocument();
+  });
+
+  it('shows an error message for a category whose generation failed', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        categoryImageGeneration={{
+          mediumCategories: ['비료'],
+          generatedCategoryImages: {},
+          isGeneratingCategoryImage: {},
+          errorMessages: { 비료: '이미지를 생성하지 못했습니다.' },
+          generateCategoryImage: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+
+    expect(screen.getByText('이미지를 생성하지 못했습니다.')).toBeInTheDocument();
+  });
 });

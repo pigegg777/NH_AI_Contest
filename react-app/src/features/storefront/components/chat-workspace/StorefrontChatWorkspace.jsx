@@ -10,7 +10,6 @@ export default function StorefrontChatWorkspace({ session, builder }) {
   const composerMode = builder?.composerMode;
   const isDataMode = session.mode === 'data' && dataMode;
   const isDesignMode = session.mode === 'design' && designMode;
-  const isCategoryDesignTarget = isDesignMode && designMode.selectedCategoryId !== 'common';
   const modeChoiceMessage = session.messages.find(
     (message) => message.kind === 'mode-choice',
   );
@@ -50,7 +49,6 @@ export default function StorefrontChatWorkspace({ session, builder }) {
           <ChatComposerDock
             composer={composerMode}
             categoryTabsMode={isDesignMode ? designMode : null}
-            categoryImageMode={isCategoryDesignTarget ? designMode : null}
           />
         </div>
       ) : (

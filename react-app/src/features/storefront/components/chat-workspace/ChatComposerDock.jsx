@@ -1,9 +1,8 @@
-import CategoryImageGenPanel from './CategoryImageGenPanel';
 import CategoryTabs from './CategoryTabs';
 import DesignTargetChipsBubble from './DesignTargetChipsBubble';
 import styles from './ChatComposerDock.module.css';
 
-export default function ChatComposerDock({ composer, categoryTabsMode, categoryImageMode }) {
+export default function ChatComposerDock({ composer, categoryTabsMode }) {
   const copy = composer?.copy;
 
   if (!copy || !composer) {
@@ -59,15 +58,6 @@ export default function ChatComposerDock({ composer, categoryTabsMode, categoryI
           onSelectTarget={composer.setTargetId}
         />
       </div>
-
-      {categoryImageMode ? (
-        <CategoryImageGenPanel
-          mediumCategories={categoryImageMode.mediumCategories}
-          generatedCategoryImages={categoryImageMode.generatedCategoryImages}
-          isGeneratingCategoryImage={categoryImageMode.isGeneratingCategoryImage}
-          onGenerate={categoryImageMode.generateCategoryImage}
-        />
-      ) : null}
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <label
