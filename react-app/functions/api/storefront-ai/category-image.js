@@ -1,11 +1,13 @@
 import { requestOpenAiImage } from '../../lib/openAiImageRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
+  assertPromptWithinLimit,
   pickAllowedKeys,
   readOfficeCode,
   readValidatedJsonBody,
-  withRequestErrorHandling,
   RequestValidationError,
+  toOptionalTrimmedString,
+  withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
 
@@ -16,13 +18,9 @@ const REQUEST_BODY_ALLOWED_KEYS = [
   'representativeProductFields',
 ];
 
-function toTrimmedStringLocal(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
 function buildDefaultPrompt(mediumCategory, representativeProductFields) {
-  const spec = toTrimmedStringLocal(representativeProductFields?.spec);
-  const nutrient = toTrimmedStringLocal(representativeProductFields?.nutrient);
+  const spec = toOptionalTrimmedString(representativeProductFields?.spec);
+  const nutrient = toOptionalTrimmedString(representativeProductFields?.nutrient);
   const detailParts = [spec, nutrient].filter(Boolean).join(', ');
 
   return [
@@ -39,16 +37,18 @@ export const onRequestPost = withRequestErrorHandling(async ({ request, env }) =
   const body = pickAllowedKeys(rawBody, REQUEST_BODY_ALLOWED_KEYS);
   const officeCode = readOfficeCode(body);
 
-  const mediumCategory = toTrimmedStringLocal(body.mediumCategory);
+  const mediumCategory = toOptionalTrimmedString(body.mediumCategory);
 
   if (!mediumCategory) {
     throw new RequestValidationError('mediumCategory is required.', 422);
   }
 
-  await requireOwnedOffice({ request, env, officeCode });
-
-  const promptOverride = toTrimmedStringLocal(body.promptOverride);
+  const promptOverride = toOptionalTrimmedString(body.promptOverride);
   const prompt = promptOverride || buildDefaultPrompt(mediumCategory, body.representativeProductFields);
+
+  assertPromptWithinLimit(prompt);
+
+  await requireOwnedOffice({ request, env, officeCode });
 
   let imageResult;
 

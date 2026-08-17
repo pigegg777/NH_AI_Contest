@@ -73,6 +73,20 @@ describe('POST /api/storefront-ai/category-image', () => {
     expect(response.status).toBe(422);
   });
 
+  it('returns 422 when promptOverride exceeds 2000 characters', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    const longPrompt = 'a'.repeat(2001);
+    const request = buildRequest({
+      officeCode: 'OFF-1',
+      mediumCategory: '복합비료',
+      promptOverride: longPrompt,
+    });
+
+    const response = await onRequestPost({ request, env: TEST_ENV });
+
+    expect(response.status).toBe(422);
+  });
+
   it('returns 502 when OpenAI fails', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
     vi.stubGlobal(
