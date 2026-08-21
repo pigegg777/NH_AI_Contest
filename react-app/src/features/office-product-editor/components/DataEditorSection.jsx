@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { useActiveCategoryCtx, useAiCtx, useExtractionCtx, useTableCtx } from '../contexts/editorContexts';
+import {
+  useActiveCategoryCtx,
+  useAiCtx,
+  useExtractionCtx,
+  useTableCtx,
+} from '../contexts/editorContexts';
 import { TabBar } from './data-edit-controls/TabBar';
 import { ExcelUploadPanel } from './data-edit-controls/excel-upload/ExcelUploadPanel';
 import { WorkbookAiRecommendationPanel } from './data-edit-controls/workbook-ai-recommendation/WorkbookAiRecommendationPanel';
@@ -7,13 +12,14 @@ import styles from './DataEditorSection.module.css';
 
 const TABS = [
   { id: 'upload', label: '엑셀 업로드' },
-  { id: 'ai', label: 'AI 분석' },
+  { id: 'ai', label: 'AI 작업실' },
 ];
 
 export function DataEditorSection() {
   const [activeTabId, setActiveTabId] = useState('upload');
   const { handleWorkbookChange, result } = useExtractionCtx();
-  const { isRegisteredProductDataLoading, registeredProductDataErrorMessage } = useActiveCategoryCtx();
+  const { isRegisteredProductDataLoading, registeredProductDataErrorMessage } =
+    useActiveCategoryCtx();
   const { rows, warningRows } = useTableCtx();
   const {
     recommendations: aiRecommendations,
@@ -25,13 +31,17 @@ export function DataEditorSection() {
     handleRecommendationSelect: onAiRecommendationSelect,
     marketResearch,
     bulkNoteWriter,
-    categoryImageGeneration,
+    imageApply,
   } = useAiCtx();
 
   return (
     <section className={styles.workspace}>
       <div className={styles.tabPanelWrap}>
-        <TabBar tabs={TABS} activeTabId={activeTabId} onTabChange={setActiveTabId} />
+        <TabBar
+          tabs={TABS}
+          activeTabId={activeTabId}
+          onTabChange={setActiveTabId}
+        />
 
         <div role="tabpanel" className={styles.tabPanel}>
           {activeTabId === 'upload' ? (
@@ -55,7 +65,7 @@ export function DataEditorSection() {
               onAiRecommendationSelect={onAiRecommendationSelect}
               marketResearch={marketResearch}
               bulkNoteWriter={bulkNoteWriter}
-              categoryImageGeneration={categoryImageGeneration}
+              imageApply={imageApply}
             />
           )}
         </div>

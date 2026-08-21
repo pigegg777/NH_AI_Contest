@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import {
+  ImageThumbnailCell,
   LinkCell,
   NoteCell,
   PriceCell,
@@ -92,13 +93,22 @@ function SortButton({ column, sortState, onSortChange }) {
   );
 }
 
-function renderCellContent(row, key, onPriceChange) {
+function renderCellContent(row, key, onPriceChange, onImgUrlChange, officeCode) {
   if (key === 'manufacturer_list') {
     return formatManufacturerList(row.manufacturer_list);
   }
 
   if (key === 'img_url') {
-    return <LinkCell href={row.img_url} ariaLabel={`img-${row.row_id}`} />;
+    return (
+      <ImageThumbnailCell
+        src={row.img_url}
+        ariaLabel={`img-${row.row_id}`}
+        rowId={row.row_id}
+        officeCode={officeCode}
+        onImgUrlChange={onImgUrlChange}
+        isLocked={row.img_url_is_static === true}
+      />
+    );
   }
 
   if (key === 'product_url') {
@@ -140,6 +150,8 @@ export function DataTable({
   onVisibleRowsShadowChange,
   onNoteChange,
   onPriceChange,
+  onImgUrlChange,
+  officeCode,
 }) {
   const visibleRowIds = useMemo(
     () => rows.map((row) => row.row_id).filter(Boolean),
@@ -245,7 +257,7 @@ export function DataTable({
                     data-col={column.key}
                     title={String(getCellTextValue(row, column.key))}
                   >
-                    {renderCellContent(row, column.key, onPriceChange)}
+                    {renderCellContent(row, column.key, onPriceChange, onImgUrlChange, officeCode)}
                   </td>
                 ),
               )}

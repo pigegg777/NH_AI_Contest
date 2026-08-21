@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { WorkbookAiRecommendationPanel } from '../components/data-edit-controls/workbook-ai-recommendation/WorkbookAiRecommendationPanel';
 
 function switchToMarketResearchTab() {
-  fireEvent.click(screen.getByRole('tab', { name: '시장조사' }));
+  fireEvent.click(screen.getByRole('tab', { name: 'AI 시장조사' }));
 }
 
 describe('WorkbookAiRecommendationPanel', () => {
@@ -18,7 +18,7 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    expect(screen.getByRole('tab', { name: '유사상품분석' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'AI 유사상품 유효성검사' })).toHaveAttribute(
       'aria-selected',
       'true'
     );
@@ -41,7 +41,7 @@ describe('WorkbookAiRecommendationPanel', () => {
 
     switchToMarketResearchTab();
 
-    expect(screen.getByRole('tab', { name: '시장조사' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'AI 시장조사' })).toHaveAttribute(
       'aria-selected',
       'true'
     );
@@ -378,9 +378,9 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
-    expect(screen.getByRole('tab', { name: '일괄비고작성' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' })).toHaveAttribute('aria-selected', 'true');
     expect(
       screen.getByPlaceholderText("예: 소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘")
     ).toBeInTheDocument();
@@ -410,7 +410,7 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
     const textarea = screen.getByPlaceholderText(
       "예: 소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘"
@@ -453,11 +453,91 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
-    expect(screen.getByText('2개 상품이 매칭되었습니다. 기존 비고를 새 내용으로 덮어씁니다.')).toBeInTheDocument();
+    expect(screen.getByText('2개 상품이 매칭되었습니다. 선택된 필드를 새 값으로 덮어씁니다.')).toBeInTheDocument();
     expect(screen.getByText('유기질비료')).toBeInTheDocument();
     expect(screen.getByText('축분퇴비')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '적용' }));
+
+    expect(handleApply).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders price field diffs alongside the note diff for matches that carry them', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        bulkNoteWriter={{
+          rows: [
+            {
+              row_id: 'A100__01',
+              product_name: '유기질비료',
+              spec: '20kg',
+              note: '',
+              zero_tax_price: 2500,
+              tax_price: null,
+              exempt_tax_price: null,
+            },
+          ],
+          isLoading: false,
+          mode: 'openai',
+          matches: [
+            { rowId: 'A100__01', note: '가격 인상', zero_tax_price: 3000, tax_price: 3300 },
+          ],
+          unmatchedReason: null,
+          message: '',
+          appliedCount: 0,
+          handlePreview: vi.fn(),
+          handleApply: vi.fn(),
+          handleClear: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
+
+    expect(screen.getByText('가격 인상')).toBeInTheDocument();
+    expect(screen.getByText('영세단가:')).toBeInTheDocument();
+    expect(screen.getByText('2,500')).toBeInTheDocument();
+    expect(screen.getByText('3,000')).toBeInTheDocument();
+    expect(screen.getByText('과세단가:')).toBeInTheDocument();
+    expect(screen.getByText('3,300')).toBeInTheDocument();
+    expect(screen.queryByText('면세단가:')).not.toBeInTheDocument();
+  });
+
+  it('applies only the price fields for a match that has no note change', () => {
+    const handleApply = vi.fn();
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        bulkNoteWriter={{
+          rows: [{ row_id: 'A100__01', product_name: '유기질비료', spec: '20kg' }],
+          isLoading: false,
+          mode: 'openai',
+          matches: [{ rowId: 'A100__01', zero_tax_price: 3000 }],
+          unmatchedReason: null,
+          message: '',
+          appliedCount: 0,
+          handlePreview: vi.fn(),
+          handleApply,
+          handleClear: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
+
+    expect(screen.queryByText('비고:')).not.toBeInTheDocument();
+    expect(screen.getByText('영세단가:')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '적용' }));
 
@@ -487,7 +567,7 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
     expect(screen.getByText('조건에 맞는 상품을 찾지 못했습니다.')).toBeInTheDocument();
   });
@@ -521,7 +601,7 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
     const file = new File(['dummy'], 'ref.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -590,7 +670,7 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
     expect(screen.getByText('참고 엑셀은 500행 이하만 지원합니다.')).toBeInTheDocument();
   });
@@ -618,12 +698,12 @@ describe('WorkbookAiRecommendationPanel', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '일괄비고작성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
     expect(screen.getByRole('button', { name: '매칭 미리보기' })).toBeDisabled();
   });
 
-  it('switches to the 대체 이미지 생성 sub-tab and lists medium categories', () => {
+  it('switches to the 이미지 생성/적용 sub-tab and shows the generate/apply controls', () => {
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -631,25 +711,36 @@ describe('WorkbookAiRecommendationPanel', () => {
         hasRows={true}
         aiRecommendations={[]}
         aiIsLoading={false}
-        categoryImageGeneration={{
-          mediumCategories: ['비료', '농약'],
-          generatedCategoryImages: {},
-          isGeneratingCategoryImage: {},
-          errorMessages: {},
-          generateCategoryImage: vi.fn(),
+        imageApply={{
+          rows: [],
+          previewImage: null,
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleApplyRequest: vi.fn(),
         }}
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
 
-    expect(screen.getByRole('tab', { name: '대체 이미지 생성' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('비료')).toBeInTheDocument();
-    expect(screen.getByText('농약')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByLabelText('📎 이미지 업로드')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('예: 복합비료 20kg 포대 스튜디오 컷 이미지 생성해줘'),
+    ).toBeInTheDocument();
   });
 
-  it('requests image generation with the typed prompt override for the chosen category', () => {
-    const generateCategoryImage = vi.fn();
+  it('requests AI image generation with the typed prompt', () => {
+    const handleGenerateImage = vi.fn();
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -657,26 +748,35 @@ describe('WorkbookAiRecommendationPanel', () => {
         hasRows={true}
         aiRecommendations={[]}
         aiIsLoading={false}
-        categoryImageGeneration={{
-          mediumCategories: ['비료'],
-          generatedCategoryImages: {},
-          isGeneratingCategoryImage: {},
-          errorMessages: {},
-          generateCategoryImage,
+        imageApply={{
+          rows: [],
+          previewImage: null,
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage,
+          handleClearPreview: vi.fn(),
+          handleApplyRequest: vi.fn(),
         }}
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
 
-    const promptInput = screen.getByPlaceholderText('원하는 이미지 스타일을 직접 입력 (선택)');
+    const promptInput = screen.getByPlaceholderText('예: 복합비료 20kg 포대 스튜디오 컷 이미지 생성해줘');
     fireEvent.change(promptInput, { target: { value: '따뜻한 느낌' } });
-    fireEvent.click(screen.getByRole('button', { name: '이미지 생성' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI 생성' }));
 
-    expect(generateCategoryImage).toHaveBeenCalledWith('비료', { promptOverride: '따뜻한 느낌' });
+    expect(handleGenerateImage).toHaveBeenCalledWith('따뜻한 느낌');
   });
 
-  it('shows a loading label and disables the button while a category image is generating', () => {
+  it('shows a loading label and disables the button while an image is generating', () => {
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -684,23 +784,32 @@ describe('WorkbookAiRecommendationPanel', () => {
         hasRows={true}
         aiRecommendations={[]}
         aiIsLoading={false}
-        categoryImageGeneration={{
-          mediumCategories: ['비료'],
-          generatedCategoryImages: {},
-          isGeneratingCategoryImage: { 비료: true },
-          errorMessages: {},
-          generateCategoryImage: vi.fn(),
+        imageApply={{
+          rows: [],
+          previewImage: null,
+          previewError: '',
+          isGenerating: true,
+          isApplying: false,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleApplyRequest: vi.fn(),
         }}
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
 
-    const generatingButton = screen.getByRole('button', { name: '생성 중...' });
-    expect(generatingButton).toBeDisabled();
+    expect(screen.getByRole('button', { name: '생성 중...' })).toBeDisabled();
   });
 
-  it('shows an already-generated thumbnail and offers a regenerate action', () => {
+  it('shows the preview image and requests apply with the typed instruction once the preview is already saved', () => {
+    const handleApplyRequest = vi.fn();
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -708,28 +817,41 @@ describe('WorkbookAiRecommendationPanel', () => {
         hasRows={true}
         aiRecommendations={[]}
         aiIsLoading={false}
-        categoryImageGeneration={{
-          mediumCategories: ['비료'],
-          generatedCategoryImages: {
-            비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'p', isAiGenerated: true },
-          },
-          isGeneratingCategoryImage: {},
-          errorMessages: {},
-          generateCategoryImage: vi.fn(),
+        imageApply={{
+          rows: [],
+          previewImage: { kind: 'generated', imageDataUri: 'data:image/png;base64,abc', previewUrl: 'data:image/png;base64,abc', storageUrl: 'https://example.com/a.png' },
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          isSavingImage: false,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleSaveGeneratedImage: vi.fn(),
+          handleApplyRequest,
         }}
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
 
-    expect(screen.getByRole('img', { name: '비료 대체 이미지' })).toHaveAttribute(
-      'src',
-      'data:image/png;base64,abc',
-    );
-    expect(screen.getByRole('button', { name: '다시 생성' })).toBeInTheDocument();
+    expect(screen.getByAltText('적용할 이미지 미리보기')).toHaveAttribute('src', 'data:image/png;base64,abc');
+    expect(screen.queryByRole('button', { name: '저장하기' })).not.toBeInTheDocument();
+
+    const instructionInput = screen.getByPlaceholderText('예: 복합비료 분류에 적용해줘');
+    fireEvent.change(instructionInput, { target: { value: '복합비료 분류에 적용해줘' } });
+    fireEvent.click(screen.getByRole('button', { name: '적용' }));
+
+    expect(handleApplyRequest).toHaveBeenCalledWith('복합비료 분류에 적용해줘');
   });
 
-  it('shows an error message for a category whose generation failed', () => {
+  it('shows a 저장하기 button for an unsaved generated preview, disables apply until it is saved, and wires the click', () => {
+    const handleSaveGeneratedImage = vi.fn();
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -737,18 +859,344 @@ describe('WorkbookAiRecommendationPanel', () => {
         hasRows={true}
         aiRecommendations={[]}
         aiIsLoading={false}
-        categoryImageGeneration={{
-          mediumCategories: ['비료'],
-          generatedCategoryImages: {},
-          isGeneratingCategoryImage: {},
-          errorMessages: { 비료: '이미지를 생성하지 못했습니다.' },
-          generateCategoryImage: vi.fn(),
+        imageApply={{
+          rows: [],
+          previewImage: { kind: 'generated', imageDataUri: 'data:image/png;base64,abc', previewUrl: 'data:image/png;base64,abc', storageUrl: null },
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          isSavingImage: false,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleSaveGeneratedImage,
+          handleApplyRequest: vi.fn(),
         }}
       />
     );
 
-    fireEvent.click(screen.getByRole('tab', { name: '대체 이미지 생성' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
 
-    expect(screen.getByText('이미지를 생성하지 못했습니다.')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('예: 복합비료 분류에 적용해줘')).toBeDisabled();
+    expect(screen.getByRole('button', { name: '적용' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: '저장하기' }));
+
+    expect(handleSaveGeneratedImage).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a loading label and disables the button while a generated preview is saving', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={{
+          rows: [],
+          previewImage: { kind: 'generated', imageDataUri: 'data:image/png;base64,abc', previewUrl: 'data:image/png;base64,abc', storageUrl: null },
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          isSavingImage: true,
+          mode: 'idle',
+          matchedRowIds: [],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleSaveGeneratedImage: vi.fn(),
+          handleApplyRequest: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByRole('button', { name: '저장 중...' })).toBeDisabled();
+  });
+
+  it('shows the unmatched reason when the AI finds no matching rows', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={{
+          rows: [],
+          previewImage: { kind: 'generated', imageDataUri: 'data:image/png;base64,abc', previewUrl: 'data:image/png;base64,abc', storageUrl: null },
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          mode: 'openai',
+          matchedRowIds: [],
+          unmatchedReason: '조건에 맞는 상품을 찾지 못했습니다.',
+          applyErrorMessage: '',
+          appliedCount: 0,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleApplyRequest: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByText('조건에 맞는 상품을 찾지 못했습니다.')).toBeInTheDocument();
+  });
+
+  it('shows the applied product list after a successful apply', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={{
+          rows: [{ row_id: 'A100__01', product_name: '복합비료 20kg' }],
+          previewImage: { kind: 'generated', imageDataUri: 'data:image/png;base64,abc', previewUrl: 'data:image/png;base64,abc', storageUrl: 'https://example.com/a.png' },
+          previewError: '',
+          isGenerating: false,
+          isApplying: false,
+          mode: 'openai',
+          matchedRowIds: ['A100__01'],
+          unmatchedReason: null,
+          applyErrorMessage: '',
+          appliedCount: 1,
+          handleSelectFile: vi.fn(),
+          handleGenerateImage: vi.fn(),
+          handleClearPreview: vi.fn(),
+          handleApplyRequest: vi.fn(),
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByText('1개 상품에 이미지를 적용했습니다.')).toBeInTheDocument();
+    expect(screen.getByText('복합비료 20kg')).toBeInTheDocument();
+  });
+
+  function baseImageApply(overrides = {}) {
+    return {
+      rows: [],
+      previewImage: null,
+      previewError: '',
+      isGenerating: false,
+      isApplying: false,
+      mode: 'idle',
+      matchedRowIds: [],
+      unmatchedReason: null,
+      applyErrorMessage: '',
+      appliedCount: 0,
+      isStorageBrowserOpen: false,
+      storageImages: [],
+      isLoadingStorageImages: false,
+      storageListError: '',
+      isUploadingFile: false,
+      uploadSuccessMessage: '',
+      isSavingImage: false,
+      handleSelectFile: vi.fn(),
+      handleGenerateImage: vi.fn(),
+      handleClearPreview: vi.fn(),
+      handleSaveGeneratedImage: vi.fn(),
+      handleApplyRequest: vi.fn(),
+      handleOpenStorageBrowser: vi.fn(),
+      handleCloseStorageBrowser: vi.fn(),
+      handleSelectStorageImage: vi.fn(),
+      handleDeleteStorageImage: vi.fn(),
+      ...overrides,
+    };
+  }
+
+  it('opens the storage browser when its button is clicked', () => {
+    const handleOpenStorageBrowser = vi.fn();
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({ handleOpenStorageBrowser })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+    fireEvent.click(screen.getByRole('button', { name: '🗂️ 저장소에서 선택' }));
+
+    expect(handleOpenStorageBrowser).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a loading message while storage images are loading', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({ isStorageBrowserOpen: true, isLoadingStorageImages: true })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
+  });
+
+  it('shows the storage list error message', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({
+          isStorageBrowserOpen: true,
+          storageListError: '이미지 목록을 불러오지 못했습니다.',
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByText('이미지 목록을 불러오지 못했습니다.')).toBeInTheDocument();
+  });
+
+  it('selects a storage image on click', () => {
+    const handleSelectStorageImage = vi.fn();
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({
+          isStorageBrowserOpen: true,
+          storageImages: [{ path: 'OFF-1/a.png', url: 'https://example.com/a.png', createdAt: null }],
+          handleSelectStorageImage,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+    fireEvent.click(screen.getByRole('button', { name: 'storage-image-OFF-1/a.png' }));
+
+    expect(handleSelectStorageImage).toHaveBeenCalledWith({
+      path: 'OFF-1/a.png',
+      url: 'https://example.com/a.png',
+      createdAt: null,
+    });
+  });
+
+  it('deletes a storage image after confirming', () => {
+    const handleDeleteStorageImage = vi.fn();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({
+          isStorageBrowserOpen: true,
+          storageImages: [{ path: 'OFF-1/a.png', url: 'https://example.com/a.png', createdAt: null }],
+          handleDeleteStorageImage,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+    fireEvent.click(screen.getByRole('button', { name: 'storage-image-delete-OFF-1/a.png' }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(handleDeleteStorageImage).toHaveBeenCalledWith({
+      path: 'OFF-1/a.png',
+      url: 'https://example.com/a.png',
+      createdAt: null,
+    });
+
+    confirmSpy.mockRestore();
+  });
+
+  it('does not delete a storage image when the confirmation is declined', () => {
+    const handleDeleteStorageImage = vi.fn();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({
+          isStorageBrowserOpen: true,
+          storageImages: [{ path: 'OFF-1/a.png', url: 'https://example.com/a.png', createdAt: null }],
+          handleDeleteStorageImage,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+    fireEvent.click(screen.getByRole('button', { name: 'storage-image-delete-OFF-1/a.png' }));
+
+    expect(handleDeleteStorageImage).not.toHaveBeenCalled();
+
+    confirmSpy.mockRestore();
+  });
+
+  it('disables the upload input and shows a loading label while a file upload is in flight', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({ isUploadingFile: true })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(screen.getByText('업로드 중...')).toBeInTheDocument();
+    expect(screen.getByLabelText('업로드 중...')).toBeDisabled();
+  });
+
+  it('shows the upload success message after a file finishes uploading', () => {
+    render(
+      <WorkbookAiRecommendationPanel
+        onAiAnalyze={vi.fn()}
+        aiDisabled={false}
+        hasRows={true}
+        aiRecommendations={[]}
+        aiIsLoading={false}
+        imageApply={baseImageApply({
+          uploadSuccessMessage: '업로드 완료. "저장소에서 선택"에서 골라 적용하세요.',
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 상품이미지생성 적용' }));
+
+    expect(
+      screen.getByText('업로드 완료. "저장소에서 선택"에서 골라 적용하세요.'),
+    ).toBeInTheDocument();
   });
 });

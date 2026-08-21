@@ -14,6 +14,7 @@ export function useWorkbookSave({
   tableNameMode,
   customTableName,
   onSaved,
+  isStaticMergePending = false,
 }) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState('');
@@ -34,7 +35,8 @@ export function useWorkbookSave({
       user?.office_name &&
       Array.isArray(rowsToSave) &&
       rowsToSave.length > 0 &&
-      toTrimmedString(resolvedCategoryName),
+      toTrimmedString(resolvedCategoryName) &&
+      !isStaticMergePending,
   );
 
   useEffect(() => {

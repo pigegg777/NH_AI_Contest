@@ -52,7 +52,7 @@ describe('DataEditorSection', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('excel-upload-dropzone')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'AI 분석' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 작업실' }));
 
     expect(
       screen.getByRole('button', { name: 'AI 분석하기' })
@@ -62,7 +62,7 @@ describe('DataEditorSection', () => {
       screen.queryByTestId('excel-upload-dropzone')
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: '시장조사' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 시장조사' }));
 
     expect(
       screen.getByPlaceholderText('예: 마진율이 낮은 상품 위주로 검토해줘')
@@ -72,8 +72,8 @@ describe('DataEditorSection', () => {
   it('wires the market research state into the natural language prompt', () => {
     render(<DataEditorSection />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'AI 분석' }));
-    fireEvent.click(screen.getByRole('tab', { name: '시장조사' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 작업실' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 시장조사' }));
 
     const textarea = screen.getByPlaceholderText('예: 마진율이 낮은 상품 위주로 검토해줘');
     fireEvent.change(textarea, { target: { value: '사과 부사 5kg' } });

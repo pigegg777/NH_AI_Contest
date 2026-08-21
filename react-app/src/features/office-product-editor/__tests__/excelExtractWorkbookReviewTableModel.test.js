@@ -106,9 +106,9 @@ describe('excel extract workbook review table model', () => {
     expect(extendedKeys).toContain('price_subsidy');
     expect(extendedKeys).toContain('img_url');
     expect(extendedKeys).toContain('product_url');
-    expect(extendedKeys[8]).toBe('price_subsidy');
-    expect(extendedKeys[11]).toBe('product_url');
-    expect(extendedKeys[12]).toBe('note');
+    expect(extendedKeys[13]).toBe('price_subsidy');
+    expect(extendedKeys[15]).toBe('product_url');
+    expect(extendedKeys[8]).toBe('note');
     expect(getTableColumnsByMode('fertilizer')).toBe(FERTILIZER_TABLE_COLUMNS);
   });
 
@@ -122,19 +122,19 @@ describe('excel extract workbook review table model', () => {
     expect(pesticideKeys).toContain('product_usage');
     expect(pesticideKeys).toContain('indict_symbl');
     expect(pesticideKeys).not.toContain('nutrient');
-    expect(pesticideKeys).not.toContain('img_url');
+    expect(pesticideKeys).toContain('img_url');
     expect(pesticideKeys).not.toContain('product_url');
     expect(getTableColumnsByMode('pesticide')).toBe(PESTICIDE_TABLE_COLUMNS);
   });
 
-  it('returns the default column set without nutrient/subsidy/url columns for custom and unset modes', () => {
+  it('returns the default column set with img_url but without nutrient/subsidy/product_url columns for custom and unset modes', () => {
     const defaultKeys = DEFAULT_TABLE_COLUMNS.map((column) => column.key);
 
     expect(defaultKeys).not.toContain('nutrient');
     expect(defaultKeys).not.toContain('price_subsidy');
-    expect(defaultKeys).not.toContain('img_url');
+    expect(defaultKeys).toContain('img_url');
     expect(defaultKeys).not.toContain('product_url');
-    expect(defaultKeys).toHaveLength(FERTILIZER_TABLE_COLUMNS.length - 4);
+    expect(defaultKeys).toHaveLength(FERTILIZER_TABLE_COLUMNS.length - 3);
     expect(getTableColumnsByMode('custom')).toBe(DEFAULT_TABLE_COLUMNS);
     expect(getTableColumnsByMode('')).toBe(DEFAULT_TABLE_COLUMNS);
     expect(getTableColumnsByMode(undefined)).toBe(DEFAULT_TABLE_COLUMNS);

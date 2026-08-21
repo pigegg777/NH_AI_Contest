@@ -1077,7 +1077,7 @@ describe('PublicStorefrontPage', () => {
 
     expect(pageEl.style.getPropertyValue('--brand-color')).toBe('#ea580c');
     expect(pageEl.style.getPropertyValue('--page-bg')).toBe('#fdf2e9');
-    expect(pageEl.style.getPropertyValue('--page-search-border-width')).toBe('2.5px');
+    expect(pageEl.style.getPropertyValue('--page-search-border-width')).toBe('2px');
     expect(pageEl.style.getPropertyValue('--page-chip-active-bg')).toBe('#ea580c');
   });
 });

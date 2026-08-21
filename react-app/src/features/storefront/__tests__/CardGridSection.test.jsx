@@ -147,57 +147,14 @@ describe('CardGridSection conditionalStyles', () => {
   });
 });
 
-describe('CardGridSection generatedCategoryImages fallback', () => {
-  it('renders the generated image and an AI badge for a product with no img_url', () => {
-    render(
-      <CardGridSection
-        section={{
-          products: [{ row_id: 'p1', product_name: '무이미지 상품', medium_category: '복합비료' }],
-          generatedCategoryImages: {
-            복합비료: { imageDataUri: 'data:image/png;base64,abc', isAiGenerated: true },
-          },
-        }}
-        fields={['product_name', 'img_url']}
-        cardStyle={DEFAULT_CARD_STYLE}
-        sectionId="test-section-image-fallback"
-      />,
-    );
-
-    const image = screen.getByRole('img', { name: '무이미지 상품' });
-    expect(image).toHaveAttribute('src', 'data:image/png;base64,abc');
-    expect(screen.getByText('AI 생성 이미지')).toBeInTheDocument();
-  });
-
-  it('renders the generated image even when img_url is not a selected visible field', () => {
-    render(
-      <CardGridSection
-        section={{
-          products: [{ row_id: 'p1', product_name: '무이미지 상품', medium_category: '복합비료' }],
-          generatedCategoryImages: {
-            복합비료: { imageDataUri: 'data:image/png;base64,abc', isAiGenerated: true },
-          },
-        }}
-        fields={['product_name']}
-        cardStyle={DEFAULT_CARD_STYLE}
-        sectionId="test-section-image-fallback-no-field"
-      />,
-    );
-
-    const image = screen.getByRole('img', { name: '무이미지 상품' });
-    expect(image).toHaveAttribute('src', 'data:image/png;base64,abc');
-    expect(screen.getByText('AI 생성 이미지')).toBeInTheDocument();
-  });
-
-  it('prefers the real img_url over the generated fallback and shows no badge when img_url is present', () => {
+describe('CardGridSection image rendering', () => {
+  it('renders the product img_url when img_url is a selected visible field', () => {
     render(
       <CardGridSection
         section={{
           products: [
-            { row_id: 'p2', product_name: '실제 이미지 상품', medium_category: '복합비료', img_url: 'https://example.com/real.png' },
+            { row_id: 'p2', product_name: '실제 이미지 상품', img_url: 'https://example.com/real.png' },
           ],
-          generatedCategoryImages: {
-            복합비료: { imageDataUri: 'data:image/png;base64,abc', isAiGenerated: true },
-          },
         }}
         fields={['product_name', 'img_url']}
         cardStyle={DEFAULT_CARD_STYLE}
@@ -207,21 +164,34 @@ describe('CardGridSection generatedCategoryImages fallback', () => {
 
     const image = screen.getByRole('img', { name: '실제 이미지 상품' });
     expect(image).toHaveAttribute('src', 'https://example.com/real.png');
-    expect(screen.queryByText('AI 생성 이미지')).not.toBeInTheDocument();
   });
 
-  it('renders no image section when neither img_url nor a matching generated image exists', () => {
+  it('renders no image section when the product has no img_url', () => {
     render(
       <CardGridSection
         section={{
-          products: [{ row_id: 'p3', product_name: '무이미지·무생성 상품', medium_category: '유기질비료' }],
-          generatedCategoryImages: {
-            복합비료: { imageDataUri: 'data:image/png;base64,abc', isAiGenerated: true },
-          },
+          products: [{ row_id: 'p3', product_name: '무이미지 상품' }],
         }}
         fields={['product_name', 'img_url']}
         cardStyle={DEFAULT_CARD_STYLE}
         sectionId="test-section-image-none"
+      />,
+    );
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('renders no image section when img_url is not a selected visible field, even if present', () => {
+    render(
+      <CardGridSection
+        section={{
+          products: [
+            { row_id: 'p4', product_name: '숨긴 이미지 상품', img_url: 'https://example.com/real.png' },
+          ],
+        }}
+        fields={['product_name']}
+        cardStyle={DEFAULT_CARD_STYLE}
+        sectionId="test-section-image-hidden-field"
       />,
     );
 

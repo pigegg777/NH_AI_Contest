@@ -83,11 +83,17 @@ export function useAnnotations(workbookFingerprint, rows) {
     );
   }
 
+  function updateImgUrl(rowId, imgUrl) {
+    if (!rowId) return;
+    setAnnotations((curr) => applyAnnotation(curr, rowId, (a) => ({ ...a, img_url: imgUrl })));
+  }
+
   return {
     annotations,
     toggleShadow,
     setShadowForRows,
     updateNote,
     updatePrice,
+    updateImgUrl,
   };
 }

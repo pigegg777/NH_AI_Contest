@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@supabase/supabase-js', () => ({ createClient: vi.fn() }));
 
 import { createClient } from '@supabase/supabase-js';
-import { onRequestPost } from '../category-image';
+import { onRequestPost } from '../generate';
 
 const TEST_ENV = {
   VITE_SUPABASE_URL: 'https://example.supabase.co',
@@ -31,7 +31,7 @@ function buildRequest(body, { authorization = 'Bearer test-token' } = {}) {
     headers.set('authorization', authorization);
   }
 
-  return new Request('https://example.com/api/storefront-ai/category-image', {
+  return new Request('https://example.com/api/ai-image-apply/generate', {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -43,10 +43,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('POST /api/storefront-ai/category-image', () => {
+describe('POST /api/ai-image-apply/generate', () => {
   it('returns 401 when no bearer token is present', async () => {
     const request = buildRequest(
-      { officeCode: 'OFF-1', mediumCategory: '복합비료' },
+      { officeCode: 'OFF-1', prompt: '복합비료 이미지' },
       { authorization: '' },
     );
 
@@ -57,30 +57,16 @@ describe('POST /api/storefront-ai/category-image', () => {
 
   it('returns 403 when officeCode does not match the profile', async () => {
     createClient.mockReturnValue(buildSupabaseStub({ officeCode: 'OFF-OTHER' }));
-    const request = buildRequest({ officeCode: 'OFF-1', mediumCategory: '복합비료' });
+    const request = buildRequest({ officeCode: 'OFF-1', prompt: '복합비료 이미지' });
 
     const response = await onRequestPost({ request, env: TEST_ENV });
 
     expect(response.status).toBe(403);
   });
 
-  it('returns 422 when mediumCategory is missing', async () => {
+  it('returns 422 when prompt is missing', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
-    const request = buildRequest({ officeCode: 'OFF-1', mediumCategory: '' });
-
-    const response = await onRequestPost({ request, env: TEST_ENV });
-
-    expect(response.status).toBe(422);
-  });
-
-  it('returns 422 when promptOverride exceeds 2000 characters', async () => {
-    createClient.mockReturnValue(buildSupabaseStub());
-    const longPrompt = 'a'.repeat(2001);
-    const request = buildRequest({
-      officeCode: 'OFF-1',
-      mediumCategory: '복합비료',
-      promptOverride: longPrompt,
-    });
+    const request = buildRequest({ officeCode: 'OFF-1', prompt: '' });
 
     const response = await onRequestPost({ request, env: TEST_ENV });
 
@@ -93,14 +79,14 @@ describe('POST /api/storefront-ai/category-image', () => {
       'fetch',
       vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => ({}), text: async () => 'boom' }),
     );
-    const request = buildRequest({ officeCode: 'OFF-1', mediumCategory: '복합비료' });
+    const request = buildRequest({ officeCode: 'OFF-1', prompt: '복합비료 이미지' });
 
     const response = await onRequestPost({ request, env: TEST_ENV });
 
     expect(response.status).toBe(502);
   });
 
-  it('returns 200 with mediumCategory, imageDataUri, and the auto-built prompt on success', async () => {
+  it('returns 200 with imageDataUri and the safety-wrapped prompt on success', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
     vi.stubGlobal(
       'fetch',
@@ -109,39 +95,14 @@ describe('POST /api/storefront-ai/category-image', () => {
         json: async () => ({ data: [{ b64_json: 'ZmFrZS1wbmc=' }] }),
       }),
     );
-    const request = buildRequest({
-      officeCode: 'OFF-1',
-      mediumCategory: '복합비료',
-      representativeProductFields: { spec: '20kg', nutrient: '18-18-18' },
-    });
+    const request = buildRequest({ officeCode: 'OFF-1', prompt: '복합비료 20kg 포대' });
 
     const response = await onRequestPost({ request, env: TEST_ENV });
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.mediumCategory).toBe('복합비료');
     expect(body.imageDataUri).toBe('data:image/png;base64,ZmFrZS1wbmc=');
-    expect(body.prompt).toContain('복합비료');
-  });
-
-  it('uses promptOverride verbatim when provided instead of the auto-built prompt', async () => {
-    createClient.mockReturnValue(buildSupabaseStub());
-    const fetchSpy = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ data: [{ b64_json: 'ZmFrZS1wbmc=' }] }),
-    });
-    vi.stubGlobal('fetch', fetchSpy);
-    const request = buildRequest({
-      officeCode: 'OFF-1',
-      mediumCategory: '복합비료',
-      promptOverride: '파란색 톤으로, 논밭을 배경으로',
-    });
-
-    const response = await onRequestPost({ request, env: TEST_ENV });
-    const body = await response.json();
-
-    expect(body.prompt).toBe('파란색 톤으로, 논밭을 배경으로');
-    const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
-    expect(sentBody.prompt).toBe('파란색 톤으로, 논밭을 배경으로');
+    expect(body.prompt).toContain('복합비료 20kg 포대');
+    expect(body.prompt).toContain('실제 브랜드 로고나 텍스트 없이');
   });
 });

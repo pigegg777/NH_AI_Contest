@@ -176,11 +176,11 @@ describe('OfficeProductEditor draft persistence', () => {
     render(<OfficeProductEditorPage user={USER} />);
 
     await screen.findByText('Alpha');
-    fireEvent.click(screen.getByRole('tab', { name: 'AI 분석' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 작업실' }));
 
     expect(await screen.findByText('가격 확인 필요')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: '시장조사' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 시장조사' }));
     expect(screen.getByText('사과 부사 5kg 온라인 판매가 조사')).toBeInTheDocument();
   });
 });

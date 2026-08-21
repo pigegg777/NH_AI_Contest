@@ -132,6 +132,7 @@
 .table th {
   position: sticky;
   top: 0;
+  z-index: 2;
   padding: 0;
   background: var(--corp-table-header-bg);
   color: var(--corp-table-header-text);

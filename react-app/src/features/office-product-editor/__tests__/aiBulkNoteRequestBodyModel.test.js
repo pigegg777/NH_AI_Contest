@@ -136,6 +136,9 @@ describe('buildAiBulkNoteRequestBody', () => {
     expect(requestBody.text.format.schema.properties.matches.items.required).toEqual([
       'row_id',
       'note',
+      'zero_tax_price',
+      'tax_price',
+      'exempt_tax_price',
     ]);
   });
 

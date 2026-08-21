@@ -27,6 +27,10 @@ function normalizeAnnotation(annotation) {
     normalized.exempt_tax_price = annotation.exempt_tax_price;
   }
 
+  if (typeof annotation?.img_url === 'string') {
+    normalized.img_url = annotation.img_url;
+  }
+
   return normalized;
 }
 
@@ -100,6 +104,7 @@ export class ReviewTableAnnotationModel {
         tax_price: annotation.tax_price ?? row.tax_price,
         zero_tax_price: annotation.zero_tax_price ?? row.zero_tax_price,
         exempt_tax_price: annotation.exempt_tax_price ?? row.exempt_tax_price,
+        img_url: annotation.img_url ?? row.img_url,
       };
     });
   }

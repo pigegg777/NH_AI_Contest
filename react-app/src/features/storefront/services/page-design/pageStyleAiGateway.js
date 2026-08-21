@@ -1,7 +1,8 @@
 import supabase from '../../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../../common/utils/text';
-import { PAGE_STYLE_AI_SESSION_EXPIRED_ERROR_MESSAGE } from '../../config/page-design/pageStyleAiCopyConfig';
-import { PAGE_STYLE_AI_ENDPOINT } from '../../config/page-design/pageStyleAiHttpConfig';
+
+const PAGE_STYLE_AI_SESSION_EXPIRED_ERROR_MESSAGE = '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.';
+const PAGE_STYLE_AI_ENDPOINT = '/api/storefront-ai/page-style';
 
 async function readErrorMessage(response) {
   try {

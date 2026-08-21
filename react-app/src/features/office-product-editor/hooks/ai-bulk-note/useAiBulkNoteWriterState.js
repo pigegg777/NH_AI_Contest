@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { analyzeAiBulkNoteMatches } from '../../model/ai-bulk-note/aiBulkNoteAnalysisModel';
 import { AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS } from '../../model/ai-bulk-note/aiBulkNoteRequestBodyModel';
+import { AI_BULK_NOTE_PRICE_FIELD_KEYS } from '../../model/ai-bulk-note/aiBulkNoteMatchModel';
 import { readWorkbookSheet } from '../../services/workbookSheetReader';
 
 const REFERENCE_SHEET_ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
@@ -10,7 +11,7 @@ function hasAllowedReferenceSheetExtension(fileName) {
   return REFERENCE_SHEET_ALLOWED_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
 }
 
-export function useAiBulkNoteWriterState(officeCode, rows, tableNameMode, updateNote) {
+export function useAiBulkNoteWriterState(officeCode, rows, tableNameMode, updateNote, updatePrice) {
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState('idle');
   const [matches, setMatches] = useState([]);
@@ -82,7 +83,17 @@ export function useAiBulkNoteWriterState(officeCode, rows, tableNameMode, update
   }
 
   function handleApply() {
-    matches.forEach((match) => updateNote(match.rowId, match.note));
+    matches.forEach((match) => {
+      if (match.note !== undefined) {
+        updateNote(match.rowId, match.note);
+      }
+
+      AI_BULK_NOTE_PRICE_FIELD_KEYS.forEach((key) => {
+        if (match[key] !== undefined) {
+          updatePrice(match.rowId, key, match[key]);
+        }
+      });
+    });
     setAppliedCount(matches.length);
     setMatches([]);
     setUnmatchedReason(null);

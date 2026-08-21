@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DataTableSection } from '../components/DataTableSection';
 import { EditorMetaCtx, TableCtx } from '../contexts/editorContexts';
@@ -9,6 +9,15 @@ import {
   getTableColumnsByMode,
 } from '../model/review-table/reviewTableConfigModel';
 import { createInitialFilters } from '../model/review-table/reviewTableBuildModel';
+import { requestAiImageList } from '../services/ai-image-apply/aiImageApplyClient';
+
+vi.mock('../services/ai-image-apply/aiImageApplyClient', () => ({
+  requestAiImageList: vi.fn(),
+}));
+
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
 const rows = [
   {
@@ -77,6 +86,8 @@ function renderTable({ tableNameMode, ...tableOverrides } = {}) {
     onVisibleRowsShadowChange: vi.fn(),
     onNoteChange: vi.fn(),
     onPriceChange: vi.fn(),
+    onImgUrlChange: vi.fn(),
+    officeCode: 'OFF-1',
     ...tableOverrides,
   };
 
@@ -129,6 +140,81 @@ describe('excel extract workbook review table', () => {
     expect(screen.getAllByText('-').length).toBeGreaterThan(0);
   });
 
+  it('opens the storage picker for a row without an image and lists office storage images', async () => {
+    const user = userEvent.setup();
+    requestAiImageList.mockResolvedValue({
+      images: [{ path: 'OFF-1/a.png', url: 'https://example.com/a.png', createdAt: null }],
+    });
+
+    renderTable({ tableNameMode: 'fertilizer' });
+
+    await user.click(screen.getByRole('button', { name: 'img-picker-B200__02' }));
+
+    expect(requestAiImageList).toHaveBeenCalledWith({ officeCode: 'OFF-1' });
+    expect(
+      await screen.findByRole('button', { name: 'img-picker-option-B200__02-OFF-1/a.png' }),
+    ).toBeInTheDocument();
+  });
+
+  it('opens the storage picker for a row that already has an image, to allow swapping it', async () => {
+    const user = userEvent.setup();
+    requestAiImageList.mockResolvedValue({ images: [] });
+
+    renderTable({ tableNameMode: 'fertilizer' });
+
+    await user.click(screen.getByRole('button', { name: 'img-picker-A100__01' }));
+
+    expect(requestAiImageList).toHaveBeenCalledWith({ officeCode: 'OFF-1' });
+    expect(
+      screen.getByRole('dialog', { name: 'img-picker-popover-A100__01' }),
+    ).toBeInTheDocument();
+  });
+
+  it('sets the row image from the picker and closes it on selection', async () => {
+    const user = userEvent.setup();
+    const onImgUrlChange = vi.fn();
+    requestAiImageList.mockResolvedValue({
+      images: [{ path: 'OFF-1/a.png', url: 'https://example.com/a.png', createdAt: null }],
+    });
+
+    renderTable({ tableNameMode: 'fertilizer', onImgUrlChange });
+
+    await user.click(screen.getByRole('button', { name: 'img-picker-B200__02' }));
+    await user.click(
+      await screen.findByRole('button', { name: 'img-picker-option-B200__02-OFF-1/a.png' }),
+    );
+
+    expect(onImgUrlChange).toHaveBeenCalledWith('B200__02', 'https://example.com/a.png');
+    expect(
+      screen.queryByRole('dialog', { name: 'img-picker-popover-B200__02' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the delete and picker buttons for a static-fertilizer-sourced image', () => {
+    renderTable({
+      tableNameMode: 'fertilizer',
+      rows: [{ ...rows[0], img_url_is_static: true }, rows[1]],
+    });
+
+    expect(screen.queryByRole('button', { name: 'img-delete-A100__01' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'img-picker-A100__01' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'img-A100__01' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'img-picker-B200__02' })).toBeInTheDocument();
+  });
+
+  it('clears a product image by calling onImgUrlChange when the delete button is clicked', async () => {
+    const user = userEvent.setup();
+    const onImgUrlChange = vi.fn();
+
+    renderTable({ tableNameMode: 'fertilizer', onImgUrlChange });
+
+    expect(screen.queryByRole('button', { name: 'img-delete-B200__02' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'img-delete-A100__01' }));
+
+    expect(onImgUrlChange).toHaveBeenCalledWith('A100__01', '');
+  });
+
   it('matches the custom-mode column set from the table model', () => {
     renderTable({ tableNameMode: 'custom' });
 
@@ -140,7 +226,7 @@ describe('excel extract workbook review table', () => {
     ]);
     expect(renderedColumnKeys).not.toContain('nutrient');
     expect(renderedColumnKeys).not.toContain('price_subsidy');
-    expect(renderedColumnKeys).not.toContain('img_url');
+    expect(renderedColumnKeys).toContain('img_url');
     expect(renderedColumnKeys).not.toContain('product_url');
   });
 
@@ -186,7 +272,7 @@ describe('excel extract workbook review table', () => {
     expect(renderedColumnKeys).toContain('product_usage');
     expect(renderedColumnKeys).toContain('indict_symbl');
     expect(renderedColumnKeys).not.toContain('price_subsidy');
-    expect(renderedColumnKeys).not.toContain('img_url');
+    expect(renderedColumnKeys).toContain('img_url');
 
     const usageButton = screen.getByRole('button', { name: 'usage-cell-A100__01' });
     expect(usageButton.textContent).toContain('(1)');

@@ -65,6 +65,31 @@ describe('PAGE_STYLE_AI_SCHEMA', () => {
     ).toContain('null');
   });
 
+  it('lets the AI set search backgroundHex, borderColorHex, and focusBorderColorHex independently of palette', () => {
+    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.backgroundHex.type).toContain('null');
+    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.backgroundHex.pattern).toBe('^#[0-9a-fA-F]{6}$');
+    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.borderColorHex.type).toContain('null');
+    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.focusBorderColorHex.type).toContain('null');
+  });
+
+  it('lets the AI set chip activeBorderHex, borderStrengthToken, and fontWeight for both chip scopes', () => {
+    ['categoryChips', 'productCategoryChips'].forEach((scope) => {
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.activeBorderHex.type).toContain('null');
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderStrengthToken.type).toContain('null');
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderStrengthToken.enum).toContain('none');
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.fontWeight.type).toContain('null');
+    });
+  });
+
+  it('lets the AI set chip borderSides to one of all/bottom/top/left/right', () => {
+    ['categoryChips', 'productCategoryChips'].forEach((scope) => {
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderSides.type).toContain('null');
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderSides.enum).toEqual(
+        expect.arrayContaining(['all', 'bottom', 'top', 'left', 'right', null]),
+      );
+    });
+  });
+
   it('requires explanation as a plain string and suggestion as a nullable string', () => {
     expect(PAGE_STYLE_AI_SCHEMA.properties.explanation.type).toBe('string');
     expect(PAGE_STYLE_AI_SCHEMA.properties.suggestion.type).toContain('null');
@@ -163,9 +188,36 @@ describe('normalizeCategoryChipsIntent', () => {
         variant: 'glossy',
         sizeToken: 'huge',
         radiusToken: 'circle',
-        gapToken: 'none',
+        gapToken: 'huge',
       }),
     ).toBeNull();
+  });
+
+  it('keeps activeBorderHex, borderStrengthToken, and fontWeight, dropping invalid values', () => {
+    expect(
+      normalizeCategoryChipsIntent({
+        activeBorderHex: '#334155',
+        borderStrengthToken: 'bold',
+        fontWeight: 800,
+      }),
+    ).toEqual({
+      activeBorderHex: '#334155',
+      borderStrengthToken: 'bold',
+      fontWeight: 800,
+    });
+
+    expect(
+      normalizeCategoryChipsIntent({
+        activeBorderHex: 'not-a-color',
+        borderStrengthToken: 'extreme',
+        fontWeight: 'huge',
+      }),
+    ).toBeNull();
+  });
+
+  it('keeps a valid borderSides token and rejects an unapproved one', () => {
+    expect(normalizeCategoryChipsIntent({ borderSides: 'bottom' })).toEqual({ borderSides: 'bottom' });
+    expect(normalizeCategoryChipsIntent({ borderSides: 'diagonal' })).toBeNull();
   });
 });
 
@@ -207,13 +259,29 @@ describe('normalizeSearchIntent', () => {
     expect(normalizeSearchIntent(null)).toBeNull();
   });
 
-  it('keeps only sizeToken and borderStrengthToken', () => {
+  it('keeps sizeToken, borderStrengthToken, and the approved hex colors, dropping everything else', () => {
     expect(
       normalizeSearchIntent({
         sizeToken: 'lg',
         radius: 'pill',
         backgroundHex: '#000000',
+        borderColorHex: '#111111',
+        focusBorderColorHex: '#222222',
         iconPosition: 'right',
+      }),
+    ).toEqual({
+      sizeToken: 'lg',
+      backgroundHex: '#000000',
+      borderColorHex: '#111111',
+      focusBorderColorHex: '#222222',
+    });
+  });
+
+  it('drops an invalid search hex but keeps other valid fields', () => {
+    expect(
+      normalizeSearchIntent({
+        sizeToken: 'lg',
+        backgroundHex: 'not-a-color',
       }),
     ).toEqual({ sizeToken: 'lg' });
   });

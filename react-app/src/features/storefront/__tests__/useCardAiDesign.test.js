@@ -6,11 +6,9 @@ import { DEFAULT_CARD_AI_DESIGN } from '../model/card-design/ai-request/cardAiDe
 import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../model/card-design/style/cardStyleModel';
 import { requestCardStyleAiIntent } from '../model/card-design/ai-request/cardStyleAiOrchestrator';
 import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
-import { postCategoryImageRequest } from '../services/card-design/categoryImageGateway';
 
 vi.mock('../model/card-design/ai-request/cardStyleAiOrchestrator', () => ({ requestCardStyleAiIntent: vi.fn() }));
 vi.mock('../model/card-design/style/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
-vi.mock('../services/card-design/categoryImageGateway', () => ({ postCategoryImageRequest: vi.fn() }));
 
 describe('useCardAiDesign', () => {
   afterEach(() => {
@@ -223,69 +221,5 @@ describe('useCardAiDesign', () => {
 
     expect(result.current.cardAiDesign).toEqual(DEFAULT_CARD_AI_DESIGN);
     expect(result.current.cardStyle).toEqual(compiledStyle);
-  });
-
-  it('starts with an empty generatedCategoryImages map', () => {
-    const { result } = renderHook(() => useCardAiDesign());
-
-    expect(result.current.generatedCategoryImages).toEqual({});
-  });
-
-  it('hydrateCardStyle accepts and stores a generatedCategoryImages map as its third argument', () => {
-    const { result } = renderHook(() => useCardAiDesign());
-    const stored = { 복합비료: { imageDataUri: 'data:image/png;base64,abc', prompt: 'x', isAiGenerated: true, generatedAt: '2026-08-17T00:00:00.000Z' } };
-
-    act(() => result.current.hydrateCardStyle(DEFAULT_CARD_STYLE, [], stored));
-
-    expect(result.current.generatedCategoryImages).toEqual(stored);
-  });
-
-  it('generateCategoryImage calls the gateway, stores the result keyed by mediumCategory, and toggles the in-flight flag', async () => {
-    let resolveRequest;
-    postCategoryImageRequest.mockReturnValue(
-      new Promise((resolve) => {
-        resolveRequest = resolve;
-      }),
-    );
-
-    const { result } = renderHook(() => useCardAiDesign({ officeCode: 'OFF-1' }));
-
-    let pendingCall;
-    act(() => {
-      pendingCall = result.current.generateCategoryImage('복합비료', { promptOverride: '' });
-    });
-
-    expect(result.current.isGeneratingCategoryImage.복합비료).toBe(true);
-
-    await act(async () => {
-      resolveRequest({ mediumCategory: '복합비료', imageDataUri: 'data:image/png;base64,abc', prompt: '자동 프롬프트' });
-      await pendingCall;
-    });
-
-    expect(postCategoryImageRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ officeCode: 'OFF-1', mediumCategory: '복합비료' }),
-    );
-    expect(result.current.generatedCategoryImages.복합비료).toEqual({
-      imageDataUri: 'data:image/png;base64,abc',
-      prompt: '자동 프롬프트',
-      isAiGenerated: true,
-      generatedAt: expect.any(String),
-    });
-    expect(result.current.isGeneratingCategoryImage.복합비료).toBe(false);
-  });
-
-  it('generateCategoryImage surfaces the error and clears the in-flight flag on failure', async () => {
-    postCategoryImageRequest.mockRejectedValue(new Error('network down'));
-
-    const { result } = renderHook(() => useCardAiDesign());
-
-    let outcome;
-    await act(async () => {
-      outcome = await result.current.generateCategoryImage('복합비료');
-    });
-
-    expect(outcome).toEqual({ ok: false, error: 'network down' });
-    expect(result.current.isGeneratingCategoryImage.복합비료).toBe(false);
-    expect(result.current.generatedCategoryImages.복합비료).toBeUndefined();
   });
 });

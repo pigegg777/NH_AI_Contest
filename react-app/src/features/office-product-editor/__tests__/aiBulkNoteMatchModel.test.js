@@ -56,6 +56,60 @@ describe('sanitizeAiBulkNoteMatches', () => {
     expect(result.matches[0].note).toHaveLength(300);
   });
 
+  it('includes a price field on its own when the instruction only targets a price', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      { matches: [{ row_id: 'A100__01', note: null, zero_tax_price: 3000, tax_price: null, exempt_tax_price: null }], unmatched_reason: null },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([{ rowId: 'A100__01', zero_tax_price: 3000 }]);
+  });
+
+  it('includes note and multiple price fields together when the instruction targets all of them', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      {
+        matches: [
+          {
+            row_id: 'A100__01',
+            note: '가격 인상',
+            zero_tax_price: 3000,
+            tax_price: 3300,
+            exempt_tax_price: null,
+          },
+        ],
+        unmatched_reason: null,
+      },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([
+      { rowId: 'A100__01', note: '가격 인상', zero_tax_price: 3000, tax_price: 3300 },
+    ]);
+  });
+
+  it('drops a match with a row_id but no note and no price field set', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      {
+        matches: [
+          { row_id: 'A100__01', note: null, zero_tax_price: null, tax_price: null, exempt_tax_price: null },
+        ],
+        unmatched_reason: null,
+      },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([]);
+  });
+
+  it('ignores a non-numeric price value', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      { matches: [{ row_id: 'A100__01', note: null, zero_tax_price: 'not-a-number' }], unmatched_reason: null },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([]);
+  });
+
   it('defaults missing fields to safe empty values and carries through a Korean unmatched_reason', () => {
     expect(sanitizeAiBulkNoteMatches({}, ['A100__01'])).toEqual({
       matches: [],

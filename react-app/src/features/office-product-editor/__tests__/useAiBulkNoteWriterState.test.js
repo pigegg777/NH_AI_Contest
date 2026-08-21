@@ -28,7 +28,7 @@ describe('useAiBulkNoteWriterState', () => {
     analyzeAiBulkNoteMatches.mockResolvedValue({ mode: 'openai', matches: sampleMatches, unmatchedReason: null });
     const updateNote = vi.fn();
 
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote, vi.fn()));
 
     await act(async () => {
       await result.current.handlePreview("소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘");
@@ -47,7 +47,7 @@ describe('useAiBulkNoteWriterState', () => {
         resolvePromise = resolve;
       }),
     );
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     act(() => {
       void result.current.handlePreview('조건');
@@ -66,7 +66,7 @@ describe('useAiBulkNoteWriterState', () => {
     analyzeAiBulkNoteMatches.mockResolvedValue({ mode: 'openai', matches: sampleMatches, unmatchedReason: null });
     const updateNote = vi.fn();
 
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote, vi.fn()));
 
     await act(async () => {
       await result.current.handlePreview('조건');
@@ -83,11 +83,45 @@ describe('useAiBulkNoteWriterState', () => {
     expect(result.current.appliedCount).toBe(2);
   });
 
+  it('applies whichever price fields and note a match carries, calling only the setters for fields actually present', async () => {
+    analyzeAiBulkNoteMatches.mockResolvedValue({
+      mode: 'openai',
+      matches: [
+        { rowId: 'A100__01', zero_tax_price: 3000 },
+        { rowId: 'B200__01', note: '가격 인상', tax_price: 3300, exempt_tax_price: 2900 },
+      ],
+      unmatchedReason: null,
+    });
+    const updateNote = vi.fn();
+    const updatePrice = vi.fn();
+
+    const { result } = renderHook(() =>
+      useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote, updatePrice),
+    );
+
+    await act(async () => {
+      await result.current.handlePreview('조건');
+    });
+
+    act(() => {
+      result.current.handleApply();
+    });
+
+    expect(updateNote).toHaveBeenCalledTimes(1);
+    expect(updateNote).toHaveBeenCalledWith('B200__01', '가격 인상');
+
+    expect(updatePrice).toHaveBeenCalledTimes(3);
+    expect(updatePrice).toHaveBeenCalledWith('A100__01', 'zero_tax_price', 3000);
+    expect(updatePrice).toHaveBeenCalledWith('B200__01', 'tax_price', 3300);
+    expect(updatePrice).toHaveBeenCalledWith('B200__01', 'exempt_tax_price', 2900);
+    expect(result.current.appliedCount).toBe(2);
+  });
+
   it('clears the preview without applying when handleClear is called', async () => {
     analyzeAiBulkNoteMatches.mockResolvedValue({ mode: 'openai', matches: sampleMatches, unmatchedReason: null });
     const updateNote = vi.fn();
 
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', updateNote, vi.fn()));
 
     await act(async () => {
       await result.current.handlePreview('조건');
@@ -116,7 +150,7 @@ describe('useAiBulkNoteWriterState', () => {
         }),
       );
 
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     act(() => {
       void result.current.handlePreview('조건A');
@@ -135,7 +169,7 @@ describe('useAiBulkNoteWriterState', () => {
   });
 
   it('rejects a file with a disallowed extension without parsing it', async () => {
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.csv' });
@@ -154,7 +188,7 @@ describe('useAiBulkNoteWriterState', () => {
         ['유기질비료', 15000],
       ],
     });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });
@@ -173,7 +207,7 @@ describe('useAiBulkNoteWriterState', () => {
 
   it('surfaces an error when the file cannot be parsed', async () => {
     readWorkbookSheet.mockRejectedValue(new Error('corrupt'));
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });
@@ -188,7 +222,7 @@ describe('useAiBulkNoteWriterState', () => {
       sheetName: 'Sheet1',
       sheetRows: Array.from({ length: AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS + 1 }, (_, i) => [`row-${i}`]),
     });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });
@@ -204,7 +238,7 @@ describe('useAiBulkNoteWriterState', () => {
     readWorkbookSheet
       .mockResolvedValueOnce({ sheetName: 'Sheet1', sheetRows: [['a']] })
       .mockResolvedValueOnce({ sheetName: 'Sheet2', sheetRows: [['b']] });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'first.xlsx' });
@@ -222,7 +256,7 @@ describe('useAiBulkNoteWriterState', () => {
 
   it('clears the reference sheet on explicit removal', async () => {
     readWorkbookSheet.mockResolvedValue({ sheetName: 'Sheet1', sheetRows: [['a']] });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });
@@ -237,7 +271,7 @@ describe('useAiBulkNoteWriterState', () => {
   it('keeps the reference sheet across handleClear and handleApply', async () => {
     readWorkbookSheet.mockResolvedValue({ sheetName: 'Sheet1', sheetRows: [['a']] });
     analyzeAiBulkNoteMatches.mockResolvedValue({ mode: 'openai', matches: sampleMatches, unmatchedReason: null });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });
@@ -269,7 +303,7 @@ describe('useAiBulkNoteWriterState', () => {
   it('forwards the uploaded reference sheet on preview', async () => {
     readWorkbookSheet.mockResolvedValue({ sheetName: 'Sheet1', sheetRows: [['a']] });
     analyzeAiBulkNoteMatches.mockResolvedValue({ mode: 'openai', matches: [], unmatchedReason: null });
-    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn()));
+    const { result } = renderHook(() => useAiBulkNoteWriterState('OFF-1', [], 'fertilizer', vi.fn(), vi.fn()));
 
     await act(async () => {
       await result.current.handleUploadReferenceSheet({ name: 'ref.xlsx' });

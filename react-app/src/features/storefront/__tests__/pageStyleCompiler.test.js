@@ -173,6 +173,7 @@ describe('compilePageStyle sticky incremental edits', () => {
       search: {
         sizeToken: 'lg',
         borderStrengthToken: 'strong',
+        backgroundHex: '#ffffff',
         borderColorHex: '#1d4a2e',
         focusBorderColorHex: '#173223',
       },
@@ -289,7 +290,31 @@ describe('compilePageStyle property boundaries', () => {
       'schemaVersion',
       'search',
     ]);
-    expect(Object.keys(result.search).sort()).toEqual(['borderColorHex', 'borderStrengthToken', 'focusBorderColorHex', 'sizeToken']);
+    expect(Object.keys(result.search).sort()).toEqual([
+      'backgroundHex',
+      'borderColorHex',
+      'borderStrengthToken',
+      'focusBorderColorHex',
+      'sizeToken',
+    ]);
+    expect(Object.keys(result.categoryChips).sort()).toEqual([
+      'activeBackgroundHex',
+      'activeBorderHex',
+      'activeTextHex',
+      'backgroundHex',
+      'borderColorHex',
+      'borderSides',
+      'borderStrengthToken',
+      'fontWeight',
+      'gapToken',
+      'hoverBackgroundHex',
+      'hoverBorderHex',
+      'hoverTextHex',
+      'radiusToken',
+      'sizeToken',
+      'textHex',
+      'variant',
+    ]);
   });
 
   it('keeps search colors unchanged when only its size is requested', () => {
@@ -298,9 +323,91 @@ describe('compilePageStyle property boundaries', () => {
       previousPageStyle: undefined,
     });
 
+    expect(result.search.backgroundHex).toBe(DEFAULT_PAGE_STYLE.search.backgroundHex);
     expect(result.search.borderColorHex).toBe(DEFAULT_PAGE_STYLE.search.borderColorHex);
     expect(result.search.focusBorderColorHex).toBe(
       DEFAULT_PAGE_STYLE.search.focusBorderColorHex,
     );
+  });
+});
+
+describe('compilePageStyle: search colors independent of palette', () => {
+  it('uses an AI-supplied search backgroundHex/borderColorHex instead of the palette-derived default', () => {
+    const result = compilePageStyle({
+      intent: {
+        ...BASE_INTENT,
+        search: { backgroundHex: '#0f172a', borderColorHex: '#38bdf8', focusBorderColorHex: '#7dd3fc' },
+      },
+      previousPageStyle: undefined,
+      targetScope: 'search',
+    });
+
+    expect(result.search.backgroundHex).toBe('#0f172a');
+    expect(result.search.borderColorHex).toBe('#38bdf8');
+    expect(result.search.focusBorderColorHex).toBe('#7dd3fc');
+  });
+
+  it('keeps a customized search backgroundHex when a later prompt changes only the palette', () => {
+    const previousPageStyle = compilePageStyle({
+      intent: { ...BASE_INTENT, search: { backgroundHex: '#0f172a' } },
+      previousPageStyle: undefined,
+      targetScope: 'search',
+    });
+
+    const result = compilePageStyle({
+      intent: { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, search: null },
+      previousPageStyle,
+    });
+
+    expect(result.search.backgroundHex).toBe('#0f172a');
+  });
+});
+
+describe('compilePageStyle: chip activeBorderHex/borderStrengthToken/fontWeight', () => {
+  it('uses an AI-supplied chip activeBorderHex/borderStrengthToken/fontWeight override', () => {
+    const result = compilePageStyle({
+      intent: {
+        ...BASE_INTENT,
+        categoryChips: { activeBorderHex: '#334155', borderStrengthToken: 'bold', fontWeight: 800 },
+      },
+      previousPageStyle: undefined,
+      targetScope: 'categoryChips',
+    });
+
+    expect(result.categoryChips.activeBorderHex).toBe('#334155');
+    expect(result.categoryChips.borderStrengthToken).toBe('bold');
+    expect(result.categoryChips.fontWeight).toBe(800);
+  });
+
+  it('keeps a customized chip borderStrengthToken across a palette-only change', () => {
+    const previousPageStyle = compilePageStyle({
+      intent: { ...BASE_INTENT, categoryChips: { borderStrengthToken: 'none' } },
+      previousPageStyle: undefined,
+      targetScope: 'categoryChips',
+    });
+
+    const result = compilePageStyle({
+      intent: { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, categoryChips: null },
+      previousPageStyle,
+    });
+
+    expect(result.categoryChips.borderStrengthToken).toBe('none');
+  });
+
+  it('uses an AI-supplied chip borderSides override and keeps it sticky across a palette-only change', () => {
+    const result = compilePageStyle({
+      intent: { ...BASE_INTENT, categoryChips: { borderSides: 'bottom' } },
+      previousPageStyle: undefined,
+      targetScope: 'categoryChips',
+    });
+
+    expect(result.categoryChips.borderSides).toBe('bottom');
+
+    const next = compilePageStyle({
+      intent: { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, categoryChips: null },
+      previousPageStyle: result,
+    });
+
+    expect(next.categoryChips.borderSides).toBe('bottom');
   });
 });

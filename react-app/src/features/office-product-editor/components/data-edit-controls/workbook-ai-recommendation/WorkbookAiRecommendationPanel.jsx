@@ -4,14 +4,14 @@ import { AiSimilarityExtractionPanel } from './ai-similarity-extraction/AiSimila
 import { AiMarketResearchPromptInput } from './ai-market-research/AiMarketResearchPromptInput';
 import { AiMarketResearchPanel } from './ai-market-research/AiMarketResearchPanel';
 import { AiBulkNoteWriterPanel } from './ai-bulk-note/AiBulkNoteWriterPanel';
-import { AiCategoryImageGenerationPanel } from './ai-category-image/AiCategoryImageGenerationPanel';
+import { AiImageApplyPanel } from './ai-image-apply/AiImageApplyPanel';
 import styles from './WorkbookAiRecommendationPanel.module.css';
 
 const AI_ANALYSIS_SUB_TABS = [
-  { id: 'similarity', label: '유사상품분석' },
-  { id: 'marketResearch', label: '시장조사' },
-  { id: 'bulkNote', label: '일괄비고작성' },
-  { id: 'categoryImage', label: '대체 이미지 생성' },
+  { id: 'similarity', label: 'AI 유사상품 유효성검사' },
+  { id: 'marketResearch', label: 'AI 시장조사' },
+  { id: 'bulkNote', label: 'AI 일괄 데이터수정' },
+  { id: 'imageApply', label: 'AI 상품이미지생성 적용' },
 ];
 
 export function WorkbookAiRecommendationPanel({
@@ -26,14 +26,14 @@ export function WorkbookAiRecommendationPanel({
   onAiRecommendationSelect,
   marketResearch,
   bulkNoteWriter,
-  categoryImageGeneration,
+  imageApply,
 }) {
   const [analysisHint, setAnalysisHint] = useState('');
   const [activeSubTabId, setActiveSubTabId] = useState('similarity');
 
   return (
     <div className={styles.aiSubTabs}>
-      <h4 className={styles.sectionTitle}>AI 분석</h4>
+      <h4 className={styles.sectionTitle}>AI 작업실</h4>
 
       <TabBar
         tabs={AI_ANALYSIS_SUB_TABS}
@@ -70,9 +70,9 @@ export function WorkbookAiRecommendationPanel({
         </div>
       ) : null}
 
-      {activeSubTabId === 'categoryImage' ? (
+      {activeSubTabId === 'imageApply' ? (
         <div className={styles.aiSubTabPanel}>
-          <AiCategoryImageGenerationPanel categoryImageGeneration={categoryImageGeneration} />
+          <AiImageApplyPanel imageApply={imageApply} />
         </div>
       ) : null}
     </div>

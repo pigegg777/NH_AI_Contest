@@ -2,34 +2,42 @@ import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../../
 
 export const PAGE_STYLE_SCHEMA_VERSION = 1;
 
-export const PAGE_STYLE_SEARCH_SIZE_TOKENS = ['sm', 'md', 'lg', 'xl'];
-export const PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS = ['soft', 'normal', 'strong'];
-export const PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS = ['sm', 'md', 'lg', 'xl'];
+export const PAGE_STYLE_SEARCH_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+export const PAGE_STYLE_BORDER_STRENGTH_TOKENS = ['none', 'hairline', 'soft', 'normal', 'strong', 'bold'];
+export const PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
 
 export const PAGE_STYLE_SEARCH_SIZE_VALUES = {
-  sm: { minHeight: '34px', fontSize: '0.82rem' },
+  xs: { minHeight: '32px', fontSize: '0.86rem' },
+  sm: { minHeight: '36px', fontSize: '0.9rem' },
   md: { minHeight: '40px', fontSize: '0.94rem' },
-  lg: { minHeight: '46px', fontSize: '1rem' },
-  xl: { minHeight: '52px', fontSize: '1.08rem' },
+  lg: { minHeight: '44px', fontSize: '0.98rem' },
+  xl: { minHeight: '48px', fontSize: '1.02rem' },
+  xxl: { minHeight: '52px', fontSize: '1.06rem' },
 };
 
 export const PAGE_STYLE_HEADER_TITLE_SIZE_VALUES = {
-  sm: '0.95rem',
+  xs: '0.9rem',
+  sm: '1rem',
   md: '1.1rem',
-  lg: '1.25rem',
-  xl: '1.4rem',
+  lg: '1.2rem',
+  xl: '1.3rem',
+  xxl: '1.4rem',
 };
 
-export const PAGE_STYLE_SEARCH_BORDER_WIDTH_VALUES = {
+export const PAGE_STYLE_BORDER_WIDTH_VALUES = {
+  none: '0px',
+  hairline: '0.5px',
   soft: '1px',
   normal: '1.5px',
-  strong: '2.5px',
+  strong: '2px',
+  bold: '2.5px',
 };
 
 export const PAGE_STYLE_CHIP_VARIANT_TOKENS = ['soft', 'outline', 'filled'];
+export const PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS = ['all', 'bottom', 'top', 'left', 'right'];
 export const PAGE_STYLE_CHIP_SIZE_TOKENS = ['sm', 'md', 'lg'];
-export const PAGE_STYLE_CHIP_RADIUS_TOKENS = ['square', 'rounded', 'pill'];
-export const PAGE_STYLE_CHIP_GAP_TOKENS = ['tight', 'normal', 'relaxed'];
+export const PAGE_STYLE_CHIP_RADIUS_TOKENS = ['none', 'square', 'rounded', 'pill'];
+export const PAGE_STYLE_CHIP_GAP_TOKENS = ['none', 'tight', 'normal', 'relaxed'];
 
 export const PAGE_STYLE_CHIP_SIZE_VALUES = {
   sm: { minHeight: '28px', fontSize: '0.72rem', paddingInline: '10px' },
@@ -38,12 +46,14 @@ export const PAGE_STYLE_CHIP_SIZE_VALUES = {
 };
 
 export const PAGE_STYLE_CHIP_RADIUS_VALUES = {
+  none: '0px',
   square: '8px',
   rounded: '14px',
   pill: '999px',
 };
 
 export const PAGE_STYLE_CHIP_GAP_VALUES = {
+  none: '0px',
   tight: '8px',
   normal: '14px',
   relaxed: '20px',
@@ -53,13 +63,20 @@ export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
   palette: { backgroundHex: '#ffffff', accentHex: '#1d4a2e' },
   header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
-  search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#d8e2dc', focusBorderColorHex: '#1d4a2e' },
+  search: {
+    sizeToken: 'md',
+    borderStrengthToken: 'normal',
+    backgroundHex: '#ffffff',
+    borderColorHex: '#d8e2dc',
+    focusBorderColorHex: '#1d4a2e',
+  },
   categoryChips: {
     backgroundHex: '#ffffff',
     textHex: '#5f6d5b',
     borderColorHex: '#d8e2dc',
     activeBackgroundHex: '#1d4a2e',
     activeTextHex: '#ffffff',
+    activeBorderHex: '#1d4a2e',
     hoverBackgroundHex: '#f4f7f5',
     hoverTextHex: '#355a30',
     hoverBorderHex: '#a9c2af',
@@ -67,6 +84,9 @@ export const DEFAULT_PAGE_STYLE = {
     sizeToken: 'md',
     radiusToken: 'pill',
     gapToken: 'relaxed',
+    borderStrengthToken: 'soft',
+    borderSides: 'all',
+    fontWeight: 600,
   },
   productCategoryChips: {
     backgroundHex: '#ffffff',
@@ -74,6 +94,7 @@ export const DEFAULT_PAGE_STYLE = {
     borderColorHex: '#d8e2dc',
     activeBackgroundHex: '#1d4a2e',
     activeTextHex: '#ffffff',
+    activeBorderHex: '#1d4a2e',
     hoverBackgroundHex: '#ffffff',
     hoverTextHex: '#1d4a2e',
     hoverBorderHex: '#7fa688',
@@ -81,6 +102,9 @@ export const DEFAULT_PAGE_STYLE = {
     sizeToken: 'md',
     radiusToken: 'pill',
     gapToken: 'normal',
+    borderStrengthToken: 'soft',
+    borderSides: 'all',
+    fontWeight: 700,
   },
 };
 
@@ -112,9 +136,10 @@ function normalizeSearch(search) {
 
   return {
     sizeToken: PAGE_STYLE_SEARCH_SIZE_TOKENS.includes(source.sizeToken) ? source.sizeToken : DEFAULT_PAGE_STYLE.search.sizeToken,
-    borderStrengthToken: PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
+    borderStrengthToken: PAGE_STYLE_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
       ? source.borderStrengthToken
       : DEFAULT_PAGE_STYLE.search.borderStrengthToken,
+    backgroundHex: normalizeHexColor(source.backgroundHex, DEFAULT_PAGE_STYLE.search.backgroundHex),
     borderColorHex: normalizeHexColor(source.borderColorHex, DEFAULT_PAGE_STYLE.search.borderColorHex),
     focusBorderColorHex: normalizeHexColor(source.focusBorderColorHex, DEFAULT_PAGE_STYLE.search.focusBorderColorHex),
   };
@@ -138,10 +163,18 @@ function normalizeChips(chips, defaults) {
     hoverBackgroundHex,
     hoverTextHex: ensureReadableTextColor(candidateHoverTextHex, hoverBackgroundHex),
     hoverBorderHex: normalizeHexColor(source.hoverBorderHex, defaults.hoverBorderHex),
+    activeBorderHex: normalizeHexColor(source.activeBorderHex, defaults.activeBorderHex),
     variant: PAGE_STYLE_CHIP_VARIANT_TOKENS.includes(source.variant) ? source.variant : defaults.variant,
     sizeToken: PAGE_STYLE_CHIP_SIZE_TOKENS.includes(source.sizeToken) ? source.sizeToken : defaults.sizeToken,
     radiusToken: PAGE_STYLE_CHIP_RADIUS_TOKENS.includes(source.radiusToken) ? source.radiusToken : defaults.radiusToken,
     gapToken: PAGE_STYLE_CHIP_GAP_TOKENS.includes(source.gapToken) ? source.gapToken : defaults.gapToken,
+    borderStrengthToken: PAGE_STYLE_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
+      ? source.borderStrengthToken
+      : defaults.borderStrengthToken,
+    borderSides: PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS.includes(source.borderSides)
+      ? source.borderSides
+      : defaults.borderSides,
+    fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : defaults.fontWeight,
   };
 }
 

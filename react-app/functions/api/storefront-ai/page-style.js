@@ -1,4 +1,3 @@
-import { PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS } from '../../../src/features/storefront/config/page-design/pageStyleAiHttpConfig.js';
 import { normalizePageAiDesignInput } from '../../../src/features/storefront/model/page-design/ai-request/pageAiDesignModel.js';
 import {
   normalizePageStyleAiExplanation,
@@ -18,6 +17,12 @@ import {
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
 
+const PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS = [
+  'officeCode',
+  'pageAiDesign',
+  'currentPageStyle',
+  'history',
+];
 const PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
 export const onRequestPost = withRequestErrorHandling(
   async ({ request, env }) => {

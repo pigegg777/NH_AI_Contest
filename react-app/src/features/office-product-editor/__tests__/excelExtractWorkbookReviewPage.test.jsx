@@ -283,6 +283,38 @@ describe('OfficeProductEditorPage', () => {
     ).toHaveAttribute('href', 'https://example.com/a100');
   });
 
+  it('disables the save button while the static fertilizer lookup is still loading, and re-enables it once resolved', async () => {
+    const user = userEvent.setup();
+    let resolveLookup;
+
+    mockResult = { warnings: [], rows: sampleRows };
+    fetchStaticProductLookup.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLookup = resolve;
+      }),
+    );
+
+    render(
+      <OfficeProductEditorPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /비료/i }));
+
+    await waitFor(() => {
+      expect(fetchStaticProductLookup).toHaveBeenCalled();
+    });
+
+    expect(screen.getByRole('button', { name: '저장하기' })).toBeDisabled();
+
+    resolveLookup({});
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '저장하기' })).toBeEnabled();
+    });
+  });
+
   it('renders the save button inside the result section for registered data review', async () => {
     const user = userEvent.setup();
 
@@ -325,13 +357,13 @@ describe('OfficeProductEditorPage', () => {
     expect(screen.getByRole('button', { name: '저장하기' })).toBeEnabled();
   });
 
-  it('saves only the currently rendered rows from the result section', async () => {
+  it('saves the full category row set even when a search filter narrows the result section', async () => {
     const user = userEvent.setup();
 
     mockResult = { warnings: [], rows: sampleRowsWithSibling };
     saveOfficeProductData.mockResolvedValue({
       id: 1,
-      row_count: 1,
+      row_count: 2,
       updated_at: '2026-06-07T00:00:00Z',
     });
 
@@ -347,6 +379,9 @@ describe('OfficeProductEditorPage', () => {
     await user.click(fertilizerCardButton);
 
     await user.type(screen.getByRole('searchbox'), 'Alpha');
+    await waitFor(() => {
+      expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole('button', { name: '저장하기' }));
 
@@ -354,10 +389,16 @@ describe('OfficeProductEditorPage', () => {
       expect(saveOfficeProductData).toHaveBeenCalledWith(
         expect.objectContaining({
           categoryName: '비료',
-          rows: [expect.objectContaining({ row_id: 'A100__01', product_name: 'Alpha' })],
+          rows: expect.arrayContaining([
+            expect.objectContaining({ row_id: 'A100__01', product_name: 'Alpha' }),
+            expect.objectContaining({ row_id: 'B200__02', product_name: 'Beta' }),
+          ]),
         }),
       );
     });
+
+    const savedRows = saveOfficeProductData.mock.calls[0][0].rows;
+    expect(savedRows).toHaveLength(2);
   });
 
   it('marks a category as 등록됨 in the sidebar after saving it', async () => {
@@ -517,6 +558,73 @@ describe('OfficeProductEditorPage', () => {
     });
   });
 
+  it('shows the newly saved value after editing and saving an already-registered category, instead of reverting to the stale pre-save data', async () => {
+    const user = userEvent.setup();
+
+    mockCatalogState = {
+      items: [
+        {
+          id: 1,
+          categoryName: '비료',
+          rowCount: 1,
+          sourceFileName: 'fertilizer.xlsx',
+          updatedAt: '2026-06-07T00:00:00Z',
+        },
+      ],
+      isLoading: false,
+      errorMessage: '',
+    };
+    fetchOfficeProductData
+      .mockResolvedValueOnce({
+        rows: sampleRows,
+        sourceFileName: 'fertilizer.xlsx',
+        updatedAt: '2026-06-07T00:00:00Z',
+        rowCount: 1,
+      })
+      .mockResolvedValueOnce({
+        rows: [{ ...sampleRows[0], note: '변경된 비고' }],
+        sourceFileName: 'fertilizer.xlsx',
+        updatedAt: '2026-06-08T00:00:00Z',
+        rowCount: 1,
+      });
+    saveOfficeProductData.mockResolvedValue({
+      id: 1,
+      row_count: 1,
+      updated_at: '2026-06-08T00:00:00Z',
+    });
+
+    render(
+      <OfficeProductEditorPage
+        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+      />,
+    );
+
+    const fertilizerCardButton = screen
+      .getAllByRole('button', { name: /비료/i })
+      .find((button) => !button.getAttribute('aria-label'));
+    await user.click(fertilizerCardButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Alpha')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'note-cell-A100__01' }));
+    await user.type(screen.getByRole('textbox', { name: 'note-input-A100__01' }), '변경된 비고');
+    await user.keyboard('{Enter}');
+
+    expect(screen.getByRole('button', { name: 'note-cell-A100__01' })).toHaveTextContent('변경된 비고');
+
+    await user.click(screen.getByRole('button', { name: '저장하기' }));
+
+    await waitFor(() => {
+      expect(fetchOfficeProductData).toHaveBeenCalledTimes(2);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'note-cell-A100__01' })).toHaveTextContent('변경된 비고');
+    });
+  });
+
   it('renders only the table-name card until a sidebar category is selected', async () => {
     const user = userEvent.setup();
 
@@ -536,7 +644,7 @@ describe('OfficeProductEditorPage', () => {
 
     expect(screen.getByText('📂 파일 선택')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('tab', { name: 'AI 분석' }));
+    await user.click(screen.getByRole('tab', { name: 'AI 작업실' }));
 
     expect(screen.getByRole('button', { name: 'AI 분석하기' })).toBeDisabled();
   });

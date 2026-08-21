@@ -1,7 +1,12 @@
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useWorkbookReviewTableState } from '../hooks/review-table/useWorkbookReviewTableState';
+import { fetchStaticProductLookup } from '../services/staticProductLookupService';
+
+vi.mock('../services/staticProductLookupService', () => ({
+  fetchStaticProductLookup: vi.fn(),
+}));
 
 const sampleRows = [
   {
@@ -45,6 +50,85 @@ describe('useWorkbookReviewTableState', () => {
     globalThis.sessionStorage.clear();
   });
 
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('static merge loading state', () => {
+    it('reports isStaticMergeLoading true while the static lookup fetch is in flight, then false once it resolves', async () => {
+      let resolveLookup;
+      fetchStaticProductLookup.mockReturnValue(
+        new Promise((resolve) => {
+          resolveLookup = resolve;
+        }),
+      );
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(sampleRows, 'fp-fert', {
+          hasResult: true,
+          isStaticMergeEnabled: true,
+          tableNameMode: 'fertilizer',
+        }),
+      );
+
+      await act(async () => {});
+
+      expect(result.current.isStaticMergeLoading).toBe(true);
+
+      await act(async () => {
+        resolveLookup({});
+      });
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(false);
+      });
+    });
+
+    it('still applies the static lookup to rows once it resolves, even though annotations hydration fires its own effect on mount', async () => {
+      fetchStaticProductLookup.mockResolvedValue({
+        A100: {
+          product_code: 'A100',
+          img_url: 'https://example.com/a100.png',
+          product_url: 'https://example.com/a100',
+          nutrient: 'N-P-K',
+          price_subsidy: 1200,
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(sampleRows, 'fp-fert-2', {
+          hasResult: true,
+          isStaticMergeEnabled: true,
+          tableNameMode: 'fertilizer',
+        }),
+      );
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(false);
+      });
+
+      const row = result.current.rows.find((r) => r.row_id === 'A100__01');
+      expect(row.img_url).toBe('https://example.com/a100.png');
+      expect(row.nutrient).toBe('N-P-K');
+      expect(row.price_subsidy).toBe(1200);
+    });
+
+    it('is not loading when static merge is disabled for this table mode', async () => {
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(sampleRows, 'fp-custom', {
+          hasResult: true,
+          isStaticMergeEnabled: false,
+          tableNameMode: 'custom',
+        }),
+      );
+
+      await act(async () => {});
+
+      expect(result.current.isStaticMergeLoading).toBe(false);
+      expect(fetchStaticProductLookup).not.toHaveBeenCalled();
+    });
+  });
+
   describe('annotations', () => {
     it('preserves saved note and shadow values from loaded rows before any local edit', () => {
       const savedRows = [
@@ -61,6 +145,21 @@ describe('useWorkbookReviewTableState', () => {
 
       expect(result.current.rows[0].shadow).toBe(true);
       expect(result.current.rows[0].note).toBe('saved note');
+    });
+
+    it('preserves a previously-saved img_url from loaded rows before any local edit', () => {
+      const savedRows = [
+        {
+          ...sampleRows[0],
+          img_url: 'https://example.com/existing.png',
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(savedRows, 'fp-saved-img'),
+      );
+
+      expect(result.current.rows[0].img_url).toBe('https://example.com/existing.png');
     });
 
     it('applies shadow and note to rows', async () => {
@@ -157,6 +256,24 @@ describe('useWorkbookReviewTableState', () => {
 
       const row = result.current.rows.find((r) => r.row_id === 'A100__01');
       expect(row.tax_price).toBe(9999);
+    });
+
+    it('applies an AI-generated/uploaded img_url override to rows, ready to be saved', async () => {
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState(sampleRows, 'fp-1'),
+      );
+
+      await act(async () => {
+        result.current.updateImgUrl('A100__01', 'https://example.supabase.co/storage/v1/object/public/product-images/OFF-1/x.png');
+      });
+
+      const row = result.current.rows.find((r) => r.row_id === 'A100__01');
+      expect(row.img_url).toBe(
+        'https://example.supabase.co/storage/v1/object/public/product-images/OFF-1/x.png',
+      );
+      // untouched rows must not pick up the override
+      const otherRow = result.current.rows.find((r) => r.row_id === 'B200__02');
+      expect(otherRow.img_url).toBeUndefined();
     });
 
     it('returns a stable empty row set when no rows provided', () => {
