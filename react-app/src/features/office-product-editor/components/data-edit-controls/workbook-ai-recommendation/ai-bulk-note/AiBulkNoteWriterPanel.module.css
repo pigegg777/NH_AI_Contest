@@ -105,6 +105,11 @@
   line-height: 1.5;
 }
 
+.matchFieldLabel {
+  color: var(--corp-muted);
+  font-weight: 700;
+}
+
 .matchOldNote {
   color: var(--corp-muted);
   text-decoration: line-through;

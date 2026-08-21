@@ -32,6 +32,7 @@ export function useWorkbookReviewTableState(
     setShadowForRows,
     updateNote,
     updatePrice,
+    updateImgUrl,
   } = useAnnotations(workbookFingerprint, extractedRows);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,11 +64,13 @@ export function useWorkbookReviewTableState(
       ? mergeRowsWithStaticPesticide
       : mergeRowsWithStaticFertilizer;
   const [staticMergeLookup, setStaticMergeLookup] = useState(null);
+  const [isStaticMergeLoading, setIsStaticMergeLoading] = useState(false);
   const attemptedFingerprintRef = useRef(null);
 
   useEffect(() => {
     setStaticMergeLookup(null);
     attemptedFingerprintRef.current = null;
+    setIsStaticMergeLoading(false);
   }, [workbookFingerprint, tableNameMode]);
 
   useEffect(() => {
@@ -79,10 +82,20 @@ export function useWorkbookReviewTableState(
       return;
     }
 
-    const productCodes = getStaticMergeProductCodes(annotatedRows);
+    // Deliberately keyed on extractedRows, not annotatedRows: annotatedRows
+    // gets a brand-new array reference the moment useAnnotations' own
+    // hydration effect resolves (a separate effect, unrelated to this
+    // fetch) even though product_code — all this effect actually reads —
+    // never changes from that. Depending on annotatedRows made this effect
+    // see a "changed" dependency right after the fetch started, tear itself
+    // down (isCancelled = true) before the request resolved, and then get
+    // blocked from retrying by attemptedFingerprintRef — so the fetched
+    // static data was silently discarded and the table never showed it.
+    const productCodes = getStaticMergeProductCodes(extractedRows);
     let isCancelled = false;
 
     attemptedFingerprintRef.current = workbookFingerprint;
+    setIsStaticMergeLoading(true);
 
     void (async () => {
       try {
@@ -102,6 +115,10 @@ export function useWorkbookReviewTableState(
         }
 
         setStaticMergeLookup({});
+      } finally {
+        if (!isCancelled) {
+          setIsStaticMergeLoading(false);
+        }
       }
     })();
 
@@ -109,7 +126,7 @@ export function useWorkbookReviewTableState(
       isCancelled = true;
     };
   }, [
-    annotatedRows,
+    extractedRows,
     getStaticMergeProductCodes,
     hasResult,
     isStaticMergeEnabled,
@@ -179,5 +196,7 @@ export function useWorkbookReviewTableState(
     setShadowForRows,
     updateNote,
     updatePrice,
+    updateImgUrl,
+    isStaticMergeLoading,
   };
 }

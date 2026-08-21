@@ -24,7 +24,7 @@ export const PAGE_AI_TARGET_SCOPE_OPTIONS = [
   {
     id: 'search',
     label: '검색창',
-    detail: '크기와 테두리 강도',
+    detail: '배경색, 테두리색, 크기',
   },
 ];
 

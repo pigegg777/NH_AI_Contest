@@ -20,6 +20,8 @@ export function DataTableSection() {
     onVisibleRowsShadowChange,
     onNoteChange,
     onPriceChange,
+    onImgUrlChange,
+    officeCode,
   } = useTableCtx();
 
   const columns = getTableColumnsByMode(tableNameMode);
@@ -55,6 +57,8 @@ export function DataTableSection() {
         onVisibleRowsShadowChange={onVisibleRowsShadowChange}
         onNoteChange={onNoteChange}
         onPriceChange={onPriceChange}
+        onImgUrlChange={onImgUrlChange}
+        officeCode={officeCode}
       />
     </section>
   );

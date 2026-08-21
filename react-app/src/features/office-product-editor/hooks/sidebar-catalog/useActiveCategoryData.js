@@ -27,6 +27,7 @@ export function useActiveCategoryData({
     user,
     categoryName: activeCategoryName,
     isEnabled: shouldFetchRegisteredData,
+    refreshToken: registeredCatalogItem?.updatedAt ?? null,
   });
 
   const extractedRows = result?.rows ?? registeredProductData?.rows ?? EMPTY_ROWS;

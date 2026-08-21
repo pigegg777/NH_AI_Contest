@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useInlineEditableValue } from '../../hooks/review-table/useInlineEditableValue';
+import { requestAiImageList } from '../../services/ai-image-apply/aiImageApplyClient';
 import {
   formatPriceValue,
   parsePriceDraftValue,
@@ -106,6 +107,138 @@ export function LinkCell({ href, ariaLabel }) {
     <a href={href} aria-label={ariaLabel} className={styles.tableLink} target="_blank" rel="noreferrer">
       링크
     </a>
+  );
+}
+
+function ImageStoragePickerButton({ rowId, officeCode, onSelect }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleOpen() {
+    setIsOpen(true);
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { images: fetchedImages } = await requestAiImageList({ officeCode });
+      setImages(fetchedImages);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '이미지 목록을 불러오지 못했습니다.');
+      setImages([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleClose() {
+    setIsOpen(false);
+  }
+
+  function handleSelect(image) {
+    onSelect(rowId, image.url);
+    setIsOpen(false);
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={`img-picker-${rowId}`}
+        className={styles.imagePickerButton}
+        onClick={handleOpen}
+      >
+        🗂️
+      </button>
+
+      {isOpen
+        ? createPortal(
+            <div className={styles.usageOverlay} role="presentation" onClick={handleClose}>
+              <div
+                className={styles.imagePickerPopover}
+                role="dialog"
+                aria-label={`img-picker-popover-${rowId}`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={styles.usagePopoverHeader}>
+                  <strong>이미지 선택</strong>
+                  <button
+                    type="button"
+                    aria-label={`img-picker-close-${rowId}`}
+                    className={styles.usageCloseButton}
+                    onClick={handleClose}
+                  >
+                    닫기
+                  </button>
+                </div>
+
+                <div className={styles.imagePickerBody}>
+                  {isLoading ? <p className={styles.imagePickerStatus}>불러오는 중...</p> : null}
+                  {!isLoading && error ? <p className={styles.imagePickerStatus}>{error}</p> : null}
+                  {!isLoading && !error && images.length === 0 ? (
+                    <p className={styles.imagePickerStatus}>저장된 이미지가 없습니다.</p>
+                  ) : null}
+                  {!isLoading && images.length > 0 ? (
+                    <ul className={styles.imagePickerGrid}>
+                      {images.map((image) => (
+                        <li key={image.path}>
+                          <button
+                            type="button"
+                            aria-label={`img-picker-option-${rowId}-${image.path}`}
+                            className={styles.imagePickerOption}
+                            onClick={() => handleSelect(image)}
+                          >
+                            <img className={styles.imagePickerThumb} src={image.url} alt="" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
+export function ImageThumbnailCell({ src, ariaLabel, rowId, officeCode, onImgUrlChange, isLocked }) {
+  const canEdit = Boolean(onImgUrlChange) && !isLocked;
+
+  return (
+    <span className={styles.imageThumbnailWrap}>
+      <span className={styles.imageThumbnailInner}>
+        {src ? (
+          <a
+            href={src}
+            aria-label={ariaLabel}
+            className={styles.imageThumbnailLink}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img className={styles.imageThumbnail} src={src} alt="" loading="lazy" />
+          </a>
+        ) : (
+          <span>-</span>
+        )}
+        {canEdit && src ? (
+          <button
+            type="button"
+            aria-label={`img-delete-${rowId}`}
+            className={styles.imageThumbnailDeleteButton}
+            onClick={() => onImgUrlChange(rowId, '')}
+          >
+            ✕
+          </button>
+        ) : null}
+      </span>
+      {canEdit ? (
+        <ImageStoragePickerButton rowId={rowId} officeCode={officeCode} onSelect={onImgUrlChange} />
+      ) : null}
+    </span>
   );
 }
 

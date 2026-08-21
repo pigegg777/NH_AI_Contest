@@ -62,13 +62,9 @@ export default function CardGridSection({
             product?.row_id ||
             product?.product_code ||
             `${product?.product_name ?? 'product'}-${product?.spec ?? index}`;
-          const generatedImageForProduct =
-            section?.generatedCategoryImages?.[product?.medium_category] ?? null;
-          const resolvedImageSrc = product?.img_url || generatedImageForProduct?.imageDataUri || '';
-          const isAiGeneratedImage = !product?.img_url && Boolean(generatedImageForProduct);
           const hasImage =
-            (visibleFields.includes('img_url') || isAiGeneratedImage) &&
-            Boolean(resolvedImageSrc) &&
+            visibleFields.includes('img_url') &&
+            Boolean(product?.img_url) &&
             sectionOrder.includes('image');
           const isSideImage =
             hasImage &&
@@ -92,8 +88,7 @@ export default function CardGridSection({
               <CardImageSection
                 key="image"
                 product={product}
-                imageSrc={resolvedImageSrc}
-                isAiGenerated={isAiGeneratedImage}
+                imageSrc={product?.img_url}
                 cardStyle={resolvedStyle}
                 fitOverride={activeConditionalStyle?.image?.fit}
               />

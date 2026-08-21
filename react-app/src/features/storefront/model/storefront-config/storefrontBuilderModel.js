@@ -184,29 +184,6 @@ function uniqueStrings(values) {
   );
 }
 
-export function normalizeGeneratedCategoryImages(value) {
-  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  const result = {};
-
-  Object.keys(source).forEach((mediumCategory) => {
-    const entry = source[mediumCategory];
-    const imageDataUri = typeof entry?.imageDataUri === 'string' ? entry.imageDataUri : '';
-
-    if (!imageDataUri.startsWith('data:image/')) {
-      return;
-    }
-
-    result[mediumCategory] = {
-      imageDataUri,
-      prompt: typeof entry?.prompt === 'string' ? entry.prompt : '',
-      isAiGenerated: true,
-      generatedAt: typeof entry?.generatedAt === 'string' ? entry.generatedAt : new Date().toISOString(),
-    };
-  });
-
-  return result;
-}
-
 export function normalizeNavConfig(navConfig) {
   const source = navConfig ?? {};
 
@@ -319,7 +296,6 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
       cardStyle: normalizedCardStyle,
       bodySlots,
     },
-    generatedCategoryImages: normalizeGeneratedCategoryImages(source.generatedCategoryImages),
   };
 }
 
@@ -391,7 +367,6 @@ export function resolveCategoryDraft({
     cardFields: normalizeCardFields(existingCategoryConfig.cardDesign.visibleFields, effectiveScalarKeys),
     cardStyle: normalizeCardStyle(existingCategoryConfig.cardDesign.cardStyle),
     bodySlots: existingCategoryConfig.cardDesign.bodySlots,
-    generatedCategoryImages: existingCategoryConfig.generatedCategoryImages,
   };
 }
 
@@ -404,7 +379,6 @@ export function buildCategoryConfigRow({
   cardStyle,
   bodySlots,
   allowedScalarKeys,
-  generatedCategoryImages,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
   const existingRow = findCategoryConfigRow(existingConfig?.categoryConfigs, normalizedProductCategoryName);
@@ -419,10 +393,6 @@ export function buildCategoryConfigRow({
         visibleFields: cardFields,
         cardStyle,
         bodySlots,
-      },
-      generatedCategoryImages: {
-        ...normalizeGeneratedCategoryImages(existingRow?.categoryConfig?.generatedCategoryImages),
-        ...normalizeGeneratedCategoryImages(generatedCategoryImages),
       },
     },
     normalizedProductCategoryName,
@@ -479,7 +449,6 @@ export function buildStorefrontSavePayload({
   mobileUiTree,
   pageStyle,
   allowedScalarKeys,
-  generatedCategoryImages,
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
   const resolvedNavConfig = normalizeNavConfig({ ...(existingConfig?.navConfig ?? {}), ...(navConfig ?? {}) });
@@ -523,7 +492,6 @@ export function buildStorefrontSavePayload({
     cardStyle: normalizeCardStyle(cardStyle),
     bodySlots,
     allowedScalarKeys,
-    generatedCategoryImages,
   });
 
   return {

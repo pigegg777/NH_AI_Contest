@@ -1,10 +1,6 @@
 import { normalizeHexColor } from '../../shared/pageStyleColor';
 import { normalizePageAiTargetScope } from '../ai-request/pageAiDesignModel';
-import {
-  deriveCategoryChipsFromPalette,
-  deriveSearchDefaultsFromPalette,
-  normalizePageStyle,
-} from './pageStyleModel';
+import { deriveCategoryChipsFromPalette, normalizePageStyle } from './pageStyleModel';
 
 function resolvePalette(intentPalette, previousPalette) {
   if (!intentPalette) {
@@ -27,29 +23,15 @@ function resolveHeader(intentHeader, previousHeader) {
   };
 }
 
-function resolveSearch(intentSearch, previousSearch, palette, shouldRefreshPaletteDefaults) {
-  const paletteDefaults = deriveSearchDefaultsFromPalette(palette);
-
+function resolveSearch(intentSearch, previousSearch) {
   return {
     sizeToken: intentSearch?.sizeToken ?? previousSearch.sizeToken,
     borderStrengthToken:
       intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
-    borderColorHex: shouldRefreshPaletteDefaults
-      ? paletteDefaults.borderColorHex
-      : previousSearch.borderColorHex,
-    focusBorderColorHex: shouldRefreshPaletteDefaults
-      ? paletteDefaults.focusBorderColorHex
-      : previousSearch.focusBorderColorHex,
-  };
-}
-
-function resolveScopedSearch(intentSearch, previousSearch) {
-  return {
-    sizeToken: intentSearch?.sizeToken ?? previousSearch.sizeToken,
-    borderStrengthToken:
-      intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
-    borderColorHex: previousSearch.borderColorHex,
-    focusBorderColorHex: previousSearch.focusBorderColorHex,
+    backgroundHex: intentSearch?.backgroundHex ?? previousSearch.backgroundHex,
+    borderColorHex: intentSearch?.borderColorHex ?? previousSearch.borderColorHex,
+    focusBorderColorHex:
+      intentSearch?.focusBorderColorHex ?? previousSearch.focusBorderColorHex,
   };
 }
 
@@ -59,6 +41,7 @@ const CHIP_FIELDS = [
   'borderColorHex',
   'activeBackgroundHex',
   'activeTextHex',
+  'activeBorderHex',
   'hoverBackgroundHex',
   'hoverTextHex',
   'hoverBorderHex',
@@ -66,6 +49,9 @@ const CHIP_FIELDS = [
   'sizeToken',
   'radiusToken',
   'gapToken',
+  'borderStrengthToken',
+  'borderSides',
+  'fontWeight',
 ];
 
 function resolveChips(intentChips, previousChips, palette, shouldRefreshPaletteDefaults) {
@@ -99,7 +85,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette,
       header: resolveHeader(intent.header, previous.header),
-      search: resolveSearch(intent.search, previous.search, palette, false),
+      search: resolveSearch(intent.search, previous.search),
       categoryChips: resolveChips(
         intent.categoryChips,
         previous.categoryChips,
@@ -166,7 +152,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
   return normalizePageStyle({
     palette: previous.palette,
     header: previous.header,
-    search: resolveScopedSearch(intent.search, previous.search),
+    search: resolveSearch(intent.search, previous.search),
     categoryChips: previous.categoryChips,
     productCategoryChips: previous.productCategoryChips,
   });

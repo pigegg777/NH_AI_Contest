@@ -9,7 +9,6 @@ import {
 import { collectConditionFieldValueSamples, normalizeCardStyle } from '../model/card-design/style/cardStyleModel';
 import { requestCardStyleAiIntent } from '../model/card-design/ai-request/cardStyleAiOrchestrator';
 import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
-import { postCategoryImageRequest } from '../services/card-design/categoryImageGateway';
 
 const MISSING_CARD_PROMPT_ERROR_MESSAGE = '카드 디자인 요청을 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '카드 디자인을 적용하지 못했습니다.';
@@ -18,8 +17,6 @@ const MAX_CARD_AI_HISTORY_TURNS = 6;
 export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots = [] } = {}) {
   const [cardStyle, setCardStyle] = useState(() => normalizeCardStyle(initialCardStyle));
   const [bodySlots, setBodySlots] = useState(initialBodySlots);
-  const [generatedCategoryImages, setGeneratedCategoryImages] = useState({});
-  const [isGeneratingCategoryImage, setIsGeneratingCategoryImage] = useState({});
   const [cardAiDesign, setCardAiDesignState] = useState(DEFAULT_CARD_AI_DESIGN);
   const [cardAiMessages, setCardAiMessages] = useState([]);
   const [isApplyingCardAiDesign, setIsApplyingCardAiDesign] = useState(false);
@@ -33,10 +30,9 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     return `card-ai-message-${messageIdRef.current}`;
   }
 
-  function hydrateCardStyle(nextCardStyle, nextBodySlots = [], nextGeneratedCategoryImages = {}) {
+  function hydrateCardStyle(nextCardStyle, nextBodySlots = []) {
     setCardStyle(normalizeCardStyle(nextCardStyle));
     setBodySlots(nextBodySlots);
-    setGeneratedCategoryImages(nextGeneratedCategoryImages);
     setCardAiDesignState(DEFAULT_CARD_AI_DESIGN);
     setCardAiMessages([]);
     setCardAiErrorMessage('');
@@ -185,37 +181,6 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     setLastCardAiSnapshot(null);
   }
 
-  async function generateCategoryImage(mediumCategory, { promptOverride, representativeProductFields } = {}) {
-    setIsGeneratingCategoryImage((current) => ({ ...current, [mediumCategory]: true }));
-
-    try {
-      const result = await postCategoryImageRequest({
-        officeCode,
-        mediumCategory,
-        promptOverride: promptOverride || '',
-        representativeProductFields: representativeProductFields ?? {},
-      });
-
-      setGeneratedCategoryImages((current) => ({
-        ...current,
-        [mediumCategory]: {
-          imageDataUri: result.imageDataUri,
-          prompt: result.prompt,
-          isAiGenerated: true,
-          generatedAt: new Date().toISOString(),
-        },
-      }));
-
-      return { ok: true };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '이미지를 생성하지 못했습니다.';
-
-      return { ok: false, error: message };
-    } finally {
-      setIsGeneratingCategoryImage((current) => ({ ...current, [mediumCategory]: false }));
-    }
-  }
-
   function discardCardAiDesignSession() {
     setCardAiDesignState(DEFAULT_CARD_AI_DESIGN);
     setCardAiMessages([]);
@@ -224,8 +189,6 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
   return {
     cardStyle,
     bodySlots,
-    generatedCategoryImages,
-    isGeneratingCategoryImage,
     cardAiDesign,
     cardAiMessages,
     isApplyingCardAiDesign,
@@ -238,6 +201,5 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     applyCardAiDesign,
     undoLastCardAiDesign,
     discardCardAiDesignSession,
-    generateCategoryImage,
   };
 }

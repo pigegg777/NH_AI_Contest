@@ -6,7 +6,7 @@ import { useOfficeProductDataDeletion } from './office-product-data/useOfficePro
 import { useAiSimilarityExtractionState } from './ai-similarity-extraction/useAiSimilarityExtractionState';
 import { useAiMarketResearchState } from './ai-market-research/useAiMarketResearchState';
 import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterState';
-import { useAiCategoryImageGenerationState } from './ai-category-image/useAiCategoryImageGenerationState';
+import { useAiImageApplyState } from './ai-image-apply/useAiImageApplyState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
@@ -84,28 +84,32 @@ export function useOfficeProductEditorState(user) {
     tableState.mergedRows,
     tableNameMode,
     tableState.updateNote,
+    tableState.updatePrice,
   );
 
-  const categoryImageGenerationState = useAiCategoryImageGenerationState(
+  const imageApplyState = useAiImageApplyState(
     user?.office_code,
     tableState.mergedRows,
-    activeCategoryData.activeCategoryName,
+    tableState.updateImgUrl,
   );
 
   const saveState = useWorkbookSave({
     user,
-    rowsToSave: tableState.rows,
+    rowsToSave: tableState.mergedRows,
     selectedFileName: extraction.selectedFileName,
     workbookFingerprint: extraction.workbookFingerprint,
     tableNameMode,
     customTableName: selection.effectiveCustomTableName,
     onSaved: officeProductCatalog.upsertItem,
+    isStaticMergePending: tableState.isStaticMergeLoading,
   });
 
   const saveDisabledMessage =
     tableState.rows.length > 0 && !toTrimmedString(saveState.resolvedCategoryName)
       ? '저장하려면 먼저 사이드바에서 카테고리를 선택하세요.'
-      : '';
+      : tableState.isStaticMergeLoading
+        ? '정적 데이터를 불러오는 중입니다. 잠시 후 다시 시도하세요.'
+        : '';
 
   const { cards, registeredCount } = useMemo(
     () =>
@@ -297,6 +301,7 @@ export function useOfficeProductEditorState(user) {
     upload: uploadValue,
 
     table: {
+      officeCode: draftOfficeCode,
       rows: visibleTableRows,
       warningRows: tableState.warningRows,
       searchQuery: tableState.searchQuery,
@@ -311,6 +316,7 @@ export function useOfficeProductEditorState(user) {
       onVisibleRowsShadowChange: tableState.setShadowForRows,
       onNoteChange: tableState.updateNote,
       onPriceChange: tableState.updatePrice,
+      onImgUrlChange: tableState.updateImgUrl,
     },
 
     ai: {
@@ -326,7 +332,10 @@ export function useOfficeProductEditorState(user) {
         ...bulkNoteWriterState,
         rows: tableState.mergedRows,
       },
-      categoryImageGeneration: categoryImageGenerationState,
+      imageApply: {
+        ...imageApplyState,
+        rows: tableState.mergedRows,
+      },
     },
 
     save: saveValue,

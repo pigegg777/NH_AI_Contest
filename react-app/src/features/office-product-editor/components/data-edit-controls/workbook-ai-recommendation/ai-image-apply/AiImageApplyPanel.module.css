@@ -1,0 +1,228 @@
+.panelBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.desc {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.sourceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.storageBrowser {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 9px;
+  border-radius: var(--corp-radius-sm);
+  background: rgba(29, 74, 46, 0.05);
+}
+
+.storageGrid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.storageGridItem {
+  position: relative;
+}
+
+.storageImageButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.storageImageThumb {
+  display: block;
+  width: 100%;
+  height: 64px;
+  object-fit: cover;
+}
+
+.storageImageDeleteButton {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.65rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.storageGridItem:hover .storageImageDeleteButton,
+.storageImageDeleteButton:focus-visible {
+  display: flex;
+}
+
+.uploadButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--corp-radius);
+  border: 1px dashed var(--corp-line);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.generateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 18px;
+  border-radius: var(--corp-radius);
+  border: 1px solid rgba(29, 74, 46, 0.6);
+  background: rgb(57, 57, 199);
+  color: var(--corp-on-primary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.generateButton:hover:not(:disabled) {
+  background: rgb(117, 117, 236);
+}
+
+.generateButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.generateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 0;
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.previewRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.previewImage {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--corp-radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--corp-line);
+}
+
+.previewBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 9px;
+  border-radius: var(--corp-radius-sm);
+  background: rgba(29, 74, 46, 0.05);
+}
+
+.matchCount {
+  margin: 0;
+  color: var(--corp-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.matchList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.matchItem {
+  padding: 6px 0;
+  border-top: 1px solid var(--corp-line);
+  font-size: 0.74rem;
+  color: var(--corp-text);
+}
+
+.matchItem:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.applyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 18px;
+  border-radius: var(--corp-radius);
+  border: 1px solid rgba(29, 74, 46, 0.6);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.applyButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  padding: 6px 16px;
+  border-radius: var(--corp-radius);
+  border: 1px solid var(--corp-line);
+  background: var(--corp-panel);
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}

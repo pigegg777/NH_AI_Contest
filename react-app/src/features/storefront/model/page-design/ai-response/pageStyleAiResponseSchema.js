@@ -1,16 +1,17 @@
 import {
+  PAGE_STYLE_BORDER_STRENGTH_TOKENS,
+  PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS,
   PAGE_STYLE_CHIP_GAP_TOKENS,
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
   PAGE_STYLE_CHIP_VARIANT_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
-  PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../page-style/pageStyleModel';
 
 const HEX_COLOR_SCHEMA_PATTERN = '^#[0-9a-fA-F]{6}$';
 const LETTER_SPACING_SCHEMA_PATTERN = '^normal$|^-?\\d+(\\.\\d+)?(em|rem|px)$';
-const HEADER_FONT_WEIGHT_TOKENS = [400, 500, 600, 700, 800, 900];
+const FONT_WEIGHT_TOKENS = [400, 500, 600, 700, 800, 900];
 
 function nullableHex() {
   return { type: ['string', 'null'], pattern: HEX_COLOR_SCHEMA_PATTERN };
@@ -37,7 +38,7 @@ const NULLABLE_HEADER_SCHEMA = nullableObject({
   },
   fontWeight: {
     type: ['number', 'null'],
-    enum: [...HEADER_FONT_WEIGHT_TOKENS, null],
+    enum: [...FONT_WEIGHT_TOKENS, null],
   },
   titleFontSizeToken: nullableToken(PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS),
 });
@@ -49,6 +50,7 @@ function buildNullableChipsSchema() {
     borderColorHex: nullableHex(),
     activeBackgroundHex: nullableHex(),
     activeTextHex: nullableHex(),
+    activeBorderHex: nullableHex(),
     hoverBackgroundHex: nullableHex(),
     hoverTextHex: nullableHex(),
     hoverBorderHex: nullableHex(),
@@ -56,12 +58,21 @@ function buildNullableChipsSchema() {
     sizeToken: nullableToken(PAGE_STYLE_CHIP_SIZE_TOKENS),
     radiusToken: nullableToken(PAGE_STYLE_CHIP_RADIUS_TOKENS),
     gapToken: nullableToken(PAGE_STYLE_CHIP_GAP_TOKENS),
+    borderStrengthToken: nullableToken(PAGE_STYLE_BORDER_STRENGTH_TOKENS),
+    borderSides: nullableToken(PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS),
+    fontWeight: {
+      type: ['number', 'null'],
+      enum: [...FONT_WEIGHT_TOKENS, null],
+    },
   });
 }
 
 const NULLABLE_SEARCH_SCHEMA = nullableObject({
   sizeToken: nullableToken(PAGE_STYLE_SEARCH_SIZE_TOKENS),
-  borderStrengthToken: nullableToken(PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS),
+  borderStrengthToken: nullableToken(PAGE_STYLE_BORDER_STRENGTH_TOKENS),
+  backgroundHex: nullableHex(),
+  borderColorHex: nullableHex(),
+  focusBorderColorHex: nullableHex(),
 });
 
 const NULLABLE_PALETTE_SCHEMA = nullableObject({

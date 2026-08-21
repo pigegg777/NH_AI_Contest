@@ -3,6 +3,7 @@
 export const DEFAULT_TABLE_COLUMNS = [
   { key: 'product_code', label: '상품코드' },
   { key: 'product_name', label: '상품명' },
+  { key: 'img_url', label: '이미지 URL' },
   { key: 'spec', label: '규격' },
   // { key: 'sale_price_type_code', label: '유형코드' },
   { key: 'sale_price_type_name', label: '단가유형' },
@@ -19,7 +20,6 @@ export const DEFAULT_TABLE_COLUMNS = [
 const FERTILIZER_ONLY_TABLE_COLUMNS = [
   { key: 'price_subsidy', label: '보조금' },
   { key: 'nutrient', label: '성분' },
-  { key: 'img_url', label: '이미지 URL' },
   { key: 'product_url', label: '상품 URL' },
 ];
 

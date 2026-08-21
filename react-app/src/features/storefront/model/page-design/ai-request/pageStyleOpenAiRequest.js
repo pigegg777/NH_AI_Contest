@@ -1,12 +1,11 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
-import {
-  PAGE_STYLE_AI_OPENAI_MAX_OUTPUT_TOKENS,
-  PAGE_STYLE_AI_OPENAI_RESPONSE_FORMAT_NAME,
-  PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS,
-} from '../../../config/page-design/pageStyleAiOpenAiConfig';
+import { PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS } from './pageStyleAiPrompt';
 import { buildPageAiTargetScopeInstruction } from './pageAiDesignModel';
 import { PAGE_STYLE_AI_SCHEMA } from '../ai-response/pageStyleAiResponseModel';
 import { normalizePageStyle } from '../page-style/pageStyleModel';
+
+const PAGE_STYLE_AI_OPENAI_RESPONSE_FORMAT_NAME = 'storefront_page_style_suggestion';
+const PAGE_STYLE_AI_OPENAI_MAX_OUTPUT_TOKENS = 800;
 
 export function buildPageStyleOpenAiRequestBody({
   pageAiDesign,

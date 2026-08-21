@@ -178,12 +178,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     const baseline = {
       cardStyle: cloneValue(cardAi.cardStyle),
       bodySlots: cloneValue(cardAi.bodySlots),
-      generatedCategoryImages: cloneValue(cardAi.generatedCategoryImages),
     };
 
     categoryDraftRef.current = baseline;
     setComposerApplyPending("category", false);
-    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots, baseline.generatedCategoryImages);
+    cardAi.hydrateCardStyle(baseline.cardStyle, baseline.bodySlots);
   }
 
   function setComposerDraft(mode, value) {
@@ -223,11 +222,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       resolvedDraft.cardFields,
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
-    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots, resolvedDraft.generatedCategoryImages);
+    cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
     categoryDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
       bodySlots: cloneValue(resolvedDraft.bodySlots),
-      generatedCategoryImages: cloneValue(resolvedDraft.generatedCategoryImages),
     };
   }
 
@@ -348,7 +346,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         cardAi.hydrateCardStyle(
           categoryDraftRef.current.cardStyle,
           categoryDraftRef.current.bodySlots,
-          categoryDraftRef.current.generatedCategoryImages,
         );
       }
 
@@ -447,7 +444,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
       allowedScalarKeys: effectiveScalarKeys,
-      generatedCategoryImages: cardAi.generatedCategoryImages,
     });
   }
 
@@ -617,7 +613,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         cardAi.hydrateCardStyle(
           categoryDraftRef.current.cardStyle,
           categoryDraftRef.current.bodySlots,
-          categoryDraftRef.current.generatedCategoryImages,
         );
         categoryDraftRef.current = null;
       }
@@ -661,7 +656,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           mobileUiTree,
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
-          generatedCategoryImages: cardAi.generatedCategoryImages,
         })
       : {
           officeCode,
@@ -712,20 +706,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     ],
     selectedCategoryId: designTarget === "common" ? "common" : selectedProductCategoryName,
     selectCategory: selectDesignTarget,
-    mediumCategories: selectedMediumCategories,
-    generatedCategoryImages: cardAi.generatedCategoryImages,
-    isGeneratingCategoryImage: cardAi.isGeneratingCategoryImage,
-    generateCategoryImage: (mediumCategory, options) =>
-      cardAi.generateCategoryImage(mediumCategory, {
-        ...options,
-        representativeProductFields: (() => {
-          const representativeRow = (currentEntry?.rows ?? []).find(
-            (row) => row?.medium_category === mediumCategory,
-          );
-
-          return { spec: representativeRow?.spec, nutrient: representativeRow?.nutrient };
-        })(),
-      }),
   };
 
   const composerDraftKey = designTarget === "common" ? "common" : "category";

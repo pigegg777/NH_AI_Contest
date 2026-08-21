@@ -4,7 +4,10 @@ import {
   normalizeNavConfig,
   normalizePageConfig,
 } from './storefrontBuilderModel';
-import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../page-design/page-style/pageStyleMigration';
+import {
+  migrateLegacyPageConfigToPageStyle,
+  pageConfigNeedsPageStyleMigration,
+} from '../page-design/page-style/pageStyleMigration';
 import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../../services/storefront-config/storefrontConfigService';
 
 function toArray(value) {

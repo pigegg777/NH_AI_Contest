@@ -227,12 +227,14 @@
 .productCategoryChip {
   min-height: var(--page-product-chip-height, 36px);
   padding: 0 var(--page-product-chip-padding-inline, 16px);
-  border: 1px solid var(--page-product-chip-border, rgba(29, 74, 46, 0.14));
+  border-width: var(--page-product-chip-border-width, 1px);
+  border-style: solid;
+  border-color: var(--page-product-chip-border, rgba(29, 74, 46, 0.14));
   border-radius: var(--page-product-chip-radius, 999px);
   background: var(--page-product-chip-bg, rgba(255, 255, 255, 0.86));
   color: var(--page-product-chip-text, #355a30);
   font-size: var(--page-product-chip-font-size, 0.82rem);
-  font-weight: 700;
+  font-weight: var(--page-product-chip-font-weight, 700);
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -252,11 +254,14 @@
 }
 
 .productCategoryChipActive {
-  border-color: color-mix(
-    in srgb,
-    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
-      48%,
-    rgba(29, 74, 46, 0.14)
+  border-color: var(
+    --page-product-chip-active-border,
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+        48%,
+      rgba(29, 74, 46, 0.14)
+    )
   );
   background: var(
     --page-product-chip-active-bg,
@@ -434,7 +439,7 @@
     var(--page-search-border-color, rgba(29, 74, 46, 0.18))
   );
   border-radius: var(--search-radius, var(--corp-radius));
-  background: #ffffff;
+  background: var(--search-bg, var(--page-search-bg, #ffffff));
   transition:
     border-color var(--corp-transition),
     box-shadow var(--corp-transition);
@@ -534,14 +539,14 @@
   flex: 0 0 auto;
   min-height: var(--page-chip-height, 32px);
   padding: 0 var(--page-chip-padding-inline, 14px);
-  border-width: 1px;
+  border-width: var(--page-chip-border-width, 1px);
   border-style: solid;
   border-color: var(--page-chip-border, rgba(29, 74, 46, 0.16));
   border-radius: var(--page-chip-radius, 999px);
   background: var(--page-chip-bg, #ffffff);
   color: var(--page-chip-text, #5f6d5b);
   font-size: var(--page-chip-font-size, 0.8rem);
-  font-weight: 600;
+  font-weight: var(--page-chip-font-weight, 600);
   white-space: nowrap;
   cursor: pointer;
   scroll-snap-align: start;
@@ -550,17 +555,6 @@
     color var(--corp-transition),
     border-color var(--corp-transition),
     box-shadow var(--corp-transition);
-}
-
-.categoryChip:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -9px;
-  width: 1px;
-  height: 14px;
-  background: rgba(29, 74, 46, 0.18);
-  transform: translateY(-50%);
 }
 
 .categoryChip:hover {
@@ -572,8 +566,9 @@
 
 .categoryChipActive {
   background: var(--page-chip-active-bg, transparent);
+  border-color: var(--page-chip-active-border, var(--page-chip-border, rgba(29, 74, 46, 0.16)));
   color: var(--page-chip-active-text, #173223);
-  font-weight: 700;
+  font-weight: calc(var(--page-chip-font-weight, 600) + 100);
 }
 
 .categoryWrapSoft .categoryChip {
@@ -596,14 +591,17 @@
       14%,
     #ffffff
   );
-  border-color: color-mix(
-    in srgb,
-    var(
-        --category-chip-accent,
-        var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-      )
-      40%,
-    #dfe9dc
+  border-color: var(
+    --page-chip-active-border,
+    color-mix(
+      in srgb,
+      var(
+          --category-chip-accent,
+          var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
+        )
+        40%,
+      #dfe9dc
+    )
   );
   box-shadow: 0 4px 12px
     color-mix(
@@ -624,8 +622,11 @@
 
 .categoryWrapOutline .categoryChipActive {
   border-color: var(
-    --category-chip-accent,
-    var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
+    --page-chip-active-border,
+    var(
+      --category-chip-accent,
+      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
+    )
   );
   box-shadow: 0 0 0 1px
     color-mix(
@@ -649,6 +650,7 @@
     --category-chip-accent,
     var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
   );
+  border-color: var(--page-chip-active-border, var(--page-chip-border, rgba(29, 74, 46, 0.16)));
   color: var(--page-chip-active-text, #ffffff);
   box-shadow: 0 10px 20px
     color-mix(
@@ -673,10 +675,13 @@
     var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 14%,
     #ffffff
   );
-  border-color: color-mix(
-    in srgb,
-    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 40%,
-    #dfe9dc
+  border-color: var(
+    --page-product-chip-active-border,
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 40%,
+      #dfe9dc
+    )
   );
   color: var(--page-product-chip-active-text, #173223);
   box-shadow: 0 4px 12px
@@ -694,7 +699,10 @@
 
 .productCategoryWrapOutline .productCategoryChipActive {
   background: var(--page-product-chip-bg, #ffffff);
-  border-color: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
+  border-color: var(
+    --page-product-chip-active-border,
+    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+  );
   color: var(--page-product-chip-active-text, #173223);
   box-shadow: 0 0 0 1px
     color-mix(
@@ -711,7 +719,10 @@
 
 .productCategoryWrapFilled .productCategoryChipActive {
   background: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
-  border-color: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
+  border-color: var(
+    --page-product-chip-active-border,
+    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+  );
   color: var(--page-product-chip-active-text, #ffffff);
   box-shadow: 0 10px 20px
     color-mix(
@@ -867,10 +878,6 @@
     min-height: var(--page-chip-height, 30px);
     padding: 0 var(--page-chip-padding-inline, 12px);
     font-size: var(--page-chip-font-size, 0.74rem);
-  }
-
-  .categoryChip:not(:last-child)::after {
-    right: -7px;
   }
 
   .searchBox {

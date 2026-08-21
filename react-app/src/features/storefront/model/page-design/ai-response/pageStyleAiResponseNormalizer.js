@@ -1,15 +1,17 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
-import { PAGE_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE } from '../../../config/page-design/pageStyleAiCopyConfig';
 import { isHexColor, mixHexColors, normalizeHexColor } from '../../shared/pageStyleColor';
 import {
+  PAGE_STYLE_BORDER_STRENGTH_TOKENS,
+  PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS,
   PAGE_STYLE_CHIP_GAP_TOKENS,
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
   PAGE_STYLE_CHIP_VARIANT_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
-  PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../page-style/pageStyleModel';
+
+const PAGE_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 페이지 스타일에 반영했습니다.';
 
 const CHIP_INTENT_HEX_KEYS = [
   'backgroundHex',
@@ -17,6 +19,7 @@ const CHIP_INTENT_HEX_KEYS = [
   'borderColorHex',
   'activeBackgroundHex',
   'activeTextHex',
+  'activeBorderHex',
   'hoverBackgroundHex',
   'hoverTextHex',
   'hoverBorderHex',
@@ -78,9 +81,13 @@ function normalizeChipsIntent(rawChips) {
     ['sizeToken', PAGE_STYLE_CHIP_SIZE_TOKENS],
     ['radiusToken', PAGE_STYLE_CHIP_RADIUS_TOKENS],
     ['gapToken', PAGE_STYLE_CHIP_GAP_TOKENS],
+    ['borderStrengthToken', PAGE_STYLE_BORDER_STRENGTH_TOKENS],
+    ['borderSides', PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS],
   ].forEach(([key, tokens]) => {
     if (tokens.includes(rawChips[key])) intent[key] = rawChips[key];
   });
+
+  if (Number.isFinite(rawChips.fontWeight)) intent.fontWeight = rawChips.fontWeight;
 
   return Object.keys(intent).length > 0 ? intent : null;
 }
@@ -93,14 +100,17 @@ export function normalizeProductCategoryChipsIntent(rawChips) {
   return normalizeChipsIntent(rawChips);
 }
 
+const SEARCH_INTENT_HEX_KEYS = ['backgroundHex', 'borderColorHex', 'focusBorderColorHex'];
+
 export function normalizeSearchIntent(rawSearch) {
   if (!rawSearch) return null;
 
-  const intent = {};
+  const intent = toRecognizedObject(rawSearch, SEARCH_INTENT_HEX_KEYS);
+
   if (PAGE_STYLE_SEARCH_SIZE_TOKENS.includes(rawSearch.sizeToken)) {
     intent.sizeToken = rawSearch.sizeToken;
   }
-  if (PAGE_STYLE_SEARCH_BORDER_STRENGTH_TOKENS.includes(rawSearch.borderStrengthToken)) {
+  if (PAGE_STYLE_BORDER_STRENGTH_TOKENS.includes(rawSearch.borderStrengthToken)) {
     intent.borderStrengthToken = rawSearch.borderStrengthToken;
   }
 
