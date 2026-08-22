@@ -9,22 +9,6 @@ const NAV_ITEMS = [
   { key: 'storefront-builder', label: 'AI 페이지 만들기' },
 ];
 
-function ChevronIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M6 3.5L10.5 8 6 12.5" />
-    </svg>
-  );
-}
-
 function BrandContent() {
   return (
     <>
@@ -47,16 +31,14 @@ export default function AppLayout({
   const isDashboard = activePage === 'dashboard';
   const canNavigate = showBackButton && typeof onNavigate === 'function';
   const name = user?.name;
-
+  const initial = name?.trim().charAt(0) ?? '';
   const officeLabel = [user?.nh_name, user?.office_name]
     .filter(Boolean)
     .join(ORG_SEPARATOR);
 
   return (
     <div
-      className={[styles.shell, isDashboard ? styles.shellNarrow : ''].join(
-        ' ',
-      )}
+      className={[styles.shell, isDashboard ? styles.shellNarrow : ''].join(' ')}
     >
       <header className={styles.header}>
         <div className={styles.headerInner}>
@@ -93,9 +75,6 @@ export default function AppLayout({
                       onClick={() => onNavigate(key)}
                     >
                       {label}
-                      <span className={styles.navLinkIcon} aria-hidden="true">
-                        <ChevronIcon />
-                      </span>
                     </button>
                   ))}
                 </nav>
@@ -110,6 +89,9 @@ export default function AppLayout({
 
             {name ? (
               <span className={styles.account}>
+                <span className={styles.avatar} aria-hidden="true">
+                  {initial}
+                </span>
                 <span className={styles.accountName}>{name}</span>
               </span>
             ) : null}
