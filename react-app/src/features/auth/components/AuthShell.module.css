@@ -1,0 +1,119 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+  background: var(--corp-panel, #ffffff);
+  /* Korean has no inter-word break opportunities by default, so the UA splits
+     mid-word ("정보" -> "정" / "보"). keep-all restricts breaks to spaces. */
+  word-break: keep-all;
+}
+
+.brandPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 3.5rem 3rem;
+  background: var(--corp-primary, #1d4a2e);
+  color: var(--corp-on-primary, #ffffff);
+}
+
+.brandLockup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: auto;
+}
+
+.brandSymbol {
+  display: block;
+  width: auto;
+  height: 26px;
+}
+
+.brandName {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.brandStatement {
+  max-width: 11em;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.brandSupport {
+  max-width: 21em;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.brandFooter {
+  margin: 1.5rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.formPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 2.5rem;
+}
+
+.form {
+  width: 100%;
+  max-width: 23rem;
+}
+
+.title {
+  margin: 0 0 2rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--corp-text, #111827);
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .brandPanel {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  .brandLockup {
+    margin-bottom: 0;
+  }
+
+  .brandSymbol {
+    height: 20px;
+  }
+
+  .brandStatement,
+  .brandSupport,
+  .brandFooter {
+    display: none;
+  }
+
+  .formPanel {
+    align-items: flex-start;
+    padding: 2.5rem 1.25rem 3rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+}
