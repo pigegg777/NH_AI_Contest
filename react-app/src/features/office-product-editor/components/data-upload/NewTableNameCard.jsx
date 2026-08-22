@@ -17,7 +17,7 @@ export function NewTableNameCard({
     <aside className={styles.tableNameCard} aria-label="테이블 이름 설정">
       <div className={styles.tableNameCardHeader}>
         <h3 className={styles.tableNameCardTitle}>새 테이블 이름</h3>
-        <span className={styles.tableNameRequiredBadge}>필수</span>
+        {/* <span className={styles.tableNameRequiredBadge}>필수</span> */}
       </div>
 
       <p className={styles.tableNameCardDescription}>
@@ -29,7 +29,7 @@ export function NewTableNameCard({
           className={`${styles.catalogInlineField} ${styles.tableNameRowField}`}
           htmlFor="table-name-input"
         >
-          <span className={styles.catalogInlineLabel}>테이블 이름</span>
+          <span className={styles.catalogInlineLabel}>테이블 이름설정</span>
           <input
             id="table-name-input"
             className={styles.catalogInlineInput}

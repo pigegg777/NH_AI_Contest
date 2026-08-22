@@ -17,7 +17,7 @@ import {
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
 
-const DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.6-terra';
 const REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
   'cardAiDesign',

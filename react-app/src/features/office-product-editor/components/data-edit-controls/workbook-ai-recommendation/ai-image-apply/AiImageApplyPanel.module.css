@@ -4,12 +4,21 @@
   gap: 8px;
 }
 
-.desc {
+.flowHint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
   margin: 0;
   color: var(--corp-muted);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.5;
+}
+
+.flowArrow {
+  color: var(--corp-primary);
+  font-weight: 700;
 }
 
 .sourceRow {

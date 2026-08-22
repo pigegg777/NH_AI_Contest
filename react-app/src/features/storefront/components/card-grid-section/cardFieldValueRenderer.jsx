@@ -11,7 +11,7 @@ export function renderFieldSlotValue(field, value) {
         target="_blank"
         rel="noreferrer"
       >
-        View
+        바로가기
       </a>
     );
   }

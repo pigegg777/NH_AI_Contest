@@ -1,0 +1,31 @@
+.aiFeatureNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  /* border: 1px solid var(--corp-accent-border-strong, var(--corp-line));
+  border-radius: var(--corp-radius); */
+  /* background: var(--corp-primary-soft); */
+}
+
+.aiFeatureBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  /* min-height: 20px; */
+  padding: 7px 12px;
+  border-radius: var(--corp-radius-pill);
+  background: rgb(57, 57, 199);
+  color: var(--corp-on-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.aiFeatureText {
+  margin: 0;
+  color: var(--corp-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+}

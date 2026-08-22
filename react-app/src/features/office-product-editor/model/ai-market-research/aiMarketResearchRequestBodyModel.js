@@ -69,6 +69,7 @@ const AI_MARKET_RESEARCH_REPORT_SCHEMA = {
         'note',
       ],
     },
+    overall_opinion: { type: 'string' },
   },
   required: [
     'understood_query',
@@ -78,6 +79,7 @@ const AI_MARKET_RESEARCH_REPORT_SCHEMA = {
     'price_sources',
     'news_articles',
     'price_comparison',
+    'overall_opinion',
   ],
 };
 

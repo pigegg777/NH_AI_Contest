@@ -3,11 +3,8 @@ import { SaveControlPanel } from './SaveControlPanel';
 import styles from './HeaderSection.module.css';
 
 export function HeaderSection() {
-  const {
-    activeCategoryName,
-    bannerStatusLabel,
-    bannerStatusVariant,
-  } = useEditorMeta();
+  const { activeCategoryName, bannerStatusLabel, bannerStatusVariant } =
+    useEditorMeta();
   const save = useSaveCtx();
 
   return (

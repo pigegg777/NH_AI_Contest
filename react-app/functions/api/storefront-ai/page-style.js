@@ -23,7 +23,7 @@ const PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS = [
   'currentPageStyle',
   'history',
 ];
-const PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
+const PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL = 'gpt-5.6-terra';
 export const onRequestPost = withRequestErrorHandling(
   async ({ request, env }) => {
     const rawBody = await readValidatedJsonBody(request);

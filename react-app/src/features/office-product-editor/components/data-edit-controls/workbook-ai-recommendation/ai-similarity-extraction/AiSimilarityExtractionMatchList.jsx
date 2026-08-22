@@ -25,33 +25,39 @@ export function AiSimilarityExtractionMatchList({
       ) : null}
 
       {!isLoading && recommendations.length > 0 ? (
-        <div className={styles.recommendationGrid}>
-          {recommendations.map((recommendation) => {
-            const isActive = recommendation.id === activeRecommendationId;
+        <>
+          <p className={styles.filterHint}>
+            카드를 클릭하면 관련된 행만 필터링해 보여줍니다. 필터를 해제하려면 테이블의 &apos;필터
+            초기화&apos;를 눌러주세요.
+          </p>
+          <div className={styles.recommendationGrid}>
+            {recommendations.map((recommendation) => {
+              const isActive = recommendation.id === activeRecommendationId;
 
-            return (
-              <button
-                key={recommendation.id}
-                type="button"
-                aria-pressed={isActive}
-                className={`${primitives.recommendationCard} ${
-                  isActive ? styles.recommendationCardActive : ''
-                }`.trim()}
-                onClick={() => onRecommendationSelect(recommendation.id)}
-              >
-                <div className={styles.recommendationCardHeader}>
-                  <strong>{recommendation.title}</strong>
-                </div>
-                <p className={styles.recommendationReason}>
-                  {recommendation.reason}
-                </p>
-                <span className={styles.recommendationFooter}>
-                  관련 행 {recommendation.relatedRowIds.length}건
-                </span>
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={recommendation.id}
+                  type="button"
+                  aria-pressed={isActive}
+                  className={`${primitives.recommendationCard} ${
+                    isActive ? styles.recommendationCardActive : ''
+                  }`.trim()}
+                  onClick={() => onRecommendationSelect(recommendation.id)}
+                >
+                  <div className={styles.recommendationCardHeader}>
+                    <strong>{recommendation.title}</strong>
+                  </div>
+                  <p className={styles.recommendationReason}>
+                    {recommendation.reason}
+                  </p>
+                  <span className={styles.recommendationFooter}>
+                    관련 행 {recommendation.relatedRowIds.length}건
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
       ) : null}
     </section>
   );

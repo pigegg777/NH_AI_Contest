@@ -25,9 +25,17 @@ export function AiMarketResearchReportBody({ marketResearch }) {
 
   if (!report.dataFound) {
     return (
-      <p className={styles.marketResearchStatus}>
-        온라인 판매 정보를 찾지 못했습니다.
-      </p>
+      <div className={styles.marketResearchReport}>
+        <p className={styles.marketResearchStatus}>
+          온라인 판매 정보를 찾지 못했습니다.
+        </p>
+        {report.overallOpinion ? (
+          <div className={styles.overallOpinion}>
+            <h5 className={styles.overallOpinionTitle}>🧭 종합 의견</h5>
+            <p className={styles.overallOpinionText}>{report.overallOpinion}</p>
+          </div>
+        ) : null}
+      </div>
     );
   }
 
@@ -79,18 +87,6 @@ export function AiMarketResearchReportBody({ marketResearch }) {
           ))}
         </ul>
       ) : null}
-      {report.searchQueries.length > 0 ? (
-        <div className={styles.marketResearchQueries}>
-          <h5 className={styles.marketResearchQueriesTitle}>🔍 검색어</h5>
-          <ul className={styles.marketResearchQueryList}>
-            {report.searchQueries.map((query) => (
-              <li key={query} className={styles.marketResearchQueryChip}>
-                {query}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
       {report.newsArticles.length > 0 ? (
         <div className={styles.marketResearchNews}>
           <h5 className={styles.marketResearchNewsTitle}>📰 관련 뉴스</h5>
@@ -110,6 +106,12 @@ export function AiMarketResearchReportBody({ marketResearch }) {
               </li>
             ))}
           </ul>
+        </div>
+      ) : null}
+      {report.overallOpinion ? (
+        <div className={styles.overallOpinion}>
+          <h5 className={styles.overallOpinionTitle}>🧭 종합 의견</h5>
+          <p className={styles.overallOpinionText}>{report.overallOpinion}</p>
         </div>
       ) : null}
     </div>

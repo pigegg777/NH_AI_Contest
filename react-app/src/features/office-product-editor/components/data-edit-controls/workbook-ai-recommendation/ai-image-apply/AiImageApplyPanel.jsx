@@ -1,100 +1,10 @@
-import { useState } from 'react';
+import { useAiImageApplyInstructionForm } from '../../../../hooks/ai-image-apply/useAiImageApplyInstructionForm';
+import { AiImageStorageBrowser } from './AiImageStorageBrowser';
+import { AiImageApplyMatchList } from './AiImageApplyMatchList';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiImageApplyPanel.module.css';
 
-function findRowById(rows, rowId) {
-  return (
-    (Array.isArray(rows) ? rows : []).find((row) => row.row_id === rowId) ??
-    null
-  );
-}
-
-function AiImageStorageBrowser({
-  storageImages,
-  isLoadingStorageImages,
-  storageListError,
-  onSelect,
-  onDelete,
-}) {
-  function handleDeleteClick(image) {
-    if (
-      !window.confirm('이 이미지를 삭제할까요? 저장소에서도 함께 삭제됩니다.')
-    ) {
-      return;
-    }
-
-    onDelete(image);
-  }
-
-  return (
-    <div className={styles.storageBrowser}>
-      {isLoadingStorageImages ? (
-        <p className={styles.status}>불러오는 중...</p>
-      ) : null}
-      {!isLoadingStorageImages && storageListError ? (
-        <p className={styles.status}>{storageListError}</p>
-      ) : null}
-      {!isLoadingStorageImages &&
-      !storageListError &&
-      storageImages.length === 0 ? (
-        <p className={styles.status}>저장된 이미지가 없습니다.</p>
-      ) : null}
-      {!isLoadingStorageImages && storageImages.length > 0 ? (
-        <ul className={styles.storageGrid}>
-          {storageImages.map((image) => (
-            <li key={image.path} className={styles.storageGridItem}>
-              <button
-                type="button"
-                className={styles.storageImageButton}
-                aria-label={`storage-image-${image.path}`}
-                onClick={() => onSelect(image)}
-              >
-                <img
-                  className={styles.storageImageThumb}
-                  src={image.url}
-                  alt=""
-                />
-              </button>
-              <button
-                type="button"
-                className={styles.storageImageDeleteButton}
-                aria-label={`storage-image-delete-${image.path}`}
-                onClick={() => handleDeleteClick(image)}
-              >
-                🗑
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
-
-function AiImageApplyMatchList({ matchedRowIds, rows }) {
-  return (
-    <ul className={styles.matchList}>
-      {matchedRowIds.map((rowId) => {
-        const row = findRowById(rows, rowId);
-
-        return (
-          <li key={rowId} className={styles.matchItem}>
-            {row?.product_name || rowId}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 export function AiImageApplyPanel({ imageApply }) {
-  const [generatePromptDraft, setGeneratePromptDraft] = useState('');
-  const [instructionDraft, setInstructionDraft] = useState('');
-
-  if (!imageApply) {
-    return null;
-  }
-
   const {
     rows,
     previewImage,
@@ -122,32 +32,26 @@ export function AiImageApplyPanel({ imageApply }) {
     handleCloseStorageBrowser,
     handleSelectStorageImage,
     handleDeleteStorageImage,
-  } = imageApply;
+  } = imageApply ?? {};
 
-  function handleFileInputChange(event) {
-    const file = event.target.files?.[0] ?? null;
-    handleSelectFile(file);
-    event.target.value = '';
-  }
+  const {
+    generatePromptDraft,
+    setGeneratePromptDraft,
+    instructionDraft,
+    setInstructionDraft,
+    handleFileInputChange,
+    handleGenerateSubmit,
+    handleApplySubmit,
+  } = useAiImageApplyInstructionForm({
+    handleSelectFile,
+    handleGenerateImage,
+    isGenerating,
+    handleApplyRequest,
+    isApplying,
+  });
 
-  function handleGenerateSubmit() {
-    const prompt = generatePromptDraft.trim();
-
-    if (prompt === '' || isGenerating) {
-      return;
-    }
-
-    handleGenerateImage(prompt);
-  }
-
-  function handleApplySubmit() {
-    const instruction = instructionDraft.trim();
-
-    if (instruction === '' || isApplying) {
-      return;
-    }
-
-    handleApplyRequest(instruction);
+  if (!imageApply) {
+    return null;
   }
 
   return (
@@ -159,11 +63,15 @@ export function AiImageApplyPanel({ imageApply }) {
           🖼️ 이미지 생성/적용
         </h4>
       </div>
-      <p className={styles.desc}>
-        이미지를 업로드하거나 AI에게 생성 요청한 뒤, 어느 상품/분류에 적용할지
-        말해주세요. 예: 복합비료 분류에 적용해줘
+      <p className={styles.flowHint}>
+        이미지 업로드 또는 AI 생성
+        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        저장
+        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        저장소에서 이미지 선택
+        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        적용할 상품 조건 입력 후 적용
       </p>
-
       <div className={styles.sourceRow}>
         <label
           className={styles.uploadButton}

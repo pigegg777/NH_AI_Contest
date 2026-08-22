@@ -32,8 +32,15 @@
   border-radius: 999px;
   background: var(--corp-panel);
   color: var(--corp-muted);
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
+}
+
+.filterHint {
+  margin: 0 0 4px;
+  color: var(--corp-muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .recommendationGrid {

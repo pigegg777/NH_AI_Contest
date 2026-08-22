@@ -27,9 +27,6 @@ export function AiMarketResearchPromptInput({ marketResearch }) {
           💬 요청사항 입력
         </h4>
       </div>
-      <p className={styles.desc}>
-        AI에게 상품에대한 가격비교와 관련기사를 요청하세요
-      </p>
       <div className={primitives.promptRow}>
         <textarea
           id="ai-natural-language-prompt"

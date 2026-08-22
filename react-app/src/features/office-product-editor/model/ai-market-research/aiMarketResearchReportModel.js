@@ -103,5 +103,6 @@ export function normalizeAiMarketResearchReport(payload, searchQueries = []) {
     newsArticles: normalizeNewsArticles(safePayload.news_articles),
     priceComparison: normalizePriceComparison(safePayload.price_comparison),
     searchQueries: normalizeSearchQueries(searchQueries),
+    overallOpinion: toTrimmedString(safePayload.overall_opinion) || null,
   };
 }

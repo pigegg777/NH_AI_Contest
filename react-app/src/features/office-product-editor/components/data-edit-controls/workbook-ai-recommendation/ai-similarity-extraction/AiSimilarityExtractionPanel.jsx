@@ -26,9 +26,6 @@ export function AiSimilarityExtractionPanel({
         <div className={primitives.panelHeader}>
           <h4 className={primitives.panelTitle}>⚙️ 요청사항 입력</h4>
         </div>
-        <p className={styles.desc}>
-          요청사항을 바탕으로 AI가 유사상품을 추출합니다.
-        </p>
         <div className={primitives.promptRow}>
           <textarea
             id="ai-analysis-hint"
