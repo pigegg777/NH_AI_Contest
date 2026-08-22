@@ -33,6 +33,7 @@ describe('market research request body model', () => {
       'price_sources',
       'news_articles',
       'price_comparison',
+      'overall_opinion',
     ]);
     expect(schema.properties.price_sources.items.required).toEqual([
       'url',

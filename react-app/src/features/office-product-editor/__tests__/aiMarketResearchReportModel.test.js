@@ -34,6 +34,7 @@ describe('market research report model', () => {
         difference_krw: -1850,
         note: '등록가가 시세 평균보다 낮습니다.',
       },
+      overall_opinion: '등록가가 시세보다 낮아 경쟁력이 있으며, 최근 기사에 따르면 당분간 가격 상승 요인은 크지 않습니다.',
     }, [
       'site:search.shopping.naver.com/ns/search 사과 부사 5kg',
       'site:search.shopping.naver.com/ns/search 사과 부사 5kg',
@@ -71,6 +72,7 @@ describe('market research report model', () => {
         note: '등록가가 시세 평균보다 낮습니다.',
       },
       searchQueries: ['site:search.shopping.naver.com/ns/search 사과 부사 5kg'],
+      overallOpinion: '등록가가 시세보다 낮아 경쟁력이 있으며, 최근 기사에 따르면 당분간 가격 상승 요인은 크지 않습니다.',
     });
   });
 
@@ -86,6 +88,7 @@ describe('market research report model', () => {
       newsArticles: [],
       priceComparison: null,
       searchQueries: [],
+      overallOpinion: null,
     });
   });
 

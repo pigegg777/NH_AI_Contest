@@ -1,0 +1,34 @@
+.noteButton {
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: 0.7rem;
+  text-align: left;
+  cursor: pointer;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.noteInput {
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  font-size: 0.7rem;
+}
+
+.noteInput:focus {
+  outline: none;
+  border-color: var(--corp-primary);
+  box-shadow: var(--corp-focus-ring);
+}

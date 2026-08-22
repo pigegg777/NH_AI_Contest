@@ -246,6 +246,35 @@ describe('POST /api/ai-similarity-extraction/analyze', () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).model).toBe('gpt-5.6-luna');
   });
 
+  it('accepts a large rows payload that exceeds the generic 20KB request body limit', async () => {
+    createClient.mockReturnValue(buildSupabaseStub());
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ output_parsed: { recommendations: [] } }),
+      }),
+    );
+
+    const largeRows = Array.from({ length: 300 }, (_, index) => ({
+      row_id: `ROW-${index}__01`,
+      product_code: `CODE-${index}`,
+      product_name: `Padding Product Name ${'x'.repeat(100)} ${index}`,
+      tax_price: 1000,
+      zero_tax_price: 1200,
+    }));
+    const requestBody = { officeCode: 'OFF-1', rows: largeRows };
+    // Sanity-check the fixture actually exceeds the generic 20KB default so
+    // this test would fail without the endpoint-specific maxBytes override.
+    expect(JSON.stringify(requestBody).length).toBeGreaterThan(20000);
+
+    const request = buildRequest(requestBody);
+    const response = await onRequestPost({ request, env: TEST_ENV });
+
+    expect(response.status).not.toBe(413);
+    expect(response.status).toBe(200);
+  });
+
   it('returns 200 with normalized, sorted recommendations on success', async () => {
     createClient.mockReturnValue(buildSupabaseStub());
     vi.stubGlobal(

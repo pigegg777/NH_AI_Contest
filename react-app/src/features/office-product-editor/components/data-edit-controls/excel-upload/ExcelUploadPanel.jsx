@@ -1,76 +1,6 @@
 import { useState } from 'react';
+import { FileWarningsPanel } from './FileWarningsPanel';
 import styles from './ExcelUploadSection.module.css';
-import warningStyles from './FileWarningsPanel.module.css';
-
-function FileWarningsPanel({ warnings }) {
-  if (!warnings || warnings.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className={`${styles.panel} ${styles.compactPanel}`}>
-      <div className={styles.panelHeader}>
-        <h2 className={styles.panelTitle}>파일 경고</h2>
-      </div>
-      <ul className={warningStyles.warningList}>
-        {warnings.map((warning) => (
-          <li key={warning} className={warningStyles.warningItem}>
-            {warning}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function WarningRowsPanel({ rows }) {
-  if (rows.length === 0) {
-    return null;
-  }
-  const MAX_WARNING_ROW_COUNT = 30;
-  const visibleRows = rows.slice(0, MAX_WARNING_ROW_COUNT);
-
-  return (
-    <section className={`${styles.panel} ${styles.compactPanel}`}>
-      <div className={styles.panelHeader}>
-        <h2 className={styles.panelTitle}>행 경고</h2>
-        <span className={styles.panelMeta}>{visibleRows.length}건</span>
-      </div>
-
-      <div className={warningStyles.warningRows}>
-        {visibleRows.map((row) => (
-          <article
-            key={`${row.product_code ?? 'missing-code'}-${row.sale_price_type_code ?? 'missing-type'}`}
-            className={warningStyles.warningRowCard}
-          >
-            <div className={warningStyles.warningRowHeader}>
-              <strong>
-                {row.product_name || row.product_code || '이름 없는 행'}
-              </strong>
-              <span className={warningStyles.warningRowMeta}>
-                {row.product_code || '-'} / {row.sale_price_type_code || '-'}
-              </span>
-            </div>
-            <ul className={warningStyles.warningList}>
-              {row.warnings.map((warning) => (
-                <li
-                  key={`${row.product_code}-${warning}`}
-                  className={warningStyles.warningItem}
-                >
-                  {warning}
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function EmptyWarningsState() {
-  return <p className={styles.emptyState}>표시할 경고가 없습니다</p>;
-}
 
 function DropzoneArea({ onWorkbookChange }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -114,9 +44,6 @@ export function ExcelUploadPanel({
   fileWarnings,
   warningRows = [],
 }) {
-  const hasNoWarnings =
-    (!fileWarnings || fileWarnings.length === 0) && warningRows.length === 0;
-
   return onWorkbookChange ? (
     <div className={styles.tabColumns}>
       <div className={styles.tabColumnLeft}>
@@ -156,14 +83,7 @@ export function ExcelUploadPanel({
       </div>
 
       <div className={styles.tabColumnRight}>
-        {hasNoWarnings ? (
-          <EmptyWarningsState />
-        ) : (
-          <>
-            <FileWarningsPanel warnings={fileWarnings} />
-            <WarningRowsPanel rows={warningRows} />
-          </>
-        )}
+        <FileWarningsPanel fileWarnings={fileWarnings} warningRows={warningRows} />
       </div>
     </div>
   ) : null;

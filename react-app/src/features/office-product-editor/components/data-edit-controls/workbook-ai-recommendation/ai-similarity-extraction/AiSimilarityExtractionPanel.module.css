@@ -4,18 +4,6 @@
   gap: 8px;
 }
 
-.autoAnalysisBlock .desc {
-  margin: 0;
-}
-
-.desc {
-  margin: 0 0 10px;
-  color: var(--corp-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
 .aiButton {
   display: inline-flex;
   align-items: center;

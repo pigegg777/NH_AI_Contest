@@ -132,10 +132,10 @@ export function useOfficeProductEditorState(user) {
     [tableState.rows, aiState.recommendations, aiState.activeRecommendationId],
   );
 
-  function handleResetFilters() {
+  const handleResetFilters = useCallback(() => {
     tableState.resetFilters();
     aiState.clearActiveRecommendation();
-  }
+  }, [tableState.resetFilters, aiState.clearActiveRecommendation]);
 
   const handleCatalogCardSelect = useCallback(
     (card) => {
@@ -283,6 +283,88 @@ export function useOfficeProductEditorState(user) {
     ],
   );
 
+  const tableValue = useMemo(
+    () => ({
+      officeCode: draftOfficeCode,
+      rows: visibleTableRows,
+      warningRows: tableState.warningRows,
+      searchQuery: tableState.searchQuery,
+      onSearchQueryChange: tableState.setSearchQuery,
+      filters: tableState.filters,
+      filterOptions: tableState.filterOptions,
+      sortState: tableState.sortState,
+      onSortChange: tableState.setSortState,
+      onFilterChange: tableState.handleFilterChange,
+      onResetFilters: handleResetFilters,
+      onShadowToggle: tableState.toggleShadow,
+      onVisibleRowsShadowChange: tableState.setShadowForRows,
+      onNoteChange: tableState.updateNote,
+      onPriceChange: tableState.updatePrice,
+      onImgUrlChange: tableState.updateImgUrl,
+    }),
+    [
+      draftOfficeCode,
+      visibleTableRows,
+      tableState.warningRows,
+      tableState.searchQuery,
+      tableState.setSearchQuery,
+      tableState.filters,
+      tableState.filterOptions,
+      tableState.sortState,
+      tableState.setSortState,
+      tableState.handleFilterChange,
+      handleResetFilters,
+      tableState.toggleShadow,
+      tableState.setShadowForRows,
+      tableState.updateNote,
+      tableState.updatePrice,
+      tableState.updateImgUrl,
+    ],
+  );
+
+  const bulkNoteWriterValue = useMemo(
+    () => ({
+      ...bulkNoteWriterState,
+      rows: tableState.mergedRows,
+    }),
+    [bulkNoteWriterState, tableState.mergedRows],
+  );
+
+  const imageApplyValue = useMemo(
+    () => ({
+      ...imageApplyState,
+      rows: tableState.mergedRows,
+    }),
+    [imageApplyState, tableState.mergedRows],
+  );
+
+  const aiValue = useMemo(
+    () => ({
+      recommendations: aiState.recommendations,
+      isLoading: aiState.isLoading,
+      analysisMode: aiState.analysisMode,
+      analysisMessage: aiState.analysisMessage,
+      activeRecommendationId: aiState.activeRecommendationId,
+      handleAnalyze: aiState.handleAnalyze,
+      handleRecommendationSelect: aiState.handleRecommendationSelect,
+      marketResearch: marketResearchState,
+      bulkNoteWriter: bulkNoteWriterValue,
+      imageApply: imageApplyValue,
+    }),
+    [
+      aiState.recommendations,
+      aiState.isLoading,
+      aiState.analysisMode,
+      aiState.analysisMessage,
+      aiState.activeRecommendationId,
+      aiState.handleAnalyze,
+      aiState.handleRecommendationSelect,
+      marketResearchState,
+      bulkNoteWriterValue,
+      imageApplyValue,
+    ],
+  );
+
   return {
     tableNameMode,
     showsCustomTableNameInput: selection.showsCustomTableNameInput,
@@ -300,43 +382,9 @@ export function useOfficeProductEditorState(user) {
 
     upload: uploadValue,
 
-    table: {
-      officeCode: draftOfficeCode,
-      rows: visibleTableRows,
-      warningRows: tableState.warningRows,
-      searchQuery: tableState.searchQuery,
-      onSearchQueryChange: tableState.setSearchQuery,
-      filters: tableState.filters,
-      filterOptions: tableState.filterOptions,
-      sortState: tableState.sortState,
-      onSortChange: tableState.setSortState,
-      onFilterChange: tableState.handleFilterChange,
-      onResetFilters: handleResetFilters,
-      onShadowToggle: tableState.toggleShadow,
-      onVisibleRowsShadowChange: tableState.setShadowForRows,
-      onNoteChange: tableState.updateNote,
-      onPriceChange: tableState.updatePrice,
-      onImgUrlChange: tableState.updateImgUrl,
-    },
+    table: tableValue,
 
-    ai: {
-      recommendations: aiState.recommendations,
-      isLoading: aiState.isLoading,
-      analysisMode: aiState.analysisMode,
-      analysisMessage: aiState.analysisMessage,
-      activeRecommendationId: aiState.activeRecommendationId,
-      handleAnalyze: aiState.handleAnalyze,
-      handleRecommendationSelect: aiState.handleRecommendationSelect,
-      marketResearch: marketResearchState,
-      bulkNoteWriter: {
-        ...bulkNoteWriterState,
-        rows: tableState.mergedRows,
-      },
-      imageApply: {
-        ...imageApplyState,
-        rows: tableState.mergedRows,
-      },
-    },
+    ai: aiValue,
 
     save: saveValue,
   };

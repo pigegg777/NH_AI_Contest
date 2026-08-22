@@ -220,6 +220,7 @@ describe('WorkbookAiRecommendationPanel', () => {
               },
             ],
             searchQueries: ['site:search.shopping.naver.com/ns/search 사과 부사 5kg'],
+            overallOpinion: '등록가가 시세보다 낮아 경쟁력이 있으며, 당분간 가격 상승 요인은 크지 않습니다.',
           },
           message: '',
           handleMarketResearch: vi.fn(),
@@ -231,6 +232,9 @@ describe('WorkbookAiRecommendationPanel', () => {
 
     expect(screen.getByText('사과 부사 5kg 온라인 판매가 조사')).toBeInTheDocument();
     expect(screen.getByText(/13,800원 ~ 29,900원/)).toBeInTheDocument();
+    expect(
+      screen.getByText('등록가가 시세보다 낮아 경쟁력이 있으며, 당분간 가격 상승 요인은 크지 않습니다.'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '쿠팡' })).toHaveAttribute(
       'href',
       'https://www.coupang.com/x',
@@ -240,9 +244,6 @@ describe('WorkbookAiRecommendationPanel', () => {
       'https://news.example.com/apple-price',
     );
     expect(screen.getByText('이상기후로 사과 출하량이 줄며 가격이 올랐다.')).toBeInTheDocument();
-    expect(
-      screen.getByText('site:search.shopping.naver.com/ns/search 사과 부사 5kg'),
-    ).toBeInTheDocument();
   });
 
   it('renders the report as its own card, separate from the prompt input section', () => {

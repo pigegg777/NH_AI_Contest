@@ -147,6 +147,7 @@ describe('POST /api/ai-market-research/analyze', () => {
                       difference_krw: -1850,
                       note: '등록가가 시세 평균보다 낮습니다.',
                     },
+                    overall_opinion: '등록가가 시세보다 낮아 경쟁력이 있습니다.',
                   }),
                 },
               ],
@@ -199,6 +200,7 @@ describe('POST /api/ai-market-research/analyze', () => {
         'site:search.shopping.naver.com/ns/search 사과 부사 5kg',
         'site:search.danawa.com/dsearch.php 사과 부사 5kg',
       ],
+      overallOpinion: '등록가가 시세보다 낮아 경쟁력이 있습니다.',
     });
   });
 });

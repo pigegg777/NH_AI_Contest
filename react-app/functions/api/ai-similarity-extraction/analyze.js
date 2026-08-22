@@ -22,9 +22,12 @@ const REQUEST_BODY_ALLOWED_KEYS = [
 ];
 const MAX_WORKBOOK_AI_ROWS = 500;
 const MAX_USER_HINT_LENGTH = 500;
+const MAX_REQUEST_BODY_BYTES = 300000;
 
 export const onRequestPost = withRequestErrorHandling(async ({ request, env }) => {
-  const rawBody = await readValidatedJsonBody(request);
+  const rawBody = await readValidatedJsonBody(request, {
+    maxBytes: MAX_REQUEST_BODY_BYTES,
+  });
   const body = pickAllowedKeys(rawBody, REQUEST_BODY_ALLOWED_KEYS);
   const officeCode = readOfficeCode(body);
   const tableNameMode = toOptionalTrimmedString(body.tableNameMode);

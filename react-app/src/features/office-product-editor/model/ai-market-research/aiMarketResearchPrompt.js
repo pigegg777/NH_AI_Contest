@@ -104,9 +104,23 @@ reasoning, invent facts, or claim to have read office-data rows not provided.
   "not requested", not "no price data exists".
 - For price-only, do not search news and set news_articles to [].
 
+6. Overall opinion
+- Write overall_opinion: 2 to 4 Korean sentences synthesizing only the
+  research actually performed in this scope. Never discuss a section that was
+  skipped under rule 5.
+- For price or both, state whether the office price looks high, low, or in
+  line with the market and why, referencing price_comparison when it exists.
+- For news or both, note any article-backed factor (supply-demand, policy,
+  season, regulation) that could affect price or sourcing decisions soon.
+- When both price and news were researched, connect them into one coherent
+  recommendation instead of two separate summaries.
+- If data_found is false and news_articles is empty, say plainly that there
+  is not enough verified information to form an opinion. Never speculate
+  beyond what price_sources, price_comparison, and news_articles support.
+
 Output constraints:
-- Write understood_query, clarification_needed, price_comparison.note, and all
-  article titles and summaries in Korean.
+- Write understood_query, clarification_needed, price_comparison.note,
+  overall_opinion, and all article titles and summaries in Korean.
 - Every price_sources entry must have a real URL, site name (다나와 or 쿠팡),
   exact displayed product_name, verified price_krw, and observed_date
   when known; use null for an unknown observed date.

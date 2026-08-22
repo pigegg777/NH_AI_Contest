@@ -18,11 +18,11 @@
 .tableNameCardTitle {
   margin: 0;
   color: var(--corp-text);
-  font-size: 0.92rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
-.tableNameRequiredBadge {
+/* .tableNameRequiredBadge {
   display: inline-flex;
   align-items: center;
   min-height: 20px;
@@ -33,7 +33,7 @@
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-}
+} */
 
 .tableNameCardDescription {
   margin: 0 0 10px;
@@ -63,19 +63,20 @@
 }
 
 .catalogInlineLabel {
-  color: var(--corp-muted);
-  font-size: 0.76rem;
+  color: black;
+  font-size: 0.9rem;
   font-weight: 600;
+  margin-bottom: 3px;
 }
 
 .catalogInlineInput {
   width: 100%;
-  padding: 6px 8px;
-  border: 1px solid rgba(29, 74, 46, 0.18);
+  padding: 8px 12px;
+  border: 1px solid rgba(9, 22, 14, 0.18);
   border-radius: var(--corp-radius-sm, 4px);
   background: var(--corp-bg, #fff);
   color: var(--corp-text);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   box-sizing: border-box;
 }
 
@@ -94,19 +95,21 @@
 
 .createTableButton {
   display: inline-flex;
-  align-items: center;
+  align-items: left;
   justify-content: center;
   min-height: 32px;
-  padding: 0 16px;
+  padding: 7px 60px;
   border: 1px solid rgba(29, 74, 46, 0.28);
   border-radius: var(--corp-radius-sm);
   background: var(--corp-primary);
   color: var(--corp-on-primary);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: background var(--corp-transition), opacity var(--corp-transition);
+  transition:
+    background var(--corp-transition),
+    opacity var(--corp-transition);
 }
 
 .createTableButton:hover:not(:disabled) {

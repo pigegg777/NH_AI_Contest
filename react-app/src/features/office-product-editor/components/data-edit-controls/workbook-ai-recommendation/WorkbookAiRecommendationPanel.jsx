@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TabBar } from '../TabBar';
+import { AiFeatureNotice } from './shared/AiFeatureNotice';
 import { AiSimilarityExtractionPanel } from './ai-similarity-extraction/AiSimilarityExtractionPanel';
 import { AiMarketResearchPromptInput } from './ai-market-research/AiMarketResearchPromptInput';
 import { AiMarketResearchPanel } from './ai-market-research/AiMarketResearchPanel';
@@ -40,6 +41,8 @@ export function WorkbookAiRecommendationPanel({
         activeTabId={activeSubTabId}
         onTabChange={setActiveSubTabId}
       />
+
+      <AiFeatureNotice featureId={activeSubTabId} />
 
       {activeSubTabId === 'similarity' ? (
         <AiSimilarityExtractionPanel
