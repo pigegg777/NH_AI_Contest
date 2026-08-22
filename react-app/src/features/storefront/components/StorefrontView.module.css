@@ -445,6 +445,13 @@
     box-shadow var(--corp-transition);
 }
 
+/* The input suppresses its own ring, so the wrapper has to carry the focus
+   indicator. Border goes fully opaque; the token glow is supplementary. */
+.searchBox:focus-within {
+  border-color: var(--corp-focus);
+  box-shadow: var(--corp-focus-ring);
+}
+
 .searchBoxPill {
   border-radius: var(--search-radius, 999px);
 }
