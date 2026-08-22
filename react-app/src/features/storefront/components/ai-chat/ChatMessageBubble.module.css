@@ -14,7 +14,7 @@
 .bubble {
   max-width: 86%;
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: var(--corp-radius-xl);
   font-size: 0.86rem;
   line-height: 1.5;
 }

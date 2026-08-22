@@ -28,7 +28,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 14px 16px;
-  border-radius: 18px;
+  border-radius: var(--corp-radius-xl);
   background: rgba(15, 23, 42, 0.03);
   border: 1px dashed var(--corp-line-strong);
 }

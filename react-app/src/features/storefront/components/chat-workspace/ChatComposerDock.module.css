@@ -6,7 +6,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px 12px 20px;
-  border-radius: 20px;
+  border-radius: var(--corp-radius-xl);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.98),
@@ -61,7 +61,7 @@
   flex-shrink: 0;
   padding: 8px 10px;
   border: 1px solid var(--corp-line);
-  border-radius: 999px;
+  border-radius: var(--corp-radius-pill);
   background: rgba(255, 255, 255, 0.94);
   color: var(--corp-text);
   font-weight: 700;
@@ -94,7 +94,7 @@
 .targetChipButton,
 .targetChipButtonActive {
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--corp-radius-pill);
   border: 1px solid rgba(29, 74, 46, 0.16);
   background: rgba(255, 255, 255, 0.9);
   color: var(--corp-text);
@@ -128,7 +128,7 @@
   min-height: 64px;
   padding: 10px 14px;
   border: 1px solid var(--corp-line);
-  border-radius: 16px;
+  border-radius: var(--corp-radius-xl);
   resize: vertical;
   font: inherit;
   line-height: 1.5;
@@ -151,7 +151,7 @@
 .applyButton,
 .sendButton {
   padding: 8px 16px;
-  border-radius: 999px;
+  border-radius: var(--corp-radius-pill);
   font-weight: 800;
   font-size: 0.86rem;
   cursor: pointer;

@@ -1,7 +1,7 @@
 .fieldTableWrap {
   overflow-x: auto;
   border: 1px solid rgba(17, 24, 39, 0.16);
-  border-radius: 16px;
+  border-radius: var(--corp-radius-xl);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
 }

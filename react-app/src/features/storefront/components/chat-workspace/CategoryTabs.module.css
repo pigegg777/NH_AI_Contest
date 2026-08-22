@@ -24,7 +24,7 @@
 .tabButtonActive {
   flex-shrink: 0;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: var(--corp-radius-pill);
   border: 1px solid rgba(29, 74, 46, 0.18);
   background: rgba(255, 255, 255, 0.96);
   color: var(--corp-text);

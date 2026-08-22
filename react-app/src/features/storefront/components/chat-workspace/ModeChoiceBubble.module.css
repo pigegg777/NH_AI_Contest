@@ -30,7 +30,7 @@
   width: 100%;
   padding: 10px 20px;
   border: 1px solid rgba(211, 240, 202, 0.92);
-  border-radius: 12px;
+  border-radius: var(--corp-radius-lg);
   background: rgba(244, 252, 241, 0.92);
   color: inherit;
   text-align: left;
