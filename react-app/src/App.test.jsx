@@ -34,7 +34,16 @@ vi.mock('./features/storefront/pages/StorefrontBuilderPage', () => ({
 }));
 
 vi.mock('./common/layouts/AppLayout', () => ({
-  default: ({ children }) => <div data-testid="app-layout">{children}</div>,
+  default: ({ children, onLogout }) => (
+    <div data-testid="app-layout">
+      {typeof onLogout === 'function' ? (
+        <button type="button" onClick={onLogout}>
+          로그아웃
+        </button>
+      ) : null}
+      {children}
+    </div>
+  ),
 }));
 
 describe('App', () => {
@@ -122,13 +131,13 @@ describe('App', () => {
     render(<App />);
 
     await user.click(
-      screen.getByRole('button', { name: /AI 스토어프론트 만들기/ }),
+      screen.getByRole('button', { name: /AI로 상품페이지 만들기/ }),
     );
 
     expect(screen.getByText('storefront-builder-page:OFF-1')).toBeInTheDocument();
   });
 
-  it('renders the dashboard navbar logout button for logged-in users and calls handleLogout', async () => {
+  it('wires the layout logout button to handleLogout for logged-in users', async () => {
     const user = userEvent.setup();
     const handleLogout = vi.fn().mockResolvedValue(undefined);
 

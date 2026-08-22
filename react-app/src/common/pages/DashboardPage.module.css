@@ -1,135 +1,7 @@
 .page {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background: var(--corp-surface-muted);
-}
-
-/* ── Header ──────────────────────────────────────────── */
-
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  width: 100%;
-  background: var(--corp-panel);
-  border-bottom: 1px solid var(--corp-line);
-}
-
-.navbarInner {
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 56px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.brandMark {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  flex: none;
-  border-radius: 6px;
-  background: var(--corp-primary);
-  color: var(--corp-on-primary);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-}
-
-.navbarTitle {
-  margin: 0;
-  color: var(--corp-text);
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.navbarActions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.officeName {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--corp-muted);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 32vw;
-}
-
-.account {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding-left: 14px;
-  border-left: 1px solid var(--corp-line);
-  min-width: 0;
-}
-
-.avatar {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  flex: none;
-  border-radius: var(--corp-radius-pill);
-  background: var(--corp-primary-soft);
-  border: 1px solid var(--corp-accent-border);
-  color: var(--corp-primary);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.accountName {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--corp-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.logoutButton {
-  height: 30px;
-  padding: 0 11px;
-  border: 1px solid var(--corp-line);
-  border-radius: 6px;
-  background: var(--corp-panel);
-  color: var(--corp-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    border-color var(--corp-transition),
-    background-color var(--corp-transition),
-    color var(--corp-transition);
-}
-
-.logoutButton:hover {
-  border-color: var(--corp-line-strong);
-  background: var(--corp-surface-muted);
-  color: var(--corp-text);
 }
 
 /* ── Page body ───────────────────────────────────────── */
@@ -137,7 +9,6 @@
 .content {
   flex: 1;
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 32px 24px 64px;
   display: flex;
@@ -318,20 +189,6 @@
 }
 
 @media (max-width: 720px) {
-  .navbarInner {
-    padding: 0 16px;
-  }
-
-  .officeName,
-  .accountName {
-    display: none;
-  }
-
-  .account {
-    padding-left: 0;
-    border-left: 0;
-  }
-
   .content {
     padding: 24px 16px 48px;
   }

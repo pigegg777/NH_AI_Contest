@@ -1,27 +1,26 @@
 import styles from './AppLayout.module.css';
 
-const PAGE_LABELS = {
-  'office-product-editor': '데이터 설정/수정',
-  'storefront-builder': 'AI 페이지 만들기',
-};
+const BRAND_NAME = 'NH AI Agent';
+const ORG_SEPARATOR = ' · ';
 
-function BackArrow() {
+const NAV_ITEMS = [
+  { key: 'office-product-editor', label: '데이터 설정/수정' },
+  { key: 'storefront-builder', label: 'AI 페이지 만들기' },
+];
+
+function BrandContent() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 4L6 10l6 6" />
-    </svg>
+    <>
+      <span className={styles.brandMark} aria-hidden="true">
+        NH
+      </span>
+      <span className={styles.brandTitle}>{BRAND_NAME}</span>
+    </>
   );
 }
 
 export default function AppLayout({
+  user,
   activePage,
   onNavigate,
   onLogout,
@@ -29,59 +28,85 @@ export default function AppLayout({
   children,
 }) {
   const isDashboard = activePage === 'dashboard';
-  const pageLabel = PAGE_LABELS[activePage];
-  const shouldShowHeader = !isDashboard;
-  const canGoHome =
-    !isDashboard && showBackButton && typeof onNavigate === 'function';
+  const canNavigate = showBackButton && typeof onNavigate === 'function';
+  const name = user?.name;
+  const initial = name?.trim().charAt(0) ?? '';
+  const officeLabel = [user?.nh_name, user?.office_name]
+    .filter(Boolean)
+    .join(ORG_SEPARATOR);
 
   return (
-    <div className={styles.shell}>
-      {shouldShowHeader ? (
-        <header
-          className={[
-            styles.header,
-            isDashboard ? styles.headerDashboard : '',
-          ].join(' ')}
-        >
-          <div
-            className={[
-              styles.headerInner,
-              isDashboard ? styles.headerInnerDashboard : '',
-            ].join(' ')}
-          >
-            {!isDashboard ? (
-              <div className={styles.logo}>
-                {canGoHome ? (
-                  <>
-                    <button
-                      type="button"
-                      className={styles.backButton}
-                      onClick={() => onNavigate('dashboard')}
-                      aria-label="홈으로 돌아가기"
-                    >
-                      <BackArrow />
-                      홈으로
-                    </button>
+    <div
+      className={[styles.shell, isDashboard ? styles.shellNarrow : ''].join(' ')}
+    >
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <div className={styles.brand}>
+            {canNavigate ? (
+              <button
+                type="button"
+                className={styles.brandButton}
+                onClick={() => onNavigate('dashboard')}
+                aria-label="홈으로 돌아가기"
+              >
+                <BrandContent />
+              </button>
+            ) : (
+              <span className={styles.brandStatic}>
+                <BrandContent />
+              </span>
+            )}
 
-                    <span className={styles.logoDivider} />
-                  </>
-                ) : null}
-                <span className={styles.pageLabel}>{pageLabel}</span>
-              </div>
+            {canNavigate ? (
+              <>
+                <span className={styles.navDivider} aria-hidden="true" />
+
+                <nav className={styles.nav} aria-label="주요 기능">
+                  {NAV_ITEMS.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={[
+                        styles.navLink,
+                        activePage === key ? styles.navLinkActive : '',
+                      ].join(' ')}
+                      aria-current={activePage === key ? 'page' : undefined}
+                      onClick={() => onNavigate(key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+              </>
+            ) : null}
+          </div>
+
+          <div className={styles.actions}>
+            {officeLabel ? (
+              <span className={styles.office}>{officeLabel}</span>
+            ) : null}
+
+            {name ? (
+              <span className={styles.account}>
+                <span className={styles.avatar} aria-hidden="true">
+                  {initial}
+                </span>
+                <span className={styles.accountName}>{name}</span>
+              </span>
             ) : null}
 
             {typeof onLogout === 'function' ? (
               <button
                 type="button"
-                className={styles.lockButton}
+                className={styles.logoutButton}
                 onClick={onLogout}
               >
                 로그아웃
               </button>
             ) : null}
           </div>
-        </header>
-      ) : null}
+        </div>
+      </header>
 
       <main className={styles.main}>{children}</main>
     </div>

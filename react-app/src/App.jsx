@@ -145,11 +145,7 @@ export default function App() {
       onLogout={handleAppLogout}
     >
       {activePage === 'dashboard' && (
-        <DashboardPage
-          user={user}
-          onNavigate={setActivePage}
-          onLogout={handleAppLogout}
-        />
+        <DashboardPage user={user} onNavigate={setActivePage} />
       )}
       <Activity
         mode={
