@@ -36,7 +36,6 @@
 }
 
 .categoryTabsWrap {
-  margin: 0 -10px;
   margin: -12px -10px 0;
 }
 
@@ -45,13 +44,14 @@
 }
 
 .title {
-  margin: 0 0 px;
+  margin: 0 0 2px;
   font-size: 0.9rem;
   font-weight: 800;
   color: #111827;
 }
 
 .description {
+  margin: 0;
   font-size: 0.8rem;
   line-height: 1.35;
   color: #6b7280;
@@ -74,9 +74,6 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  /* border-radius: 16px; */
-  /* background: rgba(239, 246, 255, 0.9); */
-  /* border: 1px solid rgba(29, 74, 46, 0.14); */
 }
 
 .targetBubbleLabel {
