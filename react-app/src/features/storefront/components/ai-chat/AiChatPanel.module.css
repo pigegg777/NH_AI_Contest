@@ -61,11 +61,6 @@
   background: #163c25;
 }
 
-.sendButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.28);
-  outline-offset: 2px;
-}
-
 .sendButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -94,11 +89,6 @@
 .undoButton:hover {
   border-color: rgba(29, 74, 46, 0.32);
   background: rgba(239, 246, 255, 0.72);
-}
-
-.undoButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.18);
-  outline-offset: 2px;
 }
 
 .errorBox {

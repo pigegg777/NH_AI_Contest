@@ -47,11 +47,6 @@
   box-shadow: 0 12px 20px rgba(29, 74, 46, 0.08);
 }
 
-.modeChoiceButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.18);
-  outline-offset: 2px;
-}
-
 .modeChoiceLabel {
   font-size: 0.85rem;
   font-weight: 900;

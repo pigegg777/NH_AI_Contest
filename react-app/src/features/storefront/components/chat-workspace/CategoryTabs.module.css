@@ -48,9 +48,3 @@
   border-color: rgba(29, 74, 46, 0.3);
   box-shadow: 0 12px 24px rgba(29, 74, 46, 0.12);
 }
-
-.tabButton:focus-visible,
-.tabButtonActive:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.18);
-  outline-offset: 2px;
-}

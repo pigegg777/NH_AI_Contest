@@ -111,11 +111,6 @@
   border-color: rgba(29, 74, 46, 0.28);
 }
 
-.backButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.18);
-  outline-offset: 2px;
-}
-
 .applyButton {
   padding: 8px 16px;
   border-radius: 999px;
@@ -129,11 +124,6 @@
 
 .applyButton:hover {
   filter: brightness(1.04);
-}
-
-.applyButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.24);
-  outline-offset: 2px;
 }
 
 @media (max-width: 960px) {

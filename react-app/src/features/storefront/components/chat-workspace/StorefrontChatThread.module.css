@@ -64,8 +64,3 @@
   border-color: rgba(29, 74, 46, 0.34);
   box-shadow: 0 12px 20px rgba(29, 74, 46, 0.08);
 }
-
-.returnButton:focus-visible {
-  outline: 3px solid rgba(29, 74, 46, 0.18);
-  outline-offset: 2px;
-}
