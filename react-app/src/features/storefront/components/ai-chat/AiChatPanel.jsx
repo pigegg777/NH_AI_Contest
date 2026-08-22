@@ -68,7 +68,7 @@ export default function AiChatPanel({
           onClick={onSend}
           disabled={isSending}
         >
-          {isSending ? '적용 중...' : sendLabel}
+          {isSending ? '적용 중…' : sendLabel}
         </button>
         {canUndo ? (
           <button type="button" className={styles.undoButton} data-testid={undoTestId} onClick={onUndo}>

@@ -21,7 +21,7 @@
 
 .bubbleUser {
   background: rgb(240, 247, 241);
-  color: black;
+  color: var(--corp-text);
   border-bottom-right-radius: 2px;
 }
 

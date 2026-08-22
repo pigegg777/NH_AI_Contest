@@ -87,7 +87,7 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
             data-testid="storefront-chat-composer-send"
             disabled={composer.isApplying || !composer.canSend}
           >
-            {composer.isApplying ? '전송 중...' : copy.sendLabel}
+            {composer.isApplying ? '전송 중…' : copy.sendLabel}
           </button>
         </div>
       </form>
