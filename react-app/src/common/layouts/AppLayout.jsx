@@ -1,3 +1,4 @@
+import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
 import styles from './AppLayout.module.css';
 
 const BRAND_NAME = 'NH AI Agent';
@@ -12,7 +13,7 @@ function BrandContent() {
   return (
     <>
       <span className={styles.brandMark} aria-hidden="true">
-        NH
+        <img className={styles.brandSymbol} src={nhCyberSymbolUrl} alt="" />
       </span>
       <span className={styles.brandTitle}>{BRAND_NAME}</span>
     </>

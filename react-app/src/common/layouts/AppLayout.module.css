@@ -83,10 +83,12 @@
   flex: none;
   border-radius: 6px;
   background: var(--corp-primary);
-  color: var(--corp-on-primary);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
+}
+
+.brandSymbol {
+  width: auto;
+  height: 15px;
+  display: block;
 }
 
 .brandTitle {

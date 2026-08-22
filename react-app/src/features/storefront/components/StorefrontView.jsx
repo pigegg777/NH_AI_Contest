@@ -1,5 +1,5 @@
 import { useStorefrontView } from '../hooks/useStorefrontView';
-import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
+import nhCyberSymbolUrl from '../../../common/assets/nh_cyber_symbol.png';
 import {
   buildRenderableMobileUiTree,
   resolveSlotBlocks,
