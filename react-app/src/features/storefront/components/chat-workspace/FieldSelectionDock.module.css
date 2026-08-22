@@ -55,7 +55,7 @@
 .subtitle,
 .helperText,
 .summaryLabel {
-  color: #6b7280;
+  color: var(--corp-muted);
   font-size: 0.72rem;
   line-height: 1.4;
 }
@@ -78,7 +78,7 @@
   display: block;
   font-size: 1.05rem;
   font-weight: 800;
-  color: #111827;
+  color: var(--corp-text);
 }
 
 .tables {
@@ -101,7 +101,7 @@
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.94);
-  color: #111827;
+  color: var(--corp-text);
   font-weight: 700;
   font-size: 0.86rem;
   cursor: pointer;

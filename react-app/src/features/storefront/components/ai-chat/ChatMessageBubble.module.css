@@ -37,7 +37,7 @@
   padding: 1px 8px;
   border-radius: var(--corp-radius-pill);
   background: rgba(29, 74, 46, 0.12);
-  color: #163622;
+  color: var(--corp-primary-hover);
   font-size: 0.66rem;
   font-weight: 800;
 }
@@ -51,7 +51,7 @@
   margin: 6px 0 0;
   padding-top: 6px;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
-  color: #6b7280;
+  color: var(--corp-muted);
   font-size: 0.78rem;
   font-style: italic;
 }

@@ -47,14 +47,14 @@
   margin: 0 0 2px;
   font-size: 0.9rem;
   font-weight: 800;
-  color: #111827;
+  color: var(--corp-text);
 }
 
 .description {
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.35;
-  color: #6b7280;
+  color: var(--corp-muted);
 }
 
 .discardButton {
@@ -63,7 +63,7 @@
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.94);
-  color: #111827;
+  color: var(--corp-text);
   font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
@@ -82,7 +82,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #163622;
+  color: var(--corp-primary-hover);
 }
 
 .targetChipList {
@@ -97,14 +97,14 @@
   border-radius: 999px;
   border: 1px solid rgba(29, 74, 46, 0.16);
   background: rgba(255, 255, 255, 0.9);
-  color: #111827;
+  color: var(--corp-text);
   font-weight: 700;
   font-size: 0.78rem;
   cursor: pointer;
 }
 
 .targetChipButtonActive {
-  background: linear-gradient(135deg, #d8efe2, #f0faf4);
+  background: linear-gradient(135deg, var(--corp-primary-hover-bg), var(--corp-primary-soft));
   border-color: rgba(29, 74, 46, 0.3);
   box-shadow: 0 10px 18px rgba(29, 74, 46, 0.1);
 }
@@ -120,7 +120,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--corp-muted);
 }
 
 .input {
@@ -132,14 +132,14 @@
   resize: vertical;
   font: inherit;
   line-height: 1.5;
-  color: #111827;
+  color: var(--corp-text);
   background: rgba(255, 255, 255, 0.98);
 }
 
 .errorMessage {
   margin: 0;
   font-size: 0.84rem;
-  color: #b91c1c;
+  color: var(--corp-danger);
 }
 
 .footer {
@@ -170,7 +170,7 @@
 
 .sendButton {
   border: 0;
-  background: linear-gradient(135deg, #1d4a2e, #163622);
+  background: linear-gradient(135deg, var(--corp-primary), var(--corp-primary-hover));
   color: #ffffff;
 }
 

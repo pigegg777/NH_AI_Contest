@@ -57,5 +57,5 @@
 .modeChoiceDescription {
   font-size: 0.8rem;
   line-height: 1.25;
-  color: #6b7280;
+  color: var(--corp-muted);
 }

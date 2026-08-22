@@ -35,11 +35,11 @@
 }
 
 .scopeChip:focus-visible {
-  border-color: #1d4a2e;
+  border-color: var(--corp-primary);
 }
 
 .scopeChipActive {
-  border-color: #1d4a2e;
-  background: #1d4a2e;
+  border-color: var(--corp-primary);
+  background: var(--corp-primary);
   color: #ffffff;
 }

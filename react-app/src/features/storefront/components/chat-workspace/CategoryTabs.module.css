@@ -27,7 +27,7 @@
   border-radius: 999px;
   border: 1px solid rgba(29, 74, 46, 0.18);
   background: rgba(255, 255, 255, 0.96);
-  color: #111827;
+  color: var(--corp-text);
   font-weight: 700;
   font-size: 0.76rem;
   cursor: pointer;
@@ -44,7 +44,7 @@
 }
 
 .tabButtonActive {
-  background: linear-gradient(135deg, #d8efe2, #f0faf4);
+  background: linear-gradient(135deg, var(--corp-primary-hover-bg), var(--corp-primary-soft));
   border-color: rgba(29, 74, 46, 0.3);
   box-shadow: 0 12px 24px rgba(29, 74, 46, 0.12);
 }
