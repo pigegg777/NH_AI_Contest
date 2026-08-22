@@ -73,7 +73,7 @@
   justify-content: center;
   min-height: 32px;
   padding: 0 14px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid var(--corp-line);
   border-radius: var(--corp-radius-pill);
   background: #ffffff;
   color: var(--corp-text);
@@ -88,7 +88,7 @@
 
 .undoButton:hover {
   border-color: rgba(29, 74, 46, 0.32);
-  background: rgba(239, 246, 255, 0.72);
+  background: var(--corp-primary-soft);
 }
 
 .errorBox {

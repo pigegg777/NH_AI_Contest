@@ -26,7 +26,7 @@
 }
 
 .bubbleAssistant {
-  background: #f1f5f9;
+  background: var(--corp-surface-muted);
   color: var(--corp-text);
   border-bottom-left-radius: 2px;
 }

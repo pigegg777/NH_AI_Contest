@@ -32,7 +32,7 @@
 
 .fieldTable thead th {
   border-top: none;
-  background: rgba(248, 250, 252, 0.96);
+  background: var(--corp-surface-muted);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.02em;

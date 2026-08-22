@@ -30,7 +30,7 @@
   padding: 14px 16px;
   border-radius: 18px;
   background: rgba(15, 23, 42, 0.03);
-  border: 1px dashed rgba(100, 116, 139, 0.3);
+  border: 1px dashed var(--corp-line-strong);
 }
 
 .scaffoldLabel {
