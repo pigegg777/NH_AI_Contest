@@ -46,7 +46,7 @@
 .title {
   margin: 0 0 2px;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--corp-text);
 }
 
@@ -79,7 +79,7 @@
 .targetBubbleLabel {
   margin: 0;
   font-size: 0.74rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--corp-primary-hover);
@@ -117,7 +117,7 @@
 
 .inputLabel {
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--corp-muted);
@@ -152,7 +152,7 @@
 .sendButton {
   padding: 8px 16px;
   border-radius: var(--corp-radius-pill);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.86rem;
   cursor: pointer;
 }
