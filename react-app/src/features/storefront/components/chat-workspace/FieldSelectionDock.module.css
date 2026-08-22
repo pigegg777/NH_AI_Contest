@@ -117,13 +117,14 @@
   font-weight: 800;
   font-size: 0.86rem;
   cursor: pointer;
-  border: 1px solid #d61e1e;
-  background: #d61e1e;
-  color: rgb(255, 255, 255);
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
 }
 
 .applyButton:hover {
-  filter: brightness(1.04);
+  background: var(--corp-primary-hover);
+  border-color: var(--corp-primary-hover);
 }
 
 @media (max-width: 960px) {

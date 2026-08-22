@@ -158,9 +158,14 @@
 }
 
 .applyButton {
-  border: 1px solid #d61e1e;
-  background: #d61e1e;
-  color: rgb(255, 255, 255);
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}
+
+.applyButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover);
+  border-color: var(--corp-primary-hover);
 }
 
 .sendButton {
