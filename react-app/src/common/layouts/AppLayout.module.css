@@ -75,19 +75,18 @@
   background: var(--corp-surface-muted);
 }
 
-.brandMark {
+/* .brandMark {
   display: grid;
   place-items: center;
   width: 26px;
   height: 26px;
   flex: none;
   border-radius: 6px;
-  background: var(--corp-primary);
-}
+} */
 
 .brandSymbol {
   width: auto;
-  height: 15px;
+  height: 26px;
   display: block;
 }
 
@@ -108,11 +107,11 @@
   background: var(--corp-line);
 }
 
-/* ── Nav (밑줄형 탭) ── */
+/* ── Nav (바로가기 버튼) ── */
 .nav {
   display: flex;
-  align-items: stretch;
-  gap: 18px;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -123,44 +122,55 @@
 }
 
 .navLink {
-  position: relative;
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   flex: none;
-  padding: 0 2px;
-  border: 0;
-  background: transparent;
-  color: var(--corp-muted);
+  height: 34px;
+  padding: 0 12px;
+  /* 마우스를 올리기 전에도 눌리는 것처럼 보여야 한다(터치에는 hover가 없다). */
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: var(--corp-surface-muted);
+  color: var(--corp-text);
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--corp-transition);
-}
-
-/* 헤더 하단 1px 경계선 위에 정확히 얹힌다. */
-.navLink::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  background: transparent;
-  transition: background-color var(--corp-transition);
+  transition:
+    border-color var(--corp-transition),
+    background-color var(--corp-transition),
+    color var(--corp-transition);
 }
 
 .navLink:hover {
+  border-color: var(--corp-line-strong);
+  background: var(--corp-panel);
   color: var(--corp-text);
 }
 
-.navLinkActive {
-  color: var(--corp-text);
+.navLinkActive,
+.navLinkActive:hover {
+  border-color: var(--corp-accent-border);
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
 }
 
-.navLinkActive::after {
-  background: var(--corp-primary);
+.navLinkIcon {
+  display: inline-flex;
+  width: 13px;
+  height: 13px;
+  opacity: 0.75;
+}
+
+.navLinkIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.navLink:hover .navLinkIcon,
+.navLinkActive .navLinkIcon {
+  opacity: 1;
 }
 
 /* ── Actions ── */
@@ -187,13 +197,13 @@
 .account {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 3px;
   padding-left: 14px;
   border-left: 1px solid var(--corp-line);
   flex: none;
   min-width: 0;
 }
-
+/* 
 .avatar {
   display: grid;
   place-items: center;
@@ -206,7 +216,7 @@
   color: var(--corp-primary);
   font-size: 0.7rem;
   font-weight: 700;
-}
+} */
 
 .accountName {
   font-size: 0.8125rem;
@@ -239,6 +249,13 @@
   border-color: var(--corp-line-strong);
   background: var(--corp-surface-muted);
   color: var(--corp-text);
+}
+
+/* 터치 기기에서는 44px 최소 탭 영역을 지킨다. */
+@media (hover: none) {
+  .navLink {
+    height: 44px;
+  }
 }
 
 /* ── Responsive ── */
