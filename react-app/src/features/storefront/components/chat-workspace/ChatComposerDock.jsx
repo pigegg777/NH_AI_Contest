@@ -48,35 +48,25 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
         </div>
       </div>
 
-      <div className={styles.step}>
-        <p className={styles.stepHeading}>
-          <span className={styles.stepNumber} aria-hidden="true">
-            1
-          </span>
-          어디를 바꿀까요
-        </p>
-
-        <div className={styles.stepRow}>
-          <CategoryTabs categoryTabsMode={categoryTabsMode} />
-
-          <DesignTargetChipsBubble
-            label={copy.targetLabel}
-            options={composer.targetOptions}
-            selectedTargetId={composer.selectedTargetId}
-            onSelectTarget={composer.setTargetId}
-          />
-        </div>
+      <div className={styles.categoryTabsWrap}>
+        <CategoryTabs categoryTabsMode={categoryTabsMode} />
       </div>
 
-      <form className={`${styles.step} ${styles.form}`} onSubmit={handleSubmit}>
+      <div className={styles.targetBubbleWrap}>
+        <DesignTargetChipsBubble
+          label={copy.targetLabel}
+          options={composer.targetOptions}
+          selectedTargetId={composer.selectedTargetId}
+          onSelectTarget={composer.setTargetId}
+        />
+      </div>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
         <label
-          className={styles.stepHeading}
+          className={styles.inputLabel}
           htmlFor="storefront-chat-composer-input"
         >
-          <span className={styles.stepNumber} aria-hidden="true">
-            2
-          </span>
-          무엇을 바꿀까요
+          요청 내용
         </label>
 
         {starterPrompts.length > 0 && !composer.promptDraft ? (
