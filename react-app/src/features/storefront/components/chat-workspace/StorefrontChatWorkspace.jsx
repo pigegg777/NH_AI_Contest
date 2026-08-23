@@ -31,6 +31,7 @@ export default function StorefrontChatWorkspace({ session, builder }) {
 
       {modeChoiceMessage ? (
         <ModeChoiceBubble
+          activeModeId={session.mode}
           message={modeChoiceMessage}
           onChooseMode={session.chooseMode}
         />
