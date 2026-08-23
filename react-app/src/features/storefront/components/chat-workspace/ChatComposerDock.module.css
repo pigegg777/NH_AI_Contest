@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 14px 12px 20px;
+  padding: 12px 14px;
   border-radius: var(--corp-radius-xl);
   background: var(--corp-panel, #ffffff);
   border: 1px solid var(--corp-line);
@@ -31,12 +31,50 @@
   flex-shrink: 0;
 }
 
-.categoryTabsWrap {
-  margin: -12px -10px 0;
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: #fcfbf9;
 }
 
-.targetBubbleWrap {
-  margin: -18px -14px 0;
+.stepHeading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--corp-primary, #1d4a2e);
+  color: var(--corp-on-primary, #ffffff);
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.stepRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stepRow > * {
+  flex: 1 1 120px;
+  min-width: 120px;
 }
 
 .title {
@@ -95,34 +133,32 @@
 .targetBubble {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 6px;
 }
 
 .targetBubbleLabel {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--corp-primary-hover);
+  color: var(--corp-muted);
+  word-break: keep-all;
 }
 
 .targetChipList {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .targetChipButton,
 .targetChipButtonActive {
-  padding: 6px 10px;
+  padding: 5px 10px;
   border-radius: var(--corp-radius-pill);
-  border: 1px solid rgba(29, 74, 46, 0.16);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(29, 74, 46, 0.18);
+  background: rgba(255, 255, 255, 0.96);
   color: var(--corp-text);
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   cursor: pointer;
 }
 
@@ -136,14 +172,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.inputLabel {
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--corp-muted);
 }
 
 .input {
@@ -205,5 +233,7 @@
 .applyButton:disabled,
 .sendButton:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  background: #f1efeb;
+  border-color: #e2ded7;
+  color: #a8a29a;
 }

@@ -2,16 +2,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 10px;
 }
 
 .tabLabel {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--corp-text);
+  color: var(--corp-muted);
+  word-break: keep-all;
 }
 
 .tabList {
@@ -44,7 +42,7 @@
 }
 
 .tabButtonActive {
-  background: linear-gradient(135deg, var(--corp-primary-hover-bg), var(--corp-primary-soft));
-  border-color: rgba(29, 74, 46, 0.3);
-  box-shadow: 0 12px 24px rgba(29, 74, 46, 0.12);
+  background: var(--corp-primary-soft, #f0faf4);
+  border-color: var(--corp-primary, #1d4a2e);
+  color: var(--corp-primary, #1d4a2e);
 }
