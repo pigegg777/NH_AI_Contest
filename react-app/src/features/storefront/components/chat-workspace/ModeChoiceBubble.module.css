@@ -5,16 +5,13 @@
 }
 
 .modeChoiceBubbleCompact {
-  width: fit-content;
+  /* Fixed so the descriptions wrap instead of pushing the title off the row. */
+  width: 288px;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-lg);
   background: var(--corp-surface-muted);
-}
-
-.modeChoiceBubbleCompact .modeChoiceDescription {
-  display: none;
 }
 
 .modeChoiceBubbleExpanded {
