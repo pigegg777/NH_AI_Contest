@@ -32,6 +32,20 @@ export default function StorefrontChatWorkspace({ session, builder }) {
   const modeChoiceMessage = session.messages.find(
     (message) => message.kind === 'mode-choice',
   );
+  const isIdle = session.mode === 'idle';
+  const modeChoiceBubble = modeChoiceMessage ? (
+    <ModeChoiceBubble
+      activeModeId={session.mode}
+      message={modeChoiceMessage}
+      onChooseMode={session.chooseMode}
+      size={isIdle ? 'expanded' : 'compact'}
+    />
+  ) : null;
+  const pageDescription = (
+    <p className={styles.pageDescription}>
+      말로 요청하면 미리보기에 바로 반영됩니다
+    </p>
+  );
 
   async function handleApplyDataMode() {
     if (!dataMode) {
@@ -47,29 +61,29 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       data-testid="storefront-chat-workspace"
     >
       <div className={styles.workspaceHeader}>
-        <div className={styles.titleRow}>
+        <div className={isIdle ? styles.titleRow : styles.titleRowSplit}>
           <h2 className={styles.title}>
             <span className={styles.titleIcon}>
               <AiEditIcon />
             </span>
             AI 편집
           </h2>
-          <p className={styles.pageDescription}>
-            말로 요청하면 미리보기에 바로 반영됩니다
-          </p>
+          {isIdle ? pageDescription : modeChoiceBubble}
         </div>
 
-        {modeChoiceMessage ? (
-          <ModeChoiceBubble
-            activeModeId={session.mode}
-            message={modeChoiceMessage}
-            onChooseMode={session.chooseMode}
-          />
-        ) : null}
+        {isIdle ? null : pageDescription}
       </div>
 
       <StorefrontChatThread
         canUndo={Boolean(session.lastApplySnapshot)}
+        intro={
+          isIdle && modeChoiceBubble ? (
+            <div className={styles.threadIntro}>
+              <p className={styles.threadIntroPrompt}>{modeChoiceMessage.text}</p>
+              {modeChoiceBubble}
+            </div>
+          ) : null
+        }
         onUndo={builder.undoLastApply}
         session={session}
       />

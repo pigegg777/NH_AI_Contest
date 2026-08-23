@@ -26,13 +26,19 @@ function renderMessage(message, options) {
   }
 }
 
-export default function StorefrontChatThread({ canUndo, onUndo, session }) {
+export default function StorefrontChatThread({
+  canUndo,
+  intro,
+  onUndo,
+  session,
+}) {
   const visibleMessages = session.messages.filter(
     (message) => message.kind !== "mode-choice" && message.kind !== "mode-transition",
   );
 
   return (
     <div className={styles.threadFrame}>
+      {intro}
       <ol className={styles.threadList} data-testid="storefront-chat-thread">
         {visibleMessages.map((message) =>
           renderMessage(message, {
