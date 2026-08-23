@@ -233,7 +233,7 @@ describe("StorefrontBuilderPage", () => {
     ).toHaveAttribute("aria-selected", "false");
   });
 
-  it("offers a scope guide on the tab design mode opens on", async () => {
+  it("shows a scope guide on the tab design mode opens on, and follows the chip", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -245,17 +245,18 @@ describe("StorefrontBuilderPage", () => {
     );
 
     const chips = await screen.findByTestId("storefront-design-target-chips");
-    const infoButton = within(chips).getByRole("button", {
-      name: "검색창에서 바꿀 수 있는 것 보기",
-    });
-
-    await user.click(infoButton);
-
     const guide = screen.getByTestId("storefront-design-scope-guide");
 
-    expect(within(guide).getByText("검색창에서 바꿀 수 있는 것")).toBeInTheDocument();
     expect(
-      within(guide).getByText("검색창 테두리를 얇게 해줘"),
+      within(guide).getByText("공통 요소 전체에서 바꿀 수 있는 것"),
+    ).toBeInTheDocument();
+
+    await user.click(within(chips).getByRole("button", { name: "검색창" }));
+
+    expect(
+      within(screen.getByTestId("storefront-design-scope-guide")).getByText(
+        "검색창 테두리를 얇게 해줘",
+      ),
     ).toBeInTheDocument();
   });
 

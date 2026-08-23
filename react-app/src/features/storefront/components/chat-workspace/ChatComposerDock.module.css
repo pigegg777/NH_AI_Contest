@@ -94,28 +94,12 @@
   gap: 7px;
 }
 
-.targetChipGroup,
-.targetChipGroupActive {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding-right: 8px;
+.targetChipButton,
+.targetChipButtonActive {
+  padding: 8px 13px;
   border-radius: var(--corp-radius-pill);
   border: 1px solid rgba(29, 74, 46, 0.16);
   background: rgba(255, 255, 255, 0.9);
-}
-
-.targetChipGroupActive {
-  background: var(--corp-primary-hover-bg);
-  border-color: rgba(29, 74, 46, 0.3);
-  box-shadow: var(--corp-shadow-sm);
-}
-
-.targetChipButton {
-  padding: 8px 5px 8px 13px;
-  border: none;
-  border-radius: var(--corp-radius-pill);
-  background: transparent;
   color: var(--corp-text);
   font-family: inherit;
   font-weight: 700;
@@ -123,40 +107,10 @@
   cursor: pointer;
 }
 
-.targetChipInfo,
-.targetChipInfoActive {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: 1px solid var(--corp-line-strong);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--corp-muted);
-  font-family: inherit;
-  font-size: 0.66rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.targetChipInfo:hover,
-.targetChipInfoActive:hover {
-  border-color: var(--corp-primary-bright);
-  color: var(--corp-primary-bright);
-}
-
-.targetChipInfoActive {
-  border-color: var(--corp-primary-bright);
-  background: var(--corp-primary-bright);
-  color: var(--corp-on-primary);
-}
-
-.targetChipInfoActive:hover {
-  color: var(--corp-on-primary);
+.targetChipButtonActive {
+  background: var(--corp-primary-hover-bg);
+  border-color: rgba(29, 74, 46, 0.3);
+  box-shadow: var(--corp-shadow-sm);
 }
 
 .scopeGuidePanel {
@@ -166,55 +120,35 @@
   overflow: hidden;
 }
 
-.scopeGuideHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 6px 6px 10px;
-  background: var(--corp-primary-soft);
-}
-
 .scopeGuideTitle {
   margin: 0;
-  font-size: 0.74rem;
+  padding: 8px 12px;
+  background: var(--corp-primary-soft);
+  font-size: 0.76rem;
   font-weight: 700;
   color: var(--corp-primary-hover);
   word-break: keep-all;
-}
-
-.scopeGuideClose {
-  flex-shrink: 0;
-  padding: 2px 6px;
-  border: none;
-  border-radius: var(--corp-radius-sm);
-  background: transparent;
-  color: var(--corp-muted);
-  font-family: inherit;
-  font-size: 0.76rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.scopeGuideClose:hover {
-  color: var(--corp-text);
 }
 
 .scopeGuideTable {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
 }
 
 .scopeGuideTable th,
 .scopeGuideTable td {
-  padding: 5px 8px;
+  padding: 10px 12px;
   text-align: left;
   vertical-align: top;
-  line-height: 1.35;
+  line-height: 1.45;
   word-break: keep-all;
   overflow-wrap: break-word;
+}
+
+.scopeGuideSplit {
+  border-left: 1px solid var(--corp-line);
 }
 
 .scopeGuideTable thead th {
@@ -224,8 +158,9 @@
   border-bottom: 1px solid var(--corp-line);
 }
 
-.scopeGuideTable thead th:first-child {
-  width: 35%;
+.scopeGuideTable thead th:nth-child(1),
+.scopeGuideTable thead th:nth-child(3) {
+  width: 20%;
 }
 
 .scopeGuideTable tbody th {
