@@ -21,6 +21,10 @@
 }
 
 .headerText {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   min-width: 0;
 }
 
@@ -40,10 +44,11 @@
 }
 
 .title {
-  margin: 0 0 2px;
+  margin: 0;
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--corp-text);
+  white-space: nowrap;
 }
 
 .description {
