@@ -8,6 +8,37 @@
   overflow: auto;
 }
 
+.threadFrameEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.threadEmpty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 34ch;
+  text-align: center;
+}
+
+.threadEmptyTitle {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.threadEmptyText {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--corp-muted);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 .threadList {
   display: flex;
   flex-direction: column;

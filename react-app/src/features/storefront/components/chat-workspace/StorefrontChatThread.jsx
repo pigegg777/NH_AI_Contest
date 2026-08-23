@@ -31,6 +31,25 @@ export default function StorefrontChatThread({ canUndo, onUndo, session }) {
     (message) => message.kind !== "mode-choice" && message.kind !== "mode-transition",
   );
 
+  if (visibleMessages.length === 0) {
+    return (
+      <div className={`${styles.threadFrame} ${styles.threadFrameEmpty}`}>
+        <div
+          className={styles.threadEmpty}
+          data-testid="storefront-chat-thread-empty"
+        >
+          <p className={styles.threadEmptyTitle}>
+            아직 주고받은 대화가 없습니다
+          </p>
+          <p className={styles.threadEmptyText}>
+            아래에서 바꾸고 싶은 곳을 고르고 원하는 내용을 적어주세요.
+            반영한 결과는 여기에 차례로 쌓입니다.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.threadFrame}>
       <ol className={styles.threadList} data-testid="storefront-chat-thread">
