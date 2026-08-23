@@ -4,6 +4,25 @@ import ModeChoiceBubble from './ModeChoiceBubble';
 import StorefrontChatThread from './StorefrontChatThread';
 import styles from './StorefrontChatWorkspace.module.css';
 
+function AiEditIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M8 2.4 9.45 6.55 13.6 8 9.45 9.45 8 13.6 6.55 9.45 2.4 8 6.55 6.55z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.6 11.6 15.4 13.8 17.6 14.6 15.4 15.4 14.6 17.6 13.8 15.4 11.6 14.6 13.8 13.8z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function StorefrontChatWorkspace({ session, builder }) {
   const dataMode = builder?.dataMode;
   const designMode = builder?.designMode;
@@ -28,7 +47,17 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       data-testid="storefront-chat-workspace"
     >
       <div className={styles.workspaceHeader}>
-        <h2 className={styles.title}>AI 편집</h2>
+        <div className={styles.titleRow}>
+          <h2 className={styles.title}>
+            <span className={styles.titleIcon}>
+              <AiEditIcon />
+            </span>
+            AI 편집
+          </h2>
+          <p className={styles.pageDescription}>
+            말로 요청하면 미리보기에 바로 반영됩니다
+          </p>
+        </div>
 
         {modeChoiceMessage ? (
           <ModeChoiceBubble
