@@ -36,11 +36,11 @@
 }
 
 .categoryTabsWrap {
-  margin: -12px -10px 0;
+  margin: -18px -10px 0;
 }
 
 .targetBubbleWrap {
-  margin: -18px -14px 0;
+  margin: -8px -14px 0;
 }
 
 .title {
@@ -60,31 +60,6 @@
   overflow-wrap: break-word;
 }
 
-.starterList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.starterButton {
-  padding: 6px 11px;
-  border: 1px dashed var(--corp-line-strong, #cbc5be);
-  border-radius: var(--corp-radius-pill);
-  background: transparent;
-  color: var(--corp-text);
-  font: inherit;
-  font-size: 0.78rem;
-  cursor: pointer;
-  word-break: keep-all;
-}
-
-.starterButton:hover {
-  border-style: solid;
-  border-color: var(--corp-primary, #1d4a2e);
-  color: var(--corp-primary, #1d4a2e);
-  background: var(--corp-primary-soft, #f0faf4);
-}
-
 .discardButton {
   flex-shrink: 0;
   padding: 8px 10px;
@@ -100,8 +75,8 @@
 .targetBubble {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 7px;
+  padding: 10px 14px;
 }
 
 .targetBubbleLabel {
@@ -116,25 +91,168 @@
 .targetChipList {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 7px;
 }
 
-.targetChipButton,
-.targetChipButtonActive {
-  padding: 6px 10px;
+.targetChipGroup,
+.targetChipGroupActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 8px;
   border-radius: var(--corp-radius-pill);
   border: 1px solid rgba(29, 74, 46, 0.16);
   background: rgba(255, 255, 255, 0.9);
+}
+
+.targetChipGroupActive {
+  background: linear-gradient(
+    135deg,
+    var(--corp-primary-hover-bg),
+    var(--corp-primary-soft)
+  );
+  border-color: rgba(29, 74, 46, 0.3);
+  box-shadow: 0 12px 24px rgba(29, 74, 46, 0.12);
+}
+
+.targetChipButton {
+  padding: 8px 5px 8px 13px;
+  border: none;
+  border-radius: var(--corp-radius-pill);
+  background: transparent;
   color: var(--corp-text);
+  font-family: inherit;
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   cursor: pointer;
 }
 
-.targetChipButtonActive {
-  background: var(--corp-primary, #1d4a2e);
-  border-color: var(--corp-primary, #1d4a2e);
-  color: var(--corp-on-primary, #ffffff);
+.targetChipInfo,
+.targetChipInfoActive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--corp-muted);
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.targetChipInfo:hover,
+.targetChipInfoActive:hover {
+  border-color: var(--corp-primary-bright);
+  color: var(--corp-primary-bright);
+}
+
+.targetChipInfoActive {
+  border-color: var(--corp-primary-bright);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+}
+
+.targetChipInfoActive:hover {
+  color: var(--corp-on-primary);
+}
+
+.scopeGuidePanel {
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  overflow: hidden;
+}
+
+.scopeGuideHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 6px 6px 10px;
+  background: var(--corp-primary-soft);
+}
+
+.scopeGuideTitle {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--corp-primary-hover);
+  word-break: keep-all;
+}
+
+.scopeGuideClose {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border: none;
+  border-radius: var(--corp-radius-sm);
+  background: transparent;
+  color: var(--corp-muted);
+  font-family: inherit;
+  font-size: 0.76rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.scopeGuideClose:hover {
+  color: var(--corp-text);
+}
+
+.scopeGuideTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.72rem;
+}
+
+.scopeGuideTable th,
+.scopeGuideTable td {
+  padding: 5px 8px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.35;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.scopeGuideTable thead th {
+  font-weight: 700;
+  color: var(--corp-table-header-text);
+  background: var(--corp-table-header-bg);
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.scopeGuideTable thead th:first-child {
+  width: 35%;
+}
+
+.scopeGuideTable tbody th {
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.scopeGuideTable tbody td {
+  color: var(--corp-muted);
+}
+
+.scopeGuideTable tbody tr:not(:last-child) th,
+.scopeGuideTable tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.scopeGuideNote {
+  margin: 0;
+  padding: 6px 8px 8px;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--corp-muted);
+  word-break: keep-all;
 }
 
 .form {

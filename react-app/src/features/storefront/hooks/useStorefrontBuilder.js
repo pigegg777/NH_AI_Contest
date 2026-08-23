@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { toTrimmedString } from "../../../common/utils/text";
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
 import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
+import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import {
   DEFAULT_NAV_CONFIG,
@@ -736,6 +737,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             designTarget === "common"
               ? PAGE_AI_TARGET_SCOPE_OPTIONS
               : CARD_AI_TARGET_SCOPE_OPTIONS,
+          getScopeGuide:
+            designTarget === "common" ? null : getCardDesignScopeGuide,
           selectedTargetId:
             designTarget === "common"
               ? pageAi.pageAiDesign.targetScope
