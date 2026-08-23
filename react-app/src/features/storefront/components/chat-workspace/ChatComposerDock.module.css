@@ -106,13 +106,9 @@
 }
 
 .targetChipGroupActive {
-  background: linear-gradient(
-    135deg,
-    var(--corp-primary-hover-bg),
-    var(--corp-primary-soft)
-  );
+  background: var(--corp-primary-hover-bg);
   border-color: rgba(29, 74, 46, 0.3);
-  box-shadow: 0 12px 24px rgba(29, 74, 46, 0.12);
+  box-shadow: var(--corp-shadow-sm);
 }
 
 .targetChipButton {
