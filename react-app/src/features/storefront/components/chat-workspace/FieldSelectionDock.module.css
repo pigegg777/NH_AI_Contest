@@ -7,13 +7,7 @@
   gap: 10px;
   padding: 12px 14px;
   border-top: 1px solid var(--corp-line);
-  background:
-    linear-gradient(
-      180deg,
-      var(--corp-surface-muted),
-      rgba(255, 255, 255, 0.99)
-    ),
-    rgba(255, 255, 255, 0.98);
+  background: var(--corp-panel, #ffffff);
   box-shadow: 0 -18px 40px rgba(15, 23, 42, 0.08);
   backdrop-filter: blur(18px);
 }
