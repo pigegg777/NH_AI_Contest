@@ -92,7 +92,7 @@ export default function StorefrontView({ config, productRows, officeName, nhName
 
           {view.canRenderEmptyState ? (
             <div className={styles.emptyState}>
-              표시할 상품이 없습니다. 검색어나 중분류를 다시 확인해 주세요.
+              찾으시는 자재가 없습니다. 검색어를 바꾸거나 다른 분류를 눌러보세요.
             </div>
           ) : null}
 

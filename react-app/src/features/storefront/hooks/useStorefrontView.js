@@ -190,13 +190,11 @@ export function useStorefrontView({
     ? `${headerOrgName} 농자재 정보`
     : title;
   const subtitle =
-    config?.navConfig?.subtitle ||
-    resolvedPageConfig.nav.subtitle ||
-    '고객님께 안내할 상품을 둘러보세요.';
+    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '';
   const searchPlaceholder =
     config?.navConfig?.searchPlaceholder ||
     resolvedPageConfig.searchSection.placeholder ||
-    '상품 검색';
+    '찾으시는 자재를 입력하세요';
   const searchVariant =
     config?.navConfig?.searchVariant ||
     resolvedPageConfig.searchSection.variant ||

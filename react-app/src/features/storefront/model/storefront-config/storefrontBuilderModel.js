@@ -146,7 +146,7 @@ export const DEFAULT_NAV_CONFIG = {
   title: '',
   subtitle: '',
   brandColor: DEFAULT_PAGE_STYLE.palette.accentHex,
-  searchPlaceholder: '상품 검색',
+  searchPlaceholder: '찾으시는 자재를 입력하세요',
   logoUrl: '',
   searchVariant: 'pill',
 };

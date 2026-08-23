@@ -146,7 +146,7 @@ describe('PublicStorefrontPage', () => {
   it('renders the placeholder without fetching when officeCode is missing', () => {
     render(<PublicStorefrontPage officeCode="" />);
 
-    expect(screen.getByText('페이지 준비 중입니다.')).toBeInTheDocument();
+    expect(screen.getByText('아직 공개된 상품 정보가 없습니다.')).toBeInTheDocument();
     expect(fetchStorefrontConfig).not.toHaveBeenCalled();
     expect(fetchAllOfficeProductRows).not.toHaveBeenCalled();
   });
@@ -157,7 +157,7 @@ describe('PublicStorefrontPage', () => {
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
-    expect(screen.getByText('불러오는 중...')).toBeInTheDocument();
+    expect(screen.getByText('불러오는 중…')).toBeInTheDocument();
   });
 
   it('renders the placeholder when no config row exists', async () => {
@@ -166,7 +166,7 @@ describe('PublicStorefrontPage', () => {
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
-    expect(await screen.findByText('페이지 준비 중입니다.')).toBeInTheDocument();
+    expect(await screen.findByText('아직 공개된 상품 정보가 없습니다.')).toBeInTheDocument();
   });
 
   it('shows an error message when a fetch rejects', async () => {
@@ -557,7 +557,7 @@ describe('PublicStorefrontPage', () => {
     expect(within(mobileCategoryBar).getByText('비료')).toBeInTheDocument();
     expect(within(mobileCategoryBar).getByText('복합비료')).toBeInTheDocument();
     expect(within(mobileCategoryBar).getByText('유기질비료')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('상품 검색')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('찾으시는 자재를 입력하세요')).toBeInTheDocument();
     expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-size', 'compact');
   });
 

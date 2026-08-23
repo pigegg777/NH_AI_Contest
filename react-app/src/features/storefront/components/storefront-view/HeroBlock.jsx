@@ -18,6 +18,9 @@ export default function HeroBlock({ view, brandLogoSrc }) {
               <p className={styles.eyebrow}>{view.coopName}</p>
             ) : null}
             <h1 className={styles.title}>{view.headerOrgLine}</h1>
+            {view.subtitle ? (
+              <p className={styles.subtitle}>{view.subtitle}</p>
+            ) : null}
           </div>
         </div>
       </div>
