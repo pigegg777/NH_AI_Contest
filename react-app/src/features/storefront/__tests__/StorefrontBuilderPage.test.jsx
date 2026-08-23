@@ -226,6 +226,44 @@ describe("StorefrontBuilderPage", () => {
     ).toHaveAttribute("aria-selected", "false");
   });
 
+  it("fills the composer from a starter prompt chip and hides the chips once a draft exists", async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+    );
+
+    const starters = await screen.findByTestId(
+      "storefront-chat-composer-starters",
+    );
+
+    expect(
+      within(starters)
+        .getAllByRole("button")
+        .map((button) => button.textContent),
+    ).toEqual([
+      "가격을 눈에 띄게 해줘",
+      "글씨를 조금 더 크고 진하게 해줘",
+      "전체적으로 차분한 색으로 바꿔줘",
+      "검색창을 더 잘 보이게 해줘",
+    ]);
+
+    await user.click(
+      within(starters).getByRole("button", { name: "가격을 눈에 띄게 해줘" }),
+    );
+
+    expect(screen.getByTestId("storefront-chat-composer-input")).toHaveValue(
+      "가격을 눈에 띄게 해줘",
+    );
+    expect(
+      screen.queryByTestId("storefront-chat-composer-starters"),
+    ).not.toBeInTheDocument();
+  });
+
   it("sends a common-elements prompt through requestPageStyleAiIntent and shows the reply", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
