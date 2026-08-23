@@ -205,6 +205,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setStatus((current) => (current === "saved" ? "ready" : current));
   }
 
+  function changeCardsPerRow(value) {
+    cardAi.setCardsPerRow(value);
+    markDirty();
+    setComposerApplyPending("category", true);
+  }
+
   function hydrateCategoryDraft(
     categoryName,
     nextProductEntries,
@@ -742,6 +748,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             designTarget === "common"
               ? getPageDesignScopeGuide
               : getCardDesignScopeGuide,
+          cardsPerRow:
+            designTarget === "common" ? null : cardAi.cardStyle.cardsPerRow,
+          setCardsPerRow:
+            designTarget === "common" ? null : changeCardsPerRow,
           selectedTargetId:
             designTarget === "common"
               ? pageAi.pageAiDesign.targetScope

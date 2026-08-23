@@ -95,6 +95,50 @@ describe('DesignTargetChipsBubble', () => {
     expect(within(bodyRows[3]).queryAllByRole('rowheader')).toHaveLength(1);
   });
 
+  it('offers the cards-per-row control first while 전체 is selected', async () => {
+    const user = userEvent.setup();
+    const onChangeCardsPerRow = vi.fn();
+
+    renderBubble({
+      selectedTargetId: '',
+      cardsPerRow: 2,
+      onChangeCardsPerRow,
+    });
+
+    const control = screen.getByTestId('storefront-cards-per-row');
+    const guide = screen.getByTestId('storefront-design-scope-guide');
+
+    expect(control.compareDocumentPosition(guide)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(
+      within(control).getByRole('button', { name: '2개' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(within(control).getByRole('button', { name: '1개' }));
+    expect(onChangeCardsPerRow).toHaveBeenCalledWith(1);
+  });
+
+  it('hides the cards-per-row control on every scope other than 전체', () => {
+    renderBubble({
+      selectedTargetId: 'image',
+      cardsPerRow: 2,
+      onChangeCardsPerRow: vi.fn(),
+    });
+
+    expect(
+      screen.queryByTestId('storefront-cards-per-row'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the cards-per-row control when no handler is supplied', () => {
+    renderBubble({ selectedTargetId: '' });
+
+    expect(
+      screen.queryByTestId('storefront-cards-per-row'),
+    ).not.toBeInTheDocument();
+  });
+
   it('omits the guide when no resolver is supplied', () => {
     renderBubble({ getScopeGuide: null });
 

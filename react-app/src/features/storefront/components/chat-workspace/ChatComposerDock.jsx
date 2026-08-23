@@ -57,6 +57,8 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
           selectedTargetId={composer.selectedTargetId}
           onSelectTarget={composer.setTargetId}
           getScopeGuide={composer.getScopeGuide}
+          cardsPerRow={composer.cardsPerRow}
+          onChangeCardsPerRow={composer.setCardsPerRow}
         />
       </div>
 
@@ -75,7 +77,7 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
           value={composer.promptDraft}
           placeholder={copy.placeholder}
           onChange={(event) => composer.setPromptDraft(event.target.value)}
-          rows={5}
+          rows={3}
         />
 
         {composer.errorMessage ? (
