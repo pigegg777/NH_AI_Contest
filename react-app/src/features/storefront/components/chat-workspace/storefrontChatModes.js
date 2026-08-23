@@ -1,36 +1,44 @@
 export const STOREFRONT_CHAT_MODE_OPTIONS = [
   {
     id: 'data',
-    label: '대분류별 표시할 데이터선택',
-    description: '영세가격,면세가격,분류등 보여줄 데이터를 선택',
+    label: '표시 항목 고르기',
+    description: '영세가격, 면세가격, 분류 등 카드에 보여줄 항목을 고릅니다',
   },
   {
     id: 'design',
-    label: 'AI 디자인 수정',
-    description: '공통 요소와 대분류별 카드 디자인을 한 작업 공간에서 이어서 수정',
+    label: '디자인 바꾸기',
+    description: '색감과 글씨부터 카드 모양까지 말로 요청해 바꿉니다',
   },
 ];
 
 const STOREFRONT_DESIGN_TARGET_COMPOSER_COPY = {
   common: {
-    title: '공통 요소 디자인 작업 공간',
-    description:
-      '미리보기를 유지한 채 페이지 전반 분위기와 탐색 요소를 조정합니다.',
-    placeholder:
-      '페이지 톤, 검색창, 카테고리 칩, 배너 등에 대한 수정 요청을 입력하세요.',
+    title: '페이지 전체 디자인',
+    description: '색감, 검색창, 카테고리 버튼처럼 모든 화면에 함께 적용됩니다.',
+    placeholder: '예) 배경을 조금 더 밝게 하고 가격을 눈에 띄게 해줘',
     discardLabel: '뒤로가기',
-    sendLabel: 'AI 요청하기',
+    sendLabel: '미리보기에 반영',
     targetLabel: '수정 대상',
+    starterPrompts: [
+      '가격을 눈에 띄게 해줘',
+      '글씨를 조금 더 크고 진하게 해줘',
+      '전체적으로 차분한 색으로 바꿔줘',
+      '검색창을 더 잘 보이게 해줘',
+    ],
   },
   category: {
-    title: '카드 디자인 작업 공간',
-    description:
-      '선택된 카테고리 카드의 상세 디자인을 이 작업 공간 안에서 이어서 조정합니다.',
-    placeholder:
-      '카드 레이아웃, 이미지 처리, 정보 영역, 강조 필드 등에 대한 수정 요청을 입력하세요.',
+    title: '카드 디자인',
+    description: '지금 고른 분류의 상품 카드에만 적용됩니다.',
+    placeholder: '예) 사진을 크게 하고 상품명을 두 줄까지 보여줘',
     discardLabel: '뒤로가기',
-    sendLabel: 'AI 요청하기',
+    sendLabel: '미리보기에 반영',
     targetLabel: '수정 대상',
+    starterPrompts: [
+      '사진을 더 크게 보여줘',
+      '상품명을 두 줄까지 보여줘',
+      '가격을 제일 크게 강조해줘',
+      '카드를 더 단순하게 정리해줘',
+    ],
   },
 };
 

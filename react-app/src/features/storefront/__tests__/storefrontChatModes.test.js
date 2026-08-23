@@ -24,15 +24,15 @@ describe('getStorefrontDesignComposerCopy', () => {
   it('returns page-style copy for the common target', () => {
     const copy = getStorefrontDesignComposerCopy('common');
 
-    expect(copy.title).toBe('공통 요소 디자인 작업 공간');
+    expect(copy.title).toBe('페이지 전체 디자인');
     expect(copy.targetLabel).toBe('수정 대상');
-    expect(copy.sendLabel).toBe('AI 요청하기');
+    expect(copy.sendLabel).toBe('미리보기에 반영');
   });
 
   it('returns card-style copy for the category target', () => {
     const copy = getStorefrontDesignComposerCopy('category');
 
-    expect(copy.title).toBe('카드 디자인 작업 공간');
+    expect(copy.title).toBe('카드 디자인');
     expect(copy.targetLabel).toBe('수정 대상');
   });
 

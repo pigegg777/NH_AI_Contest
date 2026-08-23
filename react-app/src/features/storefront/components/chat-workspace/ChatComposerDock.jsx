@@ -9,6 +9,8 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
     return null;
   }
 
+  const starterPrompts = copy.starterPrompts ?? [];
+
   function handleSubmit(event) {
     event.preventDefault();
     composer.sendPrompt();
@@ -66,6 +68,25 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
         >
           요청 내용
         </label>
+
+        {starterPrompts.length > 0 && !composer.promptDraft ? (
+          <div
+            className={styles.starterList}
+            data-testid="storefront-chat-composer-starters"
+          >
+            {starterPrompts.map((starter) => (
+              <button
+                key={starter}
+                type="button"
+                className={styles.starterButton}
+                onClick={() => composer.setPromptDraft(starter)}
+              >
+                {starter}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <textarea
           id="storefront-chat-composer-input"
           data-testid="storefront-chat-composer-input"

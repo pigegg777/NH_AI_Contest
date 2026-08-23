@@ -188,10 +188,10 @@ describe("StorefrontBuilderPage", () => {
     const bubble = await screen.findByTestId("storefront-mode-choice-bubble");
 
     expect(
-      within(bubble).getByRole("button", { name: "대분류별 표시할 데이터선택" }),
+      within(bubble).getByRole("button", { name: "표시 항목 고르기" }),
     ).toBeInTheDocument();
     expect(
-      within(bubble).getByRole("button", { name: "AI 디자인 수정" }),
+      within(bubble).getByRole("button", { name: "디자인 바꾸기" }),
     ).toBeInTheDocument();
     expect(within(bubble).getAllByRole("button")).toHaveLength(2);
   });
@@ -204,13 +204,13 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
 
     expect(
       await screen.findByTestId("storefront-chat-composer-dock"),
     ).toBeInTheDocument();
-    expect(screen.getByText("공통 요소 디자인 작업 공간")).toBeInTheDocument();
+    expect(screen.getByText("페이지 전체 디자인")).toBeInTheDocument();
 
     const tabs = screen.getByTestId("storefront-sticky-category-tabs");
 
@@ -239,7 +239,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
 
     const composerInput = await screen.findByTestId(
@@ -270,13 +270,13 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
     await user.click(
       await screen.findByRole("tab", { name: "Fertilizer Upload" }),
     );
 
-    expect(screen.getByText("카드 디자인 작업 공간")).toBeInTheDocument();
+    expect(screen.getByText("카드 디자인")).toBeInTheDocument();
 
     const composerInput = screen.getByTestId("storefront-chat-composer-input");
     await user.type(composerInput, "Make the price field bold.");
@@ -302,7 +302,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
@@ -318,7 +318,7 @@ describe("StorefrontBuilderPage", () => {
       screen.getByRole("tab", { name: "Fertilizer Upload" }),
     );
 
-    expect(screen.getByText("카드 디자인 작업 공간")).toBeInTheDocument();
+    expect(screen.getByText("카드 디자인")).toBeInTheDocument();
     expect(upsertStorefrontConfig).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "저장하기" })).toBeDisabled();
 
@@ -365,7 +365,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" nhName="NH" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "AI 디자인 수정" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
@@ -403,7 +403,7 @@ describe("StorefrontBuilderPage", () => {
 
     await user.click(
       await screen.findByRole("button", {
-        name: "대분류별 표시할 데이터선택",
+        name: "표시 항목 고르기",
       }),
     );
 

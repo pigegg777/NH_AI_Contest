@@ -14,7 +14,7 @@ describe('useStorefrontChatSession', () => {
         role: 'assistant',
         kind: 'mode-choice',
         isActionable: true,
-        text: '다음 스토어프론트 모드를 선택하세요.',
+        text: '무엇을 도와드릴까요?',
       }),
     ]);
     expect(result.current.lastApplySnapshot).toBeUndefined();
@@ -87,7 +87,7 @@ describe('useStorefrontChatSession', () => {
         role: 'assistant',
         kind: 'mode-choice',
         isActionable: true,
-        text: '다음 스토어프론트 모드를 선택하세요.',
+        text: '무엇을 도와드릴까요?',
       }),
       expect.objectContaining({
         id: 'storefront-chat-message-2',
@@ -117,7 +117,7 @@ describe('useStorefrontChatSession', () => {
         id: 'storefront-chat-message-1',
         kind: 'mode-choice',
         isActionable: true,
-        text: '다음 스토어프론트 모드를 선택하세요.',
+        text: '무엇을 도와드릴까요?',
       }),
       expect.objectContaining({
         id: 'storefront-chat-message-2',

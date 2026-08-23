@@ -27,7 +27,7 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       className={styles.workspace}
       data-testid="storefront-chat-workspace"
     >
-      <h2 className={styles.title}>스토어프론트 AI 작업 공간</h2>
+      <h2 className={styles.title}>AI 편집</h2>
 
       {modeChoiceMessage ? (
         <ModeChoiceBubble

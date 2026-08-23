@@ -31,7 +31,7 @@ function createInitialModeChoiceMessage({ isActionable = true } = {}) {
     role: 'assistant',
     kind: 'mode-choice',
     isActionable,
-    text: '다음 스토어프론트 모드를 선택하세요.',
+    text: '무엇을 도와드릴까요?',
   };
 }
 

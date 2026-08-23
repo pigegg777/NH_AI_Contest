@@ -7,11 +7,7 @@
   gap: 10px;
   padding: 12px 14px 12px 20px;
   border-radius: var(--corp-radius-xl);
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98),
-    var(--corp-surface-muted)
-  );
+  background: var(--corp-panel, #ffffff);
   border: 1px solid var(--corp-line);
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
   backdrop-filter: blur(16px);
@@ -55,6 +51,33 @@
   font-size: 0.8rem;
   line-height: 1.35;
   color: var(--corp-muted);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.starterList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.starterButton {
+  padding: 6px 11px;
+  border: 1px dashed var(--corp-line-strong, #cbc5be);
+  border-radius: var(--corp-radius-pill);
+  background: transparent;
+  color: var(--corp-text);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.starterButton:hover {
+  border-style: solid;
+  border-color: var(--corp-primary, #1d4a2e);
+  color: var(--corp-primary, #1d4a2e);
+  background: var(--corp-primary-soft, #f0faf4);
 }
 
 .discardButton {
@@ -104,9 +127,9 @@
 }
 
 .targetChipButtonActive {
-  background: linear-gradient(135deg, var(--corp-primary-hover-bg), var(--corp-primary-soft));
-  border-color: rgba(29, 74, 46, 0.3);
-  box-shadow: 0 10px 18px rgba(29, 74, 46, 0.1);
+  background: var(--corp-primary, #1d4a2e);
+  border-color: var(--corp-primary, #1d4a2e);
+  color: var(--corp-on-primary, #ffffff);
 }
 
 .form {
@@ -169,9 +192,14 @@
 }
 
 .sendButton {
-  border: 0;
-  background: linear-gradient(135deg, var(--corp-primary), var(--corp-primary-hover));
-  color: #ffffff;
+  border: 1px solid var(--corp-primary, #1d4a2e);
+  background: var(--corp-primary, #1d4a2e);
+  color: var(--corp-on-primary, #ffffff);
+}
+
+.sendButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover, #163622);
+  border-color: var(--corp-primary-hover, #163622);
 }
 
 .applyButton:disabled,
