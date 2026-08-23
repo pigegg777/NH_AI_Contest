@@ -187,6 +187,8 @@ describe("StorefrontBuilderPage", () => {
 
     const bubble = await screen.findByTestId("storefront-mode-choice-bubble");
 
+    expect(bubble).toHaveAttribute("data-placement", "thread");
+
     expect(
       within(bubble).getByRole("button", { name: "표시 항목 고르기" }),
     ).toBeInTheDocument();
@@ -205,6 +207,11 @@ describe("StorefrontBuilderPage", () => {
 
     await user.click(
       await screen.findByRole("button", { name: "디자인 바꾸기" }),
+    );
+
+    expect(screen.getByTestId("storefront-mode-choice-bubble")).toHaveAttribute(
+      "data-placement",
+      "header",
     );
 
     expect(
@@ -226,7 +233,7 @@ describe("StorefrontBuilderPage", () => {
     ).toHaveAttribute("aria-selected", "false");
   });
 
-  it("fills the composer from a starter prompt chip and hides the chips once a draft exists", async () => {
+  it("offers a scope guide on the tab design mode opens on", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -237,31 +244,38 @@ describe("StorefrontBuilderPage", () => {
       await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
 
-    const starters = await screen.findByTestId(
-      "storefront-chat-composer-starters",
-    );
+    const chips = await screen.findByTestId("storefront-design-target-chips");
+    const infoButton = within(chips).getByRole("button", {
+      name: "검색창에서 바꿀 수 있는 것 보기",
+    });
 
+    await user.click(infoButton);
+
+    const guide = screen.getByTestId("storefront-design-scope-guide");
+
+    expect(within(guide).getByText("검색창에서 바꿀 수 있는 것")).toBeInTheDocument();
     expect(
-      within(starters)
-        .getAllByRole("button")
-        .map((button) => button.textContent),
-    ).toEqual([
-      "가격을 눈에 띄게 해줘",
-      "글씨를 조금 더 크고 진하게 해줘",
-      "전체적으로 차분한 색으로 바꿔줘",
-      "검색창을 더 잘 보이게 해줘",
-    ]);
+      within(guide).getByText("검색창 테두리를 얇게 해줘"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the design composer without starter prompt chips", async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      within(starters).getByRole("button", { name: "가격을 눈에 띄게 해줘" }),
+      await screen.findByRole("button", { name: "디자인 바꾸기" }),
     );
 
-    expect(screen.getByTestId("storefront-chat-composer-input")).toHaveValue(
-      "가격을 눈에 띄게 해줘",
-    );
     expect(
       screen.queryByTestId("storefront-chat-composer-starters"),
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId("storefront-chat-composer-input")).toHaveValue(
+      "",
+    );
   });
 
   it("sends a common-elements prompt through requestPageStyleAiIntent and shows the reply", async () => {
@@ -420,16 +434,17 @@ describe("StorefrontBuilderPage", () => {
     const undoButton = await screen.findByRole("button", { name: "되돌리기" });
 
     expect(undoButton).toBeInTheDocument();
-    expect(
-      screen.getAllByTestId("storefront-mode-choice-bubble").length,
-    ).toBeGreaterThan(0);
+    expect(screen.getByTestId("storefront-mode-choice-bubble")).toHaveAttribute(
+      "data-placement",
+      "header",
+    );
 
     await user.click(undoButton);
 
     expect(upsertStorefrontConfig).toHaveBeenCalledTimes(2);
     expect(
-      (await screen.findAllByTestId("storefront-mode-choice-bubble")).length,
-    ).toBeGreaterThan(0);
+      await screen.findByTestId("storefront-mode-choice-bubble"),
+    ).toHaveAttribute("data-placement", "header");
   });
 
   it("keeps data mode working: category tabs, per-category field toggles, and 저장하기", async () => {

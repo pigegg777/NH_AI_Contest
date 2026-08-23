@@ -5,6 +5,7 @@ import { fetchOfficeProductDataEntries } from "../../office-product-editor/servi
 import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
 import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
+import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -738,7 +739,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
               ? PAGE_AI_TARGET_SCOPE_OPTIONS
               : CARD_AI_TARGET_SCOPE_OPTIONS,
           getScopeGuide:
-            designTarget === "common" ? null : getCardDesignScopeGuide,
+            designTarget === "common"
+              ? getPageDesignScopeGuide
+              : getCardDesignScopeGuide,
           selectedTargetId:
             designTarget === "common"
               ? pageAi.pageAiDesign.targetScope
