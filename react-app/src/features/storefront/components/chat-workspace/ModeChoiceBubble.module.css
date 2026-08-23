@@ -83,14 +83,14 @@
 }
 
 .modeChoiceButtonActive {
-  background: var(--corp-primary);
-  border-color: var(--corp-primary);
+  background: var(--corp-primary-bright);
+  border-color: var(--corp-primary-bright);
   box-shadow: var(--corp-shadow-sm);
 }
 
 .modeChoiceButtonActive:hover:not(:disabled) {
-  background: var(--corp-primary-hover);
-  border-color: var(--corp-primary-hover);
+  background: var(--corp-primary-bright-hover);
+  border-color: var(--corp-primary-bright-hover);
 }
 
 .modeChoiceButtonActive .modeChoiceLabel {
