@@ -1,6 +1,8 @@
 .modeChoiceBubble {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: fit-content;
+  max-width: 100%;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--corp-line-strong);
