@@ -7,6 +7,7 @@
   position: sticky;
   top: 0;
   z-index: 3;
+  background: var(--corp-panel, #ffffff);
 }
 
 .modeChoiceText {
@@ -18,17 +19,17 @@
 
 .modeChoiceGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
 .modeChoiceButton {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 2px;
   width: 100%;
-  padding: 10px 20px;
+  padding: 12px 16px;
   border: 1px solid rgba(211, 240, 202, 0.92);
   border-radius: var(--corp-radius-lg);
   background: rgba(244, 252, 241, 0.92);
