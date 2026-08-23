@@ -5,12 +5,17 @@ export default function ModeChoiceBubble({
   message,
   onChooseMode,
   activeModeId,
+  size = "compact",
 }) {
   const isActionable = message.isActionable !== false;
+  const sizeClass =
+    size === "expanded"
+      ? styles.modeChoiceBubbleExpanded
+      : styles.modeChoiceBubbleCompact;
 
   return (
     <div
-      className={styles.modeChoiceBubble}
+      className={`${styles.modeChoiceBubble} ${sizeClass}`}
       data-testid="storefront-mode-choice-bubble"
       role="group"
       aria-label={message.text}

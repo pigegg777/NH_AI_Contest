@@ -1,13 +1,50 @@
 .modeChoiceBubble {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: fit-content;
   max-width: 100%;
+}
+
+.modeChoiceBubbleCompact {
+  width: fit-content;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-lg);
   background: var(--corp-surface-muted);
+}
+
+.modeChoiceBubbleCompact .modeChoiceDescription {
+  display: none;
+}
+
+.modeChoiceBubbleExpanded {
+  width: 100%;
+  gap: 8px;
+}
+
+.modeChoiceBubbleExpanded .modeChoiceButton,
+.modeChoiceBubbleExpanded .modeChoiceButtonActive {
+  gap: 5px;
+  padding: 14px 12px;
+  border-radius: var(--corp-radius-lg);
+}
+
+.modeChoiceBubbleExpanded .modeChoiceButton {
+  border-color: var(--corp-line-strong);
+  background: var(--corp-panel);
+}
+
+.modeChoiceBubbleExpanded .modeChoiceLabel {
+  font-size: 0.9rem;
+}
+
+.modeChoiceBubbleExpanded .modeChoiceDescription {
+  font-size: 0.78rem;
+}
+
+.modeChoiceBubbleExpanded .modeChoiceButton:hover:not(:disabled) {
+  border-color: var(--corp-primary);
+  background: var(--corp-primary-soft);
 }
 
 .modeChoiceButton,
