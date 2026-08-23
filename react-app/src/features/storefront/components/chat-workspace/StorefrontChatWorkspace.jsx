@@ -27,15 +27,17 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       className={styles.workspace}
       data-testid="storefront-chat-workspace"
     >
-      <h2 className={styles.title}>AI 편집</h2>
+      <div className={styles.workspaceHeader}>
+        <h2 className={styles.title}>AI 편집</h2>
 
-      {modeChoiceMessage ? (
-        <ModeChoiceBubble
-          activeModeId={session.mode}
-          message={modeChoiceMessage}
-          onChooseMode={session.chooseMode}
-        />
-      ) : null}
+        {modeChoiceMessage ? (
+          <ModeChoiceBubble
+            activeModeId={session.mode}
+            message={modeChoiceMessage}
+            onChooseMode={session.chooseMode}
+          />
+        ) : null}
+      </div>
 
       <StorefrontChatThread
         canUndo={Boolean(session.lastApplySnapshot)}
