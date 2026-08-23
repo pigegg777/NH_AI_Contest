@@ -9,20 +9,20 @@
   display: inline-flex;
   gap: 2px;
   padding: 3px;
-  border: 1px solid var(--corp-line);
+  border: 1px solid var(--corp-line-strong);
   border-radius: var(--corp-radius-pill);
   background: var(--corp-surface-muted);
 }
 
 .modeChoiceButton,
 .modeChoiceButtonActive {
-  padding: 6px 12px;
+  padding: 7px 14px;
   border: 1px solid transparent;
   border-radius: var(--corp-radius-pill);
   background: transparent;
-  color: var(--corp-muted);
+  color: var(--corp-table-header-text);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -34,19 +34,27 @@
 }
 
 .modeChoiceButton:hover:not(:disabled) {
-  background: var(--corp-primary-soft);
-  color: var(--corp-text);
+  background: var(--corp-primary-hover-bg);
+  border-color: var(--corp-accent-border);
+  color: var(--corp-primary-hover);
 }
 
 .modeChoiceButtonActive {
   background: var(--corp-primary);
   border-color: var(--corp-primary);
   color: var(--corp-on-primary);
+  box-shadow: var(--corp-shadow-sm);
 }
 
 .modeChoiceButtonActive:hover:not(:disabled) {
   background: var(--corp-primary-hover);
   border-color: var(--corp-primary-hover);
+}
+
+.modeChoiceButton:focus-visible,
+.modeChoiceButtonActive:focus-visible {
+  outline: 2px solid var(--corp-focus);
+  outline-offset: 2px;
 }
 
 .modeChoiceButton:disabled,
