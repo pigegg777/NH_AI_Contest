@@ -1,12 +1,11 @@
-/* Boxless so the toggle and its helper line join the parent header grid. */
+/* Boxless so the toggle and its helper line stack with the panel title. */
 .modeChoiceBubble {
   display: contents;
 }
 
 .modeChoiceGroup {
-  grid-column: 2;
-  justify-self: end;
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--corp-line-strong);
@@ -16,15 +15,16 @@
 
 .modeChoiceButton,
 .modeChoiceButtonActive {
-  padding: 7px 14px;
+  padding: 9px 12px;
   border: 1px solid transparent;
   border-radius: var(--corp-radius-pill);
   background: transparent;
   color: var(--corp-table-header-text);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.2;
+  text-align: center;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -64,7 +64,6 @@
 }
 
 .modeChoiceHelper {
-  grid-column: 1 / -1;
   margin: 0;
   font-size: 0.78rem;
   line-height: 1.4;
