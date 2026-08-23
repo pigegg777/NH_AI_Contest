@@ -2,12 +2,12 @@ export const STOREFRONT_CHAT_MODE_OPTIONS = [
   {
     id: 'data',
     label: '표시 항목 고르기',
-    description: '영세가격, 면세가격, 분류 등 카드에 보여줄 항목을 고릅니다',
+    description: '카드에 보여줄 항목을 고릅니다',
   },
   {
     id: 'design',
     label: '디자인 바꾸기',
-    description: '색감과 글씨부터 카드 모양까지 말로 요청해 바꿉니다',
+    description: '색과 글씨, 모양을 바꿉니다',
   },
 ];
 

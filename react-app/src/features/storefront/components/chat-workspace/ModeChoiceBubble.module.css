@@ -1,54 +1,68 @@
-/* Boxless so the toggle and its helper line stack with the panel title. */
 .modeChoiceBubble {
-  display: contents;
-}
-
-.modeChoiceGroup {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--corp-line-strong);
-  border-radius: var(--corp-radius-pill);
+  border-radius: var(--corp-radius-lg);
   background: var(--corp-surface-muted);
 }
 
 .modeChoiceButton,
 .modeChoiceButtonActive {
-  padding: 9px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px;
   border: 1px solid transparent;
-  border-radius: var(--corp-radius-pill);
+  border-radius: var(--corp-radius);
   background: transparent;
-  color: var(--corp-table-header-text);
   font: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.2;
-  text-align: center;
-  white-space: nowrap;
+  text-align: left;
   cursor: pointer;
   transition:
     background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease;
+    border-color 140ms ease;
+}
+
+.modeChoiceLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.modeChoiceDescription {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--corp-muted);
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .modeChoiceButton:hover:not(:disabled) {
   background: var(--corp-primary-hover-bg);
   border-color: var(--corp-accent-border);
-  color: var(--corp-primary-hover);
 }
 
 .modeChoiceButtonActive {
   background: var(--corp-primary);
   border-color: var(--corp-primary);
-  color: var(--corp-on-primary);
   box-shadow: var(--corp-shadow-sm);
 }
 
 .modeChoiceButtonActive:hover:not(:disabled) {
   background: var(--corp-primary-hover);
   border-color: var(--corp-primary-hover);
+}
+
+.modeChoiceButtonActive .modeChoiceLabel {
+  color: var(--corp-on-primary);
+}
+
+.modeChoiceButtonActive .modeChoiceDescription {
+  color: var(--corp-primary-hover-bg);
 }
 
 .modeChoiceButton:focus-visible,
@@ -61,13 +75,4 @@
 .modeChoiceButtonActive:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-.modeChoiceHelper {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--corp-muted);
-  word-break: keep-all;
-  overflow-wrap: break-word;
 }
