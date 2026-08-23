@@ -207,16 +207,6 @@
   gap: 3px;
 }
 
-.selectionLabel {
-  margin: 0;
-  margin-bottom: 4px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #172e1f;
-  margin-bottom: 3px;
-}
-
 .productCategoryWrap {
   display: flex;
   flex-wrap: wrap;

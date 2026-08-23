@@ -15,19 +15,21 @@ export default function CategoryChipsBlock({ view, elementKey }) {
 
   return (
     <div className={styles.categoryChipsSection}>
-      <p className={styles.selectionLabel}>중분류 선택</p>
       <div
         className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[categoryChipVariant] || ''}`}
         data-testid="storefront-category-chips"
         data-chip-variant={categoryChipVariant}
         data-category-layout="single-row-scroll"
         data-chip-size="compact"
+        role="group"
+        aria-label="세부 분류"
       >
         {view.mediumCategoryItems.map((item) => (
           <button
             key={`${elementKey}-${item}`}
             type="button"
             className={`${styles.categoryChip} ${view.activeMediumCategory === item ? styles.categoryChipActive : ''}`}
+            aria-pressed={view.activeMediumCategory === item}
             onClick={() => view.handleMediumCategorySelect(item)}
           >
             {item}

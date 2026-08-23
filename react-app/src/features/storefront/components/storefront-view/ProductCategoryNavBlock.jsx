@@ -15,11 +15,12 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
 
   return (
     <div className={styles.productCategorySection}>
-      <p className={styles.selectionLabel}>대분류 선택</p>
       <div
         className={`${styles.productCategoryWrap} ${PRODUCT_CHIP_VARIANT_CLASS_NAMES[productCategoryChipVariant] || ''}`}
         data-testid="storefront-product-category-chips"
         data-chip-variant={productCategoryChipVariant}
+        role="group"
+        aria-label="상품 분류"
       >
         {view.catalogSectionEntries.map(({ sectionId, sectionName }) => (
           <button
