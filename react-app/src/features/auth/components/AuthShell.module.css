@@ -22,7 +22,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: auto;
+}
+
+.brandCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: auto 0;
 }
 
 .brandSymbol {

@@ -21,7 +21,7 @@
 
 .greeting {
   margin: 0 0 6px;
-  font-size: 0.8125rem;
+  font-size: 1.5rem;
   color: var(--corp-muted);
   font-weight: 500;
 }
@@ -46,7 +46,7 @@
 .dashboardSections {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
-  align-items: start;
+  align-items: stretch;
   gap: 20px;
 }
 
@@ -55,58 +55,103 @@
 .featuresSection,
 .sideSection {
   min-width: 0;
+}
+
+.featuresSection {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--corp-line);
   border-radius: 10px;
   background: var(--corp-panel);
   overflow: hidden;
 }
 
-.panelHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  height: 44px;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--corp-line);
-}
-
-.sectionLabel {
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--corp-text);
-  letter-spacing: -0.01em;
+.sideSection {
+  border: 1px solid var(--corp-line);
+  border-radius: 10px;
+  background: var(--corp-panel);
+  overflow: hidden;
 }
 
 .grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px 18px 16px;
 }
 
-/* ── Workflow rows ───────────────────────────────────── */
+.panelHead {
+  min-height: 62px;
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.featuresTitle {
+  margin: 0 0 3px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  letter-spacing: -0.015em;
+}
+
+.featuresDescription {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--corp-muted);
+  word-break: keep-all;
+}
+
+.stageBadge {
+  flex: none;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Feature cards ───────────────────────────────────── */
 
 .card {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   width: 100%;
-  padding: 16px 18px;
-  border: 0;
-  border-top: 1px solid var(--corp-line);
+  min-height: 194px;
+  padding: 20px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
   background: var(--corp-panel);
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--corp-transition);
+  touch-action: manipulation;
+  transition:
+    border-color var(--corp-transition),
+    background-color var(--corp-transition),
+    box-shadow var(--corp-transition);
 }
 
 .card:first-child {
-  border-top: 0;
+  border-color: color-mix(in srgb, var(--corp-primary) 28%, var(--corp-line));
+  background: color-mix(
+    in srgb,
+    var(--corp-primary-soft) 32%,
+    var(--corp-panel)
+  );
 }
 
 .card:hover {
-  background: var(--corp-surface-muted);
+  border-color: var(--corp-line-strong);
+  background: #fcfdfc;
+  box-shadow: var(--corp-shadow-sm);
 }
 
 .card:focus-visible {
@@ -114,32 +159,56 @@
   outline-offset: -2px;
 }
 
-.cardIndex {
-  align-self: start;
-  padding-top: 1px;
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  line-height: 1;
+}
+
+.cardIconImage {
+  display: block;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.stepLabel {
+  align-self: flex-start;
+  padding-top: 4px;
+  color: var(--corp-primary);
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--corp-line-strong);
+  letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
 }
 
 .cardContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
   min-width: 0;
 }
 
 .cardTitle {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--corp-text);
   letter-spacing: -0.015em;
 }
 
 .cardDesc {
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   color: var(--corp-muted);
   line-height: 1.55;
   word-break: keep-all;
@@ -148,12 +217,46 @@
 .cardAction {
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 3px;
-  flex: none;
+  width: 100%;
+  margin-top: auto;
+  padding: 15px 0 0;
+  color: var(--corp-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  transition: color var(--corp-transition);
+}
+
+.workflow {
+  margin: 0 18px 18px;
+  padding: 13px 16px;
+  border-radius: 8px;
+  /* background: rgb(242, 252, 242); */
+}
+
+.workflowTitle {
+  margin: 0 0 10px;
+  color: var(--corp-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.workflowSteps {
+  display: grid;
+  grid-template-columns: auto minmax(24px, 1fr) auto minmax(24px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  color: var(--corp-text);
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--corp-muted);
-  transition: color var(--corp-transition);
+}
+
+.workflowLine {
+  height: 1px;
+  background: var(--corp-line-strong);
 }
 
 .cardActionIcon {
@@ -169,7 +272,7 @@
 }
 
 .card:hover .cardAction {
-  color: var(--corp-primary);
+  color: var(--corp-primary-strong, #276e3c);
 }
 
 .card:hover .cardActionIcon {
@@ -197,14 +300,35 @@
     font-size: 1.25rem;
   }
 
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
   .card {
-    grid-template-columns: 22px minmax(0, 1fr);
-    align-items: start;
+    min-height: 190px;
     padding: 16px;
   }
 
   .cardAction {
-    grid-column: 2;
     margin-top: 2px;
+    padding-top: 14px;
+  }
+
+  .panelHead {
+    align-items: flex-start;
+  }
+
+  .stageBadge {
+    display: none;
+  }
+
+  .workflowSteps {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .workflowLine {
+    display: none;
   }
 }

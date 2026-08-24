@@ -1,7 +1,7 @@
 import nhCyberSymbolUrl from '../assets/nh_cyber_symbol.png';
 import styles from './AppLayout.module.css';
 
-const BRAND_NAME = 'NH AI Agent';
+const BRAND_NAME = 'NH AI Agent 경진대회';
 const ORG_SEPARATOR = ' · ';
 
 const NAV_ITEMS = [
@@ -38,7 +38,9 @@ export default function AppLayout({
 
   return (
     <div
-      className={[styles.shell, isDashboard ? styles.shellNarrow : ''].join(' ')}
+      className={[styles.shell, isDashboard ? styles.shellNarrow : ''].join(
+        ' ',
+      )}
     >
       <header className={styles.header}>
         <div className={styles.headerInner}>
@@ -89,9 +91,6 @@ export default function AppLayout({
 
             {name ? (
               <span className={styles.account}>
-                <span className={styles.avatar} aria-hidden="true">
-                  {initial}
-                </span>
                 <span className={styles.accountName}>{name}</span>
               </span>
             ) : null}

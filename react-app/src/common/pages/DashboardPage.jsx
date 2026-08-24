@@ -1,4 +1,6 @@
 import PublicStorefrontQrCard from '../components/PublicStorefrontQrCard';
+import productDataInputIcon from '../assets/dashboard/product-data-input.png';
+import productPageBuilderIcon from '../assets/dashboard/product-page-builder.png';
 import styles from './DashboardPage.module.css';
 
 const COPY = {
@@ -11,8 +13,13 @@ const COPY = {
   greetingPrefix: '안녕하세요, ',
   greetingSuffix: '님.',
   systemTitle: 'AI로 고객용 상품 페이지를 만들고 배포해 보세요',
-  featuresSectionLabel: '주요 기능',
-  goTo: '바로가기',
+  featuresTitle: '상품 페이지 만들기',
+  featuresDescription: '데이터 입력부터 고객 공유까지 순서대로 진행하세요.',
+  stageBadge: '2단계 작업',
+  flowUpload: '엑셀 업로드 및 AI 작업',
+  flowBuild: 'AI 페이지 제작 및 디자인',
+  flowShare: 'QR 및 페이지링크 공유',
+  flowTitle: '진행 순서',
 };
 
 const FEATURES = [
@@ -20,11 +27,17 @@ const FEATURES = [
     key: 'office-product-editor',
     title: COPY.dataEditorTitle,
     description: COPY.dataEditorDescription,
+    iconImage: productDataInputIcon,
+    stepLabel: 'STEP 01',
+    actionLabel: '데이터 정리 시작',
   },
   {
     key: 'storefront-builder',
     title: COPY.storefrontTitle,
     description: COPY.storefrontDescription,
+    iconImage: productPageBuilderIcon,
+    stepLabel: 'STEP 02',
+    actionLabel: '페이지 제작 시작',
   },
 ];
 
@@ -42,10 +55,6 @@ function ChevronIcon() {
       <path d="M6 3.5L10.5 8 6 12.5" />
     </svg>
   );
-}
-
-function formatStepIndex(index) {
-  return String(index + 1).padStart(2, '0');
 }
 
 export default function DashboardPage({ user, onNavigate }) {
@@ -69,34 +78,82 @@ export default function DashboardPage({ user, onNavigate }) {
         <div className={styles.dashboardSections}>
           <section className={styles.featuresSection}>
             <div className={styles.panelHead}>
-              <p className={styles.sectionLabel}>{COPY.featuresSectionLabel}</p>
+              <div>
+                <h2 className={styles.featuresTitle}>{COPY.featuresTitle}</h2>
+                <p className={styles.featuresDescription}>
+                  {COPY.featuresDescription}
+                </p>
+              </div>
+              {/* <span className={styles.stageBadge}>{COPY.stageBadge}</span> */}
             </div>
 
             <div className={styles.grid}>
-              {FEATURES.map(({ key, title, description }, index) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={styles.card}
-                  onClick={() => onNavigate(key)}
-                >
-                  <span className={styles.cardIndex} aria-hidden="true">
-                    {formatStepIndex(index)}
-                  </span>
-
-                  <span className={styles.cardContent}>
-                    <span className={styles.cardTitle}>{title}</span>
-                    <span className={styles.cardDesc}>{description}</span>
-                  </span>
-
-                  <span className={styles.cardAction}>
-                    {COPY.goTo}
-                    <span className={styles.cardActionIcon} aria-hidden="true">
-                      <ChevronIcon />
+              {FEATURES.map(
+                ({
+                  key,
+                  title,
+                  description,
+                  iconImage,
+                  stepLabel,
+                  actionLabel,
+                }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={styles.card}
+                    onClick={() => onNavigate(key)}
+                  >
+                    <span className={styles.cardTop}>
+                      <span className={styles.cardIcon} aria-hidden="true">
+                        <img
+                          className={styles.cardIconImage}
+                          src={iconImage}
+                          alt=""
+                          width="54"
+                          height="54"
+                        />
+                      </span>
+                      <span className={styles.cardTitle}>{title}</span>
+                      {/* <span className={styles.stepLabel} aria-hidden="true">
+                        {stepLabel}
+                      </span> */}
                     </span>
-                  </span>
-                </button>
-              ))}
+
+                    <span className={styles.cardContent}>
+                      <span className={styles.cardDesc}>{description}</span>
+                    </span>
+
+                    <span className={styles.cardAction}>
+                      {actionLabel}
+                      <span
+                        className={styles.cardActionIcon}
+                        aria-hidden="true"
+                      >
+                        <ChevronIcon />
+                      </span>
+                    </span>
+                  </button>
+                ),
+              )}
+            </div>
+
+            <div
+              className={styles.workflow}
+              aria-labelledby="dashboard-workflow-title"
+            >
+              <h3
+                id="dashboard-workflow-title"
+                className={styles.workflowTitle}
+              >
+                {COPY.flowTitle}
+              </h3>
+              <div className={styles.workflowSteps}>
+                <span>{COPY.flowUpload}</span>
+                <span className={styles.workflowLine} aria-hidden="true" />
+                <span>{COPY.flowBuild}</span>
+                <span className={styles.workflowLine} aria-hidden="true" />
+                <span>{COPY.flowShare}</span>
+              </div>
             </div>
           </section>
 

@@ -75,7 +75,7 @@
   background: var(--corp-surface-muted);
 }
 
-.brandMark {
+/* .brandMark {
   display: grid;
   place-items: center;
   width: 26px;
@@ -83,11 +83,11 @@
   flex: none;
   border-radius: 6px;
   background: var(--corp-primary);
-}
+} */
 
 .brandSymbol {
   width: auto;
-  height: 15px;
+  height: 26px;
   display: block;
 }
 
@@ -192,20 +192,6 @@
   border-left: 1px solid var(--corp-line);
   flex: none;
   min-width: 0;
-}
-
-.avatar {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  flex: none;
-  border-radius: var(--corp-radius-pill);
-  background: var(--corp-primary-soft);
-  border: 1px solid var(--corp-accent-border);
-  color: var(--corp-primary);
-  font-size: 0.7rem;
-  font-weight: 700;
 }
 
 .accountName {
