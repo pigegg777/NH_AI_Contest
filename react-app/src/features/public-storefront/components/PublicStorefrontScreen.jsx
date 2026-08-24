@@ -1,4 +1,4 @@
-import StorefrontView from '../../storefront/components/StorefrontView';
+import StorefrontView from '../../storefront/components/storefront-page/StorefrontView';
 
 export default function PublicStorefrontScreen({
   config,

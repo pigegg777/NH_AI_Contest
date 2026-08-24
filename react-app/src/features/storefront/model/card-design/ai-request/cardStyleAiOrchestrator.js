@@ -1,10 +1,11 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
 import { normalizeCardAiDesignInput } from './cardAiDesignModel';
 import { normalizeCardStyle } from '../style/cardStyleModel';
-import { normalizeOpenAiCardIntent } from '../ai-response/cardStyleAiResponseNormalizer';
+import {
+  normalizeOpenAiCardExplanation,
+  normalizeOpenAiCardIntent,
+} from '../ai-response/cardStyleAiResponseNormalizer';
 import { postCardStyleAiRequest } from '../../../services/card-design/cardStyleAiGateway';
-
-const DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 카드 디자인에 반영했습니다.';
 
 export async function requestCardStyleAiIntent({
   cardAiDesign,
@@ -31,7 +32,6 @@ export async function requestCardStyleAiIntent({
 
   return {
     intent: normalizeOpenAiCardIntent(body?.intent, normalizedInput.targetScope),
-    explanation: toTrimmedString(body?.explanation) || DEFAULT_EXPLANATION_MESSAGE,
-    suggestion: toTrimmedString(body?.suggestion) || null,
+    ...normalizeOpenAiCardExplanation(body),
   };
 }

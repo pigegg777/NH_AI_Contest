@@ -2,8 +2,8 @@ import { normalizePageAiDesignInput } from '../../../src/features/storefront/mod
 import {
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
-} from '../../../src/features/storefront/model/page-design/ai-response/pageStyleAiResponseModel.js';
-import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/page-style/pageStyleModel.js';
+} from '../../../src/features/storefront/model/page-design/ai-response/pageStyleAiResponseNormalizer.js';
+import { normalizePageStyle } from '../../../src/features/storefront/model/page-design/style/pageStyleModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
 import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront/model/page-design/ai-request/pageStyleOpenAiRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';

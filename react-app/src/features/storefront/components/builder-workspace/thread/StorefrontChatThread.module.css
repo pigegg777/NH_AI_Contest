@@ -1,0 +1,69 @@
+.threadFrame {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-height: 260px;
+  padding: 14px;
+  border-radius: var(--corp-radius-xl);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--corp-line);
+  overflow: auto;
+}
+
+.threadList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.threadItem {
+  list-style: none;
+}
+
+.applyResultBubble {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--corp-radius-xl);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--corp-line);
+}
+
+.applyResultText {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.returnButton {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 12px;
+  border: 1px solid rgba(29, 74, 46, 0.16);
+  border-radius: var(--corp-radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  color: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.returnButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(29, 74, 46, 0.34);
+  box-shadow: 0 12px 20px rgba(29, 74, 46, 0.08);
+}

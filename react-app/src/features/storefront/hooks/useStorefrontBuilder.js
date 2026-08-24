@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { toTrimmedString } from "../../../common/utils/text";
 import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
 import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
+import { CARD_DESIGN_LAYOUT_OPTIONS } from "../model/card-design/ai-request/cardDesignLayoutOptions";
+import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
+import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -23,7 +26,7 @@ import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
 } from "../model/storefront-config/storefrontConfigOrchestrator";
-import { getStorefrontDesignComposerCopy } from "../components/chat-workspace/storefrontChatModes";
+import { getStorefrontDesignComposerCopy } from "../components/builder-workspace/mode-choice/storefrontChatModes";
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
 import { usePageAiDesign } from "./usePageAiDesign";
@@ -31,6 +34,8 @@ import { useStorefrontChatSession } from "./useStorefrontChatSession";
 
 const FETCH_ERROR_MESSAGE = "스토어프론트 빌더를 불러오지 못했습니다.";
 const MAX_SHARED_AI_HISTORY_MESSAGES = 12;
+const ALL_SCOPE_CHAT_LABEL = "전체";
+const FALLBACK_CATEGORY_CHAT_LABEL = "카드";
 
 function getInitialCategoryName(productEntries, existingConfig) {
   const existingCategoryName = findCategoryConfigRow(
@@ -201,6 +206,18 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   function markDirty() {
     setStatus((current) => (current === "saved" ? "ready" : current));
+  }
+
+  function changeCardsPerRow(value) {
+    cardAi.setCardsPerRow(value);
+    markDirty();
+    setComposerApplyPending("category", true);
+  }
+
+  function changeStructuralPreset(value) {
+    cardAi.setStructuralPreset(value);
+    markDirty();
+    setComposerApplyPending("category", true);
   }
 
   function hydrateCategoryDraft(
@@ -530,8 +547,13 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       designTarget === "common"
         ? pageAi.pageAiDesign.targetScope
         : cardAi.cardAiDesign.targetScope;
-    const scopeLabel = resolveChatScopeLabel(designTarget, targetScope);
-    const targetLabel = designTarget === "common" ? "공통 요소" : "카드";
+    const scopeLabel =
+      resolveChatScopeLabel(designTarget, targetScope) || ALL_SCOPE_CHAT_LABEL;
+    const targetLabel =
+      designTarget === "common"
+        ? "공통 요소"
+        : toTrimmedString(selectedProductCategoryName) ||
+          FALLBACK_CATEGORY_CHAT_LABEL;
     const userMessage = buildSharedThreadMessage({
       role: "user",
       mode,
@@ -736,6 +758,20 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             designTarget === "common"
               ? PAGE_AI_TARGET_SCOPE_OPTIONS
               : CARD_AI_TARGET_SCOPE_OPTIONS,
+          getScopeGuide:
+            designTarget === "common"
+              ? getPageDesignScopeGuide
+              : getCardDesignScopeGuide,
+          cardsPerRow:
+            designTarget === "common" ? null : cardAi.cardStyle.cardsPerRow,
+          setCardsPerRow:
+            designTarget === "common" ? null : changeCardsPerRow,
+          layoutOptions:
+            designTarget === "common" ? null : CARD_DESIGN_LAYOUT_OPTIONS,
+          selectedLayoutId:
+            designTarget === "common" ? null : cardAi.cardStyle.structuralPreset,
+          setLayoutId:
+            designTarget === "common" ? null : changeStructuralPreset,
           selectedTargetId:
             designTarget === "common"
               ? pageAi.pageAiDesign.targetScope

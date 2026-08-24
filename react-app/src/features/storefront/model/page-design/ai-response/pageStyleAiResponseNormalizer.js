@@ -9,7 +9,7 @@ import {
   PAGE_STYLE_CHIP_VARIANT_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
-} from '../page-style/pageStyleModel';
+} from '../style/pageStyleModel';
 
 const PAGE_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 페이지 스타일에 반영했습니다.';
 

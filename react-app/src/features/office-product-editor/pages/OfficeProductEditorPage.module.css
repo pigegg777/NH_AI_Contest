@@ -3,6 +3,7 @@
   --office-editor-sticky-top: 72px;
   display: flex;
   flex-direction: column;
+  width: 100%;
   max-width: 100%;
   min-height: 100%;
   margin: 0 auto;
@@ -12,6 +13,8 @@
 /* ─── Two-column layout ───────────────────────────────── */
 .layout {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
   min-height: 0;

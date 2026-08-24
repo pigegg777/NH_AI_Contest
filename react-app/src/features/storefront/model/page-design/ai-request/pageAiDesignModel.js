@@ -3,28 +3,28 @@ import { toTrimmedString } from '../../../../../common/utils/text';
 export const PAGE_AI_TARGET_SCOPE_OPTIONS = [
   {
     id: 'palette',
-    label: '전체 색감',
-    detail: '배경색과 포인트 색상',
+    label: '화면 전체 색상',
+    detail: '화면 배경과 포인트 색상',
   },
   {
     id: 'header',
-    label: '헤더 텍스트 스타일',
-    detail: '글자색, 굵기, 자간',
-  },
-  {
-    id: 'categoryChips',
-    label: '중분류 칩',
-    detail: '배경색, 글자색, 테두리',
-  },
-  {
-    id: 'productCategoryChips',
-    label: '대분류 칩',
-    detail: '배경색, 글자색, 테두리',
+    label: '상단 제목 글자',
+    detail: '글자색, 굵기, 글자 간격',
   },
   {
     id: 'search',
-    label: '검색창',
+    label: '상품 검색창',
     detail: '배경색, 테두리색, 크기',
+  },
+  {
+    id: 'productCategoryChips',
+    label: '상품 상단 카테고리 버튼',
+    detail: '비료, 농약, 자재 버튼의 색상과 테두리',
+  },
+  {
+    id: 'categoryChips',
+    label: '상품 하단 세부카테고리 버튼',
+    detail: '전체, 무기질비료, 종자종묘 버튼의 색상과 테두리',
   },
 ];
 

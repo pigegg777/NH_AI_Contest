@@ -58,7 +58,7 @@
 .eyebrow {
   margin: 0 0 6px;
   font-size: 0.74rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--corp-primary);
@@ -77,6 +77,8 @@
   justify-content: center;
 }
 
+/* Bezel radii here are off the token scale on purpose: this draws a phone
+   chassis, so they track device shape, not the app's radius system. */
 .previewDevice {
   width: min(100%, 390px);
   padding: 16px 10px 12px;
@@ -91,7 +93,7 @@
   width: 92px;
   height: 10px;
   margin: 0 auto 12px;
-  border-radius: 999px;
+  border-radius: var(--corp-radius-pill);
   background: rgba(255, 255, 255, 0.14);
 }
 

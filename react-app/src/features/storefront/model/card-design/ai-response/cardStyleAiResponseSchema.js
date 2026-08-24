@@ -14,6 +14,10 @@ import {
   CARD_FIELD_EMPHASIS_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
+  CARD_HEADER_BORDER_SIDE_TOKENS,
+  CARD_HEADER_BORDER_STRENGTH_TOKENS,
+  CARD_HEADER_TEXT_ALIGN_TOKENS,
+  CARD_HEADER_TITLE_SIZE_TOKENS,
   CARD_IMAGE_FIT_OPTIONS,
   CARD_RADIUS_OPTIONS,
   CARD_SHADOW_OPTIONS,
@@ -99,6 +103,64 @@ const NULLABLE_HEADER_SCHEMA = {
       description:
         '제목 글자 굵기. 400(보통)~900(매우 굵게) 중 100 단위 값만 선택.',
     },
+    titleSizeToken: {
+      type: ['string', 'null'],
+      enum: [...CARD_HEADER_TITLE_SIZE_TOKENS, null],
+      description:
+        "제목 글자 크기 단계. 'xs'(가장 작게)~'xxl'(가장 크게) 6단계이며 'md'가 기본. 카드 본문 글자 크기에 더해지는 상대 단계입니다.",
+    },
+    borderColor: {
+      type: ['string', 'null'],
+      pattern: HEX_COLOR_SCHEMA_PATTERN,
+      description: '카드 제목 영역 테두리색 hex 코드.',
+    },
+    borderStrengthToken: {
+      type: ['string', 'null'],
+      enum: [...CARD_HEADER_BORDER_STRENGTH_TOKENS, null],
+      description:
+        "제목 영역 테두리 굵기 단계. 'none'(없음)~'bold'(가장 굵게) 6단계이며 'soft'가 기본(1px).",
+    },
+    borderSide: {
+      type: ['string', 'null'],
+      enum: [...CARD_HEADER_BORDER_SIDE_TOKENS, null],
+      description:
+        "제목 영역 테두리 방향. 'bottom'(아래쪽만, 기본)/'all'(사방)/'none'(없음).",
+    },
+    padding: {
+      type: ['string', 'null'],
+      enum: [...CARD_SPACING_OPTIONS, null],
+      description: '제목 영역 안쪽 여백 토큰.',
+    },
+    textAlign: {
+      type: ['string', 'null'],
+      enum: [...CARD_HEADER_TEXT_ALIGN_TOKENS, null],
+      description: "제목 정렬. 'left'(기본)/'center'/'right'.",
+    },
+  },
+  required: [
+    'backgroundColor',
+    'titleColorHex',
+    'letterSpacing',
+    'fontWeight',
+    'titleSizeToken',
+    'borderColor',
+    'borderStrengthToken',
+    'borderSide',
+    'padding',
+    'textAlign',
+  ],
+};
+
+// Conditional rules stay on the narrower legacy header shape: their overrides are
+// applied as inline CSS vars per card, which only covers colour/letterSpacing/weight.
+const CONDITIONAL_HEADER_STYLE_SCHEMA = {
+  type: ['object', 'null'],
+  additionalProperties: false,
+  properties: {
+    backgroundColor: NULLABLE_HEADER_SCHEMA.properties.backgroundColor,
+    titleColorHex: NULLABLE_HEADER_SCHEMA.properties.titleColorHex,
+    letterSpacing: NULLABLE_HEADER_SCHEMA.properties.letterSpacing,
+    fontWeight: NULLABLE_HEADER_SCHEMA.properties.fontWeight,
   },
   required: ['backgroundColor', 'titleColorHex', 'letterSpacing', 'fontWeight'],
 };
@@ -166,12 +228,35 @@ const NULLABLE_INFO_SCHEMA = {
     requestedGroups: {
       type: ['array', 'null'],
       items: INFO_GROUP_SCHEMA,
-      description: '필드를 묶을 그룹 목록. 그룹핑을 바꾸지 않으려면 null.',
+      description:
+        '추가하거나 수정할 그룹만 담는 목록. 기존 그룹은 그대로 유지되고 같은 id면 덮어씁니다. 그룹핑을 바꾸지 않으려면 null, 모든 그룹을 해제하려면 빈 배열.',
+    },
+    removeGroupIds: {
+      type: ['array', 'null'],
+      items: { type: 'string' },
+      description: '해제할 그룹 id 목록. 특정 묶음 하나만 풀 때 사용. 그 외에는 null.',
     },
     requestedFieldOrder: {
       type: ['array', 'null'],
       items: { type: 'string' },
       description: '필드 표시 순서. 순서를 바꾸지 않으려면 null.',
+    },
+    labelColorRole: {
+      type: ['string', 'null'],
+      enum: [...CARD_FIELD_COLOR_ROLE_OPTIONS, null],
+      description: '항목 이름(라벨) 글자색 역할 토큰. 값이 아니라 라벨에만 적용.',
+    },
+    labelFontSizeToken: {
+      type: ['string', 'null'],
+      enum: [...CARD_FIELD_FONT_SIZE_OPTIONS, null],
+      description:
+        "항목 이름(라벨) 글자 크기 단계. 'xs'(가장 작게)~'xxl'(가장 크게) 6단계이며 'md'가 기본.",
+    },
+    labelFontWeight: {
+      type: ['number', 'null'],
+      enum: [...CARD_FIELD_FONT_WEIGHT_OPTIONS, null],
+      description:
+        '항목 이름(라벨) 글자 굵기. 400(보통)~900(매우 굵게) 중 100 단위 값. 기본 600.',
     },
   },
   required: [
@@ -180,7 +265,11 @@ const NULLABLE_INFO_SCHEMA = {
     'padding',
     'fieldGap',
     'fieldGroupGap',
+    'labelColorRole',
+    'labelFontSizeToken',
+    'labelFontWeight',
     'requestedGroups',
+    'removeGroupIds',
     'requestedFieldOrder',
   ],
 };
@@ -191,7 +280,7 @@ const FIELD_STYLE_SCHEMA = {
   properties: {
     field: { type: 'string' },
     colorRole: { type: 'string', enum: CARD_FIELD_COLOR_ROLE_OPTIONS },
-    fontWeight: { type: 'string', enum: CARD_FIELD_FONT_WEIGHT_OPTIONS },
+    fontWeight: { type: 'number', enum: CARD_FIELD_FONT_WEIGHT_OPTIONS },
     fontSize: { type: 'string', enum: CARD_FIELD_FONT_SIZE_OPTIONS },
     emphasis: { type: 'string', enum: CARD_FIELD_EMPHASIS_OPTIONS },
   },
@@ -202,6 +291,23 @@ const NULLABLE_FIELD_SCHEMA = {
   type: ['object', 'null'],
   additionalProperties: false,
   properties: {
+    defaultColorRole: {
+      type: ['string', 'null'],
+      enum: [...CARD_FIELD_COLOR_ROLE_OPTIONS, null],
+      description: '모든 항목 값의 기본 글자색 역할 토큰.',
+    },
+    defaultFontWeight: {
+      type: ['number', 'null'],
+      enum: [...CARD_FIELD_FONT_WEIGHT_OPTIONS, null],
+      description:
+        '모든 항목 값의 기본 글자 굵기. 400(보통)~900(매우 굵게) 중 100 단위 값.',
+    },
+    defaultFontSize: {
+      type: ['string', 'null'],
+      enum: [...CARD_FIELD_FONT_SIZE_OPTIONS, null],
+      description:
+        "카드 기준 글자 크기 단계. 'xs'~'xxl' 6단계이며 'md'가 기본. 제목 크기도 이 값을 기준으로 계산됩니다.",
+    },
     priceColorRole: {
       type: ['string', 'null'],
       enum: [...CARD_FIELD_COLOR_ROLE_OPTIONS, null],
@@ -213,18 +319,21 @@ const NULLABLE_FIELD_SCHEMA = {
       description: '특정 필드별 개별 스타일 지정 목록.',
     },
   },
-  required: ['priceColorRole', 'targetedFieldStyles'],
+  required: [
+    'defaultColorRole',
+    'defaultFontWeight',
+    'defaultFontSize',
+    'priceColorRole',
+    'targetedFieldStyles',
+  ],
 };
 
 const NULLABLE_LAYOUT_SCHEMA = {
   type: ['object', 'null'],
   additionalProperties: false,
   properties: {
-    cardsPerRow: {
-      type: ['number', 'null'],
-      enum: [1, 2, null],
-      description: '한 줄에 보여줄 카드 개수(1 또는 2).',
-    },
+    // cardsPerRow is deliberately absent: it is a user-only control, set through the
+    // builder UI. Offering it here let the AI override the merchant's choice.
     sectionOrder: {
       type: ['array', 'null'],
       items: { type: 'string', enum: CARD_LAYOUT_SECTION_OPTIONS },
@@ -257,7 +366,6 @@ const NULLABLE_LAYOUT_SCHEMA = {
     },
   },
   required: [
-    'cardsPerRow',
     'sectionOrder',
     'imagePlacement',
     'titleClamp',
@@ -370,7 +478,7 @@ const CONDITIONAL_STYLE_RULE_SCHEMA = {
       description: '비교할 문자열 값(예: 종자).',
     },
     shell: CONDITIONAL_SHELL_STYLE_SCHEMA,
-    header: NULLABLE_HEADER_SCHEMA,
+    header: CONDITIONAL_HEADER_STYLE_SCHEMA,
     image: CONDITIONAL_IMAGE_STYLE_SCHEMA,
     info: CONDITIONAL_INFO_STYLE_SCHEMA,
     field: CONDITIONAL_FIELD_STYLE_SCHEMA,

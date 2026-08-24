@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="336" viewBox="0 0 640 336" fill="none">
+  <title>엑셀 파일에서 상품 데이터 생성</title>
+
+  <g transform="translate(-12 -84)">
+    <path d="M32 104h86l43 43v257H32V104Z" fill="#FFFFFF" stroke="#17302A" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M118 104v43h43" stroke="#17302A" stroke-width="12" stroke-linejoin="round"/>
+
+    <rect x="70" y="188" width="116" height="132" rx="18" fill="#168447" stroke="#17302A" stroke-width="12"/>
+    <path d="M99 220l58 68M157 220l-58 68" stroke="#FFFFFF" stroke-width="22" stroke-linecap="square"/>
+
+    <g fill="#57AE6A">
+      <rect x="47" y="218" width="16" height="22" rx="2"/>
+      <rect x="47" y="252" width="16" height="22" rx="2"/>
+      <rect x="47" y="286" width="16" height="22" rx="2"/>
+    </g>
+  </g>
+
+  <path transform="translate(35 -84)" d="M205 237h53v-31l62 50-62 50v-31h-53v-38Z" stroke="#17302A" stroke-width="12" stroke-linejoin="round"/>
+
+  <g transform="translate(107 -84)" stroke="#17302A" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="405" cy="151" rx="82" ry="39"/>
+    <path d="M323 151v70c0 22 37 39 82 39s82-17 82-39v-70"/>
+    <path d="M323 221v70c0 22 37 39 82 39s82-17 82-39v-70"/>
+    <path d="M323 291v70c0 22 37 39 82 39s82-17 82-39v-70"/>
+  </g>
+</svg>

@@ -10,6 +10,15 @@ The AI treats these five card sections as independent edit targets:
 - \`card.info\`
 - \`card.field\`
 
+## Target Scope Restriction
+
+When the request carries a target scope, only that scope
+(\`header\`/\`image\`/\`info\`/\`field\`) may be non-null. Every other area object must
+be null.
+
+\`shell\`, \`structuralPresetRequest\`, \`titleModeRequest\`, and \`conditionalStyles\`
+are general: they may be set regardless of the target scope.
+
 ## Scope Meaning
 
 ### \`card.shell\`

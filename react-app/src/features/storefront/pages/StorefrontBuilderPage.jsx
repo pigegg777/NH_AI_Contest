@@ -1,5 +1,5 @@
 import PublicStorefrontScreen from "../../public-storefront/components/PublicStorefrontScreen";
-import StorefrontChatWorkspace from "../components/chat-workspace/StorefrontChatWorkspace";
+import StorefrontChatWorkspace from "../components/builder-workspace/StorefrontChatWorkspace";
 import { useStorefrontBuilder } from "../hooks/useStorefrontBuilder";
 import { useStorefrontChatSession } from "../hooks/useStorefrontChatSession";
 import styles from "./StorefrontBuilderPage.module.css";

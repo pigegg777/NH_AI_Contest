@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
 import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/page-style/pageStyleModel';
+import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/style/pageStyleModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
@@ -146,7 +146,7 @@ export const DEFAULT_NAV_CONFIG = {
   title: '',
   subtitle: '',
   brandColor: DEFAULT_PAGE_STYLE.palette.accentHex,
-  searchPlaceholder: '상품 검색',
+  searchPlaceholder: '찾으시는 자재를 입력하세요',
   logoUrl: '',
   searchVariant: 'pill',
 };

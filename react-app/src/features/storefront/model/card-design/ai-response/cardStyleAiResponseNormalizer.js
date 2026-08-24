@@ -14,6 +14,10 @@ import {
   CARD_FIELD_EMPHASIS_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
+  CARD_HEADER_BORDER_SIDE_TOKENS,
+  CARD_HEADER_BORDER_STRENGTH_TOKENS,
+  CARD_HEADER_TEXT_ALIGN_TOKENS,
+  CARD_HEADER_TITLE_SIZE_TOKENS,
   CARD_IMAGE_FIT_OPTIONS,
   CARD_RADIUS_OPTIONS,
   CARD_SHADOW_OPTIONS,
@@ -31,6 +35,7 @@ import {
   selectCardStyleSkillPackIds,
 } from '../../../services/card-design/cardStyleSkillPromptService';
 
+const CARD_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 카드 디자인에 반영했습니다.';
 const CARD_STRUCTURAL_PRESET_IDS = Object.keys(CARD_STRUCTURAL_PRESETS);
 
 function limitCardIntentToTargetScope(intent, targetScope) {
@@ -83,6 +88,18 @@ function normalizeHeaderIntent(rawHeader) {
     intent.letterSpacing = rawHeader.letterSpacing;
   if (Number.isFinite(rawHeader.fontWeight))
     intent.fontWeight = rawHeader.fontWeight;
+  if (CARD_HEADER_TITLE_SIZE_TOKENS.includes(rawHeader.titleSizeToken))
+    intent.titleSizeToken = rawHeader.titleSizeToken;
+  if (isHexColor(rawHeader.borderColor))
+    intent.borderColor = normalizeHexColor(rawHeader.borderColor);
+  if (CARD_HEADER_BORDER_STRENGTH_TOKENS.includes(rawHeader.borderStrengthToken))
+    intent.borderStrengthToken = rawHeader.borderStrengthToken;
+  if (CARD_HEADER_BORDER_SIDE_TOKENS.includes(rawHeader.borderSide))
+    intent.borderSide = rawHeader.borderSide;
+  if (CARD_SPACING_OPTIONS.includes(rawHeader.padding))
+    intent.padding = rawHeader.padding;
+  if (CARD_HEADER_TEXT_ALIGN_TOKENS.includes(rawHeader.textAlign))
+    intent.textAlign = rawHeader.textAlign;
 
   return Object.keys(intent).length > 0 ? intent : null;
 }
@@ -118,22 +135,42 @@ function normalizeInfoIntent(rawInfo) {
     intent.fieldGap = rawInfo.fieldGap;
   if (CARD_SPACING_OPTIONS.includes(rawInfo.fieldGroupGap))
     intent.fieldGroupGap = rawInfo.fieldGroupGap;
+  if (CARD_FIELD_COLOR_ROLE_OPTIONS.includes(rawInfo.labelColorRole))
+    intent.labelColorRole = rawInfo.labelColorRole;
+  if (CARD_FIELD_FONT_SIZE_OPTIONS.includes(rawInfo.labelFontSizeToken))
+    intent.labelFontSizeToken = rawInfo.labelFontSizeToken;
+  if (CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(rawInfo.labelFontWeight))
+    intent.labelFontWeight = rawInfo.labelFontWeight;
 
-  const requestedGroups = (
-    Array.isArray(rawInfo.requestedGroups) ? rawInfo.requestedGroups : []
+  // An empty array is meaningful here: it clears every group. Only a missing or
+  // non-array value means "leave grouping alone".
+  if (Array.isArray(rawInfo.requestedGroups)) {
+    const requestedGroups = rawInfo.requestedGroups
+      .map((group) => ({
+        id: toTrimmedString(group?.id),
+        label: toTrimmedString(group?.label),
+        display:
+          group?.display === 'stack-group' ? 'stack-group' : 'inline-group',
+        fields: (Array.isArray(group?.fields) ? group.fields : [])
+          .map((field) => toTrimmedString(field))
+          .filter(Boolean),
+      }))
+      .filter((group) => group.id && group.fields.length > 0);
+
+    // An array that arrived empty is an explicit "clear every group". An array
+    // whose entries were all malformed carries no instruction, so ignore it.
+    if (requestedGroups.length > 0 || rawInfo.requestedGroups.length === 0) {
+      intent.requestedGroups = requestedGroups;
+    }
+  }
+
+  const removeGroupIds = (
+    Array.isArray(rawInfo.removeGroupIds) ? rawInfo.removeGroupIds : []
   )
-    .map((group) => ({
-      id: toTrimmedString(group?.id),
-      label: toTrimmedString(group?.label),
-      display:
-        group?.display === 'stack-group' ? 'stack-group' : 'inline-group',
-      fields: (Array.isArray(group?.fields) ? group.fields : [])
-        .map((field) => toTrimmedString(field))
-        .filter(Boolean),
-    }))
-    .filter((group) => group.id && group.fields.length > 0);
+    .map((id) => toTrimmedString(id))
+    .filter(Boolean);
 
-  if (requestedGroups.length > 0) intent.requestedGroups = requestedGroups;
+  if (removeGroupIds.length > 0) intent.removeGroupIds = removeGroupIds;
 
   const requestedFieldOrder = (
     Array.isArray(rawInfo.requestedFieldOrder)
@@ -156,9 +193,8 @@ function normalizeLayoutIntent(rawLayout) {
 
   const intent = {};
 
-  if ([1, 2].includes(Number(rawLayout.cardsPerRow)))
-    intent.cardsPerRow = Number(rawLayout.cardsPerRow);
-
+  // cardsPerRow is never read off an AI response. It is a user-only control, so a
+  // payload carrying it is dropped rather than applied.
   const sectionOrder = (
     Array.isArray(rawLayout.sectionOrder) ? rawLayout.sectionOrder : []
   )
@@ -191,6 +227,12 @@ function normalizeFieldIntent(rawField) {
 
   const intent = {};
 
+  if (CARD_FIELD_COLOR_ROLE_OPTIONS.includes(rawField.defaultColorRole))
+    intent.defaultColorRole = rawField.defaultColorRole;
+  if (CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(rawField.defaultFontWeight))
+    intent.defaultFontWeight = rawField.defaultFontWeight;
+  if (CARD_FIELD_FONT_SIZE_OPTIONS.includes(rawField.defaultFontSize))
+    intent.defaultFontSize = rawField.defaultFontSize;
   if (CARD_FIELD_COLOR_ROLE_OPTIONS.includes(rawField.priceColorRole))
     intent.priceColorRole = rawField.priceColorRole;
 
@@ -260,7 +302,7 @@ export function normalizeOpenAiCardIntent(payload, targetScope) {
 export function normalizeOpenAiCardExplanation(payload) {
   return {
     explanation:
-      toTrimmedString(payload?.explanation) || '\uC694\uCCAD\uD558\uC2E0 \uB0B4\uC6A9\uC744 \uCE74\uB4DC \uB514\uC790\uC778\uC5D0 \uBC18\uC601\uD588\uC2B5\uB2C8\uB2E4.',
+      toTrimmedString(payload?.explanation) || CARD_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE,
     suggestion: toTrimmedString(payload?.suggestion) || null,
   };
 }

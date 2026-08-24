@@ -80,7 +80,7 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'loading') {
     return (
       <div className={styles.page}>
-        <div className={styles.statusMessage}>불러오는 중...</div>
+        <div className={styles.statusMessage}>불러오는 중…</div>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function PublicStorefrontPage({ officeCode }) {
   if (state.status === 'placeholder') {
     return (
       <div className={styles.page}>
-        <div className={styles.statusMessage}>페이지 준비 중입니다.</div>
+        <div className={styles.statusMessage}>아직 공개된 상품 정보가 없습니다.</div>
       </div>
     );
   }
