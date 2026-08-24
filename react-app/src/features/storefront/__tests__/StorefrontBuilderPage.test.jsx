@@ -6,10 +6,22 @@ import { fetchOfficeProductDataEntries } from "../../office-product-editor/servi
 import { requestCardStyleAiIntent } from "../model/card-design/ai-request/cardStyleAiOrchestrator";
 import { requestPageStyleAiIntent } from "../model/page-design/ai-request/pageStyleAiOrchestrator";
 import StorefrontBuilderPage from "../pages/StorefrontBuilderPage";
+import { STOREFRONT_CHAT_MODE_OPTIONS } from "../components/builder-workspace/mode-choice/storefrontChatModes";
+import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
+import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
 } from "../model/storefront-config/storefrontConfigOrchestrator";
+
+// Mode labels are UI copy that gets renamed; read them off the options so a rename
+// never breaks these cases.
+const modeLabelOf = (id) =>
+  STOREFRONT_CHAT_MODE_OPTIONS.find((option) => option.id === id).label;
+const DATA_MODE_LABEL = modeLabelOf("data");
+const DESIGN_MODE_LABEL = modeLabelOf("design");
+const pageScopeLabelOf = (id) =>
+  PAGE_AI_TARGET_SCOPE_OPTIONS.find((option) => option.id === id).label;
 
 vi.mock(
   "../../office-product-editor/services/office-product-data/officeProductDataReadService",
@@ -190,10 +202,10 @@ describe("StorefrontBuilderPage", () => {
     expect(bubble).toHaveAttribute("data-placement", "thread");
 
     expect(
-      within(bubble).getByRole("button", { name: "표시 항목 고르기" }),
+      within(bubble).getByRole("button", { name: DATA_MODE_LABEL }),
     ).toBeInTheDocument();
     expect(
-      within(bubble).getByRole("button", { name: "디자인 바꾸기" }),
+      within(bubble).getByRole("button", { name: DESIGN_MODE_LABEL }),
     ).toBeInTheDocument();
     expect(within(bubble).getAllByRole("button")).toHaveLength(2);
   });
@@ -206,7 +218,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
 
     expect(screen.getByTestId("storefront-mode-choice-bubble")).toHaveAttribute(
@@ -241,17 +253,21 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
 
     const chips = await screen.findByTestId("storefront-design-target-chips");
     const guide = screen.getByTestId("storefront-design-scope-guide");
 
     expect(
-      within(guide).getByText("공통 요소 전체에서 바꿀 수 있는 것"),
+      within(guide).getByText(
+        `${getPageDesignScopeGuide("").title}에서 바꿀 수 있는 것`,
+      ),
     ).toBeInTheDocument();
 
-    await user.click(within(chips).getByRole("button", { name: "검색창" }));
+    await user.click(
+      within(chips).getByRole("button", { name: pageScopeLabelOf("search") }),
+    );
 
     expect(
       within(screen.getByTestId("storefront-design-scope-guide")).getByText(
@@ -268,7 +284,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
 
     expect(
@@ -292,7 +308,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
 
     const composerInput = await screen.findByTestId(
@@ -323,7 +339,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
     await user.click(
       await screen.findByRole("tab", { name: "Fertilizer Upload" }),
@@ -355,7 +371,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
@@ -418,7 +434,7 @@ describe("StorefrontBuilderPage", () => {
     render(<StorefrontBuilderPage officeCode="OFF-1" nhName="NH" />);
 
     await user.click(
-      await screen.findByRole("button", { name: "디자인 바꾸기" }),
+      await screen.findByRole("button", { name: DESIGN_MODE_LABEL }),
     );
     await user.type(
       screen.getByTestId("storefront-chat-composer-input"),
@@ -457,7 +473,7 @@ describe("StorefrontBuilderPage", () => {
 
     await user.click(
       await screen.findByRole("button", {
-        name: "표시 항목 고르기",
+        name: DATA_MODE_LABEL,
       }),
     );
 

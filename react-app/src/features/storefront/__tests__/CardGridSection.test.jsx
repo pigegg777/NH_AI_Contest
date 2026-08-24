@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import CardGridSection from '../components/CardGridSection';
+import CardGridSection from '../components/storefront-page/product-cards/CardGridSection';
 import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
 
 const BASE_SECTION = {

@@ -12,7 +12,7 @@ import {
   buildUniqueMediumCategories,
   filterHiddenProducts,
 } from '../model/storefront-config/sectionMatching';
-import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/page-style/pageStyleModel';
+import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import {
   MOBILE_UI_HELPER_TYPES,

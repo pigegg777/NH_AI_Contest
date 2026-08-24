@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import StorefrontView from '../components/StorefrontView';
+import StorefrontView from '../components/storefront-page/StorefrontView';
 import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
 
 describe('StorefrontView', () => {

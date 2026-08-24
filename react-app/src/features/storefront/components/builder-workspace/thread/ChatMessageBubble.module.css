@@ -1,0 +1,78 @@
+.bubbleRow {
+  display: flex;
+  list-style: none;
+}
+
+.bubbleRowUser {
+  justify-content: flex-end;
+}
+
+.bubbleRowAssistant {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: 86%;
+  padding: 10px 14px;
+  border-radius: var(--corp-radius-xl);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.bubbleUser {
+  background: rgb(240, 247, 241);
+  color: var(--corp-text);
+  border-bottom-right-radius: 2px;
+}
+
+.bubbleAssistant {
+  background: var(--corp-surface-muted);
+  color: var(--corp-text);
+  border-bottom-left-radius: 2px;
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.scopeTag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: var(--corp-radius-pill);
+  background: rgba(29, 74, 46, 0.12);
+  color: var(--corp-primary-hover);
+  font-size: 0.66rem;
+  font-weight: 700;
+  word-break: keep-all;
+}
+
+.scopeTagMuted {
+  composes: scopeTag;
+  background: transparent;
+  border: 1px solid rgba(29, 74, 46, 0.24);
+}
+
+.bubbleText {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.suggestionText {
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.warningText {
+  margin: 6px 0 0;
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 600;
+}

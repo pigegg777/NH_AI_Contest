@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react';
 
-import { normalizeCardsPerRow, resolveStructuralPreset } from '../model/card-design/style/cardCompositionModel';
+import {
+  CARD_STRUCTURAL_PRESETS,
+  normalizeCardsPerRow,
+  resolveStructuralPreset,
+} from '../model/card-design/style/cardCompositionModel';
+import { deriveLegacyCardLayoutPlan } from '../model/card-design/style/cardLayoutPlanModel';
 import {
   DEFAULT_CARD_AI_DESIGN,
   normalizeCardAiDesignInput,
@@ -54,15 +59,58 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
   function setCardsPerRow(value) {
     setCardStyle((current) => {
       const nextCardsPerRow = normalizeCardsPerRow(value, current.cardsPerRow);
+      const nextStructuralPreset = resolveStructuralPreset(
+        current.structuralPreset,
+        nextCardsPerRow,
+      );
 
       return normalizeCardStyle({
         ...current,
         cardsPerRow: nextCardsPerRow,
-        structuralPreset: resolveStructuralPreset(current.structuralPreset, nextCardsPerRow),
-        layoutPlan: {
-          ...current.layoutPlan,
+        structuralPreset: nextStructuralPreset,
+        // When the new card count makes the current preset ineligible, the plan has
+        // to be rebuilt too — carrying the old one over would keep rendering a
+        // side-by-side card the preset no longer allows.
+        layoutPlan:
+          nextStructuralPreset === current.structuralPreset
+            ? { ...current.layoutPlan, cardsPerRow: nextCardsPerRow }
+            : deriveLegacyCardLayoutPlan({
+                cardsPerRow: nextCardsPerRow,
+                structuralPreset: nextStructuralPreset,
+                titleMode: current.titleMode,
+                info: current.info,
+              }),
+      });
+    });
+  }
+
+  function setStructuralPreset(value) {
+    setCardStyle((current) => {
+      const requestedPreset = CARD_STRUCTURAL_PRESETS[value];
+      // Side-by-side layouts need a full-width card. Rather than refusing the
+      // pick, move the card count to one so the chosen layout actually applies.
+      const nextCardsPerRow =
+        requestedPreset &&
+        !requestedPreset.allowedCardsPerRow.includes(current.cardsPerRow)
+          ? requestedPreset.allowedCardsPerRow[0]
+          : current.cardsPerRow;
+      const nextStructuralPreset = resolveStructuralPreset(value, nextCardsPerRow);
+      // The split layout puts the title in its own full-width row, so an inline
+      // title would leave that row empty and repeat the name inside the info area.
+      const nextTitleMode =
+        nextStructuralPreset === 'header-split' ? 'header' : current.titleMode;
+
+      return normalizeCardStyle({
+        ...current,
+        cardsPerRow: nextCardsPerRow,
+        structuralPreset: nextStructuralPreset,
+        titleMode: nextTitleMode,
+        layoutPlan: deriveLegacyCardLayoutPlan({
           cardsPerRow: nextCardsPerRow,
-        },
+          structuralPreset: nextStructuralPreset,
+          titleMode: nextTitleMode,
+          info: current.info,
+        }),
       });
     });
   }
@@ -196,6 +244,7 @@ export function useCardAiDesign({ officeCode, initialCardStyle, initialBodySlots
     canUndoCardAiDesign: Boolean(lastCardAiSnapshot),
     hydrateCardStyle,
     setCardsPerRow,
+    setStructuralPreset,
     setPrompt,
     setTargetScope,
     applyCardAiDesign,

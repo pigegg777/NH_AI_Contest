@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   STOREFRONT_CHAT_MODE_OPTIONS,
   getStorefrontDesignComposerCopy,
-} from '../components/chat-workspace/storefrontChatModes';
+} from '../components/builder-workspace/mode-choice/storefrontChatModes';
 
 describe('STOREFRONT_CHAT_MODE_OPTIONS', () => {
   it('exposes exactly the data and design entry modes, in that order', () => {

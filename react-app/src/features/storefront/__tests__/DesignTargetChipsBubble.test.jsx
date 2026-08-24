@@ -2,13 +2,24 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import DesignTargetChipsBubble from '../components/chat-workspace/DesignTargetChipsBubble';
+import DesignTargetChipsBubble from '../components/builder-workspace/composer/DesignTargetChipsBubble';
+import { CARD_DESIGN_LAYOUT_OPTIONS } from '../model/card-design/ai-request/cardDesignLayoutOptions';
 import { getCardDesignScopeGuide } from '../model/card-design/ai-request/cardDesignScopeGuide';
 
 const TARGET_OPTIONS = [
   { id: 'header', label: '제목 영역', detail: '배경색, 글자색, 굵기, 자간' },
   { id: 'image', label: '이미지', detail: '크기, 채우기 방식' },
 ];
+
+// Layout labels and guide titles are UI copy that gets renamed; look them up by id so
+// a rename never breaks these cases.
+function layoutLabelOf(id) {
+  return CARD_DESIGN_LAYOUT_OPTIONS.find((option) => option.id === id).label;
+}
+
+function guideTitleOf(scopeId) {
+  return `${getCardDesignScopeGuide(scopeId).title}에서 바꿀 수 있는 것`;
+}
 
 function renderBubble(overrides = {}) {
   const props = {
@@ -40,7 +51,7 @@ describe('DesignTargetChipsBubble', () => {
     const guide = screen.getByTestId('storefront-design-scope-guide');
 
     expect(
-      within(guide).getByText('이미지에서 바꿀 수 있는 것'),
+      within(guide).getByText(guideTitleOf('image')),
     ).toBeInTheDocument();
     expect(within(guide).getByText('채우기 방식')).toBeInTheDocument();
     expect(
@@ -54,7 +65,7 @@ describe('DesignTargetChipsBubble', () => {
     const guide = screen.getByTestId('storefront-design-scope-guide');
 
     expect(
-      within(guide).getByText('카드 전체에서 바꿀 수 있는 것'),
+      within(guide).getByText(guideTitleOf('')),
     ).toBeInTheDocument();
     expect(within(guide).getByText('그림자')).toBeInTheDocument();
     expect(within(guide).getByText('카드 구조')).toBeInTheDocument();
@@ -76,9 +87,18 @@ describe('DesignTargetChipsBubble', () => {
       '프롬프트 요청 예시',
     ]);
 
-    expect(bodyRows).toHaveLength(2);
-    expect(within(bodyRows[0]).getByText('배경색')).toBeInTheDocument();
-    expect(within(bodyRows[0]).getByText('굵기')).toBeInTheDocument();
+    // Derived from the guide so adding a scope row does not break this test — what
+    // matters is that the rows are dealt into two side-by-side halves, not how many.
+    const guideRows = getCardDesignScopeGuide('header').rows;
+    const half = Math.ceil(guideRows.length / 2);
+
+    expect(bodyRows).toHaveLength(half);
+    expect(
+      within(bodyRows[0]).getByText(guideRows[0].element),
+    ).toBeInTheDocument();
+    expect(
+      within(bodyRows[0]).getByText(guideRows[half].element),
+    ).toBeInTheDocument();
   });
 
   it('leaves the trailing half empty when the guide has an odd row count', () => {
@@ -136,6 +156,61 @@ describe('DesignTargetChipsBubble', () => {
 
     expect(
       screen.queryByTestId('storefront-cards-per-row'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('offers the card layout control beside the card count while 전체 is selected', async () => {
+    const user = userEvent.setup();
+    const onChangeLayout = vi.fn();
+
+    renderBubble({
+      selectedTargetId: '',
+      cardsPerRow: 1,
+      onChangeCardsPerRow: vi.fn(),
+      layoutOptions: CARD_DESIGN_LAYOUT_OPTIONS,
+      selectedLayoutId: 'image-left',
+      onChangeLayout,
+    });
+
+    const control = screen.getByTestId('storefront-card-layout');
+
+    expect(
+      within(control).getByRole('button', { name: layoutLabelOf('image-left') }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(
+      within(control).getByRole('button', { name: layoutLabelOf('header-split') }),
+    );
+    expect(onChangeLayout).toHaveBeenCalledWith('header-split');
+  });
+
+  it('keeps all three layouts on offer whatever the card count is', () => {
+    renderBubble({
+      selectedTargetId: '',
+      cardsPerRow: 2,
+      onChangeCardsPerRow: vi.fn(),
+      layoutOptions: CARD_DESIGN_LAYOUT_OPTIONS,
+      selectedLayoutId: 'header-top',
+      onChangeLayout: vi.fn(),
+    });
+
+    const control = screen.getByTestId('storefront-card-layout');
+
+    expect(within(control).getAllByRole('button').map((b) => b.textContent)).toEqual(
+      CARD_DESIGN_LAYOUT_OPTIONS.map((option) => option.label),
+    );
+  });
+
+  it('hides the card layout control on every scope other than 전체', () => {
+    renderBubble({
+      selectedTargetId: 'image',
+      layoutOptions: CARD_DESIGN_LAYOUT_OPTIONS,
+      selectedLayoutId: 'image-left',
+      onChangeLayout: vi.fn(),
+    });
+
+    expect(
+      screen.queryByTestId('storefront-card-layout'),
     ).not.toBeInTheDocument();
   });
 
