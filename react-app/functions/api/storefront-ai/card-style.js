@@ -1,7 +1,7 @@
 import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/card-design/ai-request/cardAiDesignModel.js';
 import { normalizeCardStyle } from '../../../src/features/storefront/model/card-design/style/cardStyleModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
-import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront/model/card-design/ai-request/cardStyleAiRequest.js';
+import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront/model/card-design/ai-request/cardStyleOpenAiRequest.js';
 import {
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,

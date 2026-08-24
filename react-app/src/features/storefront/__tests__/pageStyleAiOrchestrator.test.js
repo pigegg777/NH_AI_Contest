@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/page-style/pageStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/style/pageStyleModel';
 import { requestPageStyleAiIntent } from '../model/page-design/ai-request/pageStyleAiOrchestrator';
 
 vi.mock('../../../lib/supabaseClient', () => ({

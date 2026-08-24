@@ -14,12 +14,58 @@ import { normalizeHexColor } from '../../shared/pageStyleColor';
 export const CARD_STYLE_SCHEMA_VERSION = 1;
 
 export const CARD_FIELD_COLOR_ROLE_OPTIONS = ['inherit', 'brand', 'muted', 'blue', 'red', 'green', 'amber', 'ink'];
-export const CARD_FIELD_FONT_WEIGHT_OPTIONS = ['normal', 'medium', 'semibold', 'bold'];
-export const CARD_FIELD_FONT_SIZE_OPTIONS = ['small', 'medium', 'large'];
+export const CARD_FIELD_FONT_WEIGHT_OPTIONS = [400, 500, 600, 700, 800, 900];
+export const CARD_FIELD_FONT_SIZE_OPTIONS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+
+// The six steps above replaced a coarser three/four step scale. These maps exist so a
+// saved design keeps rendering at exactly the rem/weight it used to — every legacy
+// token has an exact equivalent in the new scale, so migration is lossless.
+const LEGACY_FIELD_FONT_SIZE_TOKENS = { small: 'xs', medium: 'md', large: 'xxl' };
+const LEGACY_FIELD_FONT_WEIGHT_TOKENS = { normal: 400, medium: 500, semibold: 700, bold: 800 };
+
+export function normalizeFieldFontSizeToken(value, fallback = 'md') {
+  if (CARD_FIELD_FONT_SIZE_OPTIONS.includes(value)) {
+    return value;
+  }
+
+  return LEGACY_FIELD_FONT_SIZE_TOKENS[value] ?? fallback;
+}
+
+export function normalizeFieldFontWeightToken(value, fallback = 400) {
+  if (CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(value)) {
+    return value;
+  }
+
+  return LEGACY_FIELD_FONT_WEIGHT_TOKENS[value] ?? fallback;
+}
 export const CARD_FIELD_EMPHASIS_OPTIONS = ['none', 'subtle', 'strong'];
 export const CARD_SHADOW_OPTIONS = ['none', 'soft', 'strong'];
 export const CARD_RADIUS_OPTIONS = ['md', 'lg', 'xl'];
 export const CARD_SPACING_OPTIONS = ['tight', 'normal', 'relaxed'];
+
+// Header title size is an offset onto the card body font size rather than an absolute
+// value, so "make the card text bigger" still grows the title, while these six steps
+// adjust the title on top of that. The md step is 0rem, i.e. the pre-token look.
+export const CARD_HEADER_TITLE_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+export const CARD_HEADER_TITLE_SIZE_OFFSET_REM = {
+  xs: '-0.12rem',
+  sm: '-0.07rem',
+  md: '0rem',
+  lg: '0.08rem',
+  xl: '0.18rem',
+  xxl: '0.30rem',
+};
+export const CARD_HEADER_BORDER_STRENGTH_TOKENS = ['none', 'hairline', 'soft', 'normal', 'strong', 'bold'];
+export const CARD_HEADER_BORDER_WIDTH_VALUES = {
+  none: '0px',
+  hairline: '0.5px',
+  soft: '1px',
+  normal: '1.5px',
+  strong: '2px',
+  bold: '2.5px',
+};
+export const CARD_HEADER_BORDER_SIDE_TOKENS = ['bottom', 'all', 'none'];
+export const CARD_HEADER_TEXT_ALIGN_TOKENS = ['left', 'center', 'right'];
 export const CARD_IMAGE_FIT_OPTIONS = ['cover', 'contain'];
 export const CARD_CONDITION_OPERATOR_OPTIONS = ['equals', 'contains'];
 export const CARD_CONDITION_FIELD_OPTIONS = [
@@ -104,6 +150,10 @@ export const DEFAULT_CARD_STYLE = {
     titleColorHex: '#111827',
     letterSpacing: 'normal',
     fontWeight: 700,
+    titleSizeToken: 'md',
+    borderStrengthToken: 'soft',
+    borderSide: 'bottom',
+    textAlign: 'left',
   },
   image: {
     fit: 'contain',
@@ -115,11 +165,18 @@ export const DEFAULT_CARD_STYLE = {
     padding: 'normal',
     fieldGap: 'normal',
     fieldGroupGap: 'normal',
+    labelColorRole: 'muted',
+    labelFontSizeToken: 'md',
+    labelFontWeight: 600,
+    // Grouping and ordering live on the saved style, not only on the rendered
+    // bodySlots, so a later unrelated request cannot silently flatten them.
+    requestedGroups: [],
+    requestedFieldOrder: [],
   },
   field: {
     defaultColorRole: 'inherit',
-    defaultFontWeight: 'normal',
-    defaultFontSize: 'medium',
+    defaultFontWeight: 400,
+    defaultFontSize: 'md',
     priceColorRole: 'brand',
   },
   conditionalStyles: [],
@@ -167,6 +224,18 @@ function normalizeHeader(header) {
     titleColorHex: normalizeHexColor(source.titleColorHex, DEFAULT_CARD_STYLE.header.titleColorHex),
     letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : DEFAULT_CARD_STYLE.header.letterSpacing,
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : DEFAULT_CARD_STYLE.header.fontWeight,
+    titleSizeToken: CARD_HEADER_TITLE_SIZE_TOKENS.includes(source.titleSizeToken)
+      ? source.titleSizeToken
+      : DEFAULT_CARD_STYLE.header.titleSizeToken,
+    borderStrengthToken: CARD_HEADER_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
+      ? source.borderStrengthToken
+      : DEFAULT_CARD_STYLE.header.borderStrengthToken,
+    borderSide: CARD_HEADER_BORDER_SIDE_TOKENS.includes(source.borderSide)
+      ? source.borderSide
+      : DEFAULT_CARD_STYLE.header.borderSide,
+    textAlign: CARD_HEADER_TEXT_ALIGN_TOKENS.includes(source.textAlign)
+      ? source.textAlign
+      : DEFAULT_CARD_STYLE.header.textAlign,
   };
 }
 
@@ -180,6 +249,64 @@ function normalizeImage(image) {
   };
 }
 
+export const CARD_INFO_GROUP_DISPLAY_OPTIONS = ['inline-group', 'stack-group'];
+
+export function normalizeRequestedFieldOrder(requestedFieldOrder) {
+  if (!Array.isArray(requestedFieldOrder)) {
+    return [];
+  }
+
+  const seen = new Set();
+
+  return requestedFieldOrder
+    .map((field) => toTrimmedString(field))
+    .filter((field) => {
+      if (!field || seen.has(field)) {
+        return false;
+      }
+
+      seen.add(field);
+
+      return true;
+    });
+}
+
+export function normalizeRequestedGroups(requestedGroups) {
+  if (!Array.isArray(requestedGroups)) {
+    return [];
+  }
+
+  const seenGroupIds = new Set();
+  // A field may only belong to one group; applyFieldGrouping resolves ties by
+  // first match, so drop the duplicate here to keep the saved state honest.
+  const claimedFields = new Set();
+
+  return requestedGroups
+    .map((group) => {
+      const id = toTrimmedString(group?.id);
+      const fields = normalizeRequestedFieldOrder(group?.fields).filter(
+        (field) => !claimedFields.has(field),
+      );
+
+      if (!id || seenGroupIds.has(id) || fields.length === 0) {
+        return null;
+      }
+
+      seenGroupIds.add(id);
+      fields.forEach((field) => claimedFields.add(field));
+
+      return {
+        id,
+        label: toTrimmedString(group?.label),
+        display: CARD_INFO_GROUP_DISPLAY_OPTIONS.includes(group?.display)
+          ? group.display
+          : 'inline-group',
+        fields,
+      };
+    })
+    .filter(Boolean);
+}
+
 function normalizeInfo(info) {
   const source = info ?? {};
 
@@ -189,6 +316,17 @@ function normalizeInfo(info) {
     padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : DEFAULT_CARD_STYLE.info.padding,
     fieldGap: CARD_SPACING_OPTIONS.includes(source.fieldGap) ? source.fieldGap : DEFAULT_CARD_STYLE.info.fieldGap,
     fieldGroupGap: CARD_SPACING_OPTIONS.includes(source.fieldGroupGap) ? source.fieldGroupGap : DEFAULT_CARD_STYLE.info.fieldGroupGap,
+    labelColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.labelColorRole)
+      ? source.labelColorRole
+      : DEFAULT_CARD_STYLE.info.labelColorRole,
+    labelFontSizeToken: CARD_FIELD_FONT_SIZE_OPTIONS.includes(source.labelFontSizeToken)
+      ? source.labelFontSizeToken
+      : DEFAULT_CARD_STYLE.info.labelFontSizeToken,
+    labelFontWeight: CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(source.labelFontWeight)
+      ? source.labelFontWeight
+      : DEFAULT_CARD_STYLE.info.labelFontWeight,
+    requestedGroups: normalizeRequestedGroups(source.requestedGroups),
+    requestedFieldOrder: normalizeRequestedFieldOrder(source.requestedFieldOrder),
   };
 }
 
@@ -197,8 +335,8 @@ function normalizeFieldDefaults(field) {
 
   return {
     defaultColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.defaultColorRole) ? source.defaultColorRole : DEFAULT_CARD_STYLE.field.defaultColorRole,
-    defaultFontWeight: CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(source.defaultFontWeight) ? source.defaultFontWeight : DEFAULT_CARD_STYLE.field.defaultFontWeight,
-    defaultFontSize: CARD_FIELD_FONT_SIZE_OPTIONS.includes(source.defaultFontSize) ? source.defaultFontSize : DEFAULT_CARD_STYLE.field.defaultFontSize,
+    defaultFontWeight: normalizeFieldFontWeightToken(source.defaultFontWeight, DEFAULT_CARD_STYLE.field.defaultFontWeight),
+    defaultFontSize: normalizeFieldFontSizeToken(source.defaultFontSize, DEFAULT_CARD_STYLE.field.defaultFontSize),
     priceColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole) ? source.priceColorRole : DEFAULT_CARD_STYLE.field.priceColorRole,
   };
 }

@@ -95,6 +95,16 @@ export function deriveLegacyCardLayoutPlan({
         emphasis: 'image',
         groupingHint: 'default',
       });
+    case 'header-split':
+      return normalizeCardLayoutPlan({
+        cardsPerRow,
+        sectionOrder: titleMode === 'inline' ? ['image', 'info'] : ['header', 'image', 'info'],
+        imagePlacement: 'left',
+        titleClamp: 2,
+        contentDensity,
+        emphasis: 'title',
+        groupingHint: 'default',
+      });
     case 'compact-list':
       return normalizeCardLayoutPlan({
         cardsPerRow,

@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
 import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/page-style/pageStyleModel';
+import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/style/pageStyleModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];

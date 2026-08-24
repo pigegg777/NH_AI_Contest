@@ -76,6 +76,61 @@ function extractFieldStylesFromBodySlots(bodySlots) {
   return styles;
 }
 
+function extractGroupsFromBodySlots(bodySlots) {
+  return (Array.isArray(bodySlots) ? bodySlots : [])
+    .filter((slot) => slot.kind === 'inline-group' || slot.kind === 'stack-group')
+    .map((slot) => ({
+      // Slot ids are prefixed at render time; strip it so a re-request that
+      // reuses the original group id updates the group instead of duplicating it.
+      id: String(slot.id ?? '').replace(/^group-/, ''),
+      label: slot.label,
+      display: slot.kind,
+      fields: (Array.isArray(slot.items) ? slot.items : []).map((item) => item.field),
+    }));
+}
+
+// Only worth seeding when the rendered order actually diverges from the natural
+// visibleFields order. Seeding an already-natural order would pin it forever and
+// push any newly shown field to the end.
+function extractCustomFieldOrderFromBodySlots(bodySlots, naturalFieldOrder) {
+  const renderedOrder = (Array.isArray(bodySlots) ? bodySlots : [])
+    .map((slot) => (slot.kind === 'field' ? slot.field : slot.items?.[0]?.field))
+    .filter(Boolean);
+  const naturalLead = (Array.isArray(naturalFieldOrder) ? naturalFieldOrder : []).filter(
+    (field) => renderedOrder.includes(field),
+  );
+
+  return renderedOrder.join('|') === naturalLead.join('|') ? [] : renderedOrder;
+}
+
+// Groups accumulate by id, mirroring how conditionalStyles already merge, so
+// "가격 묶어줘" then "업체랑 분류 묶어줘" leaves both groups standing. An explicit
+// empty requestedGroups array clears every group; removeGroupIds drops one.
+function mergeInfoGroups(previousGroups, nextGroups, removeGroupIds) {
+  if (Array.isArray(nextGroups) && nextGroups.length === 0) {
+    return [];
+  }
+
+  const removedIds = new Set(
+    (Array.isArray(removeGroupIds) ? removeGroupIds : []).map((id) => String(id)),
+  );
+  const incomingGroups = Array.isArray(nextGroups) ? nextGroups : [];
+  const incomingIds = new Set(incomingGroups.map((group) => group.id));
+  // A newer request wins the field: strip it from whichever older group held it,
+  // otherwise normalizeRequestedGroups would award it to the stale group.
+  const incomingFields = new Set(incomingGroups.flatMap((group) => group.fields));
+
+  const carriedOverGroups = previousGroups
+    .filter((group) => !removedIds.has(group.id) && !incomingIds.has(group.id))
+    .map((group) => ({
+      ...group,
+      fields: group.fields.filter((field) => !incomingFields.has(field)),
+    }))
+    .filter((group) => group.fields.length > 0);
+
+  return [...carriedOverGroups, ...incomingGroups.filter((group) => !removedIds.has(group.id))];
+}
+
 function mergeFieldStyles(previousFieldStyles, nextFieldStyles) {
   const nextFields = new Set(
     (Array.isArray(nextFieldStyles) ? nextFieldStyles : []).map((style) => style.field),
@@ -102,19 +157,26 @@ function composeCardBodySlots({
     ]),
   );
 
+  const infoFieldSet = new Set(infoFields);
   const baseSlots = buildFieldSlots(infoFields, fieldLabels);
   const groupedSlots = applyFieldGrouping(
     baseSlots,
-    (Array.isArray(requestedGroups) ? requestedGroups : []).map((group) => ({
-      id: group.id,
-      label: group.label,
-      display: group.display,
-      items: group.fields.map((field) => ({
-        field,
-        label: fieldLabels?.[field] || field,
-        style: fieldStyleMap.get(field),
-      })),
-    })),
+    (Array.isArray(requestedGroups) ? requestedGroups : [])
+      .map((group) => ({
+        id: group.id,
+        label: group.label,
+        display: group.display,
+        // Groups persist across requests, so a member the merchant later hid
+        // must drop out of the group rather than render as an empty cell.
+        items: group.fields
+          .filter((field) => infoFieldSet.has(field))
+          .map((field) => ({
+            field,
+            label: fieldLabels?.[field] || field,
+            style: fieldStyleMap.get(field),
+          })),
+      }))
+      .filter((group) => group.items.length > 0),
   );
   const orderedSlots = reorderFieldSlots(groupedSlots, requestedFieldOrder);
 
@@ -276,10 +338,8 @@ export function compileCardStyle({
   fieldLabels,
 }) {
   const previous = normalizeCardStyle(previousCardStyle);
-  const resolvedCardsPerRow = normalizeCardsPerRow(
-    intent?.layout?.cardsPerRow ?? cardsPerRow,
-    previous.cardsPerRow,
-  );
+  // cardsPerRow comes from the builder UI only, never from the AI intent.
+  const resolvedCardsPerRow = normalizeCardsPerRow(cardsPerRow, previous.cardsPerRow);
   const titleMode = normalizeTitleMode(
     intent?.titleModeRequest || previous.titleMode,
     previous.titleMode,
@@ -333,6 +393,13 @@ export function compileCardStyle({
     ...previous.header,
     letterSpacing: intent?.header?.letterSpacing ?? previous.header.letterSpacing,
     fontWeight: intent?.header?.fontWeight ?? previous.header.fontWeight,
+    titleSizeToken: intent?.header?.titleSizeToken ?? previous.header.titleSizeToken,
+    borderColor: intent?.header?.borderColor ?? previous.header.borderColor,
+    borderStrengthToken:
+      intent?.header?.borderStrengthToken ?? previous.header.borderStrengthToken,
+    borderSide: intent?.header?.borderSide ?? previous.header.borderSide,
+    padding: intent?.header?.padding ?? previous.header.padding,
+    textAlign: intent?.header?.textAlign ?? previous.header.textAlign,
     backgroundColor: headerContrast.backgroundColor,
     titleColorHex: headerContrast.titleColorHex,
   };
@@ -358,21 +425,56 @@ export function compileCardStyle({
   const densityPatch = shouldApplyDensityPatch
     ? buildInfoDensityPatch(layoutPlan.contentDensity, previous.info)
     : {};
+  // Designs saved before grouping became persistent only carry their groups on
+  // the rendered slots, so seed from there when the style has none yet.
+  const previousGroups =
+    previous.info.requestedGroups.length > 0
+      ? previous.info.requestedGroups
+      : extractGroupsFromBodySlots(previousBodySlots);
+  const previousFieldOrder =
+    previous.info.requestedFieldOrder.length > 0
+      ? previous.info.requestedFieldOrder
+      : extractCustomFieldOrderFromBodySlots(previousBodySlots, visibleFields);
+  // An empty layout-derived list means "the layout asks for nothing", which is
+  // not the same as an explicit empty requestedGroups ("clear every group").
+  const layoutRequestedGroups = buildRequestedGroupsFromLayoutPlan(layoutPlan, visibleFields);
+  const layoutRequestedFieldOrder = buildRequestedFieldOrderFromLayoutPlan(
+    layoutPlan,
+    visibleFields,
+  );
+
   const info = {
     backgroundColor: intent?.info?.backgroundColor ?? previous.info.backgroundColor,
     borderColor: intent?.info?.borderColor ?? previous.info.borderColor,
     padding: intent?.info?.padding ?? densityPatch.padding ?? previous.info.padding,
     radius: intent?.info?.radius ?? previous.info.radius,
     fieldGap: intent?.info?.fieldGap ?? densityPatch.fieldGap ?? previous.info.fieldGap,
+    labelColorRole: intent?.info?.labelColorRole ?? previous.info.labelColorRole,
+    labelFontSizeToken:
+      intent?.info?.labelFontSizeToken ?? previous.info.labelFontSizeToken,
+    labelFontWeight: intent?.info?.labelFontWeight ?? previous.info.labelFontWeight,
     fieldGroupGap:
       intent?.info?.fieldGroupGap ??
       densityPatch.fieldGroupGap ??
       previous.info.fieldGroupGap,
-    alignment: previous.info.alignment,
+    requestedGroups: mergeInfoGroups(
+      previousGroups,
+      intent?.info?.requestedGroups ??
+        (layoutRequestedGroups.length > 0 ? layoutRequestedGroups : null),
+      intent?.info?.removeGroupIds,
+    ),
+    // An order list is whole by nature, so an explicit request or a layout hint
+    // replaces it outright instead of merging.
+    requestedFieldOrder:
+      intent?.info?.requestedFieldOrder ??
+      (layoutRequestedFieldOrder.length > 0 ? layoutRequestedFieldOrder : previousFieldOrder),
   };
 
   const field = {
     ...previous.field,
+    defaultColorRole: intent?.field?.defaultColorRole ?? previous.field.defaultColorRole,
+    defaultFontWeight: intent?.field?.defaultFontWeight ?? previous.field.defaultFontWeight,
+    defaultFontSize: intent?.field?.defaultFontSize ?? previous.field.defaultFontSize,
     ...(intent?.field?.priceColorRole
       ? { priceColorRole: intent.field.priceColorRole }
       : {}),
@@ -402,12 +504,10 @@ export function compileCardStyle({
   const bodySlots = composeCardBodySlots({
     visibleFields,
     fieldLabels,
-    requestedGroups:
-      intent?.info?.requestedGroups ??
-      buildRequestedGroupsFromLayoutPlan(layoutPlan, visibleFields),
-    requestedFieldOrder:
-      intent?.info?.requestedFieldOrder ??
-      buildRequestedFieldOrderFromLayoutPlan(layoutPlan, visibleFields),
+    // Read back off the normalized style so the rendered slots and the saved
+    // state can never drift apart.
+    requestedGroups: cardStyle.info.requestedGroups,
+    requestedFieldOrder: cardStyle.info.requestedFieldOrder,
     targetedFieldStyles: mergedFieldStyles,
   });
 

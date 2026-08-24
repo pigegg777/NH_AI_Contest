@@ -4,7 +4,7 @@ import {
   PAGE_STYLE_CHIP_RADIUS_VALUES,
   PAGE_STYLE_CHIP_SIZE_VALUES,
   PAGE_STYLE_SEARCH_SIZE_VALUES,
-} from '../page-design/page-style/pageStyleModel';
+} from '../page-design/style/pageStyleModel';
 
 const CHIP_BORDER_SIDE_SHORTHANDS = {
   bottom: (width) => `0px 0px ${width} 0px`,

@@ -41,9 +41,13 @@ describe('getCardAiTargetScopeOption / buildCardAiTargetScopeInstruction', () =>
 
   it('builds a scoping instruction naming the label and detail for a selected scope', () => {
     const instruction = buildCardAiTargetScopeInstruction('field');
+    // Scope labels are UI copy that gets renamed; read them off the option so a
+    // rename never breaks this case.
+    const fieldScope = getCardAiTargetScopeOption('field');
 
-    expect(instruction).toContain('특정 항목');
-    expect(instruction).toContain('언급한 항목의 색상, 굵기, 강조');
+    expect(instruction).toContain(fieldScope.label);
+    expect(instruction).toContain(fieldScope.detail);
+    expect(instruction).toContain('전체 글자색, 전체 굵기, 전체 글자 크기');
   });
 
   it('lists exactly the four approved scopes', () => {

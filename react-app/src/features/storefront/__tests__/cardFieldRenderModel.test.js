@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatFieldDisplayValue, formatManufacturerList, hasRenderableValue } from '../model/card-design/style/cardFieldRenderModel';
+import { formatFieldDisplayValue, formatManufacturerList, hasRenderableValue } from '../model/card-grid-section/cardFieldRenderModel';
 
 describe('hasRenderableValue', () => {
   it('treats null, undefined, empty string, and empty arrays as not renderable', () => {

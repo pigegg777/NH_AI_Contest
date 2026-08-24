@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { buildCardStyleOpenAiRequestBody } from '../model/card-design/ai-request/cardStyleAiRequest';
+import { buildCardStyleOpenAiRequestBody } from '../model/card-design/ai-request/cardStyleOpenAiRequest';
 import { CARD_STYLE_AI_SCHEMA } from '../model/card-design/ai-response/cardStyleAiResponseSchema';
 import {
   normalizeOpenAiCardExplanation,
@@ -106,7 +106,8 @@ describe('normalizeOpenAiCardIntent', () => {
     );
 
     expect(intent.structuralPresetRequest).toBe('image-left');
-    expect(intent.layout).toEqual({ cardsPerRow: 2, sectionOrder: ['header', 'image'] });
+    // cardsPerRow is user-only, so it is dropped even when the payload carries it.
+    expect(intent.layout).toEqual({ sectionOrder: ['header', 'image'] });
     expect(intent.shell).toEqual({ shadow: 'strong' });
     expect(intent.header).toEqual({ titleColorHex: '#111827' });
     expect(intent.info.requestedGroups).toEqual([
@@ -289,5 +290,134 @@ describe('buildCardStyleOpenAiRequestBody history threading', () => {
 
     expect(requestBody.input[0].content).toContain('explanation');
     expect(requestBody.input[0].content).toContain('suggestion');
+  });
+});
+
+describe('header appearance tokens in the AI contract', () => {
+  it('lets the top level header carry the new appearance tokens', () => {
+    const headerSchema = CARD_STYLE_AI_SCHEMA.properties.header;
+
+    expect(Object.keys(headerSchema.properties)).toEqual(
+      expect.arrayContaining([
+        'titleSizeToken',
+        'borderColor',
+        'borderStrengthToken',
+        'borderSide',
+        'padding',
+        'textAlign',
+      ]),
+    );
+  });
+
+  it('keeps conditional rule headers on the narrower legacy shape', () => {
+    const conditionalHeaderSchema =
+      CARD_STYLE_AI_SCHEMA.properties.conditionalStyles.items.properties.header;
+
+    expect(Object.keys(conditionalHeaderSchema.properties)).toEqual([
+      'backgroundColor',
+      'titleColorHex',
+      'letterSpacing',
+      'fontWeight',
+    ]);
+  });
+
+  it('normalizes the new header appearance tokens and drops unknown ones', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        header: {
+          titleSizeToken: 'xl',
+          borderColor: '#94a3b8',
+          borderStrengthToken: 'strong',
+          borderSide: 'all',
+          padding: 'relaxed',
+          textAlign: 'center',
+        },
+      },
+      '',
+    );
+
+    expect(intent.header).toEqual({
+      titleSizeToken: 'xl',
+      borderColor: '#94a3b8',
+      borderStrengthToken: 'strong',
+      borderSide: 'all',
+      padding: 'relaxed',
+      textAlign: 'center',
+    });
+
+    expect(
+      normalizeOpenAiCardIntent(
+        {
+          header: {
+            titleSizeToken: 'huge',
+            borderStrengthToken: 'chunky',
+            borderSide: 'diagonal',
+            padding: 'airy',
+            textAlign: 'justify',
+          },
+        },
+        '',
+      ).header,
+    ).toBeNull();
+  });
+});
+
+describe('field defaults and info labels in the AI contract', () => {
+  it('opens the whole-card field defaults to the AI', () => {
+    expect(Object.keys(CARD_STYLE_AI_SCHEMA.properties.field.properties)).toEqual(
+      expect.arrayContaining([
+        'defaultColorRole',
+        'defaultFontWeight',
+        'defaultFontSize',
+      ]),
+    );
+  });
+
+  it('opens the info label tokens to the AI', () => {
+    expect(Object.keys(CARD_STYLE_AI_SCHEMA.properties.info.properties)).toEqual(
+      expect.arrayContaining([
+        'labelColorRole',
+        'labelFontSizeToken',
+        'labelFontWeight',
+      ]),
+    );
+  });
+
+  it('normalizes the new field defaults', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        field: {
+          defaultColorRole: 'ink',
+          defaultFontWeight: 600,
+          defaultFontSize: 'lg',
+        },
+      },
+      '',
+    );
+
+    expect(intent.field).toEqual({
+      defaultColorRole: 'ink',
+      defaultFontWeight: 600,
+      defaultFontSize: 'lg',
+    });
+  });
+
+  it('normalizes the new info label tokens', () => {
+    const intent = normalizeOpenAiCardIntent(
+      {
+        info: {
+          labelColorRole: 'blue',
+          labelFontSizeToken: 'sm',
+          labelFontWeight: 700,
+        },
+      },
+      '',
+    );
+
+    expect(intent.info).toEqual({
+      labelColorRole: 'blue',
+      labelFontSizeToken: 'sm',
+      labelFontWeight: 700,
+    });
   });
 });

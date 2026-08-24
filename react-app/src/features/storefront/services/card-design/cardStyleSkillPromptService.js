@@ -1,5 +1,6 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { CARD_STYLE_SKILL_PROMPT } from './skill/skillPrompt';
+import { CARD_STYLE_CONDITIONAL_STYLE_RULES_PROMPT } from './skill/references/conditionalStyleRulesPrompt';
 import { CARD_STYLE_EDITABLE_REGIONS_PROMPT } from './skill/references/editableRegionsPrompt';
 import { CARD_STYLE_EXAMPLES_PROMPT } from './skill/references/examplesPrompt';
 import { CARD_STYLE_FIELD_GROUPING_RULES_PROMPT } from './skill/references/fieldGroupingRulesPrompt';
@@ -37,7 +38,6 @@ const SKILL_PACKS = {
     instructions: [
       'Read the current card style before proposing changes.',
       'Return a structured layout plan for mobile readability first.',
-      'You may set cardsPerRow to 1 or 2 when the user intent clearly implies a density change.',
       'Keep the arrangement readable for the chosen cardsPerRow.',
     ].join(' '),
   },
@@ -88,6 +88,7 @@ const CARD_DESIGN_FORCED_REFERENCE_PROMPT = [
   CARD_STYLE_SKILL_PROMPT,
   CARD_STYLE_SCOPE_MODEL_PROMPT,
   CARD_STYLE_FIELD_GROUPING_RULES_PROMPT,
+  CARD_STYLE_CONDITIONAL_STYLE_RULES_PROMPT,
   CARD_STYLE_EDITABLE_REGIONS_PROMPT,
   CARD_STYLE_OUTPUT_CONTRACT_PROMPT,
   CARD_STYLE_EXAMPLES_PROMPT,

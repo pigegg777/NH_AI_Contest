@@ -11,7 +11,7 @@ import {
   STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/storefront-config/storefrontBuilderModel';
 import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/page-style/pageStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-design/style/pageStyleModel';
 
 describe('categoryConfig cardStyle', () => {
   it('normalizes a missing cardDesign to the default cardStyle', () => {

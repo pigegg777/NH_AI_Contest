@@ -3,27 +3,32 @@ import { toTrimmedString } from '../../../../../common/utils/text';
 export const CARD_AI_TARGET_SCOPE_OPTIONS = [
   {
     id: 'header',
-    label: '제목 영역',
-    detail: '배경색, 글자색, 굵기, 자간',
+    label: '상품명(제목) 영역',
+    detail:
+      '배경색, 글자색, 글자 굵기, 글자 크기, 자간, 정렬, 줄 수, 여백, 테두리 색, 테두리 굵기, 테두리 방향',
   },
   {
     id: 'image',
-    label: '이미지',
-    detail: '크기, 채우기 방식',
+    label: '이미지 영역',
+    detail: '채우기 방식, 이미지 크기',
   },
   {
     id: 'info',
-    label: '정보 영역',
-    detail: '배경, 테두리, 간격, 묶음, 순서',
+    label: '상품정보 영역',
+    detail:
+      '배경색, 테두리 색, 여백, 항목 간격, 그룹 간격, 항목 순서, 항목 묶음, 라벨 색, 라벨 크기, 라벨 굵기',
   },
   {
     id: 'field',
-    label: '특정 항목',
-    detail: '언급한 항목의 색상, 굵기, 강조',
+    label: '상품정보 세부조정',
+    detail:
+      '전체 글자색, 전체 굵기, 전체 글자 크기, 글자색, 굵기, 글자 크기, 강조, 가격 색상 일괄',
   },
 ];
 
-const CARD_AI_TARGET_SCOPE_IDS = new Set(CARD_AI_TARGET_SCOPE_OPTIONS.map((option) => option.id));
+const CARD_AI_TARGET_SCOPE_IDS = new Set(
+  CARD_AI_TARGET_SCOPE_OPTIONS.map((option) => option.id),
+);
 
 export const DEFAULT_CARD_AI_DESIGN = {
   prompt: '',
@@ -31,11 +36,16 @@ export const DEFAULT_CARD_AI_DESIGN = {
 };
 
 export function normalizeCardAiTargetScope(value) {
-  return typeof value === 'string' && CARD_AI_TARGET_SCOPE_IDS.has(value) ? value : '';
+  return typeof value === 'string' && CARD_AI_TARGET_SCOPE_IDS.has(value)
+    ? value
+    : '';
 }
 
 export function getCardAiTargetScopeOption(targetScope) {
-  return CARD_AI_TARGET_SCOPE_OPTIONS.find((option) => option.id === targetScope) ?? null;
+  return (
+    CARD_AI_TARGET_SCOPE_OPTIONS.find((option) => option.id === targetScope) ??
+    null
+  );
 }
 
 export function buildCardAiTargetScopeInstruction(targetScope) {
@@ -56,8 +66,8 @@ export function normalizeCardAiDesignInput(cardAiDesign) {
   const source = cardAiDesign ?? {};
 
   return {
-    prompt: typeof source.prompt === 'string' ? toTrimmedString(source.prompt) : '',
+    prompt:
+      typeof source.prompt === 'string' ? toTrimmedString(source.prompt) : '',
     targetScope: normalizeCardAiTargetScope(source.targetScope),
   };
 }
-

@@ -20,7 +20,7 @@ import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../model/page-design/page-style/pageStyleModel';
+} from '../model/page-design/style/pageStyleModel';
 
 describe('DEFAULT_PAGE_STYLE', () => {
   it('is an explicit white default, not a fallback branch', () => {

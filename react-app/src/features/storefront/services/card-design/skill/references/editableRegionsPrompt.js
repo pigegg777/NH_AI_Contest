@@ -67,7 +67,8 @@ Examples:
 
 Not a card section by itself, but a request can also ask for:
 
-- a structural preset change (\`header-top\`, \`image-left\`, \`compact-list\`, \`detail-first\`) — must stay eligible for the current \`cardsPerRow\`
+- a structural preset change (\`header-top\`, \`image-left\`, \`header-split\`, \`compact-list\`, \`detail-first\`) — must stay eligible for the current \`cardsPerRow\`
+  - \`header-split\` puts the title in its own full-width row across the top, with the image and the info area side by side underneath. It requires \`header\` title mode; never pair it with \`inline\`.
 - a title mode change (\`header\` or \`inline\`)
 
 `;

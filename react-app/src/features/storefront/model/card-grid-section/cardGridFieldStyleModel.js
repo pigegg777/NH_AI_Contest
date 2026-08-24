@@ -1,4 +1,11 @@
-import { resolveFieldColorRoleValue } from '../card-design/style/cardStyleModel';
+import {
+  CARD_HEADER_BORDER_WIDTH_VALUES,
+  CARD_HEADER_TITLE_SIZE_OFFSET_REM,
+  DEFAULT_CARD_STYLE,
+  normalizeFieldFontSizeToken,
+  normalizeFieldFontWeightToken,
+  resolveFieldColorRoleValue,
+} from '../card-design/style/cardStyleModel';
 
 export const PRICE_FIELD_SET = new Set([
   'zero_tax_price',
@@ -7,21 +14,33 @@ export const PRICE_FIELD_SET = new Set([
   'price_subsidy',
 ]);
 
-const FIELD_FONT_WEIGHT_VALUES = {
-  normal: '400',
-  medium: '500',
-  semibold: '700',
-  bold: '800',
-};
+// Evenly spaced so every legacy token lands on an exact equivalent:
+// small = xs, medium = md, large = xxl, in both the base and the offset scale.
 const FIELD_FONT_SIZE_VALUES = {
-  small: 'calc(var(--card-font-size, 0.85rem) - 0.08rem)',
-  medium: 'var(--card-font-size, 0.85rem)',
-  large: 'calc(var(--card-font-size, 0.85rem) + 0.12rem)',
+  xs: 'calc(var(--card-font-size, 0.85rem) - 0.08rem)',
+  sm: 'calc(var(--card-font-size, 0.85rem) - 0.04rem)',
+  md: 'var(--card-font-size, 0.85rem)',
+  lg: 'calc(var(--card-font-size, 0.85rem) + 0.04rem)',
+  xl: 'calc(var(--card-font-size, 0.85rem) + 0.08rem)',
+  xxl: 'calc(var(--card-font-size, 0.85rem) + 0.12rem)',
 };
 const CARD_BASE_FONT_SIZE_REM = {
-  small: '0.75rem',
-  medium: '0.85rem',
-  large: '1rem',
+  xs: '0.75rem',
+  sm: '0.80rem',
+  md: '0.85rem',
+  lg: '0.90rem',
+  xl: '0.95rem',
+  xxl: '1rem',
+};
+// Labels sit well below the body scale, so they get their own rem ladder rather than
+// an offset. md is the pre-token 0.68rem of .fieldLabel.
+const CARD_LABEL_FONT_SIZE_REM = {
+  xs: '0.60rem',
+  sm: '0.64rem',
+  md: '0.68rem',
+  lg: '0.72rem',
+  xl: '0.76rem',
+  xxl: '0.80rem',
 };
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{3}([0-9a-f]{3})?$/i;
 
@@ -51,8 +70,15 @@ export function buildFieldValueStyle(fieldStyle) {
   }
 
   const valueStyle = {};
-  const fontWeight = FIELD_FONT_WEIGHT_VALUES[fieldStyle.fontWeight];
-  const fontSize = FIELD_FONT_SIZE_VALUES[fieldStyle.fontSize];
+  // bodySlots are persisted, so a saved slot style can still carry a legacy token.
+  const fontWeight =
+    fieldStyle.fontWeight == null
+      ? undefined
+      : normalizeFieldFontWeightToken(fieldStyle.fontWeight);
+  const fontSize =
+    fieldStyle.fontSize == null
+      ? undefined
+      : FIELD_FONT_SIZE_VALUES[normalizeFieldFontSizeToken(fieldStyle.fontSize)];
 
   if (fieldStyle.colorRole) {
     valueStyle['--field-text-color'] = resolveFieldColorRoleValue(
@@ -85,6 +111,16 @@ export function buildShellCssVars(cardStyle) {
     ),
     '--card-header-title-weight': cardStyle.header.fontWeight,
     '--card-header-title-letter-spacing': cardStyle.header.letterSpacing,
+    '--card-header-title-offset':
+      CARD_HEADER_TITLE_SIZE_OFFSET_REM[cardStyle.header.titleSizeToken],
+    '--card-header-title-align': cardStyle.header.textAlign,
+    '--card-header-border-width':
+      CARD_HEADER_BORDER_WIDTH_VALUES[cardStyle.header.borderStrengthToken],
+    // Always emitted: the muted role resolves to the same #6b7280 the admin --corp-muted
+    // token holds, so this is a visual no-op that drops the admin dependency.
+    '--card-field-label-color': resolveFieldColorRoleValue(
+      cardStyle.info.labelColorRole,
+    ),
     '--card-image-size': `${cardStyle.image.sizePx}px`,
     '--info-field-group-gap':
       cardStyle.info.fieldGroupGap === 'tight'
@@ -113,6 +149,17 @@ export function buildShellCssVars(cardStyle) {
   if (infoBackground) cssVars['--card-info-bg'] = infoBackground;
   if (infoBorder) cssVars['--card-info-border'] = infoBorder;
   if (headerBorder) cssVars['--card-header-border'] = headerBorder;
+
+  // Left unset at the default step so .fieldLabel and .groupFieldLabel keep their own
+  // fallbacks (0.68/600 vs 0.72/700); once chosen, both labels follow the one token.
+  if (cardStyle.info.labelFontSizeToken !== DEFAULT_CARD_STYLE.info.labelFontSizeToken) {
+    cssVars['--card-field-label-size'] =
+      CARD_LABEL_FONT_SIZE_REM[cardStyle.info.labelFontSizeToken];
+  }
+
+  if (cardStyle.info.labelFontWeight !== DEFAULT_CARD_STYLE.info.labelFontWeight) {
+    cssVars['--card-field-label-weight'] = cardStyle.info.labelFontWeight;
+  }
 
   if (isSideImage) {
     cssVars['--card-image-width'] = `${cardStyle.image.sizePx}px`;

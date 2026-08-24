@@ -8,8 +8,8 @@ import {
   normalizePageStyleAiIntent,
   normalizeProductCategoryChipsIntent,
   normalizeSearchIntent,
-  PAGE_STYLE_AI_SCHEMA,
-} from '../model/page-design/ai-response/pageStyleAiResponseModel';
+} from '../model/page-design/ai-response/pageStyleAiResponseNormalizer';
+import { PAGE_STYLE_AI_SCHEMA } from '../model/page-design/ai-response/pageStyleAiResponseSchema';
 
 function collectStrictModeViolations(schema, path = []) {
   if (!schema || typeof schema !== 'object') return [];

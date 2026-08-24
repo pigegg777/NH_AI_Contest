@@ -274,7 +274,7 @@ describe('compileCardStyle structural preset and title mode', () => {
     const result = compileCardStyle({
       intent: {
         layout: {
-          cardsPerRow: 1,
+          cardsPerRow: 2,
           sectionOrder: ['image', 'header', 'info'],
           imagePlacement: 'right',
           titleClamp: 1,
@@ -284,11 +284,13 @@ describe('compileCardStyle structural preset and title mode', () => {
         },
       },
       previousCardStyle: DEFAULT_CARD_STYLE,
-      cardsPerRow: 2,
+      cardsPerRow: 1,
       visibleFields: ['product_name', 'img_url'],
       fieldLabels: FIELD_LABELS,
     });
 
+    // Everything in the layout intent lands except cardsPerRow, which stays with the
+    // builder value because it is a user-only control.
     expect(result.cardStyle.cardsPerRow).toBe(1);
     expect(result.cardStyle.layoutPlan.imagePlacement).toBe('right');
     expect(result.cardStyle.layoutPlan.titleClamp).toBe(1);
@@ -507,5 +509,104 @@ describe('compileCardStyle body composition', () => {
 
     const taxPriceSlot = second.bodySlots.find((slot) => slot.field === 'tax_price');
     expect(taxPriceSlot.style.colorRole).toBe('blue');
+  });
+});
+
+describe('compileCardStyle header appearance tokens', () => {
+  it('applies every new header token from the intent', () => {
+    const result = compileCardStyle({
+      intent: {
+        header: {
+          titleSizeToken: 'xl',
+          borderColor: '#94a3b8',
+          borderStrengthToken: 'strong',
+          borderSide: 'all',
+          padding: 'relaxed',
+          textAlign: 'center',
+        },
+      },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.header.titleSizeToken).toBe('xl');
+    expect(result.cardStyle.header.borderColor).toBe('#94a3b8');
+    expect(result.cardStyle.header.borderStrengthToken).toBe('strong');
+    expect(result.cardStyle.header.borderSide).toBe('all');
+    expect(result.cardStyle.header.padding).toBe('relaxed');
+    expect(result.cardStyle.header.textAlign).toBe('center');
+  });
+
+  it('keeps the previous header tokens when the intent omits them', () => {
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      header: {
+        ...DEFAULT_CARD_STYLE.header,
+        titleSizeToken: 'lg',
+        borderStrengthToken: 'bold',
+        borderSide: 'none',
+        textAlign: 'right',
+      },
+    };
+    const result = compileCardStyle({
+      intent: { header: { fontWeight: 800 } },
+      previousCardStyle,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.header.titleSizeToken).toBe('lg');
+    expect(result.cardStyle.header.borderStrengthToken).toBe('bold');
+    expect(result.cardStyle.header.borderSide).toBe('none');
+    expect(result.cardStyle.header.textAlign).toBe('right');
+    expect(result.cardStyle.header.fontWeight).toBe(800);
+  });
+});
+
+describe('compileCardStyle field defaults and info labels', () => {
+  it('applies the whole-card field defaults from the intent', () => {
+    const result = compileCardStyle({
+      intent: {
+        field: { defaultColorRole: 'ink', defaultFontWeight: 600, defaultFontSize: 'lg' },
+      },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.field.defaultColorRole).toBe('ink');
+    expect(result.cardStyle.field.defaultFontWeight).toBe(600);
+    expect(result.cardStyle.field.defaultFontSize).toBe('lg');
+  });
+
+  it('applies the info label tokens from the intent', () => {
+    const result = compileCardStyle({
+      intent: {
+        info: { labelColorRole: 'blue', labelFontSizeToken: 'sm', labelFontWeight: 700 },
+      },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.info.labelColorRole).toBe('blue');
+    expect(result.cardStyle.info.labelFontSizeToken).toBe('sm');
+    expect(result.cardStyle.info.labelFontWeight).toBe(700);
+  });
+
+  it('keeps previous field defaults and label tokens when the intent omits them', () => {
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      field: { ...DEFAULT_CARD_STYLE.field, defaultFontWeight: 900, defaultFontSize: 'xs' },
+      info: { ...DEFAULT_CARD_STYLE.info, labelColorRole: 'red', labelFontWeight: 800 },
+    };
+    const result = compileCardStyle({
+      intent: { info: { padding: 'tight' } },
+      previousCardStyle,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.field.defaultFontWeight).toBe(900);
+    expect(result.cardStyle.field.defaultFontSize).toBe('xs');
+    expect(result.cardStyle.info.labelColorRole).toBe('red');
+    expect(result.cardStyle.info.labelFontWeight).toBe(800);
+    expect(result.cardStyle.info.padding).toBe('tight');
   });
 });

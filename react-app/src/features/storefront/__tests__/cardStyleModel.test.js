@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  CARD_FIELD_FONT_SIZE_OPTIONS,
+  CARD_FIELD_FONT_WEIGHT_OPTIONS,
+  CARD_HEADER_BORDER_STRENGTH_TOKENS,
+  CARD_HEADER_BORDER_WIDTH_VALUES,
+  CARD_HEADER_TITLE_SIZE_OFFSET_REM,
+  CARD_HEADER_TITLE_SIZE_TOKENS,
   collectConditionFieldValueSamples,
   DEFAULT_CARD_STYLE,
   normalizeCardStyle,
   normalizeConditionalStyleRules,
+  normalizeFieldFontSizeToken,
+  normalizeFieldFontWeightToken,
   resolveFieldColorRoleValue,
 } from '../model/card-design/style/cardStyleModel';
 
@@ -23,10 +31,14 @@ describe('normalizeCardStyle', () => {
           titleColorHex: '#ffffff',
           letterSpacing: '0.02em',
           fontWeight: 800,
+          titleSizeToken: 'xl',
+          borderStrengthToken: 'strong',
+          borderSide: 'all',
+          textAlign: 'center',
         },
         image: { fit: 'cover', sizePx: 160 },
         info: { padding: 'tight', fieldGap: 'tight', fieldGroupGap: 'tight' },
-        field: { defaultColorRole: 'muted', defaultFontWeight: 'bold', defaultFontSize: 'large', priceColorRole: 'red' },
+        field: { defaultColorRole: 'muted', defaultFontWeight: 900, defaultFontSize: 'xl', priceColorRole: 'red' },
       }),
     ).toEqual({
       schemaVersion: 1,
@@ -50,10 +62,25 @@ describe('normalizeCardStyle', () => {
         titleColorHex: '#ffffff',
         letterSpacing: '0.02em',
         fontWeight: 800,
+        titleSizeToken: 'xl',
+        borderStrengthToken: 'strong',
+        borderSide: 'all',
+        textAlign: 'center',
       },
       image: { fit: 'cover', sizePx: 160 },
-      info: { backgroundColor: '', borderColor: '', padding: 'tight', fieldGap: 'tight', fieldGroupGap: 'tight' },
-      field: { defaultColorRole: 'muted', defaultFontWeight: 'bold', defaultFontSize: 'large', priceColorRole: 'red' },
+      info: {
+        backgroundColor: '',
+        borderColor: '',
+        padding: 'tight',
+        fieldGap: 'tight',
+        fieldGroupGap: 'tight',
+        labelColorRole: 'muted',
+        labelFontSizeToken: 'md',
+        labelFontWeight: 600,
+        requestedGroups: [],
+        requestedFieldOrder: [],
+      },
+      field: { defaultColorRole: 'muted', defaultFontWeight: 900, defaultFontSize: 'xl', priceColorRole: 'red' },
       conditionalStyles: [],
     });
   });
@@ -210,5 +237,140 @@ describe('resolveFieldColorRoleValue', () => {
     expect(resolveFieldColorRoleValue('brand')).toBe('var(--brand-color, var(--corp-primary))');
     expect(resolveFieldColorRoleValue('red')).toBe('#dc2626');
     expect(resolveFieldColorRoleValue('unknown')).toBe('inherit');
+  });
+});
+
+describe('normalizeCardStyle header appearance tokens', () => {
+  it('defaults every new header token to the pre-existing look', () => {
+    const header = normalizeCardStyle({}).header;
+
+    expect(header.titleSizeToken).toBe('md');
+    expect(header.borderStrengthToken).toBe('soft');
+    expect(header.borderSide).toBe('bottom');
+    expect(header.textAlign).toBe('left');
+  });
+
+  it('keeps allowed header appearance tokens', () => {
+    const header = normalizeCardStyle({
+      header: {
+        titleSizeToken: 'xxl',
+        borderStrengthToken: 'bold',
+        borderSide: 'all',
+        textAlign: 'center',
+      },
+    }).header;
+
+    expect(header.titleSizeToken).toBe('xxl');
+    expect(header.borderStrengthToken).toBe('bold');
+    expect(header.borderSide).toBe('all');
+    expect(header.textAlign).toBe('center');
+  });
+
+  it('falls back to defaults for unknown header appearance tokens', () => {
+    const header = normalizeCardStyle({
+      header: {
+        titleSizeToken: 'huge',
+        borderStrengthToken: 'chunky',
+        borderSide: 'diagonal',
+        textAlign: 'justify',
+      },
+    }).header;
+
+    expect(header.titleSizeToken).toBe('md');
+    expect(header.borderStrengthToken).toBe('soft');
+    expect(header.borderSide).toBe('bottom');
+    expect(header.textAlign).toBe('left');
+  });
+
+  it('exposes a six step title size scale whose md step is a no-op offset', () => {
+    expect(CARD_HEADER_TITLE_SIZE_TOKENS).toEqual(['xs', 'sm', 'md', 'lg', 'xl', 'xxl']);
+    expect(CARD_HEADER_TITLE_SIZE_OFFSET_REM.md).toBe('0rem');
+    expect(Object.keys(CARD_HEADER_TITLE_SIZE_OFFSET_REM)).toEqual(CARD_HEADER_TITLE_SIZE_TOKENS);
+  });
+
+  it('exposes a six step border strength scale whose soft step is the pre-existing 1px', () => {
+    expect(CARD_HEADER_BORDER_STRENGTH_TOKENS).toEqual([
+      'none',
+      'hairline',
+      'soft',
+      'normal',
+      'strong',
+      'bold',
+    ]);
+    expect(CARD_HEADER_BORDER_WIDTH_VALUES.soft).toBe('1px');
+    expect(Object.keys(CARD_HEADER_BORDER_WIDTH_VALUES)).toEqual(
+      CARD_HEADER_BORDER_STRENGTH_TOKENS,
+    );
+  });
+});
+
+describe('field typography tokens', () => {
+  it('exposes six evenly spaced size steps and six weight steps', () => {
+    expect(CARD_FIELD_FONT_SIZE_OPTIONS).toEqual(['xs', 'sm', 'md', 'lg', 'xl', 'xxl']);
+    expect(CARD_FIELD_FONT_WEIGHT_OPTIONS).toEqual([400, 500, 600, 700, 800, 900]);
+  });
+
+  it('maps every legacy size token onto an exactly equivalent new step', () => {
+    // The new scale was chosen so migration is lossless: a saved 'small' must render
+    // at the same rem as before, not merely "close to" it.
+    expect(normalizeFieldFontSizeToken('small')).toBe('xs');
+    expect(normalizeFieldFontSizeToken('medium')).toBe('md');
+    expect(normalizeFieldFontSizeToken('large')).toBe('xxl');
+  });
+
+  it('maps every legacy weight token onto its exact numeric weight', () => {
+    expect(normalizeFieldFontWeightToken('normal')).toBe(400);
+    expect(normalizeFieldFontWeightToken('medium')).toBe(500);
+    expect(normalizeFieldFontWeightToken('semibold')).toBe(700);
+    expect(normalizeFieldFontWeightToken('bold')).toBe(800);
+  });
+
+  it('passes new tokens through and falls back for unknown ones', () => {
+    expect(normalizeFieldFontSizeToken('lg')).toBe('lg');
+    expect(normalizeFieldFontWeightToken(900)).toBe(900);
+    expect(normalizeFieldFontSizeToken('huge', 'md')).toBe('md');
+    expect(normalizeFieldFontWeightToken(1234, 400)).toBe(400);
+  });
+
+  it('migrates legacy field defaults through normalizeCardStyle', () => {
+    const field = normalizeCardStyle({
+      field: { defaultFontSize: 'large', defaultFontWeight: 'bold' },
+    }).field;
+
+    expect(field.defaultFontSize).toBe('xxl');
+    expect(field.defaultFontWeight).toBe(800);
+  });
+
+  it('defaults the field typography to the pre-existing look', () => {
+    expect(DEFAULT_CARD_STYLE.field.defaultFontSize).toBe('md');
+    expect(DEFAULT_CARD_STYLE.field.defaultFontWeight).toBe(400);
+  });
+});
+
+describe('normalizeCardStyle info label tokens', () => {
+  it('defaults the label tokens to the pre-existing look', () => {
+    const info = normalizeCardStyle({}).info;
+
+    expect(info.labelColorRole).toBe('muted');
+    expect(info.labelFontSizeToken).toBe('md');
+    expect(info.labelFontWeight).toBe(600);
+  });
+
+  it('keeps allowed label tokens and rejects unknown ones', () => {
+    const info = normalizeCardStyle({
+      info: { labelColorRole: 'blue', labelFontSizeToken: 'xl', labelFontWeight: 900 },
+    }).info;
+
+    expect(info.labelColorRole).toBe('blue');
+    expect(info.labelFontSizeToken).toBe('xl');
+    expect(info.labelFontWeight).toBe(900);
+
+    const fallback = normalizeCardStyle({
+      info: { labelColorRole: 'neon', labelFontSizeToken: 'huge', labelFontWeight: 42 },
+    }).info;
+
+    expect(fallback.labelColorRole).toBe('muted');
+    expect(fallback.labelFontSizeToken).toBe('md');
+    expect(fallback.labelFontWeight).toBe(600);
   });
 });

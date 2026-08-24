@@ -1,4 +1,4 @@
-import { PRICE_FIELD_KEYS } from '../../storefront-config/storefrontUiModel';
+import { PRICE_FIELD_KEYS } from '../storefront-config/storefrontUiModel';
 
 export function formatManufacturerList(manufacturerList) {
   if (!Array.isArray(manufacturerList) || manufacturerList.length === 0) {

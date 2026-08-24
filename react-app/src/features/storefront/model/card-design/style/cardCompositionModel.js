@@ -21,6 +21,14 @@ export const CARD_STRUCTURAL_PRESETS = {
     stackOrder: ['header', 'info'],
     allowedCardsPerRow: [1],
   },
+  'header-split': {
+    id: 'header-split',
+    shape: 'header-over-split',
+    sideSection: 'image',
+    order: ['header', 'image', 'info'],
+    stackOrder: ['info'],
+    allowedCardsPerRow: [1],
+  },
   'compact-list': {
     id: 'compact-list',
     shape: 'stack',
@@ -79,6 +87,18 @@ export function resolveSectionOrder(presetId, titleMode) {
   return order;
 }
 
+/**
+ * True when the title should span the full card width above a side-by-side
+ * image/info row, rather than sitting inside the column beside the image.
+ */
+export function isHeaderAboveSplit(sectionOrder) {
+  const order = Array.isArray(sectionOrder) ? sectionOrder : [];
+  const headerIndex = order.indexOf('header');
+  const imageIndex = order.indexOf('image');
+
+  return headerIndex !== -1 && imageIndex !== -1 && headerIndex < imageIndex;
+}
+
 export function resolveStructuralPresetFromLayoutPlan(layoutPlan, fallbackCardsPerRow = 2) {
   const normalizedLayoutPlan = normalizeCardLayoutPlan(layoutPlan, {
     ...deriveLegacyCardLayoutPlan({ cardsPerRow: fallbackCardsPerRow }),
@@ -90,7 +110,10 @@ export function resolveStructuralPresetFromLayoutPlan(layoutPlan, fallbackCardsP
   }
 
   if (normalizedLayoutPlan.imagePlacement === 'left' || normalizedLayoutPlan.imagePlacement === 'right') {
-    return resolveStructuralPreset('image-left', normalizedLayoutPlan.cardsPerRow);
+    return resolveStructuralPreset(
+      isHeaderAboveSplit(normalizedLayoutPlan.sectionOrder) ? 'header-split' : 'image-left',
+      normalizedLayoutPlan.cardsPerRow,
+    );
   }
 
   if (normalizedLayoutPlan.sectionOrder[0] === 'info') {
@@ -112,6 +135,7 @@ export function resolveSectionOrderFromLayoutPlan(layoutPlan, titleMode) {
 
 const IMAGE_SIZE_RANGES_BY_PRESET_FAMILY = {
   'side-by-side': { dimension: 'width', min: 96, max: 220, step: 16, default: 140 },
+  'header-over-split': { dimension: 'width', min: 96, max: 220, step: 16, default: 140 },
   stack: { dimension: 'height', min: 80, max: 200, step: 16, default: 120 },
 };
 

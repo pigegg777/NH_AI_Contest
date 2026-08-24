@@ -1,4 +1,4 @@
-import { hasRenderableValue } from '../card-design/style/cardFieldRenderModel';
+import { hasRenderableValue } from './cardFieldRenderModel';
 import { buildFieldSlots } from '../card-design/style/cardCompositionModel';
 import {
   STOREFRONT_FIELD_LABELS,

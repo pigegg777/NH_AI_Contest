@@ -41,6 +41,7 @@ The result must:
 
 - [references/scope-model.md](references/scope-model.md)
 - [references/field-grouping-rules.md](references/field-grouping-rules.md)
+- [references/conditional-style-rules.md](references/conditional-style-rules.md)
 - [references/editable-regions.md](references/editable-regions.md)
 - [references/output-contract.md](references/output-contract.md)
 - [references/examples.md](references/examples.md)

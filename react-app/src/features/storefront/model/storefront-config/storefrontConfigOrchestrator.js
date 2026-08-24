@@ -7,7 +7,7 @@ import {
 import {
   migrateLegacyPageConfigToPageStyle,
   pageConfigNeedsPageStyleMigration,
-} from '../page-design/page-style/pageStyleMigration';
+} from '../page-design/style/pageStyleMigration';
 import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../../services/storefront-config/storefrontConfigService';
 
 function toArray(value) {

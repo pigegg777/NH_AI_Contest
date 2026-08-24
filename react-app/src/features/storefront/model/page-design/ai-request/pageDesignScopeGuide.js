@@ -1,7 +1,7 @@
 export const PAGE_DESIGN_SCOPE_GUIDES = [
   {
     scopeId: '',
-    title: '공통 요소 전체',
+    title: '공통 요소',
     rows: [
       { element: '전체 색감', example: '가을 느낌으로 전체 색을 바꿔줘' },
       { element: '헤더', example: '제목을 더 크고 굵게 해줘' },
@@ -13,7 +13,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
   },
   {
     scopeId: 'palette',
-    title: '전체 색감',
+    title: '화면 전체 색상',
     rows: [
       { element: '배경색', example: '페이지 배경을 아주 연한 베이지로 해줘' },
       { element: '포인트 색', example: '포인트 색을 짙은 초록으로 바꿔줘' },
@@ -22,7 +22,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
   },
   {
     scopeId: 'header',
-    title: '헤더 텍스트',
+    title: '상단 제목 글자',
     rows: [
       { element: '글자색', example: '제목 글자를 더 진하게 해줘' },
       { element: '굵기', example: '제목을 더 굵게 해줘' },
@@ -33,41 +33,56 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
   },
   {
     scopeId: 'categoryChips',
-    title: '중분류 칩',
+    title: '상품 하단 세부카테고리 버튼',
     rows: [
       { element: '색상', example: '중분류 칩을 흰 배경에 초록 글씨로 해줘' },
-      { element: '마우스 올렸을 때', example: '마우스를 올리면 연한 초록이 되게 해줘' },
-      { element: '선택된 칩', example: '선택된 중분류 칩을 진한 초록으로 해줘' },
+      {
+        element: '마우스 올렸을 때',
+        example: '마우스를 올리면 연한 초록이 되게 해줘',
+      },
+      {
+        element: '선택된 칩',
+        example: '선택된 중분류 칩을 진한 초록으로 해줘',
+      },
       { element: '모양', example: '중분류 칩을 알약 모양으로 해줘' },
       { element: '크기', example: '중분류 칩을 조금 크게 해줘' },
       { element: '칩 간격', example: '중분류 칩 사이를 좁혀줘' },
       { element: '테두리', example: '중분류 칩은 아래쪽 밑줄만 남겨줘' },
       { element: '글자 굵기', example: '중분류 칩 글씨를 굵게 해줘' },
     ],
-    note: '중분류 칩과 대분류 칩은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
+    note: '상단 카테고리 버튼과 하단 세부카테고리 버튼은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
   },
   {
     scopeId: 'productCategoryChips',
-    title: '대분류 칩',
+    title: '상품 상단 카테고리 버튼',
     rows: [
       { element: '색상', example: '대분류 칩을 흰 배경에 초록 글씨로 해줘' },
-      { element: '마우스 올렸을 때', example: '마우스를 올리면 연한 초록이 되게 해줘' },
-      { element: '선택된 칩', example: '선택된 대분류 칩을 진한 초록으로 해줘' },
+      {
+        element: '마우스 올렸을 때',
+        example: '마우스를 올리면 연한 초록이 되게 해줘',
+      },
+      {
+        element: '선택된 칩',
+        example: '선택된 대분류 칩을 진한 초록으로 해줘',
+      },
       { element: '모양', example: '대분류 칩 모서리를 각지게 해줘' },
       { element: '크기', example: '대분류 칩을 조금 크게 해줘' },
       { element: '칩 간격', example: '대분류 칩 사이를 넓혀줘' },
       { element: '테두리', example: '대분류 칩 테두리를 없애줘' },
       { element: '글자 굵기', example: '대분류 칩 글씨를 굵게 해줘' },
     ],
-    note: '중분류 칩과 대분류 칩은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
+    note: '상단 카테고리 버튼과 하단 세부카테고리 버튼은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
   },
   {
     scopeId: 'search',
-    title: '검색창',
+    title: '상품 검색창',
     rows: [
       { element: '배경색', example: '검색창 배경을 흰색으로 해줘' },
       { element: '테두리 색', example: '검색창 테두리를 연한 회색으로 해줘' },
-      { element: '클릭했을 때 테두리', example: '검색창을 클릭하면 테두리가 초록이 되게 해줘' },
+      {
+        element: '클릭했을 때 테두리',
+        example: '검색창을 클릭하면 테두리가 초록이 되게 해줘',
+      },
       { element: '테두리 두께', example: '검색창 테두리를 얇게 해줘' },
       { element: '크기', example: '검색창을 조금 크게 해줘' },
     ],
