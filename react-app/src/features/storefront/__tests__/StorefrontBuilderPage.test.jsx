@@ -505,6 +505,33 @@ describe("StorefrontBuilderPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the page copy in the preview as it is typed", async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: DATA_MODE_LABEL }),
+    );
+
+    // The saved copy hydrates into the input, and the preview shows it.
+    const descriptionInput = await screen.findByLabelText("페이지 설명");
+
+    expect(descriptionInput).toHaveValue("Existing subtitle");
+    expect(screen.getByTestId("storefront-page-description")).toHaveTextContent(
+      "Existing subtitle",
+    );
+
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, "영세가격 안내");
+
+    expect(
+      await screen.findByTestId("storefront-page-description"),
+    ).toHaveTextContent("영세가격 안내");
+  });
+
   it("follows the category picked in design mode when data mode reopens", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);

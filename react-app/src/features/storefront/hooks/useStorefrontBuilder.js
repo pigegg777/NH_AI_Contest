@@ -180,6 +180,14 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     currentEntry?.rows,
   );
   const effectiveScalarKeys = deriveEffectiveScalarKeys(currentEntry?.rows);
+  // The copy the merchant is typing right now, shaped the way the save payload
+  // takes it. Both the preview and the save read this one value, so what they
+  // see while typing is exactly what gets written.
+  const draftNavConfig = {
+    ...navConfig,
+    title: textDraft.pageTitle,
+    subtitle: textDraft.pageDescription,
+  };
   const dataSelection = useDataSelectionDraft({
     allowedScalarKeys: effectiveScalarKeys,
     initialFields: ["product_name"],
@@ -520,11 +528,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       cardStyle: cardAi.cardStyle,
       cardFields,
       bodySlots: cardAi.bodySlots,
-      navConfig: {
-        ...navConfig,
-        title: textDraft.pageTitle,
-        subtitle: textDraft.pageDescription,
-      },
+      navConfig: draftNavConfig,
       categoryDescription: textDraft.categoryDescription,
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
@@ -742,7 +746,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           cardStyle: cardAi.cardStyle,
           cardFields,
           bodySlots: previewBodySlots,
-          navConfig,
+          navConfig: draftNavConfig,
+          categoryDescription: textDraft.categoryDescription,
           mobileUiTree,
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
@@ -753,7 +758,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
             ...existingConfig?.pageConfig,
             pageStyle: pageAi.pageStyle,
           }),
-          navConfig: normalizeNavConfig(existingConfig?.navConfig),
+          navConfig: normalizeNavConfig(draftNavConfig),
           categoryConfigs: existingConfig?.categoryConfigs ?? [],
           hiddenProducts,
         };
