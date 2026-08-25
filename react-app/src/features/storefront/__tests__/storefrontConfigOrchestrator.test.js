@@ -158,6 +158,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             schemaVersion: 1,
             displayName: 'Fertilizer Upload',
             sourceCategoryName: 'Fertilizer Upload',
+            description: '',
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
             cardDesign: {
@@ -339,6 +340,7 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
               schemaVersion: 1,
               displayName: 'Fertilizer Upload',
               sourceCategoryName: 'Fertilizer Upload',
+              description: '',
               selectedMediumCategories: ['Premium', 'Starter'],
               representativeMediumCategory: 'Premium',
               cardDesign: {

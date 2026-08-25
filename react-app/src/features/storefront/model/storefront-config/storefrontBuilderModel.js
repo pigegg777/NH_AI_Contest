@@ -286,6 +286,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
     displayName: toTrimmedString(source.displayName) || toTrimmedString(productCategoryName),
     sourceCategoryName:
       toTrimmedString(source.sourceCategoryName) || toTrimmedString(productCategoryName),
+    description: typeof source.description === 'string' ? toTrimmedString(source.description) : '',
     selectedMediumCategories,
     representativeMediumCategory:
       representativeMediumCategory && selectedMediumCategories.includes(representativeMediumCategory)
@@ -378,6 +379,7 @@ export function buildCategoryConfigRow({
   cardFields,
   cardStyle,
   bodySlots,
+  categoryDescription,
   allowedScalarKeys,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
@@ -394,6 +396,10 @@ export function buildCategoryConfigRow({
         cardStyle,
         bodySlots,
       },
+      description:
+        categoryDescription === undefined
+          ? existingRow?.categoryConfig?.description
+          : categoryDescription,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -445,6 +451,7 @@ export function buildStorefrontSavePayload({
   cardStyle,
   cardFields,
   bodySlots,
+  categoryDescription,
   navConfig,
   mobileUiTree,
   pageStyle,
@@ -491,6 +498,7 @@ export function buildStorefrontSavePayload({
     cardFields: normalizeCardFields(cardFields, allowedScalarKeys),
     cardStyle: normalizeCardStyle(cardStyle),
     bodySlots,
+    categoryDescription,
     allowedScalarKeys,
   });
 

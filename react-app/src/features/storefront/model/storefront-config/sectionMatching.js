@@ -119,6 +119,7 @@ function buildDefaultSection(productCategoryName, rows) {
   return {
     title: productCategoryName,
     productCategoryName,
+    description: '',
     fields: deriveEffectiveScalarKeys(products) ?? DEFAULT_CARD_FIELDS,
     cardStyle: undefined,
     bodySlots: undefined,
@@ -138,6 +139,7 @@ export function buildSections(categoryConfigs, productRows) {
       return {
         title: categoryConfig.displayName || categoryConfigRow?.productCategoryName || 'Products',
         productCategoryName: categoryConfigRow?.productCategoryName || '',
+        description: categoryConfig.description || '',
         fields: categoryConfig.cardDesign?.visibleFields,
         cardStyle: categoryConfig.cardDesign?.cardStyle,
         bodySlots: categoryConfig.cardDesign?.bodySlots,
