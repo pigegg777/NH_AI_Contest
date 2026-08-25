@@ -54,3 +54,38 @@ describe('category description', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('section header content', () => {
+  // The caller maps over its enabled blocks, so "none" arrives as an empty
+  // array. An empty array is truthy, and the wrapper it used to render carried
+  // a bottom margin that pushed every grid down.
+  it('renders no wrapper when the caller has no blocks to show', () => {
+    const { container } = render(
+      <CardGridSection
+        sectionId="s1"
+        section={SECTION}
+        fields={['product_name']}
+        sectionHeaderContent={[]}
+      />,
+    );
+
+    const grid = screen.getByTestId('storefront-card-grid-section');
+
+    expect(grid.firstElementChild).toBe(
+      container.querySelector('[class*="grid"]'),
+    );
+  });
+
+  it('renders the wrapper once there is a block to show', () => {
+    render(
+      <CardGridSection
+        sectionId="s1"
+        section={SECTION}
+        fields={['product_name']}
+        sectionHeaderContent={[<span key="a">안내 문구</span>]}
+      />,
+    );
+
+    expect(screen.getByText('안내 문구')).toBeInTheDocument();
+  });
+});

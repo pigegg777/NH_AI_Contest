@@ -37,6 +37,12 @@ export default function CardGridSection({
     '--card-columns': resolvedStyle.cardsPerRow,
     ...buildShellCssVars(resolvedStyle),
   };
+  // The caller maps over its blocks, so with none enabled this arrives as an
+  // empty array — truthy. Left unchecked it rendered an empty div whose bottom
+  // margin pushed every card grid down by 14px on every page.
+  const hasSectionHeaderContent = Array.isArray(sectionHeaderContent)
+    ? sectionHeaderContent.length > 0
+    : Boolean(sectionHeaderContent);
 
   return (
     <section
@@ -56,7 +62,7 @@ export default function CardGridSection({
       data-content-density={resolvedStyle.layoutPlan.contentDensity}
       data-layout-emphasis={resolvedStyle.layoutPlan.emphasis}
     >
-      {sectionHeaderContent ? (
+      {hasSectionHeaderContent ? (
         <div className={styles.sectionHeaderContent}>{sectionHeaderContent}</div>
       ) : null}
 

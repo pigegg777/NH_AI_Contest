@@ -1,7 +1,8 @@
+/* Only two children, so this gap is exactly the hero-to-cards distance. */
 .page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
   min-height: 100%;
   padding: 18px 16px 32px;
   background: var(--page-bg, #f3f1ec);
@@ -14,7 +15,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: var(--page-top-spacing, 22px) 0 14px;
+  /* Bottom padding is the chip row's clearance from the cards scrolling under
+     this sticky header — enough to read as a boundary, no more. */
+  padding: var(--page-top-spacing, 22px) 0 10px;
   background: var(--page-bg, #f3f1ec);
 }
 
@@ -57,11 +60,11 @@
 
   .page {
       padding: 14px 12px 24px;
-      gap: 12px;
+      gap: 8px;
     }
 
   .hero {
-      padding: 18px 16px 12px;
+      padding: 18px 16px 8px;
       border-radius: 18px;
     }
 }
