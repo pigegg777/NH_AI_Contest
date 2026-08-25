@@ -13,6 +13,7 @@ const EMPTY_STATE = {
   config: null,
   productRows: [],
   officeName: '',
+  productUpdatedAt: '',
   nhName: '',
 };
 
@@ -32,6 +33,7 @@ export default function PublicStorefrontPage({ officeCode }) {
       config: null,
       productRows: [],
       officeName: '',
+      productUpdatedAt: '',
       nhName: '',
     });
 
@@ -55,6 +57,7 @@ export default function PublicStorefrontPage({ officeCode }) {
           config,
           productRows,
           officeName: officeIdentity?.officeName ?? '',
+          productUpdatedAt: officeIdentity?.productUpdatedAt ?? '',
           nhName: officeIdentity?.nhName ?? '',
         });
       })
@@ -68,6 +71,7 @@ export default function PublicStorefrontPage({ officeCode }) {
           config: null,
           productRows: [],
           officeName: '',
+          productUpdatedAt: '',
           nhName: '',
         });
       });
@@ -110,6 +114,7 @@ export default function PublicStorefrontPage({ officeCode }) {
         productRows={state.productRows}
         officeName={state.officeName}
         nhName={state.nhName}
+        productUpdatedAt={state.productUpdatedAt}
       />
     </div>
   );

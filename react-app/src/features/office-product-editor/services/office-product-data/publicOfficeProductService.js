@@ -32,5 +32,8 @@ export async function fetchPublicOfficeIdentity({ officeCode }) {
   return {
     officeName: toTrimmedString(data.office_name),
     nhName: toTrimmedString(data.nh_name),
+    // Null until the migration adding this column has been applied, which the
+    // storefront treats the same as "no product data yet": it renders nothing.
+    productUpdatedAt: data.product_updated_at ?? null,
   };
 }

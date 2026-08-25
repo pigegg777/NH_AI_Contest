@@ -18,12 +18,12 @@ export const PAGE_AI_TARGET_SCOPE_OPTIONS = [
   },
   {
     id: 'productCategoryChips',
-    label: '상품 상단 카테고리 버튼',
+    label: '상품 카테고리 버튼',
     detail: '비료, 농약, 자재 버튼의 색상과 테두리',
   },
   {
     id: 'categoryChips',
-    label: '상품 하단 세부카테고리 버튼',
+    label: '상품 세부카테고리 버튼',
     detail: '전체, 무기질비료, 종자종묘 버튼의 색상과 테두리',
   },
 ];

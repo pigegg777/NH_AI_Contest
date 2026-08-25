@@ -14,6 +14,7 @@ vi.mock('../contexts/editorContexts', () => ({
     rows: [{ row_id: 'A100__01', product_name: '사과 부사 5kg' }],
     warningRows: [],
   }),
+  useUploadCtx: () => ({ carryOver: { isAvailable: false } }),
   useAiCtx: () => ({
     recommendations: [
       {

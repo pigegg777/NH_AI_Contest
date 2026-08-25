@@ -5,6 +5,8 @@ export default function PublicStorefrontScreen({
   productRows,
   officeName = '',
   nhName = '',
+  selectedSectionName = '',
+  productUpdatedAt = '',
 }) {
   return (
     <StorefrontView
@@ -12,6 +14,8 @@ export default function PublicStorefrontScreen({
       productRows={productRows}
       officeName={officeName}
       nhName={nhName}
+      selectedSectionName={selectedSectionName}
+      productUpdatedAt={productUpdatedAt}
     />
   );
 }

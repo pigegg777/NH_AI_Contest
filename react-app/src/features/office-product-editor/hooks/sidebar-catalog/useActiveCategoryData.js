@@ -17,7 +17,9 @@ export function useActiveCategoryData({
     officeProductCatalogItems.find((item) => item.categoryName === activeCategoryName) ?? null;
 
   const isViewingRegisteredData = Boolean(registeredCatalogItem);
-  const shouldFetchRegisteredData = isViewingRegisteredData && !result;
+  // Also fetched while a new workbook is under review: the saved rows are what
+  // the carry-over reads img_url and note out of.
+  const shouldFetchRegisteredData = isViewingRegisteredData;
 
   const {
     data: registeredProductData,
@@ -30,7 +32,8 @@ export function useActiveCategoryData({
     refreshToken: registeredCatalogItem?.updatedAt ?? null,
   });
 
-  const extractedRows = result?.rows ?? registeredProductData?.rows ?? EMPTY_ROWS;
+  const registeredRows = registeredProductData?.rows ?? EMPTY_ROWS;
+  const extractedRows = result?.rows ?? registeredRows;
   const registeredFingerprint = registeredCatalogItem
     ? `registered:${activeCategoryName}:${registeredCatalogItem.updatedAt ?? ''}`
     : null;
@@ -50,6 +53,7 @@ export function useActiveCategoryData({
     isRegisteredProductDataLoading,
     registeredProductDataErrorMessage,
     extractedRows,
+    registeredRows,
     effectiveFingerprint,
     bannerStatusLabel,
     bannerStatusVariant,

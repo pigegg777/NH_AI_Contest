@@ -1,3 +1,9 @@
+import { toTrimmedString } from '../../../../common/utils/text';
+import {
+  DEFAULT_CARD_FIELDS,
+  deriveEffectiveScalarKeys,
+} from './storefrontBuilderModel';
+
 function normalizeSpec(spec) {
   return spec === undefined || spec === null ? null : spec;
 }
@@ -70,11 +76,62 @@ export function buildUniqueMediumCategories(products) {
   return values;
 }
 
+/**
+ * Product categories that have rows but no categoryConfig yet. Nothing in the
+ * builder can mark a category as "do not publish", so a missing config only ever
+ * means the merchant has not opened it in the storefront builder — not that they
+ * chose to hide it. Left out, newly uploaded data is silently invisible to
+ * shoppers until someone remembers to go and save the storefront.
+ */
+function findUnconfiguredCategoryNames(categoryConfigs, rows) {
+  const configured = new Set(
+    (Array.isArray(categoryConfigs) ? categoryConfigs : [])
+      .map((row) => toTrimmedString(row?.productCategoryName || row?.product_category_name))
+      .filter(Boolean),
+  );
+  const seen = new Set();
+  const names = [];
+
+  for (const row of rows) {
+    const name = toTrimmedString(row?.product_category_name);
+
+    if (!name || configured.has(name) || seen.has(name)) {
+      continue;
+    }
+
+    seen.add(name);
+    names.push(name);
+  }
+
+  return names;
+}
+
+/**
+ * The default a category gets before anyone configures it: every scalar field
+ * the rows actually carry, which is the same fallback normalizeCardFields
+ * applies inside the builder.
+ */
+function buildDefaultSection(productCategoryName, rows) {
+  const products = rows.filter(
+    (row) => toTrimmedString(row?.product_category_name) === productCategoryName,
+  );
+
+  return {
+    title: productCategoryName,
+    productCategoryName,
+    fields: deriveEffectiveScalarKeys(products) ?? DEFAULT_CARD_FIELDS,
+    cardStyle: undefined,
+    bodySlots: undefined,
+    representativeMediumCategory: '',
+    products,
+  };
+}
+
 export function buildSections(categoryConfigs, productRows) {
   const rows = Array.isArray(productRows) ? productRows : [];
 
-  return (Array.isArray(categoryConfigs) ? categoryConfigs : [])
-    .map((categoryConfigRow) => {
+  const configuredSections = (Array.isArray(categoryConfigs) ? categoryConfigs : []).map(
+    (categoryConfigRow) => {
       const categoryConfig = categoryConfigRow?.categoryConfig ?? {};
       const products = rows.filter((row) => matchesCategoryConfig(row, categoryConfigRow));
 
@@ -87,6 +144,16 @@ export function buildSections(categoryConfigs, productRows) {
         representativeMediumCategory: categoryConfig.representativeMediumCategory || '',
         products,
       };
-    })
-    .filter((section) => section.products.length > 0);
+    },
+  );
+
+  // Appended after the configured ones so saving a storefront never reshuffles
+  // the categories a shopper already knows the order of.
+  const defaultSections = findUnconfiguredCategoryNames(categoryConfigs, rows).map((name) =>
+    buildDefaultSection(name, rows),
+  );
+
+  return [...configuredSections, ...defaultSections].filter(
+    (section) => section.products.length > 0,
+  );
 }

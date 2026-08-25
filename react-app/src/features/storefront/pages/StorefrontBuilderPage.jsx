@@ -66,6 +66,8 @@ export default function StorefrontBuilderPage({ officeCode, nhName }) {
                   productRows={builder.previewProductRows}
                   officeName={builder.officeName}
                   nhName={builder.nh_name}
+                  selectedSectionName={builder.previewSelectedCategoryName}
+                  productUpdatedAt={builder.previewProductUpdatedAt}
                 />
               </div>
             </div>

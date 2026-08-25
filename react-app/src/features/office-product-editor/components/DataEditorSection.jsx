@@ -4,6 +4,7 @@ import {
   useAiCtx,
   useExtractionCtx,
   useTableCtx,
+  useUploadCtx,
 } from '../contexts/editorContexts';
 import { TabBar } from './data-edit-controls/TabBar';
 import { ExcelUploadPanel } from './data-edit-controls/excel-upload/ExcelUploadPanel';
@@ -21,6 +22,7 @@ export function DataEditorSection() {
   const { isRegisteredProductDataLoading, registeredProductDataErrorMessage } =
     useActiveCategoryCtx();
   const { rows, warningRows } = useTableCtx();
+  const { carryOver } = useUploadCtx();
   const {
     recommendations: aiRecommendations,
     isLoading: aiIsLoading = false,
@@ -51,6 +53,7 @@ export function DataEditorSection() {
               loadingErrorMessage={registeredProductDataErrorMessage}
               fileWarnings={result?.warnings}
               warningRows={warningRows}
+              carryOver={carryOver}
             />
           ) : (
             <WorkbookAiRecommendationPanel

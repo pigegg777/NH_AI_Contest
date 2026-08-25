@@ -33,7 +33,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
   },
   {
     scopeId: 'categoryChips',
-    title: '상품 하단 세부카테고리 버튼',
+    title: '상품 세부카테고리 버튼',
     rows: [
       { element: '색상', example: '중분류 칩을 흰 배경에 초록 글씨로 해줘' },
       {
@@ -54,7 +54,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
   },
   {
     scopeId: 'productCategoryChips',
-    title: '상품 상단 카테고리 버튼',
+    title: '상품 카테고리 버튼',
     rows: [
       { element: '색상', example: '대분류 칩을 흰 배경에 초록 글씨로 해줘' },
       {

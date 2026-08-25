@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FileWarningsPanel } from './FileWarningsPanel';
+import { PreviousDataCarryOverDialog } from './PreviousDataCarryOverDialog';
 import styles from './ExcelUploadSection.module.css';
 
 function DropzoneArea({ onWorkbookChange }) {
@@ -43,6 +44,7 @@ export function ExcelUploadPanel({
   loadingErrorMessage,
   fileWarnings,
   warningRows = [],
+  carryOver = null,
 }) {
   return onWorkbookChange ? (
     <div className={styles.tabColumns}>
@@ -52,8 +54,8 @@ export function ExcelUploadPanel({
             📊 엑셀 업로드 (31-6447에서 엑셀파일을 다운로드한 뒤 선택하세요.)
           </h3>
           <p className={styles.desc}>
-            새 파일 선택 시 현재 저장된 데이터가 삭제되고 새 파일로 완전히
-            교체됩니다.
+            새 파일을 선택하면 현재 저장된 데이터가 새 파일로 교체됩니다. 이미
+            등록된 분류라면 사진과 비고를 이어받을지 아래에서 고를 수 있습니다.
           </p>
           <label className={styles.uploadBtn} htmlFor="excel-workbook-input">
             📂 파일 선택
@@ -67,6 +69,8 @@ export function ExcelUploadPanel({
           />
           <DropzoneArea onWorkbookChange={onWorkbookChange} />
         </div>
+
+        {carryOver ? <PreviousDataCarryOverDialog {...carryOver} /> : null}
 
         {isLoading || loadingErrorMessage ? (
           <div className={styles.statusArea}>

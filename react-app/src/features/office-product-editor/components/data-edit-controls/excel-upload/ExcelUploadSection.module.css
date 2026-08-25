@@ -127,3 +127,78 @@
     grid-template-columns: 1fr;
   }
 }
+
+.carryOverOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.carryOverDialog {
+  width: 420px;
+  max-width: 92vw;
+  padding: 20px;
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.carryOverDialogTitle {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.carryOverDialogBody {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.carryOverDialogNote {
+  margin: 0 0 18px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--corp-muted);
+  word-break: keep-all;
+}
+
+.carryOverDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.carryOverPrimaryButton,
+.carryOverSecondaryButton {
+  padding: 9px 16px;
+  border-radius: var(--corp-radius-sm);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.carryOverPrimaryButton {
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: #ffffff;
+}
+
+.carryOverSecondaryButton {
+  border: 1px solid var(--corp-line-strong);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+}

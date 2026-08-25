@@ -14,6 +14,7 @@ import {
 } from '../model/storefront-config/sectionMatching';
 import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
+import { formatProductUpdatedAt } from '../model/storefront-view/productUpdatedAtModel';
 import {
   MOBILE_UI_HELPER_TYPES,
   normalizeMobileUiTree,
@@ -94,14 +95,30 @@ export function useStorefrontView({
   productRows,
   officeName: externalOfficeName,
   nhName,
+  // Set by the builder so its category tab drives the preview's selection too.
+  // The public storefront leaves it undefined and keeps owning its own selection.
+  selectedSectionName = '',
+  // When the price data was last uploaded. Empty until an office has product
+  // data, in which case the storefront renders nothing for it.
+  productUpdatedAt = '',
 }) {
   const [searchText, setSearchText] = useState('');
   const [activeMediumCategory, setActiveMediumCategory] = useState(
     ALL_MEDIUM_CATEGORY_LABEL,
   );
-  const [activeSectionName, setActiveSectionName] = useState('');
+  const [activeSectionName, setActiveSectionName] = useState(selectedSectionName);
   const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] =
     useState(true);
+  const [lastExternalSectionName, setLastExternalSectionName] =
+    useState(selectedSectionName);
+
+  // Adjusted during render rather than in an effect: an effect would land a
+  // frame later and make the preview visibly flip to the old section first.
+  if (selectedSectionName && selectedSectionName !== lastExternalSectionName) {
+    setLastExternalSectionName(selectedSectionName);
+    setActiveSectionName(selectedSectionName);
+    setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
+  }
 
   const deferredSearchText = useDeferredValue(searchText);
   const searchQuery = deferredSearchText.trim().toLowerCase();
@@ -284,6 +301,7 @@ export function useStorefrontView({
     isDesktopCategoryNavOpen,
     setIsDesktopCategoryNavOpen,
     mobileUiTree,
+    productUpdatedAtLabel: formatProductUpdatedAt(productUpdatedAt),
     catalogSectionEntries,
     activeSectionTitle,
     activeSectionMediumCategories,

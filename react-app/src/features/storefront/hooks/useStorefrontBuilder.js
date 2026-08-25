@@ -27,6 +27,7 @@ import {
   upsertStorefrontConfig,
 } from "../model/storefront-config/storefrontConfigOrchestrator";
 import { getStorefrontDesignComposerCopy } from "../components/builder-workspace/mode-choice/storefrontChatModes";
+import { resolveLatestProductUpdatedAt } from "../model/storefront-view/productUpdatedAtModel";
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
 import { usePageAiDesign } from "./usePageAiDesign";
@@ -781,10 +782,22 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
         }
       : null;
 
+  // Drives the preview's category selection from whichever tab is active. The
+  // design mode's first tab is 공통 요소, which is not a category — an empty
+  // string there leaves the preview's own selection alone.
+  const previewSelectedCategoryName =
+    chatSession.mode === "design" && designTarget === "common"
+      ? ""
+      : selectedProductCategoryName;
+
   return {
     status,
     errorMessage,
     selectedProductCategoryName,
+    previewSelectedCategoryName,
+    // The preview shows the same upload timestamp the public storefront will,
+    // aggregated here from the entries the builder already holds.
+    previewProductUpdatedAt: resolveLatestProductUpdatedAt(productEntries),
     previewConfig,
     previewProductRows: allProductRows,
     officeName,

@@ -13,8 +13,22 @@ import HelperBlock from './blocks/HelperBlock';
 import StorefrontViewBlock from './blocks/StorefrontViewBlock';
 import styles from './StorefrontView.module.css';
 
-export default function StorefrontView({ config, productRows, officeName, nhName }) {
-  const view = useStorefrontView({ config, productRows, officeName, nhName });
+export default function StorefrontView({
+  config,
+  productRows,
+  officeName,
+  nhName,
+  selectedSectionName,
+  productUpdatedAt,
+}) {
+  const view = useStorefrontView({
+    config,
+    productRows,
+    officeName,
+    nhName,
+    selectedSectionName,
+    productUpdatedAt,
+  });
   const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
   const renderableMobileUiTree = buildRenderableMobileUiTree(
     view.mobileUiTree,

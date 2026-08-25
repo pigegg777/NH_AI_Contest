@@ -9,6 +9,7 @@ import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterStat
 import { useAiImageApplyState } from './ai-image-apply/useAiImageApplyState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
 import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
+import { usePreviousDataCarryOver } from './office-product-data/usePreviousDataCarryOver';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
@@ -56,12 +57,23 @@ export function useOfficeProductEditorState(user) {
     onActiveDataDeleted: extraction.resetWorkbook,
   });
 
-  const { effectiveFingerprint, extractedRows } = activeCategoryData;
+  const { effectiveFingerprint, extractedRows, registeredRows } =
+    activeCategoryData;
   const hasExtractedResult = Boolean(extraction.result);
   const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
 
+  // Sits before the review table so the merchant sees the carried-over values in
+  // the table and can still hand-edit them before saving.
+  const carryOver = usePreviousDataCarryOver({
+    newRows: extractedRows,
+    previousRows: registeredRows,
+    isReviewingNewWorkbook: hasExtractedResult,
+    isCategoryRegistered: activeCategoryData.isViewingRegisteredData,
+    workbookFingerprint: extraction.workbookFingerprint,
+  });
+
   const tableState = useWorkbookReviewTableState(
-    extractedRows,
+    carryOver.rows,
     effectiveFingerprint,
     {
       hasResult: hasExtractedResult,
@@ -246,6 +258,14 @@ export function useOfficeProductEditorState(user) {
   const uploadValue = useMemo(
     () => ({
       canUploadFile,
+      carryOver: {
+        isOpen: carryOver.isDialogOpen,
+        categoryName: activeCategoryData.activeCategoryName,
+        carriedImageCount: carryOver.carriedImageCount,
+        carriedNoteCount: carryOver.carriedNoteCount,
+        onChoose: carryOver.choose,
+        onDismiss: carryOver.dismiss,
+      },
       tableNameCardProps: {
         customTableName: selection.customTableName,
         onTableNameChange: selection.handleCustomTableNameChange,
@@ -256,6 +276,12 @@ export function useOfficeProductEditorState(user) {
     }),
     [
       canUploadFile,
+      carryOver.isDialogOpen,
+      carryOver.carriedImageCount,
+      carryOver.carriedNoteCount,
+      carryOver.choose,
+      carryOver.dismiss,
+      activeCategoryData.activeCategoryName,
       selection.customTableName,
       selection.handleCustomTableNameChange,
       selection.showsCustomTableNameInput,

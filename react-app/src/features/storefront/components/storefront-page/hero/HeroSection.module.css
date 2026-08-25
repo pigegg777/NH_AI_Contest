@@ -190,3 +190,21 @@
       min-height: 38px;
     }
 }
+
+/* Pinned to the hero's top-right rather than left in the column flow, so it can
+   sit tight against the top edge without pushing the brand block down or
+   shrinking the hero. .hero is position: sticky, which is what it resolves
+   against. Merchant-themed surface, so a hardcoded muted hex, not a --corp-*
+   token. */
+.updatedAt {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #9aa79c;
+  letter-spacing: 0.01em;
+  word-break: keep-all;
+}
