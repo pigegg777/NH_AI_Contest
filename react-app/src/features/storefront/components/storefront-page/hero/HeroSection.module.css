@@ -180,12 +180,14 @@
       height: 30px;
     }
 
+  /* Both scale off their token rather than pinning a value, so a size the
+     merchant picks in AI 페이지 디자인 still applies on phones. The offsets
+     reproduce what the pinned values gave at the default token: the title
+     grows on small screens, the description shrinks. */
   .title {
-      font-size: 1.3rem;
+      font-size: calc(var(--title-font-size, 1.1rem) + 0.2rem);
     }
 
-  /* Scaled off the token rather than pinned, so a size the merchant picks in
-     AI 페이지 디자인 still applies on phones. */
   .description {
       font-size: calc(var(--page-description-size, 0.88rem) - 0.04rem);
     }
