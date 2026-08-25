@@ -284,6 +284,7 @@ describe('compilePageStyle property boundaries', () => {
 
     expect(Object.keys(result).sort()).toEqual([
       'categoryChips',
+      'description',
       'header',
       'palette',
       'productCategoryChips',
