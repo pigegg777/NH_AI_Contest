@@ -11,14 +11,20 @@
   margin-bottom: 14px;
 }
 
+/* Reads as the same kind of text as the hero description — same colour, same
+   weight, one step smaller because it introduces a section rather than the
+   page. 14px bottom matches .sectionHeaderContent, so whatever sits above the
+   grid clears it by the same amount. */
 .categoryDescription {
-  margin: 0 0 10px;
-  font-size: 0.82rem;
-  font-weight: 500;
+  margin: 0 0 14px;
+  max-width: 40rem;
+  font-size: 0.84rem;
+  font-weight: 400;
   line-height: 1.55;
   color: #51635a;
   word-break: keep-all;
   overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .grid {

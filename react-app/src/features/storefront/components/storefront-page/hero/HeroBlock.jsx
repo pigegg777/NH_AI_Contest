@@ -24,17 +24,21 @@ export default function HeroBlock({ view, brandLogoSrc }) {
           </div>
           <div className={styles.brandCopy}>
             <h1 className={styles.title}>{view.pageTitle}</h1>
-            {view.pageDescription ? (
-              <p
-                className={styles.description}
-                data-testid="storefront-page-description"
-              >
-                {view.pageDescription}
-              </p>
-            ) : null}
           </div>
         </div>
       </div>
+
+      {/* Outside the logo row on purpose: inside it, the description's width
+          fed back into the centred logo+title block, so typing copy nudged the
+          logo sideways and wrapped the text into a narrow column. */}
+      {view.pageDescription ? (
+        <p
+          className={styles.description}
+          data-testid="storefront-page-description"
+        >
+          {view.pageDescription}
+        </p>
+      ) : null}
     </div>
   );
 }

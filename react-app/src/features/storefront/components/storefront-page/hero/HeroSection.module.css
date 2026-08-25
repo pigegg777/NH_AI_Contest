@@ -1,7 +1,9 @@
+/* The gap sets the title-to-description distance. It was dead space before —
+   .brandBlock was the only in-flow child — so tightening it costs nothing. */
 .heroTop {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .brandBlock {
@@ -46,17 +48,23 @@
   letter-spacing: var(--typography-letter-spacing, normal);
   line-height: 1.12;
   color: var(--title-text-color, #173223);
+  text-wrap: balance;
 }
 
+/* Its own centred line under the brand row, capped at a comfortable measure so
+   a long sentence wraps across the hero instead of down a narrow column. */
 .description {
-  margin: 6px 0 0;
+  margin: 0 auto;
+  max-width: 32rem;
   font-size: var(--page-description-size, 0.88rem);
   font-weight: var(--page-description-weight, 400);
   letter-spacing: var(--page-description-letter-spacing, normal);
   line-height: 1.5;
+  text-align: center;
   color: var(--page-description-color, #51635a);
   word-break: keep-all;
   overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 .searchRow {
@@ -176,8 +184,10 @@
       font-size: 1.3rem;
     }
 
+  /* Scaled off the token rather than pinned, so a size the merchant picks in
+     AI 페이지 디자인 still applies on phones. */
   .description {
-      font-size: 0.84rem;
+      font-size: calc(var(--page-description-size, 0.88rem) - 0.04rem);
     }
 
   .searchBox {
