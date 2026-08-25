@@ -68,7 +68,7 @@ export default function StorefrontView({
           <DesktopCategoryRail
             catalogSectionEntries={view.catalogSectionEntries}
             activeSectionTitle={view.activeSectionTitle}
-            title={view.title}
+            title={view.pageTitle}
             isOpen={view.isDesktopCategoryNavOpen}
             onToggle={() =>
               view.setIsDesktopCategoryNavOpen((current) => !current)
@@ -97,6 +97,7 @@ export default function StorefrontView({
                   fields={section?.fields}
                   cardStyle={section?.cardStyle}
                   bodySlots={section?.bodySlots}
+                  description={section?.description}
                   sectionHeaderContent={view.sectionHeaderBlocks.map((block) => (
                     <HelperBlock key={`${sectionId}-${block.id}`} block={block} />
                   ))}

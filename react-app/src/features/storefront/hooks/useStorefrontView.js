@@ -319,9 +319,6 @@ export function useStorefrontView({
     derivedPageTitle,
     pageTitle,
     pageDescription,
-    // DesktopCategoryRail's fallback label when no section is active yet; kept
-    // as an alias of pageTitle rather than a separate concept.
-    title: pageTitle,
     searchPlaceholder,
     searchVariant,
     canRenderDesktopCategoryRail,
