@@ -483,7 +483,14 @@ describe("StorefrontBuilderPage", () => {
     expect(
       screen.queryByTestId("storefront-chat-composer-dock"),
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("data-field-row-tax_price")).toBeInTheDocument();
+
+    // The dock opens on 공통 요소, which carries the page copy rather than the
+    // field tables; the category tabs sit after it.
+    await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
+
+    expect(
+      await screen.findByTestId("data-field-row-tax_price"),
+    ).toBeInTheDocument();
     expect(
       screen.queryByTestId("data-field-row-zero_tax_price"),
     ).not.toBeInTheDocument();

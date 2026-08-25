@@ -27,6 +27,7 @@ import {
   upsertStorefrontConfig,
 } from "../model/storefront-config/storefrontConfigOrchestrator";
 import { getStorefrontDesignComposerCopy } from "../components/builder-workspace/mode-choice/storefrontChatModes";
+import { buildDerivedPageTitle } from "../model/storefront-view/pageTitleModel";
 import { resolveLatestProductUpdatedAt } from "../model/storefront-view/productUpdatedAtModel";
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
@@ -34,6 +35,7 @@ import { usePageAiDesign } from "./usePageAiDesign";
 import { useStorefrontChatSession } from "./useStorefrontChatSession";
 
 const FETCH_ERROR_MESSAGE = "스토어프론트 빌더를 불러오지 못했습니다.";
+const COMMON_TAB_ID = "common";
 const MAX_SHARED_AI_HISTORY_MESSAGES = 12;
 const ALL_SCOPE_CHAT_LABEL = "전체";
 const FALLBACK_CATEGORY_CHAT_LABEL = "카드";
@@ -138,6 +140,14 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree),
   );
   const [designTarget, setDesignTarget] = useState("common");
+  const [dataTabId, setDataTabId] = useState(COMMON_TAB_ID);
+  // The merchant-authored copy, kept apart from the field checkboxes because it
+  // spans both the page (title/description) and the selected category.
+  const [textDraft, setTextDraftState] = useState({
+    pageTitle: "",
+    pageDescription: "",
+    categoryDescription: "",
+  });
   const [composerDrafts, setComposerDrafts] = useState({
     common: "",
     category: "",
@@ -159,6 +169,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const officeName = toTrimmedString(
     currentEntry?.officeName ?? productEntries[0]?.officeName,
   );
+  // Shown as the page-title input's placeholder. Comes from the same helper the
+  // storefront falls back to, so the two can never drift apart.
+  const derivedPageTitle = buildDerivedPageTitle({ nhName, officeName });
   const productCategoryOptions = deriveProductCategoryOptions(
     productEntries,
     existingConfig,
@@ -209,6 +222,11 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setStatus((current) => (current === "saved" ? "ready" : current));
   }
 
+  function setTextDraft(fieldId, value) {
+    markDirty();
+    setTextDraftState((current) => ({ ...current, [fieldId]: value }));
+  }
+
   function changeCardsPerRow(value) {
     cardAi.setCardsPerRow(value);
     markDirty();
@@ -219,6 +237,20 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     cardAi.setStructuralPreset(value);
     markDirty();
     setComposerApplyPending("category", true);
+  }
+
+  // Both load paths resolve the saved copy the same way navConfig does, so the
+  // input box always shows exactly what the storefront is rendering today.
+  function hydratePageTextDraft(config, normalizedPageConfig) {
+    setTextDraftState((current) => ({
+      ...current,
+      pageTitle: toTrimmedString(
+        config?.navConfig?.title ?? normalizedPageConfig.nav.title,
+      ),
+      pageDescription: toTrimmedString(
+        config?.navConfig?.subtitle ?? normalizedPageConfig.nav.subtitle,
+      ),
+    }));
   }
 
   function hydrateCategoryDraft(
@@ -241,6 +273,15 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
     cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
+    setTextDraftState((current) => ({
+      ...current,
+      categoryDescription: toTrimmedString(
+        findCategoryConfigRow(
+          nextExistingConfig?.categoryConfigs,
+          resolvedCategoryName,
+        )?.categoryConfig?.description,
+      ),
+    }));
     categoryDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
       bodySlots: cloneValue(resolvedDraft.bodySlots),
@@ -293,6 +334,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
               normalizedPageConfig.searchSection.variant,
           }),
         );
+        hydratePageTextDraft(config, normalizedPageConfig);
         hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
         setStatus("ready");
       })
@@ -352,6 +394,17 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     pageAi.discardPageAiDesignSession();
     cardAi.discardCardAiDesignSession();
     hydrateCategoryDraft(categoryName, productEntries, existingConfig);
+  }
+
+  // The data dock's tab row carries one extra tab ahead of the categories, so
+  // its selection is its own state; picking a category still drives the
+  // category draft the field tables and the preview read from.
+  function selectDataTab(tabId) {
+    setDataTabId(tabId);
+
+    if (tabId !== COMMON_TAB_ID) {
+      selectProductCategory(tabId);
+    }
   }
 
   function selectDesignTarget(targetId) {
@@ -442,6 +495,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       }),
     );
 
+    hydratePageTextDraft(config, normalizedPageConfig);
+
     if (nextCategoryName) {
       hydrateCategoryDraft(nextCategoryName, nextProductEntries, config);
     }
@@ -458,7 +513,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       cardStyle: cardAi.cardStyle,
       cardFields,
       bodySlots: cardAi.bodySlots,
-      navConfig,
+      navConfig: {
+        ...navConfig,
+        title: textDraft.pageTitle,
+        subtitle: textDraft.pageDescription,
+      },
+      categoryDescription: textDraft.categoryDescription,
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
       allowedScalarKeys: effectiveScalarKeys,
@@ -695,15 +755,23 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const previewConfig = buildPreviewConfig(dataSelection.committed);
   const dataModePreviewConfig = buildPreviewConfig(dataSelection.draft);
 
+  const productCategoryTabs = productCategoryOptions.map((option) => ({
+    id: option.categoryName,
+    label: option.categoryName,
+    rowCount: option.rowCount,
+    hasDraft: option.hasDraft,
+  }));
+
   const dataMode = {
-    categoryTabs: productCategoryOptions.map((option) => ({
-      id: option.categoryName,
-      label: option.categoryName,
-      rowCount: option.rowCount,
-      hasDraft: option.hasDraft,
-    })),
-    selectedCategoryId: selectedProductCategoryName,
-    selectCategory: selectProductCategory,
+    categoryTabs: [
+      { id: COMMON_TAB_ID, label: "공통 요소" },
+      ...productCategoryTabs,
+    ],
+    selectedCategoryId: dataTabId,
+    selectCategory: selectDataTab,
+    derivedPageTitle,
+    textDraft,
+    setTextDraft,
     availableCategoryFields,
     draftFields: dataSelection.draft,
     committedFields: dataSelection.committed,
@@ -724,8 +792,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
 
   const designMode = {
     categoryTabs: [
-      { id: "common", label: "공통 요소" },
-      ...dataMode.categoryTabs,
+      { id: COMMON_TAB_ID, label: "공통 요소" },
+      ...productCategoryTabs,
     ],
     selectedCategoryId: designTarget === "common" ? "common" : selectedProductCategoryName,
     selectCategory: selectDesignTarget,
