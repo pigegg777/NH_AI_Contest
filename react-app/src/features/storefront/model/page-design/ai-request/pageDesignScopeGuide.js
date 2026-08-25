@@ -5,6 +5,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
     rows: [
       { element: '전체 색감', example: '가을 느낌으로 전체 색을 바꿔줘' },
       { element: '헤더', example: '제목을 더 크고 굵게 해줘' },
+      { element: '상단 설명', example: '상단 설명을 조금 작게 해줘' },
       { element: '중분류 칩', example: '중분류 칩을 알약 모양으로 해줘' },
       { element: '대분류 칩', example: '대분류 칩을 밑줄 탭처럼 보이게 해줘' },
       { element: '검색창', example: '검색창을 조금 크게 해줘' },
@@ -30,6 +31,17 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
       { element: '자간', example: '제목 자간을 넓혀줘' },
     ],
     note: '제목 문구 자체는 바꿀 수 없습니다.',
+  },
+  {
+    scopeId: 'pageDescription',
+    title: '상단 설명 글자',
+    rows: [
+      { element: '글자색', example: '상단 설명을 연한 회색으로 해줘' },
+      { element: '글자 크기', example: '상단 설명을 한 단계 작게 해줘' },
+      { element: '굵기', example: '상단 설명을 조금 굵게 해줘' },
+      { element: '자간', example: '상단 설명 자간을 넓혀줘' },
+    ],
+    note: '문구 자체는 표시항목 선택의 공통 요소 탭에서 적습니다. 여기서는 모양만 바꿉니다.',
   },
   {
     scopeId: 'categoryChips',

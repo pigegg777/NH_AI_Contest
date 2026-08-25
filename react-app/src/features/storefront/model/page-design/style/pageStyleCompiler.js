@@ -23,6 +23,15 @@ function resolveHeader(intentHeader, previousHeader) {
   };
 }
 
+function resolveDescription(intentDescription, previousDescription) {
+  return {
+    colorHex: intentDescription?.colorHex ?? previousDescription.colorHex,
+    letterSpacing: intentDescription?.letterSpacing ?? previousDescription.letterSpacing,
+    fontWeight: intentDescription?.fontWeight ?? previousDescription.fontWeight,
+    fontSizeToken: intentDescription?.fontSizeToken ?? previousDescription.fontSizeToken,
+  };
+}
+
 function resolveSearch(intentSearch, previousSearch) {
   return {
     sizeToken: intentSearch?.sizeToken ?? previousSearch.sizeToken,
@@ -85,6 +94,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette,
       header: resolveHeader(intent.header, previous.header),
+      description: resolveDescription(intent.description, previous.description),
       search: resolveSearch(intent.search, previous.search),
       categoryChips: resolveChips(
         intent.categoryChips,
@@ -107,6 +117,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette,
       header: previous.header,
+      description: previous.description,
       search: previous.search,
       categoryChips: previous.categoryChips,
       productCategoryChips: previous.productCategoryChips,
@@ -117,6 +128,18 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette: previous.palette,
       header: resolveHeader(intent.header, previous.header),
+      description: previous.description,
+      search: previous.search,
+      categoryChips: previous.categoryChips,
+      productCategoryChips: previous.productCategoryChips,
+    });
+  }
+
+  if (normalizedTargetScope === 'pageDescription') {
+    return normalizePageStyle({
+      palette: previous.palette,
+      header: previous.header,
+      description: resolveDescription(intent.description, previous.description),
       search: previous.search,
       categoryChips: previous.categoryChips,
       productCategoryChips: previous.productCategoryChips,
@@ -127,6 +150,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette: previous.palette,
       header: previous.header,
+      description: previous.description,
       search: previous.search,
       categoryChips: resolveScopedChips(
         intent.categoryChips,
@@ -140,6 +164,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
     return normalizePageStyle({
       palette: previous.palette,
       header: previous.header,
+      description: previous.description,
       search: previous.search,
       categoryChips: previous.categoryChips,
       productCategoryChips: resolveScopedChips(
@@ -152,6 +177,7 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
   return normalizePageStyle({
     palette: previous.palette,
     header: previous.header,
+    description: previous.description,
     search: resolveSearch(intent.search, previous.search),
     categoryChips: previous.categoryChips,
     productCategoryChips: previous.productCategoryChips,

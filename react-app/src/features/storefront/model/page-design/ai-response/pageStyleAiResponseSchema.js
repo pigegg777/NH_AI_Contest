@@ -5,6 +5,7 @@ import {
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
   PAGE_STYLE_CHIP_VARIANT_TOKENS,
+  PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../style/pageStyleModel';
@@ -41,6 +42,19 @@ const NULLABLE_HEADER_SCHEMA = nullableObject({
     enum: [...FONT_WEIGHT_TOKENS, null],
   },
   titleFontSizeToken: nullableToken(PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS),
+});
+
+const NULLABLE_DESCRIPTION_SCHEMA = nullableObject({
+  colorHex: nullableHex(),
+  letterSpacing: {
+    type: ['string', 'null'],
+    pattern: LETTER_SPACING_SCHEMA_PATTERN,
+  },
+  fontWeight: {
+    type: ['number', 'null'],
+    enum: [...FONT_WEIGHT_TOKENS, null],
+  },
+  fontSizeToken: nullableToken(PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS),
 });
 
 function buildNullableChipsSchema() {
@@ -86,6 +100,7 @@ export const PAGE_STYLE_AI_SCHEMA = {
   properties: {
     palette: NULLABLE_PALETTE_SCHEMA,
     header: NULLABLE_HEADER_SCHEMA,
+    description: NULLABLE_DESCRIPTION_SCHEMA,
     categoryChips: buildNullableChipsSchema(),
     productCategoryChips: buildNullableChipsSchema(),
     search: NULLABLE_SEARCH_SCHEMA,
@@ -95,6 +110,7 @@ export const PAGE_STYLE_AI_SCHEMA = {
   required: [
     'palette',
     'header',
+    'description',
     'categoryChips',
     'productCategoryChips',
     'search',

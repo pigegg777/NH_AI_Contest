@@ -43,4 +43,8 @@ describe('PAGE_DESIGN_SCOPE_GUIDES', () => {
       expect(getPageDesignScopeGuide(scopeId).note).toContain('따로 움직입니다');
     });
   });
+
+  it('tells the merchant the AI never rewrites their words', () => {
+    expect(getPageDesignScopeGuide('pageDescription').note).toContain('문구');
+  });
 });
