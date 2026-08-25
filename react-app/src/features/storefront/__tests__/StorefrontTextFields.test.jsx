@@ -51,6 +51,21 @@ describe('StorefrontTextFields', () => {
     );
   });
 
+  it('renders a saved value in the input rather than leaving it blank', () => {
+    renderFields({
+      fields: [
+        {
+          id: 'pageTitle',
+          label: '페이지 제목',
+          value: '봄맞이 농자재',
+          placeholder: '발안농협 영농센터 농자재 정보',
+        },
+      ],
+    });
+
+    expect(screen.getByLabelText('페이지 제목')).toHaveValue('봄맞이 농자재');
+  });
+
   it('reports edits by field id', async () => {
     const user = userEvent.setup();
     const { onChange } = renderFields();
