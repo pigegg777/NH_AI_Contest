@@ -140,7 +140,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     sanitizeMobileUiTree(DEFAULT_PAGE_CONFIG.mobileUiTree),
   );
   const [designTarget, setDesignTarget] = useState("common");
-  const [dataTabId, setDataTabId] = useState(COMMON_TAB_ID);
+  const [isCommonDataTab, setIsCommonDataTab] = useState(true);
   // The merchant-authored copy, kept apart from the field checkboxes because it
   // spans both the page (title/description) and the selected category.
   const [textDraft, setTextDraftState] = useState({
@@ -399,8 +399,15 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   // The data dock's tab row carries one extra tab ahead of the categories, so
   // its selection is its own state; picking a category still drives the
   // category draft the field tables and the preview read from.
+  //
+  // Only the common/not-common half is held here — which category is selected
+  // stays in selectedProductCategoryName, the same arrangement design mode
+  // uses. A second copy of the category name would drift the moment anything
+  // else moved it: switching to design mode and picking another category, or a
+  // reload landing on a different one, would leave the dock highlighting one
+  // category while editing another's fields.
   function selectDataTab(tabId) {
-    setDataTabId(tabId);
+    setIsCommonDataTab(tabId === COMMON_TAB_ID);
 
     if (tabId !== COMMON_TAB_ID) {
       selectProductCategory(tabId);
@@ -767,7 +774,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       { id: COMMON_TAB_ID, label: "공통 요소" },
       ...productCategoryTabs,
     ],
-    selectedCategoryId: dataTabId,
+    selectedCategoryId: isCommonDataTab
+      ? COMMON_TAB_ID
+      : selectedProductCategoryName,
     selectCategory: selectDataTab,
     derivedPageTitle,
     textDraft,

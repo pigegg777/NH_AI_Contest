@@ -504,4 +504,42 @@ describe("StorefrontBuilderPage", () => {
       screen.queryByTestId("data-field-row-tax_price"),
     ).not.toBeInTheDocument();
   });
+
+  it("follows the category picked in design mode when data mode reopens", async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: DATA_MODE_LABEL }),
+    );
+    await user.click(
+      await screen.findByRole("tab", { name: "Fertilizer Upload" }),
+    );
+    expect(
+      await screen.findByTestId("data-field-row-tax_price"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: DESIGN_MODE_LABEL }));
+    await user.click(
+      await screen.findByRole("tab", { name: "Pesticide Upload" }),
+    );
+
+    await user.click(screen.getByRole("button", { name: DATA_MODE_LABEL }));
+
+    // The dock must highlight the category it is actually editing. Holding the
+    // tab id as its own state let the two drift, so the merchant could edit
+    // 농약 while the 비료 tab looked selected.
+    expect(
+      await screen.findByRole("tab", { name: "Pesticide Upload" }),
+    ).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("tab", { name: "Fertilizer Upload" }),
+    ).toHaveAttribute("aria-selected", "false");
+    expect(
+      screen.getByTestId("data-field-row-zero_tax_price"),
+    ).toBeInTheDocument();
+  });
 });
