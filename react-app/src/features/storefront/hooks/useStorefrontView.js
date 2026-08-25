@@ -14,6 +14,7 @@ import {
 } from '../model/storefront-config/sectionMatching';
 import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
+import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
 import { formatProductUpdatedAt } from '../model/storefront-view/productUpdatedAtModel';
 import {
   MOBILE_UI_HELPER_TYPES,
@@ -193,21 +194,21 @@ export function useStorefrontView({
     bodyWeight: Math.max(pageStyle.header.fontWeight - 200, 400),
     letterSpacing: pageStyle.header.letterSpacing,
   };
-  const coopName =
-    config?.navConfig?.title || resolvedPageConfig.nav.title || '';
-  const title = coopName || '상품 안내';
   const officeName =
     toTrimmedString(externalOfficeName) ||
     resolveOfficeName(activeSectionEntry?.section?.products) ||
     resolveOfficeName(baseVisibleProducts);
-  const headerOrgName = [toTrimmedString(nhName), officeName]
-    .filter(Boolean)
-    .join(' ');
-  const headerOrgLine = headerOrgName
-    ? `${headerOrgName} 농자재 정보`
-    : title;
-  const subtitle =
-    config?.navConfig?.subtitle || resolvedPageConfig.nav.subtitle || '';
+  // The title the merchant sees as the default in their input box, and what the
+  // storefront falls back to when they leave it blank.
+  const derivedPageTitle = buildDerivedPageTitle({ nhName, officeName });
+  const pageTitle =
+    toTrimmedString(config?.navConfig?.title) ||
+    toTrimmedString(resolvedPageConfig.nav.title) ||
+    derivedPageTitle;
+  const pageDescription =
+    toTrimmedString(config?.navConfig?.subtitle) ||
+    toTrimmedString(resolvedPageConfig.nav.subtitle) ||
+    '';
   const searchPlaceholder =
     config?.navConfig?.searchPlaceholder ||
     resolvedPageConfig.searchSection.placeholder ||
@@ -311,14 +312,16 @@ export function useStorefrontView({
     brandColor,
     pageStyle,
     chipAccentColor,
-    coopName,
     officeName,
     titleTextColorValue,
     titleFontSizeValue,
     typographyToneValue,
-    headerOrgLine,
-    title,
-    subtitle,
+    derivedPageTitle,
+    pageTitle,
+    pageDescription,
+    // DesktopCategoryRail's fallback label when no section is active yet; kept
+    // as an alias of pageTitle rather than a separate concept.
+    title: pageTitle,
     searchPlaceholder,
     searchVariant,
     canRenderDesktopCategoryRail,

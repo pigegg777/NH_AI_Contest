@@ -39,14 +39,6 @@
   min-width: 0;
 }
 
-.eyebrow {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: color-mix(in srgb, var(--brand-color, #1d4a2e) 84%, #3b3b1f);
-}
-
 .title {
   margin: 1px 0 0;
   font-size: var(--title-font-size, 1.1rem);
@@ -56,11 +48,13 @@
   color: var(--title-text-color, #173223);
 }
 
-.subtitle {
+.description {
   margin: 6px 0 0;
-  font-size: 0.88rem;
+  font-size: var(--page-description-size, 0.88rem);
+  font-weight: var(--page-description-weight, 400);
+  letter-spacing: var(--page-description-letter-spacing, normal);
   line-height: 1.5;
-  color: #51635a;
+  color: var(--page-description-color, #51635a);
   word-break: keep-all;
   overflow-wrap: break-word;
 }
@@ -182,7 +176,7 @@
       font-size: 1.3rem;
     }
 
-  .subtitle {
+  .description {
       font-size: 0.84rem;
     }
 

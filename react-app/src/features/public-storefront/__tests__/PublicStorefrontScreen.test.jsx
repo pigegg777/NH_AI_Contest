@@ -49,7 +49,7 @@ describe('PublicStorefrontScreen', () => {
     );
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /Demo Office/ }),
+      screen.getByRole('heading', { level: 1, name: 'Public Demo' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Alpha')).toBeInTheDocument();
   });

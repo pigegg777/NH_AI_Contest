@@ -23,12 +23,14 @@ export default function HeroBlock({ view, brandLogoSrc }) {
             />
           </div>
           <div className={styles.brandCopy}>
-            {view.coopName ? (
-              <p className={styles.eyebrow}>{view.coopName}</p>
-            ) : null}
-            <h1 className={styles.title}>{view.headerOrgLine}</h1>
-            {view.subtitle ? (
-              <p className={styles.subtitle}>{view.subtitle}</p>
+            <h1 className={styles.title}>{view.pageTitle}</h1>
+            {view.pageDescription ? (
+              <p
+                className={styles.description}
+                data-testid="storefront-page-description"
+              >
+                {view.pageDescription}
+              </p>
             ) : null}
           </div>
         </div>

@@ -5,7 +5,7 @@ import StorefrontView from '../components/storefront-page/StorefrontView';
 import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
 
 describe('StorefrontView', () => {
-  it('renders the co-op name in the brand row and keeps the main title focused on office only', () => {
+  it('renders the merchant-set title as the main heading', () => {
     render(
       <StorefrontView
         config={{
@@ -96,9 +96,8 @@ describe('StorefrontView', () => {
     const searchBox = screen.getByTestId('storefront-search');
     const midCategoryChips = screen.getByTestId('storefront-category-chips');
 
-    expect(screen.getByText('남해농협')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 1, name: '본점 농자재 정보' }),
+      screen.getByRole('heading', { level: 1, name: '남해농협' }),
     ).toBeInTheDocument();
     expect(productCategoryChips).toBeInTheDocument();
     expect(midCategoryChips).toBeInTheDocument();
