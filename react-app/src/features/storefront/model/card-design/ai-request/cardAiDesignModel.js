@@ -24,6 +24,11 @@ export const CARD_AI_TARGET_SCOPE_OPTIONS = [
     detail:
       '전체 글자색, 전체 굵기, 전체 글자 크기, 글자색, 굵기, 글자 크기, 강조, 가격 색상 일괄',
   },
+  {
+    id: 'description',
+    label: '분류 설명 글자',
+    detail: '글자색, 글자 굵기, 글자 크기, 자간',
+  },
 ];
 
 const CARD_AI_TARGET_SCOPE_IDS = new Set(

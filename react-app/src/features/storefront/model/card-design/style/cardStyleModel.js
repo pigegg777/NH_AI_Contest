@@ -179,7 +179,28 @@ export const DEFAULT_CARD_STYLE = {
     defaultFontSize: 'md',
     priceColorRole: 'brand',
   },
+  // The 분류 설명 line above the grid. It sits outside the cards but inside the
+  // section, and it is written per category, so it belongs to the per-category
+  // card style rather than the page-wide one. md matches the 0.84rem it already
+  // renders at, so adding this section changes nothing on screen.
+  description: {
+    colorHex: '#51635a',
+    letterSpacing: 'normal',
+    fontWeight: 400,
+    fontSizeToken: 'md',
+  },
   conditionalStyles: [],
+};
+
+export const CARD_DESCRIPTION_FONT_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+
+export const CARD_DESCRIPTION_FONT_SIZE_VALUES = {
+  xs: '0.72rem',
+  sm: '0.78rem',
+  md: '0.84rem',
+  lg: '0.9rem',
+  xl: '0.96rem',
+  xxl: '1.02rem',
 };
 
 const CARD_FIELD_COLOR_ROLE_VALUES = {
@@ -341,6 +362,24 @@ function normalizeFieldDefaults(field) {
   };
 }
 
+function normalizeDescription(description) {
+  const source = description ?? {};
+
+  return {
+    colorHex: normalizeHexColor(source.colorHex, DEFAULT_CARD_STYLE.description.colorHex),
+    letterSpacing:
+      typeof source.letterSpacing === 'string' && source.letterSpacing
+        ? source.letterSpacing
+        : DEFAULT_CARD_STYLE.description.letterSpacing,
+    fontWeight: Number.isFinite(source.fontWeight)
+      ? source.fontWeight
+      : DEFAULT_CARD_STYLE.description.fontWeight,
+    fontSizeToken: CARD_DESCRIPTION_FONT_SIZE_TOKENS.includes(source.fontSizeToken)
+      ? source.fontSizeToken
+      : DEFAULT_CARD_STYLE.description.fontSizeToken,
+  };
+}
+
 function normalizeConditionalShellOverride(source) {
   if (!source) {
     return null;
@@ -498,6 +537,7 @@ export function normalizeCardStyle(style) {
     image: normalizeImage(source.image),
     info: normalizeInfo(source.info),
     field: normalizeFieldDefaults(source.field),
+    description: normalizeDescription(source.description),
     conditionalStyles: normalizeConditionalStyleRules(source.conditionalStyles),
   };
 }

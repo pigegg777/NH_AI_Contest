@@ -81,6 +81,8 @@ describe('normalizeCardStyle', () => {
         requestedFieldOrder: [],
       },
       field: { defaultColorRole: 'muted', defaultFontWeight: 900, defaultFontSize: 'xl', priceColorRole: 'red' },
+      // Not supplied above, so it falls back to the default section whole.
+      description: DEFAULT_CARD_STYLE.description,
       conditionalStyles: [],
     });
   });

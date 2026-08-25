@@ -1,4 +1,5 @@
 import {
+  CARD_DESCRIPTION_FONT_SIZE_VALUES,
   CARD_HEADER_BORDER_WIDTH_VALUES,
   CARD_HEADER_TITLE_SIZE_OFFSET_REM,
   DEFAULT_CARD_STYLE,
@@ -134,6 +135,13 @@ export function buildShellCssVars(cardStyle) {
     '--field-default-color': resolveFieldColorRoleValue(
       cardStyle.field.defaultColorRole,
     ),
+    // The 분류 설명 line sits outside the cards but inside the section these
+    // vars land on, so it reads them the same way the cards do.
+    '--category-description-color': cardStyle.description.colorHex,
+    '--category-description-size':
+      CARD_DESCRIPTION_FONT_SIZE_VALUES[cardStyle.description.fontSizeToken],
+    '--category-description-weight': cardStyle.description.fontWeight,
+    '--category-description-letter-spacing': cardStyle.description.letterSpacing,
   };
   const shellBackground = resolveCssColor(cardStyle.shell.backgroundColor);
   const shellBorder = resolveCssColor(cardStyle.shell.borderColor);

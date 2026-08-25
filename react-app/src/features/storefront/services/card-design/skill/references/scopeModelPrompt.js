@@ -2,19 +2,20 @@ export const CARD_STYLE_SCOPE_MODEL_PROMPT = `
 
 # Card Section Scope Model
 
-The AI treats these five card sections as independent edit targets:
+The AI treats these six sections as independent edit targets:
 
 - \`card.shell\`
 - \`card.header\`
 - \`card.image\`
 - \`card.info\`
 - \`card.field\`
+- \`card.description\`
 
 ## Target Scope Restriction
 
 When the request carries a target scope, only that scope
-(\`header\`/\`image\`/\`info\`/\`field\`) may be non-null. Every other area object must
-be null.
+(\`header\`/\`image\`/\`info\`/\`field\`/\`description\`) may be non-null. Every other
+area object must be null.
 
 \`shell\`, \`structuralPresetRequest\`, \`titleModeRequest\`, and \`conditionalStyles\`
 are general: they may be set regardless of the target scope.
@@ -47,5 +48,12 @@ Individual data-item styling for one or more specific fields, after \`visibleFie
 - \`zero_tax_price\`
 - \`exempt_tax_price\`
 - \`price_subsidy\`
+
+### \`card.description\`
+
+The 분류 설명 line the merchant writes above this category's card grid: text
+colour, weight, size step, letter spacing. It sits outside the cards but belongs
+to this category. Styling only — never the sentence itself, which the merchant
+edits in 표시항목 선택.
 
 `;

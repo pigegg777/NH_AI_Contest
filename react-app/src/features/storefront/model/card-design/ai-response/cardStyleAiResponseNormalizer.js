@@ -14,6 +14,7 @@ import {
   CARD_FIELD_EMPHASIS_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
+  CARD_DESCRIPTION_FONT_SIZE_TOKENS,
   CARD_HEADER_BORDER_SIDE_TOKENS,
   CARD_HEADER_BORDER_STRENGTH_TOKENS,
   CARD_HEADER_TEXT_ALIGN_TOKENS,
@@ -38,19 +39,25 @@ import {
 const CARD_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 카드 디자인에 반영했습니다.';
 const CARD_STRUCTURAL_PRESET_IDS = Object.keys(CARD_STRUCTURAL_PRESETS);
 
+// The scoped sections, each named by the scope id that owns it — the two are
+// the same word, so a scope can never null the wrong section. shell, layout and
+// conditionalStyles are deliberately absent: they pass through whatever the scope.
+const CARD_SCOPED_SECTION_KEYS = ['header', 'image', 'info', 'field', 'description'];
+
 function limitCardIntentToTargetScope(intent, targetScope) {
-  switch (targetScope) {
-    case 'header':
-      return { ...intent, image: null, info: null, field: null };
-    case 'image':
-      return { ...intent, header: null, info: null, field: null };
-    case 'info':
-      return { ...intent, header: null, image: null, field: null };
-    case 'field':
-      return { ...intent, header: null, image: null, info: null };
-    default:
-      return intent;
+  if (!CARD_SCOPED_SECTION_KEYS.includes(targetScope)) {
+    return intent;
   }
+
+  const limited = { ...intent };
+
+  for (const key of CARD_SCOPED_SECTION_KEYS) {
+    if (key !== targetScope) {
+      limited[key] = null;
+    }
+  }
+
+  return limited;
 }
 function normalizeShellIntent(rawShell) {
   if (!rawShell) {
@@ -100,6 +107,25 @@ function normalizeHeaderIntent(rawHeader) {
     intent.padding = rawHeader.padding;
   if (CARD_HEADER_TEXT_ALIGN_TOKENS.includes(rawHeader.textAlign))
     intent.textAlign = rawHeader.textAlign;
+
+  return Object.keys(intent).length > 0 ? intent : null;
+}
+
+function normalizeDescriptionIntent(rawDescription) {
+  if (!rawDescription) {
+    return null;
+  }
+
+  const intent = {};
+
+  if (isHexColor(rawDescription.colorHex))
+    intent.colorHex = normalizeHexColor(rawDescription.colorHex);
+  if (typeof rawDescription.letterSpacing === 'string' && rawDescription.letterSpacing)
+    intent.letterSpacing = rawDescription.letterSpacing;
+  if (Number.isFinite(rawDescription.fontWeight))
+    intent.fontWeight = rawDescription.fontWeight;
+  if (CARD_DESCRIPTION_FONT_SIZE_TOKENS.includes(rawDescription.fontSizeToken))
+    intent.fontSizeToken = rawDescription.fontSizeToken;
 
   return Object.keys(intent).length > 0 ? intent : null;
 }
@@ -291,6 +317,7 @@ export function normalizeOpenAiCardIntent(payload, targetScope) {
       image: normalizeImageIntent(payload?.image),
       info: normalizeInfoIntent(payload?.info),
       field: normalizeFieldIntent(payload?.field),
+      description: normalizeDescriptionIntent(payload?.description),
       conditionalStyles: normalizeConditionalStylesIntent(
         payload?.conditionalStyles,
       ),

@@ -10,11 +10,12 @@ import {
 } from '../model/card-design/ai-request/cardAiDesignModel';
 
 describe('normalizeCardAiTargetScope', () => {
-  it('only allows the four approved scopes, falling back to empty (no selection) otherwise', () => {
+  it('only allows the five approved scopes, falling back to empty (no selection) otherwise', () => {
     expect(normalizeCardAiTargetScope('header')).toBe('header');
     expect(normalizeCardAiTargetScope('image')).toBe('image');
     expect(normalizeCardAiTargetScope('info')).toBe('info');
     expect(normalizeCardAiTargetScope('field')).toBe('field');
+    expect(normalizeCardAiTargetScope('description')).toBe('description');
     expect(normalizeCardAiTargetScope('unknown')).toBe('');
     expect(normalizeCardAiTargetScope(undefined)).toBe('');
   });
@@ -50,7 +51,13 @@ describe('getCardAiTargetScopeOption / buildCardAiTargetScopeInstruction', () =>
     expect(instruction).toContain('전체 글자색, 전체 굵기, 전체 글자 크기');
   });
 
-  it('lists exactly the four approved scopes', () => {
-    expect(CARD_AI_TARGET_SCOPE_OPTIONS.map((option) => option.id)).toEqual(['header', 'image', 'info', 'field']);
+  it('lists exactly the five approved scopes', () => {
+    expect(CARD_AI_TARGET_SCOPE_OPTIONS.map((option) => option.id)).toEqual([
+      'header',
+      'image',
+      'info',
+      'field',
+      'description',
+    ]);
   });
 });
