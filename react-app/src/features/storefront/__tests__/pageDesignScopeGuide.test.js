@@ -50,4 +50,8 @@ describe('PAGE_DESIGN_SCOPE_GUIDES', () => {
     ).not.toContain('pageDescription');
     expect(PAGE_AI_TARGET_SCOPE_OPTIONS).toHaveLength(5);
   });
+
+  it('tells the merchant the title copy itself cannot be changed', () => {
+    expect(getPageDesignScopeGuide('header').note).toContain('바꿀 수 없습니다');
+  });
 });
