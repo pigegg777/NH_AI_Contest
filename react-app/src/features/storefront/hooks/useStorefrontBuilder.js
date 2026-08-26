@@ -21,6 +21,7 @@ import {
   normalizeNavConfig,
   normalizePageConfig,
   resolveCategoryDraft,
+  resolveOfficeInfoOwnership,
 } from "../model/storefront-config/storefrontBuilderModel";
 import { sanitizeMobileUiTree } from "../model/storefront-config/storefrontUiModel";
 import {
@@ -776,20 +777,36 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
         })
-      : {
-          officeCode,
-          // No category is selected, so the save payload builder is skipped —
-          // the office entries still have to reach the preview by hand, or the
-          // merchant types into a panel that never changes.
-          pageConfig: normalizePageConfig({
-            ...existingConfig?.pageConfig,
-            officeInfo: officeInfoEntries,
-            pageStyle: pageAi.pageStyle,
-          }),
-          navConfig: normalizeNavConfig(draftNavConfig),
-          categoryConfigs: existingConfig?.categoryConfigs ?? [],
-          hiddenProducts,
-        };
+      : buildPreviewConfigWithoutCategory();
+  }
+
+  // 분류가 하나도 없으면 저장 payload 빌더를 못 쓰므로 미리보기 설정을 손으로
+  // 짓는다. 그래도 사무소 안내의 소유권 규칙은 저장 경로와 같은 것을 써야 한다 —
+  // 목록만 넘기고 옛 subtitle 을 그대로 두면 마지막 항목을 지운 판매자에게
+  // normalizePageConfig 의 폴백이 그 문구를 되살려 준다. 상품 데이터를 아직 올리지
+  // 않은 사무소가 정확히 이 상태로 스토어프론트를 처음 꾸민다.
+  function buildPreviewConfigWithoutCategory() {
+    const { officeInfo, navSubtitle } = resolveOfficeInfoOwnership({
+      savedOfficeInfo: existingConfig?.pageConfig?.officeInfo,
+      navSubtitle: existingConfig?.pageConfig?.nav?.subtitle,
+      officeInfoEntries,
+    });
+
+    return {
+      officeCode,
+      pageConfig: normalizePageConfig({
+        ...existingConfig?.pageConfig,
+        nav: {
+          ...(existingConfig?.pageConfig?.nav ?? {}),
+          subtitle: navSubtitle,
+        },
+        officeInfo,
+        pageStyle: pageAi.pageStyle,
+      }),
+      navConfig: normalizeNavConfig(draftNavConfig),
+      categoryConfigs: existingConfig?.categoryConfigs ?? [],
+      hiddenProducts,
+    };
   }
 
   const previewConfig = buildPreviewConfig(dataSelection.committed);
