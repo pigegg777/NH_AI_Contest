@@ -53,3 +53,49 @@ export function normalizeInformationEntries(source, { legacyText = '' } = {}) {
 
   return legacy ? [{ id: randomEntryId(), label: '', description: legacy }] : [];
 }
+
+/**
+ * Keep the legacy single-description editor compatible with the structured
+ * information list. Only the unlabeled entry that represents the previous
+ * legacy text is replaced; independently authored labeled entries survive.
+ */
+export function replaceLegacyInformationEntry(
+  source,
+  { previousLegacyText = '', nextLegacyText = '' } = {},
+) {
+  const previousDescription = toTrimmedString(previousLegacyText);
+  const nextDescription = toTrimmedString(nextLegacyText);
+  const entries = normalizeInformationEntries(source, {
+    legacyText: previousDescription,
+  });
+
+  if (nextDescription === previousDescription) {
+    return entries;
+  }
+
+  const legacyIndex = entries.findIndex(
+    (entry) => !entry.label && entry.description === previousDescription,
+  );
+
+  if (legacyIndex < 0) {
+    return nextDescription
+      ? normalizeInformationEntries([
+          { ...createInformationEntry(), description: nextDescription },
+          ...entries,
+        ])
+      : entries;
+  }
+
+  const nextEntries = [...entries];
+
+  if (nextDescription) {
+    nextEntries[legacyIndex] = {
+      ...nextEntries[legacyIndex],
+      description: nextDescription,
+    };
+  } else {
+    nextEntries.splice(legacyIndex, 1);
+  }
+
+  return normalizeInformationEntries(nextEntries);
+}

@@ -2,7 +2,10 @@ import { toTrimmedString } from '../../../../common/utils/text';
 import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
 import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/style/pageStyleModel';
-import { normalizeInformationEntries } from './informationEntriesModel';
+import {
+  normalizeInformationEntries,
+  replaceLegacyInformationEntry,
+} from './informationEntriesModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
@@ -390,6 +393,17 @@ export function buildCategoryConfigRow({
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
   const existingRow = findCategoryConfigRow(existingConfig?.categoryConfigs, normalizedProductCategoryName);
+  const previousCategoryDescription = existingRow?.categoryConfig?.description;
+  const nextCategoryInfoEntries =
+    categoryInfoEntries === undefined
+      ? replaceLegacyInformationEntry(existingRow?.categoryConfig?.info, {
+          previousLegacyText: previousCategoryDescription,
+          nextLegacyText:
+            categoryDescription === undefined
+              ? previousCategoryDescription
+              : categoryDescription,
+        })
+      : categoryInfoEntries;
   const nextCategoryConfig = normalizeCategoryConfig(
     {
       ...(existingRow?.categoryConfig ?? {}),
@@ -407,9 +421,7 @@ export function buildCategoryConfigRow({
           ? existingRow?.categoryConfig?.description
           : categoryDescription,
       info:
-        categoryInfoEntries === undefined
-          ? existingRow?.categoryConfig?.info
-          : categoryInfoEntries,
+        nextCategoryInfoEntries,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -471,6 +483,17 @@ export function buildStorefrontSavePayload({
 }) {
   const basePageConfig = normalizePageConfig(existingConfig?.pageConfig);
   const resolvedNavConfig = normalizeNavConfig({ ...(existingConfig?.navConfig ?? {}), ...(navConfig ?? {}) });
+  const previousPageDescription =
+    existingConfig?.navConfig?.subtitle ??
+    existingConfig?.pageConfig?.nav?.subtitle ??
+    basePageConfig.nav.subtitle;
+  const nextOfficeInfoEntries =
+    officeInfoEntries === undefined
+      ? replaceLegacyInformationEntry(existingConfig?.pageConfig?.officeInfo, {
+          previousLegacyText: previousPageDescription,
+          nextLegacyText: resolvedNavConfig.subtitle,
+        })
+      : officeInfoEntries;
   const nextMobileUiTree = normalizeMobileUiTree(mobileUiTree ?? basePageConfig.mobileUiTree, {
     searchEnabled: basePageConfig.searchSection.enabled,
     categoryChipsEnabled: basePageConfig.categoryChips.enabled,
@@ -490,7 +513,7 @@ export function buildStorefrontSavePayload({
       subtitle: resolvedNavConfig.subtitle,
       logoUrl: resolvedNavConfig.logoUrl,
     },
-    officeInfo: officeInfoEntries ?? basePageConfig.officeInfo,
+    officeInfo: nextOfficeInfoEntries,
     searchSection: {
       ...basePageConfig.searchSection,
       enabled: searchBlock ? searchBlock.enabled : basePageConfig.searchSection.enabled,

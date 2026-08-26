@@ -541,8 +541,29 @@ describe("StorefrontBuilderPage", () => {
   });
 
   it("keeps an edited category description after switching away and back", async () => {
+    const configWithStructuredDescription = {
+      ...EXISTING_CONFIG,
+      categoryConfigs: EXISTING_CONFIG.categoryConfigs.map((row) =>
+        row.productCategoryName === "Fertilizer Upload"
+          ? {
+              ...row,
+              categoryConfig: {
+                ...row.categoryConfig,
+                description: "기존 비료 안내",
+                info: [
+                  {
+                    id: "legacy-fertilizer-description",
+                    label: "",
+                    description: "기존 비료 안내",
+                  },
+                ],
+              },
+            }
+          : row,
+      ),
+    };
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
-    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+    fetchStorefrontConfig.mockResolvedValue(configWithStructuredDescription);
 
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
@@ -553,6 +574,7 @@ describe("StorefrontBuilderPage", () => {
     await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
 
     const descriptionInput = await screen.findByLabelText("분류 설명");
+    await user.clear(descriptionInput);
     await user.type(descriptionInput, "비료 사용 전 안내를 확인하세요.");
 
     await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
@@ -572,9 +594,14 @@ describe("StorefrontBuilderPage", () => {
         "비료 사용 전 안내를 확인하세요.",
       ),
     ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("mobile-preview-device")).queryByText(
+        "기존 비료 안내",
+      ),
+    ).not.toBeInTheDocument();
   });
 
-  it("keeps the saved page description in the input as it is typed", async () => {
+  it("shows an edited page description in the information preview as it is typed", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -594,6 +621,19 @@ describe("StorefrontBuilderPage", () => {
     await user.type(descriptionInput, "영세가격 안내");
 
     expect(descriptionInput).toHaveValue("영세가격 안내");
+
+    await user.click(screen.getByRole("button", { name: "안내" }));
+
+    expect(
+      within(screen.getByTestId("mobile-preview-device")).getByText(
+        "영세가격 안내",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId("mobile-preview-device")).queryByText(
+        "Existing subtitle",
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it("follows the category picked in design mode when data mode reopens", async () => {
