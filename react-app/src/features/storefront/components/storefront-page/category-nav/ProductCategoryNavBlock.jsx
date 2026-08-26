@@ -7,7 +7,10 @@ const PRODUCT_CHIP_VARIANT_CLASS_NAMES = {
 };
 
 export default function ProductCategoryNavBlock({ view, elementKey }) {
-  if (view.catalogSectionEntries.length === 0) {
+  if (
+    view.catalogSectionEntries.length === 0 &&
+    view.informationNavigationItems.length === 0
+  ) {
     return null;
   }
 

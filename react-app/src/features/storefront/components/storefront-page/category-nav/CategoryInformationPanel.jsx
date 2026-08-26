@@ -2,10 +2,7 @@ import { useId } from 'react';
 
 import styles from './CategoryInformationPanel.module.css';
 
-/**
- * 중분류 칩의 `{분류명} 정보` 탭이 여는 패널. 사무소 정보 탭과 내용이 겹치지만,
- * 그 분류를 보고 있는 구매자가 바로 읽을 수 있는 경로다.
- */
+/** 안내 분류에서 선택한 상품 분류의 항목을 보여주는 패널. */
 export default function CategoryInformationPanel({
   categoryName,
   entries = [],

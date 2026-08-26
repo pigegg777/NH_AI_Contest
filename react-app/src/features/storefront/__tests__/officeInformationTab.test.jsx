@@ -87,6 +87,30 @@ describe('office information tab', () => {
     expect(screen.getByText('알파')).toBeInTheDocument();
   });
 
+  it('keeps the selected information child when the shopper returns to the guide', async () => {
+    const user = userEvent.setup();
+    render(<StorefrontView
+      config={buildConfig({
+        officeInfo: [{ id: 'o1', label: '영세가격', description: '등록자 구매가격' }],
+        fertilizerInfo: [{ id: 'c1', label: '봄철 밑거름', description: '3월부터' }],
+      })}
+      productRows={PRODUCT_ROWS}
+    />);
+
+    await user.click(screen.getByRole('button', { name: '안내' }));
+    await user.click(screen.getByRole('button', { name: '비료 안내' }));
+    await user.click(
+      within(screen.getByTestId('storefront-product-category-chips')).getByRole(
+        'button',
+        { name: '비료' },
+      ),
+    );
+    await user.click(screen.getByRole('button', { name: '안내' }));
+
+    expect(screen.getByRole('button', { name: '비료 안내' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('3월부터')).toBeInTheDocument();
+  });
+
   it('defaults category-only information to its category child', async () => {
     const user = userEvent.setup();
     render(<StorefrontView
@@ -122,5 +146,22 @@ describe('office information tab', () => {
     render(<StorefrontView config={buildConfig()} productRows={PRODUCT_ROWS} />);
 
     expect(screen.queryByRole('button', { name: '안내' })).not.toBeInTheDocument();
+  });
+
+  it('offers the top guide for office information without catalog sections', async () => {
+    const user = userEvent.setup();
+    render(<StorefrontView
+      config={{
+        ...buildConfig({
+          officeInfo: [{ id: 'o1', label: '영세가격', description: '등록자 구매가격' }],
+        }),
+        categoryConfigs: [],
+      }}
+      productRows={[]}
+    />);
+
+    await user.click(screen.getByRole('button', { name: '안내' }));
+
+    expect(screen.getByText('등록자 구매가격')).toBeInTheDocument();
   });
 });

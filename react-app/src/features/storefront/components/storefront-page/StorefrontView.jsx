@@ -35,7 +35,7 @@ export default function StorefrontView({
   const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
   const renderableMobileUiTree = buildRenderableMobileUiTree(
     view.mobileUiTree,
-    view.catalogSectionEntries.length > 0,
+    view.catalogSectionEntries.length > 0 || view.informationNavigationItems.length > 0,
   );
 
   function renderSlot(slot) {
