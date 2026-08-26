@@ -7,12 +7,7 @@ const CHIP_VARIANT_CLASS_NAMES = {
 };
 
 export default function CategoryChipsBlock({ view, elementKey }) {
-  const hasCategoryInformation = view.activeCategoryInfoEntries.length > 0;
-  const chipItems = hasCategoryInformation
-    ? [view.categoryInformationItemId, ...view.mediumCategoryItems]
-    : view.mediumCategoryItems;
-
-  if (chipItems.length <= 1) {
+  if (view.mediumCategoryItems.length <= 1) {
     return null;
   }
 
@@ -29,29 +24,17 @@ export default function CategoryChipsBlock({ view, elementKey }) {
         role="group"
         aria-label="세부 분류"
       >
-        {chipItems.map((item) => {
-          const label =
-            item === view.categoryInformationItemId
-              ? `${view.activeSectionTitle} 정보`
-              : item;
-
-          return (
+        {view.mediumCategoryItems.map((item) => (
             <button
               key={`${elementKey}-${item}`}
-              id={
-                item === view.categoryInformationItemId
-                  ? view.categoryInformationChipId
-                  : undefined
-              }
               type="button"
               className={`${styles.categoryChip} ${view.activeMediumCategory === item ? styles.categoryChipActive : ''}`}
               aria-pressed={view.activeMediumCategory === item}
               onClick={() => view.handleMediumCategorySelect(item)}
             >
-              {label}
+              {item}
             </button>
-          );
-        })}
+          ))}
       </div>
     </div>
   );

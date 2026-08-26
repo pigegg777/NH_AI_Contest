@@ -3,7 +3,6 @@ import {
   useDeferredValue,
   useEffect,
   useId,
-  useRef,
   useState,
 } from 'react';
 
@@ -17,6 +16,10 @@ import { normalizeInformationEntries } from '../model/storefront-config/informat
 import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
+import {
+  buildInformationNavigationItems,
+  resolveActiveInformationItem,
+} from '../model/storefront-view/informationNavigationModel';
 import { formatProductUpdatedAt } from '../model/storefront-view/productUpdatedAtModel';
 import {
   MOBILE_UI_HELPER_TYPES,
@@ -57,7 +60,6 @@ function matchesMediumCategory(product, activeMediumCategory) {
   return (product?.medium_category ?? '') === activeMediumCategory;
 }
 
-const CATEGORY_INFORMATION_ITEM_ID = '__category_information__';
 const OFFICE_INFORMATION_ITEM_ID = '__office_information__';
 
 function getSectionName(section) {
@@ -110,8 +112,9 @@ export function useStorefrontView({
 }) {
   const [searchText, setSearchText] = useState('');
   const [activeMediumCategory, setActiveMediumCategory] = useState(
-    CATEGORY_INFORMATION_ITEM_ID,
+    ALL_MEDIUM_CATEGORY_LABEL,
   );
+  const [activeInformationItemId, setActiveInformationItemId] = useState('');
   const [activeSectionName, setActiveSectionName] = useState(selectedSectionName);
   const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] =
     useState(true);
@@ -120,18 +123,15 @@ export function useStorefrontView({
 
   // Adjusted during render rather than in an effect: an effect would land a
   // frame later and make the preview visibly flip to the old section first.
-  if (selectedSectionName && selectedSectionName !== lastExternalSectionName) {
+  if (selectedSectionName !== lastExternalSectionName) {
     setLastExternalSectionName(selectedSectionName);
     setActiveSectionName(selectedSectionName);
-    setActiveMediumCategory(CATEGORY_INFORMATION_ITEM_ID);
+    setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
   }
 
   const deferredSearchText = useDeferredValue(searchText);
   const searchQuery = deferredSearchText.trim().toLowerCase();
   const sectionIdPrefix = useId().replace(/:/g, '-');
-  const categoryInformationChipId = `${sectionIdPrefix}-category-information-chip`;
-  const categoryInformationPanelId = `${sectionIdPrefix}-category-information-panel`;
-  const previousActiveSectionTitleRef = useRef(null);
 
   const resolvedPageConfig = normalizePageConfig(config?.pageConfig);
   const mobileUiTree = normalizeMobileUiTree(resolvedPageConfig.mobileUiTree, {
@@ -150,27 +150,22 @@ export function useStorefrontView({
     config?.pageConfig?.officeInfo,
     { legacyText: resolvedPageConfig.nav.subtitle },
   );
-  // A group with no entries would render a bare heading, so drop it here rather
-  // than in the panel.
-  const officeInformationCategoryGroups = catalogSectionEntries.flatMap(
-    ({ sectionName, section }) =>
-      section?.infoEntries?.length > 0
-        ? [{ categoryName: sectionName, entries: section.infoEntries }]
-        : [],
+  const informationNavigationItems = buildInformationNavigationItems({
+    officeEntries: officeInformationEntries,
+    catalogSectionEntries,
+  });
+  const activeInformationItem = resolveActiveInformationItem(
+    informationNavigationItems,
+    activeInformationItemId,
   );
-  const canRenderOfficeInformation =
-    officeInformationEntries.length > 0 ||
-    officeInformationCategoryGroups.length > 0;
-  // Yields to a search the same way `effectiveActiveMediumCategory` drops the
-  // category-information chip: without it, typing a query leaves the shopper
-  // stranded on the panel with no results and no way back but a chip.
-  const isOfficeInformationActive =
-    canRenderOfficeInformation &&
+  const canRenderInformationNavigation = informationNavigationItems.length > 0;
+  const isInformationNavigationActive =
+    canRenderInformationNavigation &&
     activeSectionName === OFFICE_INFORMATION_ITEM_ID &&
     searchQuery === '';
   // The sentinel matches no catalog section, so without the short-circuit the
   // fallback below would quietly resolve the office tab to the first category.
-  const activeSectionEntry = isOfficeInformationActive
+  const activeSectionEntry = isInformationNavigationActive
     ? null
     : catalogSectionEntries.find(
         (entry) => entry.sectionName === activeSectionName,
@@ -181,35 +176,24 @@ export function useStorefrontView({
   const activeSectionMediumCategories = buildUniqueMediumCategories(
     activeSectionEntry?.section?.products,
   );
-  const activeCategoryInfoEntries = activeSectionEntry?.section?.infoEntries ?? [];
-  const canRenderCategoryInformation =
-    activeCategoryInfoEntries.length > 0 &&
-    mobileUiTree.some(
-      (block) => block.type === 'categoryChips' && block.enabled !== false,
-    );
   const mediumCategoryItems = [
     ALL_MEDIUM_CATEGORY_LABEL,
     ...activeSectionMediumCategories,
   ];
-  const isActiveMediumCategoryAvailable =
-    mediumCategoryItems.includes(activeMediumCategory) ||
-    (canRenderCategoryInformation &&
-      activeMediumCategory === CATEGORY_INFORMATION_ITEM_ID);
+  const isActiveMediumCategoryAvailable = mediumCategoryItems.includes(
+    activeMediumCategory,
+  );
   const normalizedActiveMediumCategory = isActiveMediumCategoryAvailable
     ? activeMediumCategory
-    : canRenderCategoryInformation
-      ? CATEGORY_INFORMATION_ITEM_ID
-      : mediumCategoryItems[0];
+    : mediumCategoryItems[0];
   const effectiveActiveMediumCategory =
     searchQuery === ''
       ? normalizedActiveMediumCategory
       : ALL_MEDIUM_CATEGORY_LABEL;
-  const isCategoryInformationActive =
-    effectiveActiveMediumCategory === CATEGORY_INFORMATION_ITEM_ID;
   const sectionScopedProducts =
     activeSectionEntry?.section?.products ?? baseVisibleProducts;
   const visibleProducts =
-    isCategoryInformationActive || isOfficeInformationActive
+    isInformationNavigationActive
       ? []
       : sectionScopedProducts.filter(
           (product) =>
@@ -284,8 +268,7 @@ export function useStorefrontView({
       (block) => block.type === 'productSections' && block.enabled !== false,
     ) && sectionEntries.length > 0;
   const canRenderEmptyState =
-    !isCategoryInformationActive &&
-    !isOfficeInformationActive &&
+    !isInformationNavigationActive &&
     mobileUiTree.some(
       (block) => block.type === 'emptyState' && block.enabled !== false,
     ) && sectionEntries.length === 0;
@@ -317,50 +300,14 @@ export function useStorefrontView({
   }, [activeSectionName, catalogSectionEntries]);
 
   useEffect(() => {
-    const isActiveItemAvailable =
-      mediumCategoryItems.includes(activeMediumCategory) ||
-      (canRenderCategoryInformation &&
-        activeMediumCategory === CATEGORY_INFORMATION_ITEM_ID);
+    const isActiveItemAvailable = mediumCategoryItems.includes(
+      activeMediumCategory,
+    );
 
     if (!isActiveItemAvailable) {
-      setActiveMediumCategory(
-        canRenderCategoryInformation
-          ? CATEGORY_INFORMATION_ITEM_ID
-          : mediumCategoryItems[0],
-      );
+      setActiveMediumCategory(mediumCategoryItems[0]);
     }
-  }, [
-    activeMediumCategory,
-    canRenderCategoryInformation,
-    mediumCategoryItems,
-  ]);
-
-  useEffect(() => {
-    const previousActiveSectionTitle = previousActiveSectionTitleRef.current;
-    previousActiveSectionTitleRef.current = activeSectionTitle;
-
-    if (
-      !previousActiveSectionTitle ||
-      previousActiveSectionTitle === activeSectionTitle ||
-      !isCategoryInformationActive
-    ) {
-      return;
-    }
-
-    document
-      .getElementById(categoryInformationChipId)
-      ?.focus({ preventScroll: true });
-    document.getElementById(categoryInformationPanelId)?.scrollIntoView?.({
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest',
-    });
-  }, [
-    activeSectionTitle,
-    categoryInformationChipId,
-    categoryInformationPanelId,
-    isCategoryInformationActive,
-  ]);
+  }, [activeMediumCategory, mediumCategoryItems]);
 
   function handleMediumCategorySelect(item) {
     startTransition(() => {
@@ -369,7 +316,6 @@ export function useStorefrontView({
 
     if (
       item !== ALL_MEDIUM_CATEGORY_LABEL &&
-      item !== CATEGORY_INFORMATION_ITEM_ID &&
       activeSectionEntry?.sectionId
     ) {
       scrollToSection(activeSectionEntry.sectionId);
@@ -383,16 +329,8 @@ export function useStorefrontView({
       return;
     }
 
-    const nextSection = catalogSectionEntries.find(
-      (entry) => entry.sectionName === sectionName,
-    );
-    const nextDefaultMediumCategory =
-      nextSection?.section?.infoEntries?.length > 0
-        ? CATEGORY_INFORMATION_ITEM_ID
-        : ALL_MEDIUM_CATEGORY_LABEL;
-
     setActiveSectionName(sectionName);
-    setActiveMediumCategory(nextDefaultMediumCategory);
+    setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
     scrollToSection(sectionId);
   }
 
@@ -408,6 +346,10 @@ export function useStorefrontView({
     scrollToSection(sectionId);
   }
 
+  function handleInformationItemSelect(itemId) {
+    setActiveInformationItemId(itemId);
+  }
+
   return {
     searchText,
     setSearchText,
@@ -419,17 +361,13 @@ export function useStorefrontView({
     catalogSectionEntries,
     activeSectionTitle,
     activeSectionMediumCategories,
-    activeCategoryInfoEntries,
     activeCategoryCardStyle: activeSectionEntry?.section?.cardStyle,
     officeInformationItemId: OFFICE_INFORMATION_ITEM_ID,
-    officeInformationEntries,
-    officeInformationCategoryGroups,
-    canRenderOfficeInformation,
-    isOfficeInformationActive,
-    categoryInformationItemId: CATEGORY_INFORMATION_ITEM_ID,
-    categoryInformationChipId,
-    categoryInformationPanelId,
-    isCategoryInformationActive,
+    informationNavigationItems,
+    activeInformationItem,
+    activeInformationItemId,
+    canRenderInformationNavigation,
+    isInformationNavigationActive,
     mediumCategoryItems,
     sectionEntries,
     sectionHeaderBlocks,
@@ -450,5 +388,6 @@ export function useStorefrontView({
     handleMediumCategorySelect,
     handleCategoryRailSectionSelect,
     handleCategoryRailMediumSelect,
+    handleInformationItemSelect,
   };
 }

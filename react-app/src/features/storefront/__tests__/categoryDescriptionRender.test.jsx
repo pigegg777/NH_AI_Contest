@@ -55,17 +55,12 @@ function renderStorefront(
 }
 
 describe('category description', () => {
-  it('renders the information chip from description data, independently of medium-category items', () => {
+  it('renders only product medium-category items', () => {
     render(
       <CategoryChipsBlock
         elementKey="category-chips"
         view={{
-          activeCategoryInfoEntries: [
-            { id: 'c1', label: '', description: '봄철 밑거름 모음' },
-          ],
-          activeSectionTitle: '비료',
           activeMediumCategory: '밑거름',
-          categoryInformationItemId: '__category_information__',
           mediumCategoryItems: ['전체', '밑거름'],
           pageStyle: { categoryChips: { variant: 'soft' } },
           handleMediumCategorySelect: vi.fn(),
@@ -74,17 +69,17 @@ describe('category description', () => {
     );
 
     expect(
-      screen.getByRole('button', { name: '비료 정보' }),
-    ).toHaveAttribute('aria-pressed', 'false');
+      screen.getByRole('button', { name: '밑거름' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('button', { name: '비료 정보' })).not.toBeInTheDocument();
   });
 
-  it('opens a category information screen by default when a description exists', () => {
+  it('opens a category information screen from the guide child when a description exists', async () => {
+    const user = userEvent.setup();
     renderStorefront('봄철 밑거름 모음');
 
-    const chips = screen.getByTestId('storefront-category-chips');
-    expect(
-      within(chips).getByRole('button', { name: '비료 정보' }),
-    ).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: '안내' }));
+    expect(screen.getByRole('button', { name: '비료 안내' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('heading', { name: '비료 안내' })).toBeInTheDocument();
     expect(screen.getByText('봄철 밑거름 모음')).toBeInTheDocument();
     expect(screen.queryByText('알파 비료')).not.toBeInTheDocument();
@@ -94,23 +89,20 @@ describe('category description', () => {
     const user = userEvent.setup();
     renderStorefront('봄철 밑거름 모음');
 
-    await user.click(screen.getByRole('button', { name: '밑거름' }));
+    await user.click(screen.getByRole('button', { name: '안내' }));
+    await user.click(screen.getByRole('button', { name: '비료 안내' }));
+    await user.click(screen.getByRole('button', { name: '비료' }));
 
     expect(screen.queryByRole('heading', { name: '비료 안내' })).not.toBeInTheDocument();
     expect(screen.getByText('알파 비료')).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('storefront-category-chips')).getByRole(
-        'button',
-        { name: '비료 정보' },
-      ),
-    ).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: '전체' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('keeps the existing product screen when no description exists', () => {
     renderStorefront('');
 
     expect(
-      screen.queryByRole('button', { name: '비료 정보' }),
+      screen.queryByRole('button', { name: '안내' }),
     ).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: '비료 안내' })).not.toBeInTheDocument();
     expect(screen.getByText('알파 비료')).toBeInTheDocument();

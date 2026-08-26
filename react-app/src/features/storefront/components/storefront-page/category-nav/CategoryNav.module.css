@@ -263,6 +263,30 @@
   gap: 4px;
 }
 
+.informationNavigation {
+  margin-bottom: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.informationNavigation::-webkit-scrollbar {
+  display: none;
+}
+
+.informationNavigationList {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  align-items: center;
+  gap: var(--page-chip-gap, 14px);
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--brand-color, var(--corp-primary)) 14%, #ffffff);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
 .categoryWrap {
   display: flex;
   flex-wrap: nowrap;

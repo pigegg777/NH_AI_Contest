@@ -24,17 +24,10 @@ function InformationEntryList({ entries }) {
   );
 }
 
-/**
- * 대분류 칩의 `사무소 정보` 탭이 여는 패널. 사무소 안내와 모든 분류의 안내를
- * 한 화면에 모아 보여준다. 문구 자체는 판매자가 표시항목 선택에서 쓴다.
- */
-export default function OfficeInformationPanel({
-  officeEntries = [],
-  categoryGroups = [],
-}) {
+export default function OfficeInformationPanel({ entries = [] }) {
   const titleId = useId();
 
-  if (officeEntries.length === 0 && categoryGroups.length === 0) {
+  if (entries.length === 0) {
     return null;
   }
 
@@ -45,29 +38,9 @@ export default function OfficeInformationPanel({
       data-testid="storefront-office-information"
     >
       <h2 id={titleId} className={styles.panelTitle}>
-        안내
+        사무소 안내
       </h2>
-
-      {officeEntries.length > 0 ? (
-        <div
-          className={styles.block}
-          data-testid="storefront-office-information-office"
-        >
-          <h3 className={styles.blockTitle}>사무소 안내</h3>
-          <InformationEntryList entries={officeEntries} />
-        </div>
-      ) : null}
-
-      {categoryGroups.map((group) => (
-        <div
-          key={group.categoryName}
-          className={styles.block}
-          data-testid={`storefront-office-information-group-${group.categoryName}`}
-        >
-          <h3 className={styles.blockTitle}>{group.categoryName}</h3>
-          <InformationEntryList entries={group.entries} />
-        </div>
-      ))}
+      <InformationEntryList entries={entries} />
     </section>
   );
 }

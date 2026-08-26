@@ -12,17 +12,17 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
   }
 
   const productCategoryChipVariant = view.pageStyle.productCategoryChips.variant;
-  const officeChip = view.canRenderOfficeInformation
+  const informationChip = view.canRenderInformationNavigation
     ? [
         {
           sectionId: view.officeInformationItemId,
           sectionName: view.officeInformationItemId,
-          label: '사무소 정보',
+          label: '안내',
         },
       ]
     : [];
   const chipEntries = [
-    ...officeChip,
+    ...informationChip,
     ...view.catalogSectionEntries.map(({ sectionId, sectionName }) => ({
       sectionId,
       sectionName,
@@ -42,8 +42,8 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
         {chipEntries.map(({ sectionId, sectionName, label }) => {
           const isActive =
             sectionName === view.officeInformationItemId
-              ? view.isOfficeInformationActive
-              : !view.isOfficeInformationActive &&
+              ? view.isInformationNavigationActive
+              : !view.isInformationNavigationActive &&
                 view.activeSectionTitle === sectionName;
 
           return (

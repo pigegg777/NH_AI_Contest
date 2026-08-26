@@ -44,7 +44,7 @@ export default function CategoryInformationPanel({
         ))}
       </dl>
 
-      <p className={styles.helper}>상품을 보려면 위 중분류를 선택하세요.</p>
+      <p className={styles.helper}>다른 안내는 위 안내 항목에서 선택하세요.</p>
     </section>
   );
 }
