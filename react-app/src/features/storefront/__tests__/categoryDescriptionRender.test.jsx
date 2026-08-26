@@ -126,23 +126,6 @@ describe('category description', () => {
     expect(screen.queryByTestId('storefront-category-information')).not.toBeInTheDocument();
     expect(screen.getByText('알파 비료')).toBeInTheDocument();
   });
-
-  it('keeps the configured AI description typography on the information panel', () => {
-    renderStorefront('봄철 밑거름 모음', {
-      cardStyle: {
-        description: {
-          colorHex: '#224433',
-          fontSizeToken: 'lg',
-          fontWeight: 600,
-          letterSpacing: '0.02em',
-        },
-      },
-    });
-
-    const panel = screen.getByTestId('storefront-category-information');
-    expect(panel.style.getPropertyValue('--category-description-color')).toBe('#224433');
-    expect(panel.style.getPropertyValue('--category-description-weight')).toBe('600');
-  });
 });
 
 describe('section header content', () => {

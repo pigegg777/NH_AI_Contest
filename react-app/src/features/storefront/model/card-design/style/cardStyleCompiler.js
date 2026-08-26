@@ -480,16 +480,6 @@ export function compileCardStyle({
       : {}),
   };
 
-  const description = {
-    ...previous.description,
-    colorHex: intent?.description?.colorHex ?? previous.description.colorHex,
-    letterSpacing:
-      intent?.description?.letterSpacing ?? previous.description.letterSpacing,
-    fontWeight: intent?.description?.fontWeight ?? previous.description.fontWeight,
-    fontSizeToken:
-      intent?.description?.fontSizeToken ?? previous.description.fontSizeToken,
-  };
-
   const conditionalStyles = mergeConditionalStyleRules(
     previous.conditionalStyles,
     intent?.conditionalStyles,
@@ -505,7 +495,6 @@ export function compileCardStyle({
     image,
     info,
     field,
-    description,
     conditionalStyles,
   });
 

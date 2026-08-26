@@ -17,7 +17,6 @@ import {
   CARD_HEADER_BORDER_SIDE_TOKENS,
   CARD_HEADER_BORDER_STRENGTH_TOKENS,
   CARD_HEADER_TEXT_ALIGN_TOKENS,
-  CARD_DESCRIPTION_FONT_SIZE_TOKENS,
   CARD_HEADER_TITLE_SIZE_TOKENS,
   CARD_IMAGE_FIT_OPTIONS,
   CARD_RADIUS_OPTIONS,
@@ -503,39 +502,6 @@ const NULLABLE_CONDITIONAL_STYLES_SCHEMA = {
     '특정 상품 데이터 조건에 맞는 카드에만 다르게 적용할 스타일 규칙 목록. 색상/굵기/여백 같은 스타일만 가능하고 카드 개수·필드 순서·그룹 같은 구조는 조건부로 바꿀 수 없음(전체 카드에 동일하게 유지됨). 조건부 스타일을 바꾸지 않으려면 null.',
 };
 
-// The 분류 설명 line above the card grid. Style only — the sentence itself is
-// merchant-authored copy the AI must never rewrite.
-const NULLABLE_DESCRIPTION_SCHEMA = {
-  type: ['object', 'null'],
-  additionalProperties: false,
-  properties: {
-    colorHex: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '분류 설명 글자색 hex 코드. 화면 배경과 대비되게 선택.',
-    },
-    letterSpacing: {
-      type: ['string', 'null'],
-      pattern: LETTER_SPACING_SCHEMA_PATTERN,
-      description:
-        "분류 설명 자간 CSS 값. 'normal' 또는 '0.02em'/'-0.01em'/'1px' 형태의 숫자+단위 문자열만 허용.",
-    },
-    fontWeight: {
-      type: ['number', 'null'],
-      enum: [...HEADER_FONT_WEIGHT_TOKENS, null],
-      description:
-        '분류 설명 글자 굵기. 400(보통)~900(매우 굵게) 중 100 단위 값만 선택.',
-    },
-    fontSizeToken: {
-      type: ['string', 'null'],
-      enum: [...CARD_DESCRIPTION_FONT_SIZE_TOKENS, null],
-      description:
-        "분류 설명 글자 크기 단계. 'xs'(가장 작게)~'xxl'(가장 크게) 6단계이며 'md'가 기본.",
-    },
-  },
-  required: ['colorHex', 'letterSpacing', 'fontWeight', 'fontSizeToken'],
-};
-
 export const CARD_STYLE_AI_SCHEMA = {
   type: 'object',
   additionalProperties: false,
@@ -557,7 +523,6 @@ export const CARD_STYLE_AI_SCHEMA = {
     image: NULLABLE_IMAGE_SCHEMA,
     info: NULLABLE_INFO_SCHEMA,
     field: NULLABLE_FIELD_SCHEMA,
-    description: NULLABLE_DESCRIPTION_SCHEMA,
     conditionalStyles: NULLABLE_CONDITIONAL_STYLES_SCHEMA,
     explanation: {
       type: 'string',
@@ -581,7 +546,6 @@ export const CARD_STYLE_AI_SCHEMA = {
     'image',
     'info',
     'field',
-    'description',
     'conditionalStyles',
     'explanation',
     'suggestion',

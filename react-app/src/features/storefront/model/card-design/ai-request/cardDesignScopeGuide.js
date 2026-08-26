@@ -72,17 +72,6 @@ export const CARD_DESIGN_SCOPE_GUIDES = [
     ],
     note: '표시하기로 고른 항목만 바꿀 수 있습니다.',
   },
-  {
-    scopeId: 'description',
-    title: '분류 설명 글자',
-    rows: [
-      { element: '글자색', example: '분류 설명을 조금 연한 회색으로 해줘' },
-      { element: '글자 굵기', example: '분류 설명을 살짝 굵게 해줘' },
-      { element: '글자 크기', example: '분류 설명을 한 단계 크게 해줘' },
-      { element: '자간', example: '분류 설명 자간을 조금 넓혀줘' },
-    ],
-    note: '카드 목록 위에 보이는 분류 설명의 겉모습만 바뀌고, 문구 자체는 표시항목 선택에서 고칩니다.',
-  },
 ];
 
 const CARD_DESIGN_SCOPE_GUIDE_BY_SCOPE_ID = new Map(

@@ -7,7 +7,7 @@ description: Interpret natural-language product-card design edit requests into a
 
 ## Core Goal
 
-Interpret the user's natural-language card design request into a structured intent scoped to one or more of the card's five sections.
+Interpret the user's natural-language card design request into a structured intent scoped to one or more of the card's four sections.
 
 The result must:
 
@@ -18,11 +18,11 @@ The result must:
 
 ## Workflow
 
-1. Identify which sections the request addresses: \`card.shell\`, \`card.header\`, \`card.image\`, \`card.info\`, \`card.field\`, \`card.description\`.
+1. Identify which sections the request addresses: \`card.shell\`, \`card.header\`, \`card.image\`, \`card.info\`, \`card.field\`.
 2. Check whether the request came from the main prompt or a section-specific override prompt.
 3. Check whether field grouping or reordering was explicitly requested.
 4. Preserve independent fields by default.
-5. Convert the request into the structured intent shape (\`structuralPresetRequest\`, \`titleModeRequest\`, \`requestedFieldOrder\`, \`shell\`, \`header\`, \`image\`, \`info\`, \`field\`, \`description\`).
+5. Convert the request into the structured intent shape (\`structuralPresetRequest\`, \`titleModeRequest\`, \`requestedFieldOrder\`, \`shell\`, \`header\`, \`image\`, \`info\`, \`field\`).
 6. Return \`null\` for any section the request does not address — never invent a value for an untouched section.
 
 ## Non-Negotiable Rules
