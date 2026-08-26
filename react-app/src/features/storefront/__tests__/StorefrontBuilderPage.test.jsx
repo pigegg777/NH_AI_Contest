@@ -505,7 +505,7 @@ describe("StorefrontBuilderPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps a saved category information chip after switching away and back", async () => {
+  it("shows a saved category description through its guide child", async () => {
     const configWithDescription = {
       ...EXISTING_CONFIG,
       categoryConfigs: EXISTING_CONFIG.categoryConfigs.map((row) =>
@@ -526,25 +526,18 @@ describe("StorefrontBuilderPage", () => {
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    expect(
-      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
-    ).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "안내" }));
 
-    await user.click(
-      await screen.findByRole("button", { name: DATA_MODE_LABEL }),
-    );
-    await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
-    await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
-
-    const informationChip = await screen.findByRole("button", {
-      name: "Fertilizer Upload 정보",
+    const informationChild = await screen.findByRole("button", {
+      name: "Fertilizer Upload 안내",
     });
+    await user.click(informationChild);
 
-    expect(informationChip).toHaveAttribute("aria-pressed", "true");
+    expect(informationChild).toHaveAttribute("aria-pressed", "true");
     expect(
       await screen.findByRole("heading", { name: "Fertilizer Upload 안내" }),
     ).toBeInTheDocument();
-    await waitFor(() => expect(informationChip).toHaveFocus());
+    expect(screen.getByText("비료 사용 전 안내를 확인하세요.")).toBeInTheDocument();
   });
 
   it("keeps an edited category description after switching away and back", async () => {
@@ -562,18 +555,22 @@ describe("StorefrontBuilderPage", () => {
     const descriptionInput = await screen.findByLabelText("분류 설명");
     await user.type(descriptionInput, "비료 사용 전 안내를 확인하세요.");
 
-    expect(
-      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
-    ).toBeInTheDocument();
-
     await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
     await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
 
     expect(await screen.findByLabelText("분류 설명")).toHaveValue(
       "비료 사용 전 안내를 확인하세요.",
     );
+
+    await user.click(screen.getByRole("button", { name: "안내" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Fertilizer Upload 안내" }),
+    );
+
     expect(
-      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
+      within(screen.getByTestId("mobile-preview-device")).getByText(
+        "비료 사용 전 안내를 확인하세요.",
+      ),
     ).toBeInTheDocument();
   });
 
