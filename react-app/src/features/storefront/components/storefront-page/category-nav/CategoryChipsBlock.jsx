@@ -7,7 +7,7 @@ const CHIP_VARIANT_CLASS_NAMES = {
 };
 
 export default function CategoryChipsBlock({ view, elementKey }) {
-  const hasCategoryInformation = Boolean(view.activeCategoryDescription);
+  const hasCategoryInformation = view.activeCategoryInfoEntries.length > 0;
   const chipItems = hasCategoryInformation
     ? [view.categoryInformationItemId, ...view.mediumCategoryItems]
     : view.mediumCategoryItems;

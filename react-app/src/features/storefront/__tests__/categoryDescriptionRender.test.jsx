@@ -60,7 +60,9 @@ describe('category description', () => {
       <CategoryChipsBlock
         elementKey="category-chips"
         view={{
-          activeCategoryDescription: '봄철 밑거름 모음',
+          activeCategoryInfoEntries: [
+            { id: 'c1', label: '', description: '봄철 밑거름 모음' },
+          ],
           activeSectionTitle: '비료',
           activeMediumCategory: '밑거름',
           categoryInformationItemId: '__category_information__',

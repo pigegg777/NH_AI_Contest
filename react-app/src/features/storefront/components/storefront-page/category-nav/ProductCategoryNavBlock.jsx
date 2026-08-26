@@ -12,6 +12,23 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
   }
 
   const productCategoryChipVariant = view.pageStyle.productCategoryChips.variant;
+  const officeChip = view.canRenderOfficeInformation
+    ? [
+        {
+          sectionId: view.officeInformationItemId,
+          sectionName: view.officeInformationItemId,
+          label: '사무소 정보',
+        },
+      ]
+    : [];
+  const chipEntries = [
+    ...officeChip,
+    ...view.catalogSectionEntries.map(({ sectionId, sectionName }) => ({
+      sectionId,
+      sectionName,
+      label: sectionName,
+    })),
+  ];
 
   return (
     <div className={styles.productCategorySection}>
@@ -22,19 +39,27 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
         role="group"
         aria-label="상품 분류"
       >
-        {view.catalogSectionEntries.map(({ sectionId, sectionName }) => (
-          <button
-            key={`${elementKey}-${sectionId}`}
-            type="button"
-            className={`${styles.productCategoryChip} ${view.activeSectionTitle === sectionName ? styles.productCategoryChipActive : ''}`}
-            aria-pressed={view.activeSectionTitle === sectionName}
-            onClick={() =>
-              view.handleCategoryRailSectionSelect(sectionName, sectionId)
-            }
-          >
-            {sectionName}
-          </button>
-        ))}
+        {chipEntries.map(({ sectionId, sectionName, label }) => {
+          const isActive =
+            sectionName === view.officeInformationItemId
+              ? view.isOfficeInformationActive
+              : !view.isOfficeInformationActive &&
+                view.activeSectionTitle === sectionName;
+
+          return (
+            <button
+              key={`${elementKey}-${sectionId}`}
+              type="button"
+              className={`${styles.productCategoryChip} ${isActive ? styles.productCategoryChipActive : ''}`}
+              aria-pressed={isActive}
+              onClick={() =>
+                view.handleCategoryRailSectionSelect(sectionName, sectionId)
+              }
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

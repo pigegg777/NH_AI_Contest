@@ -11,6 +11,7 @@ import CardGridSection from './product-cards/CardGridSection';
 import CategoryInformationPanel from './category-nav/CategoryInformationPanel';
 import DesktopCategoryRail from './category-nav/DesktopCategoryRail';
 import HelperBlock from './blocks/HelperBlock';
+import OfficeInformationPanel from './category-nav/OfficeInformationPanel';
 import StorefrontViewBlock from './blocks/StorefrontViewBlock';
 import styles from './StorefrontView.module.css';
 
@@ -89,12 +90,17 @@ export default function StorefrontView({
             return renderSlot(slot);
           })}
 
+          {view.isOfficeInformationActive ? (
+            <OfficeInformationPanel
+              officeEntries={view.officeInformationEntries}
+              categoryGroups={view.officeInformationCategoryGroups}
+            />
+          ) : null}
+
           {view.isCategoryInformationActive ? (
             <CategoryInformationPanel
-              id={view.categoryInformationPanelId}
               categoryName={view.activeSectionTitle}
-              description={view.activeCategoryDescription}
-              cardStyle={view.activeCategoryCardStyle}
+              entries={view.activeCategoryInfoEntries}
             />
           ) : null}
 

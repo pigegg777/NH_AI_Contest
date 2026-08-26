@@ -13,6 +13,7 @@ import {
   buildUniqueMediumCategories,
   filterHiddenProducts,
 } from '../model/storefront-config/sectionMatching';
+import { normalizeInformationEntries } from '../model/storefront-config/informationEntriesModel';
 import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
@@ -57,6 +58,7 @@ function matchesMediumCategory(product, activeMediumCategory) {
 }
 
 const CATEGORY_INFORMATION_ITEM_ID = '__category_information__';
+const OFFICE_INFORMATION_ITEM_ID = '__office_information__';
 
 function getSectionName(section) {
   return section?.productCategoryName || section?.title || '';
@@ -144,21 +146,40 @@ export function useStorefrontView({
     sectionIdPrefix,
     buildSections(config?.categoryConfigs, baseVisibleProducts),
   );
-  const activeSectionEntry =
-    catalogSectionEntries.find(
-      (entry) => entry.sectionName === activeSectionName,
-    ) ??
-    catalogSectionEntries[0] ??
-    null;
+  const officeInformationEntries = normalizeInformationEntries(
+    config?.pageConfig?.officeInfo,
+    { legacyText: resolvedPageConfig.nav.subtitle },
+  );
+  // A group with no entries would render a bare heading, so drop it here rather
+  // than in the panel.
+  const officeInformationCategoryGroups = catalogSectionEntries.flatMap(
+    ({ sectionName, section }) =>
+      section?.infoEntries?.length > 0
+        ? [{ categoryName: sectionName, entries: section.infoEntries }]
+        : [],
+  );
+  const canRenderOfficeInformation =
+    officeInformationEntries.length > 0 ||
+    officeInformationCategoryGroups.length > 0;
+  const isOfficeInformationActive =
+    canRenderOfficeInformation &&
+    activeSectionName === OFFICE_INFORMATION_ITEM_ID;
+  // The sentinel matches no catalog section, so without the short-circuit the
+  // fallback below would quietly resolve the office tab to the first category.
+  const activeSectionEntry = isOfficeInformationActive
+    ? null
+    : catalogSectionEntries.find(
+        (entry) => entry.sectionName === activeSectionName,
+      ) ??
+      catalogSectionEntries[0] ??
+      null;
   const activeSectionTitle = activeSectionEntry?.sectionName || '';
   const activeSectionMediumCategories = buildUniqueMediumCategories(
     activeSectionEntry?.section?.products,
   );
-  const activeCategoryDescription = toTrimmedString(
-    activeSectionEntry?.section?.description,
-  );
+  const activeCategoryInfoEntries = activeSectionEntry?.section?.infoEntries ?? [];
   const canRenderCategoryInformation =
-    Boolean(activeCategoryDescription) &&
+    activeCategoryInfoEntries.length > 0 &&
     mobileUiTree.some(
       (block) => block.type === 'categoryChips' && block.enabled !== false,
     );
@@ -183,13 +204,14 @@ export function useStorefrontView({
     effectiveActiveMediumCategory === CATEGORY_INFORMATION_ITEM_ID;
   const sectionScopedProducts =
     activeSectionEntry?.section?.products ?? baseVisibleProducts;
-  const visibleProducts = isCategoryInformationActive
-    ? []
-    : sectionScopedProducts.filter(
-        (product) =>
-          matchesSearch(product, searchQuery) &&
-          matchesMediumCategory(product, effectiveActiveMediumCategory),
-      );
+  const visibleProducts =
+    isCategoryInformationActive || isOfficeInformationActive
+      ? []
+      : sectionScopedProducts.filter(
+          (product) =>
+            matchesSearch(product, searchQuery) &&
+            matchesMediumCategory(product, effectiveActiveMediumCategory),
+        );
   const sectionIdByName = new Map(
     catalogSectionEntries.map(({ sectionName, sectionId }) => [
       sectionName,
@@ -268,6 +290,12 @@ export function useStorefrontView({
     ) && sectionEntries.length === 0;
 
   useEffect(() => {
+    // The office tab is not a catalog section, so the snap-back below would
+    // kick the shopper out of it the moment they select it.
+    if (activeSectionName === OFFICE_INFORMATION_ITEM_ID) {
+      return;
+    }
+
     const firstSectionName = catalogSectionEntries[0]?.sectionName || '';
 
     if (!firstSectionName) {
@@ -348,14 +376,19 @@ export function useStorefrontView({
   }
 
   function handleCategoryRailSectionSelect(sectionName, sectionId) {
+    if (sectionName === OFFICE_INFORMATION_ITEM_ID) {
+      setActiveSectionName(OFFICE_INFORMATION_ITEM_ID);
+      setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
+      return;
+    }
+
     const nextSection = catalogSectionEntries.find(
       (entry) => entry.sectionName === sectionName,
     );
-    const nextDefaultMediumCategory = toTrimmedString(
-      nextSection?.section?.description,
-    )
-      ? CATEGORY_INFORMATION_ITEM_ID
-      : ALL_MEDIUM_CATEGORY_LABEL;
+    const nextDefaultMediumCategory =
+      nextSection?.section?.infoEntries?.length > 0
+        ? CATEGORY_INFORMATION_ITEM_ID
+        : ALL_MEDIUM_CATEGORY_LABEL;
 
     setActiveSectionName(sectionName);
     setActiveMediumCategory(nextDefaultMediumCategory);
@@ -385,8 +418,13 @@ export function useStorefrontView({
     catalogSectionEntries,
     activeSectionTitle,
     activeSectionMediumCategories,
-    activeCategoryDescription,
+    activeCategoryInfoEntries,
     activeCategoryCardStyle: activeSectionEntry?.section?.cardStyle,
+    officeInformationItemId: OFFICE_INFORMATION_ITEM_ID,
+    officeInformationEntries,
+    officeInformationCategoryGroups,
+    canRenderOfficeInformation,
+    isOfficeInformationActive,
     categoryInformationItemId: CATEGORY_INFORMATION_ITEM_ID,
     categoryInformationChipId,
     categoryInformationPanelId,
