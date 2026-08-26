@@ -1,5 +1,6 @@
 import { useId } from 'react';
 
+import InformationText from './InformationText';
 import styles from './OfficeInformationPanel.module.css';
 
 function InformationEntryList({ entries }) {
@@ -16,7 +17,9 @@ function InformationEntryList({ entries }) {
             </dt>
           ) : null}
           {entry.description ? (
-            <dd className={styles.entryDescription}>{entry.description}</dd>
+            <dd className={styles.entryDescription}>
+              <InformationText text={entry.description} />
+            </dd>
           ) : null}
         </div>
       ))}
