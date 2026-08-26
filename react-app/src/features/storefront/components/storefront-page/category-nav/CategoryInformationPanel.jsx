@@ -1,30 +1,26 @@
 import { useId } from 'react';
 
-import { normalizeCardStyle } from '../../../model/card-design/style/cardStyleModel';
-import { buildShellCssVars } from '../../../model/card-grid-section/cardGridFieldStyleModel';
 import styles from './CategoryInformationPanel.module.css';
 
+/**
+ * 중분류 칩의 `{분류명} 정보` 탭이 여는 패널. 사무소 정보 탭과 내용이 겹치지만,
+ * 그 분류를 보고 있는 구매자가 바로 읽을 수 있는 경로다.
+ */
 export default function CategoryInformationPanel({
-  id,
   categoryName,
-  description,
-  cardStyle,
+  entries = [],
 }) {
   const titleId = useId();
 
-  if (!description) {
+  if (entries.length === 0) {
     return null;
   }
 
-  const cssVars = buildShellCssVars(normalizeCardStyle(cardStyle));
-
   return (
     <section
-      id={id}
       className={styles.panel}
       aria-labelledby={titleId}
       data-testid="storefront-category-information"
-      style={cssVars}
     >
       <div className={styles.headingRow}>
         <span className={styles.icon} aria-hidden="true">
@@ -35,7 +31,18 @@ export default function CategoryInformationPanel({
         </h2>
       </div>
 
-      <p className={styles.description}>{description}</p>
+      <dl className={styles.entryList}>
+        {entries.map((entry) => (
+          <div key={entry.id} className={styles.entry}>
+            {entry.label ? (
+              <dt className={styles.entryLabel}>{entry.label}</dt>
+            ) : null}
+            {entry.description ? (
+              <dd className={styles.entryDescription}>{entry.description}</dd>
+            ) : null}
+          </div>
+        ))}
+      </dl>
 
       <p className={styles.helper}>상품을 보려면 위 중분류를 선택하세요.</p>
     </section>
