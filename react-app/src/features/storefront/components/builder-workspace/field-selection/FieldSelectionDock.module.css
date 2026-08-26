@@ -206,19 +206,6 @@
   line-height: 1.5;
 }
 
-.textFieldFillButton {
-  flex: 0 0 auto;
-  padding: 8px 10px;
-  border: 1px solid var(--corp-line-strong);
-  border-radius: var(--corp-radius-sm);
-  background: var(--corp-panel);
-  color: var(--corp-text);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  word-break: keep-all;
-}
-
 .textFieldHint {
   margin: 0;
   font-size: 0.74rem;

@@ -2,12 +2,10 @@ import { useId } from 'react';
 
 import styles from './FieldSelectionDock.module.css';
 
-export const PAGE_DESCRIPTION_PLACEHOLDER = '영세가격 : 농업경영체 등록자 구매가격';
-
 /**
- * The free-text side of the field selection dock: page title, page description
- * and per-category description. Kept apart from the field tables because it
- * edits config text rather than toggling which columns a card shows.
+ * 필드 선택 독의 단일 행 입력. 지금은 페이지 제목 하나가 쓴다. 여러 줄 안내는
+ * 반복 목록이 되어 InformationEntryFields 로 넘어갔으므로, 여기 남은 것은
+ * 라벨·placeholder·힌트를 갖춘 한 줄 텍스트뿐이다.
  */
 export function StorefrontTextFields({ fields, onChange }) {
   const idPrefix = useId().replace(/:/g, '-');
@@ -16,9 +14,6 @@ export function StorefrontTextFields({ fields, onChange }) {
     <div className={styles.textFields} data-testid="storefront-text-fields">
       {fields.map((field) => {
         const inputId = `${idPrefix}-${field.id}`;
-        // Offering to fill text the merchant has already written would only
-        // risk clobbering it.
-        const showsFill = Boolean(field.fillLabel) && !field.value;
 
         return (
           <div key={field.id} className={styles.textField}>
@@ -27,35 +22,14 @@ export function StorefrontTextFields({ fields, onChange }) {
             </label>
 
             <div className={styles.textFieldRow}>
-              {field.multiline ? (
-                <textarea
-                  id={inputId}
-                  className={`${styles.textFieldInput} ${styles.textFieldTextarea}`}
-                  value={field.value}
-                  placeholder={field.placeholder}
-                  rows={3}
-                  onChange={(event) => onChange(field.id, event.target.value)}
-                />
-              ) : (
-                <input
-                  id={inputId}
-                  type="text"
-                  className={styles.textFieldInput}
-                  value={field.value}
-                  placeholder={field.placeholder}
-                  onChange={(event) => onChange(field.id, event.target.value)}
-                />
-              )}
-
-              {showsFill ? (
-                <button
-                  type="button"
-                  className={styles.textFieldFillButton}
-                  onClick={() => onChange(field.id, field.placeholder)}
-                >
-                  {field.fillLabel}
-                </button>
-              ) : null}
+              <input
+                id={inputId}
+                type="text"
+                className={styles.textFieldInput}
+                value={field.value}
+                placeholder={field.placeholder}
+                onChange={(event) => onChange(field.id, event.target.value)}
+              />
             </div>
 
             {field.hint ? (

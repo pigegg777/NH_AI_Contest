@@ -1,10 +1,7 @@
 import CategoryTabs from '../category-tabs/CategoryTabs';
 import DataFieldGroupTable from './DataFieldGroupTable';
 import { InformationEntryFields } from './InformationEntryFields';
-import {
-  PAGE_DESCRIPTION_PLACEHOLDER,
-  StorefrontTextFields,
-} from './StorefrontTextFields';
+import { StorefrontTextFields } from './StorefrontTextFields';
 import { groupAvailableFields } from '../../../model/data-selection/dataSelectionFieldGroupModel';
 import styles from './FieldSelectionDock.module.css';
 
@@ -76,7 +73,7 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
             legend="사무소 안내"
             entries={dataMode.officeInfoEntries}
             onChange={dataMode.setOfficeInfoEntries}
-            descriptionPlaceholder={PAGE_DESCRIPTION_PLACEHOLDER}
+            descriptionPlaceholder="영세가격 : 농업경영체 등록자 구매가격"
           />
         </>
       ) : (

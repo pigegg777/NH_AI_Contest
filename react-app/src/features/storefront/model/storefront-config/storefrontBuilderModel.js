@@ -394,16 +394,26 @@ export function buildCategoryConfigRow({
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
   const existingRow = findCategoryConfigRow(existingConfig?.categoryConfigs, normalizedProductCategoryName);
   const previousCategoryDescription = existingRow?.categoryConfig?.description;
-  const nextCategoryInfoEntries =
-    categoryInfoEntries === undefined
-      ? replaceLegacyInformationEntry(existingRow?.categoryConfig?.info, {
-          previousLegacyText: previousCategoryDescription,
-          nextLegacyText:
-            categoryDescription === undefined
-              ? previousCategoryDescription
-              : categoryDescription,
-        })
-      : categoryInfoEntries;
+  // 항목 목록을 명시적으로 받았다면 이 저장은 새 편집기가 낸 것이고, 그 목록이
+  // 유일한 진실이다.
+  const ownsCategoryInfo = categoryInfoEntries !== undefined;
+  const nextCategoryInfoEntries = ownsCategoryInfo
+    ? categoryInfoEntries
+    : replaceLegacyInformationEntry(existingRow?.categoryConfig?.info, {
+        previousLegacyText: previousCategoryDescription,
+        nextLegacyText:
+          categoryDescription === undefined
+            ? previousCategoryDescription
+            : categoryDescription,
+      });
+  // 옛 description 은 목록이 없던 시절 설정을 위한 읽기 폴백이다. 편집기가 목록을
+  // 쓴 순간 할 일이 끝나므로 여기서 비운다. 남겨두면 normalizeCategoryConfig 가
+  // 빈 목록을 보고 이 문자열로 항목을 되살려, 판매자가 마지막 항목을 지울 수 없다.
+  const nextCategoryDescription = ownsCategoryInfo
+    ? ''
+    : categoryDescription === undefined
+      ? previousCategoryDescription
+      : categoryDescription;
   const nextCategoryConfig = normalizeCategoryConfig(
     {
       ...(existingRow?.categoryConfig ?? {}),
@@ -416,12 +426,8 @@ export function buildCategoryConfigRow({
         cardStyle,
         bodySlots,
       },
-      description:
-        categoryDescription === undefined
-          ? existingRow?.categoryConfig?.description
-          : categoryDescription,
-      info:
-        nextCategoryInfoEntries,
+      description: nextCategoryDescription,
+      info: nextCategoryInfoEntries,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -487,13 +493,20 @@ export function buildStorefrontSavePayload({
     existingConfig?.navConfig?.subtitle ??
     existingConfig?.pageConfig?.nav?.subtitle ??
     basePageConfig.nav.subtitle;
-  const nextOfficeInfoEntries =
-    officeInfoEntries === undefined
-      ? replaceLegacyInformationEntry(existingConfig?.pageConfig?.officeInfo, {
-          previousLegacyText: previousPageDescription,
-          nextLegacyText: resolvedNavConfig.subtitle,
-        })
-      : officeInfoEntries;
+  // 항목 목록을 명시적으로 받았다면 이 저장은 새 편집기가 낸 것이고, 그 목록이
+  // 유일한 진실이다.
+  const ownsOfficeInfo = officeInfoEntries !== undefined;
+  const nextOfficeInfoEntries = ownsOfficeInfo
+    ? officeInfoEntries
+    : replaceLegacyInformationEntry(existingConfig?.pageConfig?.officeInfo, {
+        previousLegacyText: previousPageDescription,
+        nextLegacyText: resolvedNavConfig.subtitle,
+      });
+  // 옛 nav.subtitle 도 같은 이유로 은퇴한다. 남겨두면 normalizePageConfig 가 빈
+  // 목록을 보고 이 문자열로 항목을 되살려, 판매자가 마지막 항목을 지울 수 없다.
+  const nextNavConfig = ownsOfficeInfo
+    ? { ...resolvedNavConfig, subtitle: '' }
+    : resolvedNavConfig;
   const nextMobileUiTree = normalizeMobileUiTree(mobileUiTree ?? basePageConfig.mobileUiTree, {
     searchEnabled: basePageConfig.searchSection.enabled,
     categoryChipsEnabled: basePageConfig.categoryChips.enabled,
@@ -505,20 +518,20 @@ export function buildStorefrontSavePayload({
     pageStyle: pageStyle ?? basePageConfig.pageStyle,
     theme: {
       ...basePageConfig.theme,
-      brandColor: resolvedNavConfig.brandColor,
+      brandColor: nextNavConfig.brandColor,
     },
     nav: {
       ...basePageConfig.nav,
-      title: resolvedNavConfig.title,
-      subtitle: resolvedNavConfig.subtitle,
-      logoUrl: resolvedNavConfig.logoUrl,
+      title: nextNavConfig.title,
+      subtitle: nextNavConfig.subtitle,
+      logoUrl: nextNavConfig.logoUrl,
     },
     officeInfo: nextOfficeInfoEntries,
     searchSection: {
       ...basePageConfig.searchSection,
       enabled: searchBlock ? searchBlock.enabled : basePageConfig.searchSection.enabled,
-      placeholder: resolvedNavConfig.searchPlaceholder,
-      variant: resolvedNavConfig.searchVariant,
+      placeholder: nextNavConfig.searchPlaceholder,
+      variant: nextNavConfig.searchVariant,
     },
     categoryChips: {
       ...basePageConfig.categoryChips,
@@ -541,7 +554,7 @@ export function buildStorefrontSavePayload({
 
   return {
     officeCode,
-    navConfig: resolvedNavConfig,
+    navConfig: nextNavConfig,
     pageConfig: nextPageConfig,
     categoryConfigs: mergeCategoryConfigRows(existingConfig?.categoryConfigs, nextCategoryRow),
     hiddenProducts: Array.isArray(hiddenProducts) ? hiddenProducts : [],
