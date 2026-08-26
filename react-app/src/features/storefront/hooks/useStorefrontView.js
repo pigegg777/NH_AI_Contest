@@ -161,9 +161,13 @@ export function useStorefrontView({
   const canRenderOfficeInformation =
     officeInformationEntries.length > 0 ||
     officeInformationCategoryGroups.length > 0;
+  // Yields to a search the same way `effectiveActiveMediumCategory` drops the
+  // category-information chip: without it, typing a query leaves the shopper
+  // stranded on the panel with no results and no way back but a chip.
   const isOfficeInformationActive =
     canRenderOfficeInformation &&
-    activeSectionName === OFFICE_INFORMATION_ITEM_ID;
+    activeSectionName === OFFICE_INFORMATION_ITEM_ID &&
+    searchQuery === '';
   // The sentinel matches no catalog section, so without the short-circuit the
   // fallback below would quietly resolve the office tab to the first category.
   const activeSectionEntry = isOfficeInformationActive
@@ -285,6 +289,7 @@ export function useStorefrontView({
     ) && sectionEntries.length > 0;
   const canRenderEmptyState =
     !isCategoryInformationActive &&
+    !isOfficeInformationActive &&
     mobileUiTree.some(
       (block) => block.type === 'emptyState' && block.enabled !== false,
     ) && sectionEntries.length === 0;
