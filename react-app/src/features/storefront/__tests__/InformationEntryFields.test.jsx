@@ -19,12 +19,47 @@ function Stateful({ initialEntries = [] }) {
   );
 }
 
+// entries 는 건드리지 않고 부모만 리렌더시켜, 빈 목록일 때 그려지는 placeholder
+// 행의 정체성이 바깥 리렌더에 흔들리지 않는지 본다. 패널의 다른 필드가 바뀌어도
+// 이 컴포넌트는 다시 그려진다 — 그때마다 커서를 잃으면 안 된다.
+function RerenderProbe() {
+  const [entries, setEntries] = useState([]);
+  const [, forceRerender] = useState(0);
+
+  return (
+    <>
+      <button type="button" onClick={() => forceRerender((count) => count + 1)}>
+        다시 렌더
+      </button>
+      <InformationEntryFields
+        legend="사무소 안내"
+        entries={entries}
+        onChange={setEntries}
+        descriptionPlaceholder="안내 문구"
+      />
+    </>
+  );
+}
+
 describe('InformationEntryFields', () => {
   it('shows one blank row when there is nothing yet', () => {
     render(<Stateful />);
 
     expect(screen.getAllByLabelText('라벨')).toHaveLength(1);
     expect(screen.getAllByLabelText('설명')).toHaveLength(1);
+  });
+
+  it('keeps the blank row identity stable across an outside re-render', async () => {
+    const user = userEvent.setup();
+    render(<RerenderProbe />);
+
+    const before = screen.getByLabelText('설명');
+
+    await user.click(screen.getByRole('button', { name: '다시 렌더' }));
+
+    const after = screen.getByLabelText('설명');
+
+    expect(after).toBe(before);
   });
 
   it('takes the description as multiline text', () => {
@@ -116,21 +151,26 @@ describe('InformationEntryFields', () => {
   it('removes the right row, leaving the other values in place', async () => {
     const user = userEvent.setup();
 
+    // 세 행 중 가운데를 지운다: index 기반 filter((_, i) => i !== 1) 도 우연히
+    // 같은 결과를 내므로, id 기반 제거인지 가려내려면 반드시 가운데 행이어야
+    // 한다. 첫/끝 행을 지우면 index 기반 구현과 결과가 구분되지 않는다.
     render(
       <Stateful
         initialEntries={[
           { id: 'a', label: '가', description: '' },
           { id: 'b', label: '나', description: '' },
+          { id: 'c', label: '다', description: '' },
         ]}
       />,
     );
 
-    await user.click(screen.getAllByRole('button', { name: '항목 삭제' })[0]);
+    await user.click(screen.getAllByRole('button', { name: '항목 삭제' })[1]);
 
     const labels = screen.getAllByLabelText('라벨');
 
-    expect(labels).toHaveLength(1);
-    expect(labels[0]).toHaveValue('나');
+    expect(labels).toHaveLength(2);
+    expect(labels[0]).toHaveValue('가');
+    expect(labels[1]).toHaveValue('다');
   });
 
   it('hides the add button at the cap', () => {

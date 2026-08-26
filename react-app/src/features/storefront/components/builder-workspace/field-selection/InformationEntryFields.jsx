@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react';
+import { useId, useRef, useState } from 'react';
 
 import {
   MAX_INFORMATION_ENTRIES,
@@ -25,8 +25,12 @@ export function InformationEntryFields({
   const idPrefix = useId().replace(/:/g, '-');
   const descriptionRefs = useRef(new Map());
   // 빈 목록에 추가 버튼만 있으면 무슨 화면인지 알기 어렵다. 저장할 때 빈 항목은
-  // 어차피 버려지므로 이 행은 공짜다.
-  const rows = entries.length > 0 ? entries : [createInformationEntry()];
+  // 어차피 버려지므로 이 행은 공짜다. lazy useState로 한 번만 만들어야 한다 —
+  // 렌더마다 createInformationEntry()를 새로 부르면 id가 매번 바뀌어서, entries가
+  // 비어 있는 동안 바깥에서 온 리렌더가 key를 바꾸고 React가 textarea를
+  // 언마운트/리마운트해 포커스와 커서 위치를 잃는다.
+  const [placeholderEntry] = useState(() => createInformationEntry());
+  const rows = entries.length > 0 ? entries : [placeholderEntry];
 
   function updateEntry(entryId, key, value) {
     onChange(
