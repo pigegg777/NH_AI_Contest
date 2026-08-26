@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -23,6 +24,7 @@ function renderFields(overrides = {}) {
         value: '',
         placeholder: PAGE_DESCRIPTION_PLACEHOLDER,
         fillLabel: '예시문구 넣기',
+        multiline: true,
       },
     ],
     onChange: vi.fn(),
@@ -73,6 +75,35 @@ describe('StorefrontTextFields', () => {
     await user.type(screen.getByLabelText('페이지 제목'), '봄');
 
     expect(onChange).toHaveBeenCalledWith('pageTitle', '봄');
+  });
+
+  it('keeps line breaks entered in a multiline page description', async () => {
+    const user = userEvent.setup();
+
+    function StatefulFields() {
+      const [value, setValue] = useState('');
+
+      return (
+        <StorefrontTextFields
+          fields={[
+            {
+              id: 'pageDescription',
+              label: '페이지 설명',
+              value,
+              multiline: true,
+            },
+          ]}
+          onChange={(_fieldId, nextValue) => setValue(nextValue)}
+        />
+      );
+    }
+
+    render(<StatefulFields />);
+
+    const description = screen.getByLabelText('페이지 설명');
+    await user.type(description, '첫째 줄{Enter}둘째 줄');
+
+    expect(description).toHaveValue('첫째 줄\n둘째 줄');
   });
 
   it('fills the example text in one click', async () => {

@@ -65,6 +65,7 @@
   word-break: keep-all;
   overflow-wrap: break-word;
   text-wrap: pretty;
+  white-space: pre-line;
 }
 
 .searchRow {

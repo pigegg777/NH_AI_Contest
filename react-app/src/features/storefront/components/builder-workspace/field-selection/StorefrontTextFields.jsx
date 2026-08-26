@@ -27,14 +27,25 @@ export function StorefrontTextFields({ fields, onChange }) {
             </label>
 
             <div className={styles.textFieldRow}>
-              <input
-                id={inputId}
-                type="text"
-                className={styles.textFieldInput}
-                value={field.value}
-                placeholder={field.placeholder}
-                onChange={(event) => onChange(field.id, event.target.value)}
-              />
+              {field.multiline ? (
+                <textarea
+                  id={inputId}
+                  className={`${styles.textFieldInput} ${styles.textFieldTextarea}`}
+                  value={field.value}
+                  placeholder={field.placeholder}
+                  rows={3}
+                  onChange={(event) => onChange(field.id, event.target.value)}
+                />
+              ) : (
+                <input
+                  id={inputId}
+                  type="text"
+                  className={styles.textFieldInput}
+                  value={field.value}
+                  placeholder={field.placeholder}
+                  onChange={(event) => onChange(field.id, event.target.value)}
+                />
+              )}
 
               {showsFill ? (
                 <button

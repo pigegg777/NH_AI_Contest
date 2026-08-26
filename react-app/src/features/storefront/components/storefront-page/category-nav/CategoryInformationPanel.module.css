@@ -1,0 +1,66 @@
+.panel {
+  margin-bottom: 24px;
+  padding: 28px 30px 24px;
+  border: 1px solid color-mix(in srgb, var(--brand-color, #1d4a2e) 24%, #dfe8dc);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand-color, #1d4a2e) 5%, #ffffff);
+}
+
+.headingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--brand-color, #1d4a2e);
+  color: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title {
+  margin: 0;
+  color: var(--title-text-color, #173223);
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.description {
+  margin: 18px 0 22px;
+  max-width: 48rem;
+  color: var(--category-description-color, #51635a);
+  font-size: var(--category-description-size, 0.84rem);
+  font-weight: var(--category-description-weight, 400);
+  letter-spacing: var(--category-description-letter-spacing, normal);
+  line-height: 1.7;
+  overflow-wrap: break-word;
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.helper {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px dashed color-mix(in srgb, var(--brand-color, #1d4a2e) 22%, transparent);
+  color: #718074;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .panel {
+    padding: 22px 20px 20px;
+  }
+}

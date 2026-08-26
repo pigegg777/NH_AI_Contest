@@ -20,7 +20,6 @@ export default function CardGridSection({
   bodySlots = [],
   sectionId,
   sectionHeaderContent = null,
-  description = '',
 }) {
   const products = Array.isArray(section?.products) ? section.products : [];
   const visibleFields =
@@ -64,15 +63,6 @@ export default function CardGridSection({
     >
       {hasSectionHeaderContent ? (
         <div className={styles.sectionHeaderContent}>{sectionHeaderContent}</div>
-      ) : null}
-
-      {description ? (
-        <p
-          className={styles.categoryDescription}
-          data-testid="storefront-category-description"
-        >
-          {description}
-        </p>
       ) : null}
 
       <div className={styles.grid}>

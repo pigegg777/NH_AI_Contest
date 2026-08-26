@@ -158,6 +158,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   });
   const commonDraftRef = useRef(null);
   const categoryDraftRef = useRef(null);
+  const categoryDescriptionDraftsRef = useRef(new Map());
   const previousChatModeRef = useRef(chatSession.mode);
   const previousCategoryRef = useRef("");
 
@@ -231,6 +232,13 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   }
 
   function setTextDraft(fieldId, value) {
+    if (fieldId === "categoryDescription" && selectedProductCategoryName) {
+      categoryDescriptionDraftsRef.current.set(
+        selectedProductCategoryName,
+        value,
+      );
+    }
+
     markDirty();
     setTextDraftState((current) => ({ ...current, [fieldId]: value }));
   }
@@ -267,6 +275,17 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     nextExistingConfig,
   ) {
     const resolvedCategoryName = categoryName || "";
+    const savedCategoryDescription = toTrimmedString(
+      findCategoryConfigRow(
+        nextExistingConfig?.categoryConfigs,
+        resolvedCategoryName,
+      )?.categoryConfig?.description,
+    );
+    const categoryDescription = categoryDescriptionDraftsRef.current.has(
+      resolvedCategoryName,
+    )
+      ? categoryDescriptionDraftsRef.current.get(resolvedCategoryName)
+      : savedCategoryDescription;
     const resolvedDraft = resolveCategoryDraft({
       productCategoryName: resolvedCategoryName,
       productEntries: nextProductEntries,
@@ -283,12 +302,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
     setTextDraftState((current) => ({
       ...current,
-      categoryDescription: toTrimmedString(
-        findCategoryConfigRow(
-          nextExistingConfig?.categoryConfigs,
-          resolvedCategoryName,
-        )?.categoryConfig?.description,
-      ),
+      categoryDescription,
     }));
     categoryDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
@@ -317,6 +331,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           config,
         );
 
+        categoryDescriptionDraftsRef.current.clear();
         setProductEntries(nextProductEntries);
         setExistingConfig(config);
         setHiddenProducts(config?.hiddenProducts ?? []);

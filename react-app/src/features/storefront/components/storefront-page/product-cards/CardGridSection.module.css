@@ -11,23 +11,6 @@
   margin-bottom: 14px;
 }
 
-/* Reads as the same kind of text as the hero description — same colour, same
-   weight, one step smaller because it introduces a section rather than the
-   page. 14px bottom matches .sectionHeaderContent, so whatever sits above the
-   grid clears it by the same amount. */
-.categoryDescription {
-  margin: 0 0 14px;
-  max-width: 40rem;
-  font-size: var(--category-description-size, 0.84rem);
-  font-weight: var(--category-description-weight, 400);
-  letter-spacing: var(--category-description-letter-spacing, normal);
-  line-height: 1.55;
-  color: var(--category-description-color, #51635a);
-  word-break: keep-all;
-  overflow-wrap: break-word;
-  text-wrap: pretty;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(var(--card-columns, 2), minmax(0, 1fr));

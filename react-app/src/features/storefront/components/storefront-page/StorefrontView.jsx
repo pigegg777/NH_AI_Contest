@@ -8,6 +8,7 @@ import {
 } from '../../model/storefront-view/storefrontViewLayoutModel';
 import { buildStorefrontViewCssVars } from '../../model/storefront-view/storefrontViewStyleModel';
 import CardGridSection from './product-cards/CardGridSection';
+import CategoryInformationPanel from './category-nav/CategoryInformationPanel';
 import DesktopCategoryRail from './category-nav/DesktopCategoryRail';
 import HelperBlock from './blocks/HelperBlock';
 import StorefrontViewBlock from './blocks/StorefrontViewBlock';
@@ -88,6 +89,15 @@ export default function StorefrontView({
             return renderSlot(slot);
           })}
 
+          {view.isCategoryInformationActive ? (
+            <CategoryInformationPanel
+              id={view.categoryInformationPanelId}
+              categoryName={view.activeSectionTitle}
+              description={view.activeCategoryDescription}
+              cardStyle={view.activeCategoryCardStyle}
+            />
+          ) : null}
+
           {view.hasRenderableSections
             ? view.sectionEntries.map(({ section, sectionId }) => (
                 <CardGridSection
@@ -97,7 +107,6 @@ export default function StorefrontView({
                   fields={section?.fields}
                   cardStyle={section?.cardStyle}
                   bodySlots={section?.bodySlots}
-                  description={section?.description}
                   sectionHeaderContent={view.sectionHeaderBlocks.map((block) => (
                     <HelperBlock key={`${sectionId}-${block.id}`} block={block} />
                   ))}

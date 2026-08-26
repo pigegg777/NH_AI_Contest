@@ -72,6 +72,7 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
               value: dataMode.textDraft.pageDescription,
               placeholder: PAGE_DESCRIPTION_PLACEHOLDER,
               fillLabel: '예시문구 넣기',
+              multiline: true,
               hint: '비워두면 제목 아래에 아무것도 표시되지 않습니다.',
             },
           ]}
@@ -86,7 +87,8 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
                 label: '분류 설명',
                 value: dataMode.textDraft.categoryDescription,
                 placeholder: '이 분류 상품 목록 위에 보여줄 안내 문구',
-                hint: '비워두면 아무것도 표시되지 않습니다.',
+                multiline: true,
+                hint: '줄바꿈한 그대로 표시됩니다. 비워두면 아무것도 표시되지 않습니다.',
               },
             ]}
             onChange={dataMode.setTextDraft}

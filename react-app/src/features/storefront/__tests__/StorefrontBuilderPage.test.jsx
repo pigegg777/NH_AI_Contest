@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -503,6 +503,78 @@ describe("StorefrontBuilderPage", () => {
     expect(
       screen.queryByTestId("data-field-row-tax_price"),
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps a saved category information chip after switching away and back", async () => {
+    const configWithDescription = {
+      ...EXISTING_CONFIG,
+      categoryConfigs: EXISTING_CONFIG.categoryConfigs.map((row) =>
+        row.productCategoryName === "Fertilizer Upload"
+          ? {
+              ...row,
+              categoryConfig: {
+                ...row.categoryConfig,
+                description: "비료 사용 전 안내를 확인하세요.",
+              },
+            }
+          : row,
+      ),
+    };
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(configWithDescription);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    expect(
+      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
+    ).toBeInTheDocument();
+
+    await user.click(
+      await screen.findByRole("button", { name: DATA_MODE_LABEL }),
+    );
+    await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
+    await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
+
+    const informationChip = await screen.findByRole("button", {
+      name: "Fertilizer Upload 정보",
+    });
+
+    expect(informationChip).toHaveAttribute("aria-pressed", "true");
+    expect(
+      await screen.findByRole("heading", { name: "Fertilizer Upload 안내" }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(informationChip).toHaveFocus());
+  });
+
+  it("keeps an edited category description after switching away and back", async () => {
+    fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
+    fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
+
+    const user = userEvent.setup();
+    render(<StorefrontBuilderPage officeCode="OFF-1" />);
+
+    await user.click(
+      await screen.findByRole("button", { name: DATA_MODE_LABEL }),
+    );
+    await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
+
+    const descriptionInput = await screen.findByLabelText("분류 설명");
+    await user.type(descriptionInput, "비료 사용 전 안내를 확인하세요.");
+
+    expect(
+      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
+    await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
+
+    expect(await screen.findByLabelText("분류 설명")).toHaveValue(
+      "비료 사용 전 안내를 확인하세요.",
+    );
+    expect(
+      await screen.findByRole("button", { name: "Fertilizer Upload 정보" }),
+    ).toBeInTheDocument();
   });
 
   it("shows the page copy in the preview as it is typed", async () => {

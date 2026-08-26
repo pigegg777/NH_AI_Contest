@@ -81,6 +81,27 @@ describe('field selection common tab', () => {
     expect(dataMode.setTextDraft).toHaveBeenCalledWith('pageTitle', '봄');
   });
 
+  it('takes the category description as multiline text', async () => {
+    const user = userEvent.setup();
+    const dataMode = buildDataMode({ selectedCategoryId: '비료' });
+
+    render(<FieldSelectionDock dataMode={dataMode} onApply={vi.fn()} />);
+
+    const description = screen.getByLabelText('분류 설명');
+
+    expect(description.tagName).toBe('TEXTAREA');
+
+    // An <input> ignores Enter entirely, so reporting a newline is the
+    // behaviour that separates the two. setTextDraft is a stateless mock here,
+    // so each keystroke arrives against an empty value.
+    await user.type(description, '{Enter}');
+
+    expect(dataMode.setTextDraft).toHaveBeenCalledWith(
+      'categoryDescription',
+      '\n',
+    );
+  });
+
   it('keeps the save button on both tabs', () => {
     const { rerender } = render(
       <FieldSelectionDock dataMode={buildDataMode()} onApply={vi.fn()} />,
