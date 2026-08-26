@@ -12,11 +12,6 @@ export const PAGE_AI_TARGET_SCOPE_OPTIONS = [
     detail: '글자색, 굵기, 글자 간격',
   },
   {
-    id: 'pageDescription',
-    label: '상단 설명 글자',
-    detail: '글자색, 굵기, 글자 크기, 자간',
-  },
-  {
     id: 'search',
     label: '상품 검색창',
     detail: '배경색, 테두리색, 크기',

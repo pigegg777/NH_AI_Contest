@@ -24,19 +24,6 @@ export const PAGE_STYLE_HEADER_TITLE_SIZE_VALUES = {
   xxl: '1.4rem',
 };
 
-export const PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
-
-// A scale of its own rather than the title's: md matches the 0.88rem the hero
-// subtitle already renders at, so adding this section changes nothing on screen.
-export const PAGE_STYLE_DESCRIPTION_FONT_SIZE_VALUES = {
-  xs: '0.76rem',
-  sm: '0.82rem',
-  md: '0.88rem',
-  lg: '0.94rem',
-  xl: '1rem',
-  xxl: '1.06rem',
-};
-
 export const PAGE_STYLE_BORDER_WIDTH_VALUES = {
   none: '0px',
   hairline: '0.5px',
@@ -76,12 +63,6 @@ export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
   palette: { backgroundHex: '#ffffff', accentHex: '#1d4a2e' },
   header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
-  description: {
-    colorHex: '#51635a',
-    letterSpacing: 'normal',
-    fontWeight: 400,
-    fontSizeToken: 'md',
-  },
   search: {
     sizeToken: 'md',
     borderStrengthToken: 'normal',
@@ -150,24 +131,6 @@ function normalizeHeader(header, backgroundHex) {
   };
 }
 
-function normalizeDescription(description) {
-  const source = description ?? {};
-
-  return {
-    colorHex: normalizeHexColor(source.colorHex, DEFAULT_PAGE_STYLE.description.colorHex),
-    letterSpacing:
-      typeof source.letterSpacing === 'string' && source.letterSpacing
-        ? source.letterSpacing
-        : DEFAULT_PAGE_STYLE.description.letterSpacing,
-    fontWeight: Number.isFinite(source.fontWeight)
-      ? source.fontWeight
-      : DEFAULT_PAGE_STYLE.description.fontWeight,
-    fontSizeToken: PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS.includes(source.fontSizeToken)
-      ? source.fontSizeToken
-      : DEFAULT_PAGE_STYLE.description.fontSizeToken,
-  };
-}
-
 function normalizeSearch(search) {
   const source = search ?? {};
 
@@ -231,7 +194,6 @@ export function normalizePageStyle(pageStyle) {
     schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
     palette,
     header: normalizeHeader(source.header, palette.backgroundHex),
-    description: normalizeDescription(source.description),
     search: normalizeSearch(source.search),
     categoryChips: normalizeCategoryChips(source.categoryChips),
     productCategoryChips: normalizeProductCategoryChips(source.productCategoryChips),

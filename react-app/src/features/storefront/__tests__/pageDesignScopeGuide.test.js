@@ -44,7 +44,10 @@ describe('PAGE_DESIGN_SCOPE_GUIDES', () => {
     });
   });
 
-  it('tells the merchant the AI never rewrites their words', () => {
-    expect(getPageDesignScopeGuide('pageDescription').note).toContain('문구');
+  it('no longer offers the page description scope', () => {
+    expect(
+      PAGE_AI_TARGET_SCOPE_OPTIONS.map((option) => option.id),
+    ).not.toContain('pageDescription');
+    expect(PAGE_AI_TARGET_SCOPE_OPTIONS).toHaveLength(5);
   });
 });

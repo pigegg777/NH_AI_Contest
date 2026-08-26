@@ -3,7 +3,6 @@ import {
   PAGE_STYLE_CHIP_GAP_VALUES,
   PAGE_STYLE_CHIP_RADIUS_VALUES,
   PAGE_STYLE_CHIP_SIZE_VALUES,
-  PAGE_STYLE_DESCRIPTION_FONT_SIZE_VALUES,
   PAGE_STYLE_SEARCH_SIZE_VALUES,
 } from '../page-design/style/pageStyleModel';
 
@@ -50,11 +49,6 @@ export function buildStorefrontViewCssVars(view) {
     '--chip-accent': view.chipAccentColor,
     '--title-text-color': view.titleTextColorValue,
     '--title-font-size': view.titleFontSizeValue,
-    '--page-description-color': view.pageStyle.description.colorHex,
-    '--page-description-size':
-      PAGE_STYLE_DESCRIPTION_FONT_SIZE_VALUES[view.pageStyle.description.fontSizeToken],
-    '--page-description-weight': view.pageStyle.description.fontWeight,
-    '--page-description-letter-spacing': view.pageStyle.description.letterSpacing,
     '--typography-heading-weight': view.typographyToneValue.headingWeight,
     '--typography-body-weight': view.typographyToneValue.bodyWeight,
     '--typography-letter-spacing': view.typographyToneValue.letterSpacing,

@@ -104,7 +104,6 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
           schemaVersion: 1,
           palette: { backgroundHex: '#f1f4f2', accentHex: '#1d4a2e' },
           header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
-          description: { colorHex: '#51635a', letterSpacing: 'normal', fontWeight: 400, fontSizeToken: 'md' },
           search: { sizeToken: 'md', borderStrengthToken: 'soft', backgroundHex: '#ffffff', borderColorHex: '#bbc9c0', focusBorderColorHex: '#1d4a2e' },
           categoryChips: {
             backgroundHex: '#e4e9e6',

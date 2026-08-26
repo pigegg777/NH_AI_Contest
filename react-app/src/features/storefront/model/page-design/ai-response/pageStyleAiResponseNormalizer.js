@@ -7,7 +7,6 @@ import {
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
   PAGE_STYLE_CHIP_VARIANT_TOKENS,
-  PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../style/pageStyleModel';
@@ -72,22 +71,6 @@ export function normalizeHeaderIntent(rawHeader) {
   return Object.keys(intent).length > 0 ? intent : null;
 }
 
-export function normalizeDescriptionIntent(rawDescription) {
-  if (!rawDescription) return null;
-
-  const intent = toRecognizedObject(rawDescription, ['colorHex']);
-
-  if (typeof rawDescription.letterSpacing === 'string' && rawDescription.letterSpacing) {
-    intent.letterSpacing = rawDescription.letterSpacing;
-  }
-  if (Number.isFinite(rawDescription.fontWeight)) intent.fontWeight = rawDescription.fontWeight;
-  if (PAGE_STYLE_DESCRIPTION_FONT_SIZE_TOKENS.includes(rawDescription.fontSizeToken)) {
-    intent.fontSizeToken = rawDescription.fontSizeToken;
-  }
-
-  return Object.keys(intent).length > 0 ? intent : null;
-}
-
 function normalizeChipsIntent(rawChips) {
   if (!rawChips) return null;
 
@@ -135,12 +118,10 @@ export function normalizeSearchIntent(rawSearch) {
 }
 
 function limitIntentToTargetScope(intent, targetScope) {
-  // The target scope id and the intent key are the same word for every scope but
-  // pageDescription, so the intent keys come from the values, not the keys.
+  // The target scope id and the intent key are the same word for every scope.
   const scopedKeyByTarget = {
     palette: 'palette',
     header: 'header',
-    pageDescription: 'description',
     categoryChips: 'categoryChips',
     productCategoryChips: 'productCategoryChips',
     search: 'search',
@@ -162,7 +143,6 @@ export function normalizePageStyleAiIntent(payload, fallbackAccentHex, targetSco
     {
       palette: normalizePalettePatchIntent(payload?.palette, fallbackAccentHex),
       header: normalizeHeaderIntent(payload?.header),
-      description: normalizeDescriptionIntent(payload?.description),
       categoryChips: normalizeCategoryChipsIntent(payload?.categoryChips),
       productCategoryChips: normalizeProductCategoryChipsIntent(payload?.productCategoryChips),
       search: normalizeSearchIntent(payload?.search),

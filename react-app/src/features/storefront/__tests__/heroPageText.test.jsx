@@ -34,7 +34,7 @@ function renderView(navConfig) {
   );
 }
 
-describe('hero page title and description', () => {
+describe('hero page title', () => {
   it('falls back to the derived org line when no title is set', () => {
     renderView({});
 
@@ -55,22 +55,6 @@ describe('hero page title and description', () => {
     expect(
       screen.getByRole('heading', { name: '발안농협 봄맞이 자재전' }),
     ).toBeInTheDocument();
-  });
-
-  it('renders nothing for the description when it is empty', () => {
-    renderView({});
-
-    expect(
-      screen.queryByTestId('storefront-page-description'),
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders the description under the title when one is set', () => {
-    renderView({ subtitle: '영세가격 : 농업경영체 등록자 구매가격' });
-
-    expect(screen.getByTestId('storefront-page-description').textContent).toBe(
-      '영세가격 : 농업경영체 등록자 구매가격',
-    );
   });
 
   it('no longer renders the unused eyebrow line', () => {

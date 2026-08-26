@@ -313,7 +313,6 @@ describe('normalizePageStyleAiIntent', () => {
     ).toEqual({
       palette: null,
       header: null,
-      description: null,
       categoryChips: null,
       productCategoryChips: null,
       search: { sizeToken: 'lg', borderStrengthToken: 'strong' },
@@ -336,7 +335,6 @@ describe('normalizePageStyleAiIntent', () => {
     ).toEqual({
       palette: null,
       header: null,
-      description: null,
       categoryChips: null,
       productCategoryChips: { textHex: '#334155' },
       search: null,

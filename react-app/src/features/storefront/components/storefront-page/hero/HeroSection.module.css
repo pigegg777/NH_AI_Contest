@@ -51,23 +51,6 @@
   text-wrap: balance;
 }
 
-/* Its own centred line under the brand row, capped at a comfortable measure so
-   a long sentence wraps across the hero instead of down a narrow column. */
-.description {
-  margin: 0 auto;
-  max-width: 32rem;
-  font-size: var(--page-description-size, 0.88rem);
-  font-weight: var(--page-description-weight, 400);
-  letter-spacing: var(--page-description-letter-spacing, normal);
-  line-height: 1.5;
-  text-align: center;
-  color: var(--page-description-color, #51635a);
-  word-break: keep-all;
-  overflow-wrap: break-word;
-  text-wrap: pretty;
-  white-space: pre-line;
-}
-
 .searchRow {
   display: flex;
   flex-direction: column;
@@ -181,16 +164,12 @@
       height: 30px;
     }
 
-  /* Both scale off their token rather than pinning a value, so a size the
-     merchant picks in AI 페이지 디자인 still applies on phones. The offsets
-     reproduce what the pinned values gave at the default token: the title
-     grows on small screens, the description shrinks. */
+  /* Scales off its token rather than pinning a value, so a size the merchant
+     picks in AI 페이지 디자인 still applies on phones. The offset reproduces
+     what the pinned value gave at the default token: the title grows on
+     small screens. */
   .title {
       font-size: calc(var(--title-font-size, 1.1rem) + 0.2rem);
-    }
-
-  .description {
-      font-size: calc(var(--page-description-size, 0.88rem) - 0.04rem);
     }
 
   .searchBox {

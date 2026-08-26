@@ -260,10 +260,6 @@ export function useStorefrontView({
     toTrimmedString(config?.navConfig?.title) ||
     toTrimmedString(resolvedPageConfig.nav.title) ||
     derivedPageTitle;
-  const pageDescription =
-    toTrimmedString(config?.navConfig?.subtitle) ||
-    toTrimmedString(resolvedPageConfig.nav.subtitle) ||
-    '';
   const searchPlaceholder =
     config?.navConfig?.searchPlaceholder ||
     resolvedPageConfig.searchSection.placeholder ||
@@ -446,7 +442,6 @@ export function useStorefrontView({
     typographyToneValue,
     derivedPageTitle,
     pageTitle,
-    pageDescription,
     searchPlaceholder,
     searchVariant,
     canRenderDesktopCategoryRail,
