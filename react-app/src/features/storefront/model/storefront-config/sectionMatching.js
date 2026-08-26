@@ -1,4 +1,5 @@
 import { toTrimmedString } from '../../../../common/utils/text';
+import { normalizeInformationEntries } from './informationEntriesModel';
 import {
   DEFAULT_CARD_FIELDS,
   deriveEffectiveScalarKeys,
@@ -120,6 +121,7 @@ function buildDefaultSection(productCategoryName, rows) {
     title: productCategoryName,
     productCategoryName,
     description: '',
+    infoEntries: [],
     fields: deriveEffectiveScalarKeys(products) ?? DEFAULT_CARD_FIELDS,
     cardStyle: undefined,
     bodySlots: undefined,
@@ -140,6 +142,9 @@ export function buildSections(categoryConfigs, productRows) {
         title: categoryConfig.displayName || categoryConfigRow?.productCategoryName || 'Products',
         productCategoryName: categoryConfigRow?.productCategoryName || '',
         description: categoryConfig.description || '',
+        infoEntries: normalizeInformationEntries(categoryConfig.info, {
+          legacyText: categoryConfig.description,
+        }),
         fields: categoryConfig.cardDesign?.visibleFields,
         cardStyle: categoryConfig.cardDesign?.cardStyle,
         bodySlots: categoryConfig.cardDesign?.bodySlots,

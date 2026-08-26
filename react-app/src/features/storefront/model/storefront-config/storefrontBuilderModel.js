@@ -2,6 +2,7 @@ import { toTrimmedString } from '../../../../common/utils/text';
 import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
 import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/style/pageStyleModel';
+import { normalizeInformationEntries } from './informationEntriesModel';
 import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
@@ -250,6 +251,9 @@ export function normalizePageConfig(pageConfig) {
       subtitle: toTrimmedString(sourceNav.subtitle),
       logoUrl: toTrimmedString(sourceNav.logoUrl),
     },
+    officeInfo: normalizeInformationEntries(source.officeInfo, {
+      legacyText: sourceNav.subtitle,
+    }),
     searchSection: {
       enabled: isSearchEnabled,
       placeholder: toTrimmedString(sourceSearchSection.placeholder) || DEFAULT_PAGE_CONFIG.searchSection.placeholder,
@@ -287,6 +291,7 @@ export function normalizeCategoryConfig(categoryConfig, productCategoryName = ''
     sourceCategoryName:
       toTrimmedString(source.sourceCategoryName) || toTrimmedString(productCategoryName),
     description: typeof source.description === 'string' ? toTrimmedString(source.description) : '',
+    info: normalizeInformationEntries(source.info, { legacyText: source.description }),
     selectedMediumCategories,
     representativeMediumCategory:
       representativeMediumCategory && selectedMediumCategories.includes(representativeMediumCategory)
@@ -380,6 +385,7 @@ export function buildCategoryConfigRow({
   cardStyle,
   bodySlots,
   categoryDescription,
+  categoryInfoEntries,
   allowedScalarKeys,
 }) {
   const normalizedProductCategoryName = toTrimmedString(productCategoryName);
@@ -400,6 +406,10 @@ export function buildCategoryConfigRow({
         categoryDescription === undefined
           ? existingRow?.categoryConfig?.description
           : categoryDescription,
+      info:
+        categoryInfoEntries === undefined
+          ? existingRow?.categoryConfig?.info
+          : categoryInfoEntries,
     },
     normalizedProductCategoryName,
     allowedScalarKeys,
@@ -452,6 +462,8 @@ export function buildStorefrontSavePayload({
   cardFields,
   bodySlots,
   categoryDescription,
+  officeInfoEntries,
+  categoryInfoEntries,
   navConfig,
   mobileUiTree,
   pageStyle,
@@ -478,6 +490,7 @@ export function buildStorefrontSavePayload({
       subtitle: resolvedNavConfig.subtitle,
       logoUrl: resolvedNavConfig.logoUrl,
     },
+    officeInfo: officeInfoEntries ?? basePageConfig.officeInfo,
     searchSection: {
       ...basePageConfig.searchSection,
       enabled: searchBlock ? searchBlock.enabled : basePageConfig.searchSection.enabled,
@@ -499,6 +512,7 @@ export function buildStorefrontSavePayload({
     cardStyle: normalizeCardStyle(cardStyle),
     bodySlots,
     categoryDescription,
+    categoryInfoEntries,
     allowedScalarKeys,
   });
 

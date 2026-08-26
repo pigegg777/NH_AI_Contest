@@ -88,6 +88,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
         schemaVersion: 1,
         theme: { brandColor: '#1d4a2e' },
         nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
+        officeInfo: [{ id: expect.any(String), label: '', description: 'Subtitle' }],
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
         categoryChips: { enabled: true, sticky: true },
         mobileUiTree: [
@@ -159,6 +160,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             displayName: 'Fertilizer Upload',
             sourceCategoryName: 'Fertilizer Upload',
             description: '',
+            info: [],
             selectedMediumCategories: ['Premium', 'Starter'],
             representativeMediumCategory: 'Premium',
             cardDesign: {
@@ -318,6 +320,7 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
           schemaVersion: 1,
           theme: { brandColor: '#1d4a2e' },
           nav: { title: 'Demo', subtitle: 'Subtitle', logoUrl: 'https://example.com/logo.png' },
+          officeInfo: [{ id: expect.any(String), label: '', description: 'Subtitle' }],
           searchSection: { enabled: true, placeholder: 'Search products', variant: 'pill' },
           categoryChips: { enabled: true, sticky: true },
           mobileUiTree: [
@@ -341,6 +344,7 @@ describe('storefrontConfigOrchestrator.upsertStorefrontConfig', () => {
               displayName: 'Fertilizer Upload',
               sourceCategoryName: 'Fertilizer Upload',
               description: '',
+              info: [],
               selectedMediumCategories: ['Premium', 'Starter'],
               representativeMediumCategory: 'Premium',
               cardDesign: {
