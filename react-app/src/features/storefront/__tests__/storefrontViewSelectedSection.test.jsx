@@ -112,6 +112,40 @@ describe('StorefrontView selectedSectionName', () => {
     expect(pressedCategoryChip()).toBe('Pesticide Upload');
   });
 
+  it('resynchronizes the builder category after the 공통 요소 tab', async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderView('Pesticide Upload');
+
+    rerender(
+      <StorefrontView
+        config={CONFIG}
+        productRows={PRODUCT_ROWS}
+        officeName="테스트농협"
+        nhName="테스트"
+        selectedSectionName=""
+      />,
+    );
+
+    const chips = screen.getByTestId('storefront-product-category-chips');
+    await user.click(
+      within(chips).getByRole('button', { name: 'Fertilizer Upload' }),
+    );
+
+    expect(pressedCategoryChip()).toBe('Fertilizer Upload');
+
+    rerender(
+      <StorefrontView
+        config={CONFIG}
+        productRows={PRODUCT_ROWS}
+        officeName="테스트농협"
+        nhName="테스트"
+        selectedSectionName="Pesticide Upload"
+      />,
+    );
+
+    expect(pressedCategoryChip()).toBe('Pesticide Upload');
+  });
+
   it('still lets the shopper pick a category inside the preview', async () => {
     const user = userEvent.setup();
 

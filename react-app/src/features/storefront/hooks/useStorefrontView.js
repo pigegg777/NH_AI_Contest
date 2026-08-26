@@ -123,10 +123,13 @@ export function useStorefrontView({
 
   // Adjusted during render rather than in an effect: an effect would land a
   // frame later and make the preview visibly flip to the old section first.
-  if (selectedSectionName && selectedSectionName !== lastExternalSectionName) {
+  if (selectedSectionName !== lastExternalSectionName) {
     setLastExternalSectionName(selectedSectionName);
-    setActiveSectionName(selectedSectionName);
-    setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
+
+    if (selectedSectionName) {
+      setActiveSectionName(selectedSectionName);
+      setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
+    }
   }
 
   const deferredSearchText = useDeferredValue(searchText);
