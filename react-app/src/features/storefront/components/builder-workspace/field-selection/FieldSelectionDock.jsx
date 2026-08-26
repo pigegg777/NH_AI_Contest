@@ -1,5 +1,6 @@
 import CategoryTabs from '../category-tabs/CategoryTabs';
 import DataFieldGroupTable from './DataFieldGroupTable';
+import { InformationEntryFields } from './InformationEntryFields';
 import {
   PAGE_DESCRIPTION_PLACEHOLDER,
   StorefrontTextFields,
@@ -57,41 +58,34 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
       </div>
 
       {dataMode.selectedCategoryId === COMMON_TAB_ID ? (
-        <StorefrontTextFields
-          fields={[
-            {
-              id: 'pageTitle',
-              label: '페이지 제목',
-              value: dataMode.textDraft.pageTitle,
-              placeholder: dataMode.derivedPageTitle,
-              hint: '비워두면 위 문구가 그대로 표시됩니다.',
-            },
-            {
-              id: 'pageDescription',
-              label: '페이지 설명',
-              value: dataMode.textDraft.pageDescription,
-              placeholder: PAGE_DESCRIPTION_PLACEHOLDER,
-              fillLabel: '예시문구 넣기',
-              multiline: true,
-              hint: '비워두면 제목 아래에 아무것도 표시되지 않습니다.',
-            },
-          ]}
-          onChange={dataMode.setTextDraft}
-        />
-      ) : (
         <>
           <StorefrontTextFields
             fields={[
               {
-                id: 'categoryDescription',
-                label: '분류 설명',
-                value: dataMode.textDraft.categoryDescription,
-                placeholder: '이 분류 상품 목록 위에 보여줄 안내 문구',
-                multiline: true,
-                hint: '줄바꿈한 그대로 표시됩니다. 비워두면 아무것도 표시되지 않습니다.',
+                id: 'pageTitle',
+                label: '페이지 제목',
+                value: dataMode.textDraft.pageTitle,
+                placeholder: dataMode.derivedPageTitle,
+                hint: '비워두면 위 문구가 그대로 표시됩니다.',
               },
             ]}
             onChange={dataMode.setTextDraft}
+          />
+
+          <InformationEntryFields
+            legend="사무소 안내"
+            entries={dataMode.officeInfoEntries}
+            onChange={dataMode.setOfficeInfoEntries}
+            descriptionPlaceholder={PAGE_DESCRIPTION_PLACEHOLDER}
+          />
+        </>
+      ) : (
+        <>
+          <InformationEntryFields
+            legend="분류 안내"
+            entries={dataMode.categoryInfoEntries}
+            onChange={dataMode.setCategoryInfoEntries}
+            descriptionPlaceholder="이 분류 상품 목록 위에 보여줄 안내 문구"
           />
 
           <div className={styles.tables}>

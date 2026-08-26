@@ -7,6 +7,7 @@ import { CARD_DESIGN_LAYOUT_OPTIONS } from "../model/card-design/ai-request/card
 import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
+import { normalizeInformationEntries } from "../model/storefront-config/informationEntriesModel";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -141,13 +142,12 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   );
   const [designTarget, setDesignTarget] = useState("common");
   const [isCommonDataTab, setIsCommonDataTab] = useState(true);
-  // The merchant-authored copy, kept apart from the field checkboxes because it
-  // spans both the page (title/description) and the selected category.
-  const [textDraft, setTextDraftState] = useState({
-    pageTitle: "",
-    pageDescription: "",
-    categoryDescription: "",
-  });
+  // The merchant-authored copy, kept apart from the field checkboxes. Only the
+  // page title is a single string now — the office and category guidance are
+  // repeatable entry lists, the same shape the storefront reads.
+  const [textDraft, setTextDraftState] = useState({ pageTitle: "" });
+  const [officeInfoEntries, setOfficeInfoEntries] = useState([]);
+  const [categoryInfoEntries, setCategoryInfoEntries] = useState([]);
   const [composerDrafts, setComposerDrafts] = useState({
     common: "",
     category: "",
@@ -158,7 +158,9 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   });
   const commonDraftRef = useRef(null);
   const categoryDraftRef = useRef(null);
-  const categoryDescriptionDraftsRef = useRef(new Map());
+  // Unsaved guidance per category, so hopping to another tab and back does not
+  // throw away what the merchant just typed.
+  const categoryInfoEntriesDraftsRef = useRef(new Map());
   const previousChatModeRef = useRef(chatSession.mode);
   const previousCategoryRef = useRef("");
 
@@ -187,7 +189,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const draftNavConfig = {
     ...navConfig,
     title: textDraft.pageTitle,
-    subtitle: textDraft.pageDescription,
   };
   const dataSelection = useDataSelectionDraft({
     allowedScalarKeys: effectiveScalarKeys,
@@ -232,15 +233,25 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   }
 
   function setTextDraft(fieldId, value) {
-    if (fieldId === "categoryDescription" && selectedProductCategoryName) {
-      categoryDescriptionDraftsRef.current.set(
+    markDirty();
+    setTextDraftState((current) => ({ ...current, [fieldId]: value }));
+  }
+
+  function changeOfficeInfoEntries(nextEntries) {
+    markDirty();
+    setOfficeInfoEntries(nextEntries);
+  }
+
+  function changeCategoryInfoEntries(nextEntries) {
+    if (selectedProductCategoryName) {
+      categoryInfoEntriesDraftsRef.current.set(
         selectedProductCategoryName,
-        value,
+        nextEntries,
       );
     }
 
     markDirty();
-    setTextDraftState((current) => ({ ...current, [fieldId]: value }));
+    setCategoryInfoEntries(nextEntries);
   }
 
   function changeCardsPerRow(value) {
@@ -258,15 +269,15 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   // Both load paths resolve the saved copy the same way navConfig does, so the
   // input box always shows exactly what the storefront is rendering today.
   function hydratePageTextDraft(config, normalizedPageConfig) {
-    setTextDraftState((current) => ({
-      ...current,
+    setTextDraftState({
       pageTitle: toTrimmedString(
         config?.navConfig?.title ?? normalizedPageConfig.nav.title,
       ),
-      pageDescription: toTrimmedString(
-        config?.navConfig?.subtitle ?? normalizedPageConfig.nav.subtitle,
-      ),
-    }));
+    });
+    // normalizePageConfig already falls the old nav subtitle back into an
+    // unlabeled entry, so the editor opens on exactly what the storefront
+    // renders today.
+    setOfficeInfoEntries(normalizedPageConfig.officeInfo);
   }
 
   function hydrateCategoryDraft(
@@ -275,17 +286,16 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     nextExistingConfig,
   ) {
     const resolvedCategoryName = categoryName || "";
-    const savedCategoryDescription = toTrimmedString(
-      findCategoryConfigRow(
-        nextExistingConfig?.categoryConfigs,
-        resolvedCategoryName,
-      )?.categoryConfig?.description,
-    );
-    const categoryDescription = categoryDescriptionDraftsRef.current.has(
+    const categoryRow = findCategoryConfigRow(
+      nextExistingConfig?.categoryConfigs,
       resolvedCategoryName,
-    )
-      ? categoryDescriptionDraftsRef.current.get(resolvedCategoryName)
-      : savedCategoryDescription;
+    );
+    const nextCategoryInfoEntries =
+      categoryInfoEntriesDraftsRef.current.has(resolvedCategoryName)
+        ? categoryInfoEntriesDraftsRef.current.get(resolvedCategoryName)
+        : normalizeInformationEntries(categoryRow?.categoryConfig?.info, {
+            legacyText: categoryRow?.categoryConfig?.description,
+          });
     const resolvedDraft = resolveCategoryDraft({
       productCategoryName: resolvedCategoryName,
       productEntries: nextProductEntries,
@@ -300,10 +310,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       deriveEffectiveScalarKeys(resolvedDraft.entry?.rows),
     );
     cardAi.hydrateCardStyle(resolvedDraft.cardStyle, resolvedDraft.bodySlots);
-    setTextDraftState((current) => ({
-      ...current,
-      categoryDescription,
-    }));
+    setCategoryInfoEntries(nextCategoryInfoEntries);
     categoryDraftRef.current = {
       cardStyle: cloneValue(resolvedDraft.cardStyle),
       bodySlots: cloneValue(resolvedDraft.bodySlots),
@@ -331,7 +338,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           config,
         );
 
-        categoryDescriptionDraftsRef.current.clear();
+        categoryInfoEntriesDraftsRef.current.clear();
         setProductEntries(nextProductEntries);
         setExistingConfig(config);
         setHiddenProducts(config?.hiddenProducts ?? []);
@@ -544,7 +551,8 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       cardFields,
       bodySlots: cardAi.bodySlots,
       navConfig: draftNavConfig,
-      categoryDescription: textDraft.categoryDescription,
+      officeInfoEntries,
+      categoryInfoEntries,
       mobileUiTree,
       pageStyle: pageAi.pageStyle,
       allowedScalarKeys: effectiveScalarKeys,
@@ -762,15 +770,20 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
           cardFields,
           bodySlots: previewBodySlots,
           navConfig: draftNavConfig,
-          categoryDescription: textDraft.categoryDescription,
+          officeInfoEntries,
+          categoryInfoEntries,
           mobileUiTree,
           pageStyle: pageAi.pageStyle,
           allowedScalarKeys: effectiveScalarKeys,
         })
       : {
           officeCode,
+          // No category is selected, so the save payload builder is skipped —
+          // the office entries still have to reach the preview by hand, or the
+          // merchant types into a panel that never changes.
           pageConfig: normalizePageConfig({
             ...existingConfig?.pageConfig,
+            officeInfo: officeInfoEntries,
             pageStyle: pageAi.pageStyle,
           }),
           navConfig: normalizeNavConfig(draftNavConfig),
@@ -801,6 +814,10 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     derivedPageTitle,
     textDraft,
     setTextDraft,
+    officeInfoEntries,
+    setOfficeInfoEntries: changeOfficeInfoEntries,
+    categoryInfoEntries,
+    setCategoryInfoEntries: changeCategoryInfoEntries,
     availableCategoryFields,
     draftFields: dataSelection.draft,
     committedFields: dataSelection.committed,

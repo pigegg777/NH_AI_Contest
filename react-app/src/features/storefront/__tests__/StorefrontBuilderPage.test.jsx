@@ -540,7 +540,7 @@ describe("StorefrontBuilderPage", () => {
     expect(screen.getByText("비료 사용 전 안내를 확인하세요.")).toBeInTheDocument();
   });
 
-  it("keeps an edited category description after switching away and back", async () => {
+  it("keeps an edited category entry after switching away and back", async () => {
     const configWithStructuredDescription = {
       ...EXISTING_CONFIG,
       categoryConfigs: EXISTING_CONFIG.categoryConfigs.map((row) =>
@@ -573,14 +573,16 @@ describe("StorefrontBuilderPage", () => {
     );
     await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
 
-    const descriptionInput = await screen.findByLabelText("분류 설명");
+    expect(await screen.findByText("분류 안내")).toBeInTheDocument();
+
+    const descriptionInput = await screen.findByLabelText("설명");
     await user.clear(descriptionInput);
     await user.type(descriptionInput, "비료 사용 전 안내를 확인하세요.");
 
     await user.click(screen.getByRole("tab", { name: "Pesticide Upload" }));
     await user.click(screen.getByRole("tab", { name: "Fertilizer Upload" }));
 
-    expect(await screen.findByLabelText("분류 설명")).toHaveValue(
+    expect(await screen.findByLabelText("설명")).toHaveValue(
       "비료 사용 전 안내를 확인하세요.",
     );
 
@@ -601,7 +603,7 @@ describe("StorefrontBuilderPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows an edited page description in the information preview as it is typed", async () => {
+  it("shows an edited office entry in the information preview as it is typed", async () => {
     fetchOfficeProductDataEntries.mockResolvedValue(PRODUCT_ENTRIES);
     fetchStorefrontConfig.mockResolvedValue(EXISTING_CONFIG);
 
@@ -612,8 +614,11 @@ describe("StorefrontBuilderPage", () => {
       await screen.findByRole("button", { name: DATA_MODE_LABEL }),
     );
 
-    // The saved copy hydrates into the input.
-    const descriptionInput = await screen.findByLabelText("페이지 설명");
+    // The saved copy hydrates into the office entry — the old nav subtitle
+    // falls back into one unlabeled entry.
+    expect(await screen.findByText("사무소 안내")).toBeInTheDocument();
+
+    const descriptionInput = await screen.findByLabelText("설명");
 
     expect(descriptionInput).toHaveValue("Existing subtitle");
 
