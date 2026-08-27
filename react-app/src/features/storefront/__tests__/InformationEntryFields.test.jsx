@@ -42,6 +42,15 @@ function RerenderProbe() {
 }
 
 describe('InformationEntryFields', () => {
+  it('AI 강조는 없애고 수동 강조와 이모지는 유지한다', () => {
+    render(<Stateful />);
+
+    expect(screen.queryByRole('button', { name: 'AI 강조' })).toBeNull();
+    expect(screen.getByRole('button', { name: '제목' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '중요' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '이모지' })).toBeInTheDocument();
+  });
+
   it('shows one blank row when there is nothing yet', () => {
     render(<Stateful />);
 

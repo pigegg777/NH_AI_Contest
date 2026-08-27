@@ -820,7 +820,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   }));
 
   const dataMode = {
-    officeCode,
     categoryTabs: [
       { id: COMMON_TAB_ID, label: "공통 요소" },
       ...productCategoryTabs,

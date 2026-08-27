@@ -347,40 +347,11 @@
   border-color: var(--corp-focus);
 }
 
-.entryEmphasisButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.entryEmphasisResult {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.entryEmojiLoading {
   margin: 0;
+  padding: 12px;
   color: var(--corp-muted);
   font-size: 0.74rem;
   line-height: 1.6;
-  word-break: keep-all;
-}
-
-.entryEmphasisError {
-  margin: 0;
-  color: var(--corp-danger, #b91c1c);
-  font-size: 0.74rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-/* 되돌리기는 안내 문장에 딸린 링크지 또 하나의 액션 버튼이 아니다. 삽입 버튼과
-   같은 무게로 그리면 판매자가 다음에 눌러야 할 것으로 읽는다. */
-.entryUndoButton {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--corp-focus);
-  font-size: 0.74rem;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
   word-break: keep-all;
 }

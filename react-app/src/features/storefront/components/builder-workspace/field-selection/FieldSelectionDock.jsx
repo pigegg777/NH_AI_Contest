@@ -70,7 +70,6 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
           />
 
           <InformationEntryFields
-            officeCode={dataMode.officeCode}
             legend="사무소 안내"
             entries={dataMode.officeInfoEntries}
             onChange={dataMode.setOfficeInfoEntries}
@@ -80,7 +79,6 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
       ) : (
         <>
           <InformationEntryFields
-            officeCode={dataMode.officeCode}
             legend="분류 안내"
             entries={dataMode.categoryInfoEntries}
             onChange={dataMode.setCategoryInfoEntries}

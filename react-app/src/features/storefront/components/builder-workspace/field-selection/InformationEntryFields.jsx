@@ -4,7 +4,6 @@ import {
   MAX_INFORMATION_ENTRIES,
   createInformationEntry,
 } from '../../../model/storefront-config/informationEntriesModel';
-import { useInformationEmphasisAi } from '../../../hooks/useInformationEmphasisAi';
 import styles from './FieldSelectionDock.module.css';
 
 const EMPHASIS_BUTTONS = [
@@ -23,7 +22,6 @@ const EmojiPicker = lazy(() => import('emoji-picker-react'));
  */
 export function InformationEntryFields({
   legend,
-  officeCode,
   entries,
   onChange,
   descriptionPlaceholder = '',
@@ -74,12 +72,6 @@ export function InformationEntryFields({
       document.removeEventListener('keydown', closeOnEscape);
     };
   }, [openEmojiPickerEntryId]);
-
-  const emphasisAi = useInformationEmphasisAi({
-    officeCode,
-    onApplyDescription: (entryId, description) =>
-      updateEntry(entryId, 'description', description),
-  });
 
   function updateEntry(entryId, key, value) {
     onChange(
@@ -140,7 +132,6 @@ export function InformationEntryFields({
       entry.description.slice(insertionPoint);
     const nextCaret = insertionPoint + emoji.length;
 
-    emphasisAi.forget(entry.id);
     updateEntry(entry.id, 'description', nextValue);
     setOpenEmojiPickerEntryId(null);
 
@@ -157,8 +148,6 @@ export function InformationEntryFields({
       {rows.map((entry) => {
         const labelId = `${idPrefix}-${entry.id}-label`;
         const descriptionId = `${idPrefix}-${entry.id}-description`;
-        const emphasisState = emphasisAi.stateFor(entry.id);
-
         return (
           <div key={entry.id} className={styles.entryRow}>
             <div className={styles.entryRowInputs}>
@@ -192,13 +181,9 @@ export function InformationEntryFields({
                   value={entry.description}
                   placeholder={descriptionPlaceholder}
                   rows={3}
-                  onChange={(event) => {
-                    // 판매자가 직접 고치기 시작하면 되돌리기 제안은 버려야 한다.
-                    // 스냅샷은 AI 직전 원문 하나뿐이라, 그대로 두면 되돌리기가
-                    // 방금 손으로 쓴 글까지 날린다.
-                    emphasisAi.forget(entry.id);
-                    updateEntry(entry.id, 'description', event.target.value);
-                  }}
+                  onChange={(event) =>
+                    updateEntry(entry.id, 'description', event.target.value)
+                  }
                 />
 
                 <div className={styles.entryEmphasisRow}>
@@ -212,19 +197,6 @@ export function InformationEntryFields({
                       {marker.label}
                     </button>
                   ))}
-
-                  {/* 손으로 넣는 삽입 버튼과 같은 일을 하므로 같은 줄에 둔다.
-                      판매자가 배울 것은 "손으로 넣거나, AI에게 시키거나" 뿐이다. */}
-                  <button
-                    type="button"
-                    className={styles.entryEmphasisButton}
-                    onClick={() => emphasisAi.applyEmphasis(entry)}
-                    disabled={
-                      entry.description.trim() === '' || emphasisState.isPending
-                    }
-                  >
-                    AI 강조
-                  </button>
 
                   <button
                     type="button"
@@ -262,7 +234,7 @@ export function InformationEntryFields({
                   >
                     <Suspense
                       fallback={
-                        <p className={styles.entryEmphasisResult}>
+                        <p className={styles.entryEmojiLoading}>
                           이모지 불러오는 중…
                         </p>
                       }
@@ -280,26 +252,6 @@ export function InformationEntryFields({
                   </div>
                 ) : null}
 
-                {emphasisState.isPending ? (
-                  <p className={styles.entryEmphasisResult}>강조 넣는 중…</p>
-                ) : emphasisState.errorMessage ? (
-                  <p className={styles.entryEmphasisError}>
-                    {emphasisState.errorMessage}
-                  </p>
-                ) : emphasisState.noticeMessage ? (
-                  <p className={styles.entryEmphasisResult}>
-                    {emphasisState.noticeMessage}
-                    {emphasisState.canUndo ? (
-                      <button
-                        type="button"
-                        className={styles.entryUndoButton}
-                        onClick={() => emphasisAi.undo(entry.id)}
-                      >
-                        되돌리기
-                      </button>
-                    ) : null}
-                  </p>
-                ) : null}
               </div>
             </div>
 
