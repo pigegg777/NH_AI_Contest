@@ -261,6 +261,7 @@
 }
 
 .entryDescriptionCell {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -269,7 +270,20 @@
 
 .entryEmphasisRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+}
+
+.entryEmojiPicker {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  z-index: 5;
+  width: min(350px, 100%);
+  max-width: calc(100vw - 48px);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2);
 }
 
 .entryEmphasisButton {
