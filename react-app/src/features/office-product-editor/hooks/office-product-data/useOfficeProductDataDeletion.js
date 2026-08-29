@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { deleteOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
+import { deleteOfficeProductCategory } from '../../model/office-product-data/officeProductDataWriteModel';
 
 export function useOfficeProductDataDeletion({
   user,
@@ -15,7 +15,19 @@ export function useOfficeProductDataDeletion({
       setIsDeletingData(true);
 
       try {
-        await deleteOfficeProductData({ officeCode: user?.office_code, categoryName });
+        const { designError } = await deleteOfficeProductCategory({
+          officeCode: user?.office_code,
+          categoryName,
+        });
+
+        if (designError) {
+          window.alert(
+            designError instanceof Error
+              ? `데이터는 삭제했지만 저장된 디자인을 지우지 못했습니다. ${designError.message}`
+              : '데이터는 삭제했지만 저장된 디자인을 지우지 못했습니다.',
+          );
+        }
+
         onRemoved(categoryName);
         return true;
       } catch (error) {

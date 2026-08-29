@@ -1,4 +1,7 @@
-import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
+import {
+  buildActiveCategoryFingerprint,
+  resolveActiveCategoryName,
+} from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
 import { useRegisteredProductData } from '../office-product-data/useRegisteredProductData';
 
 const EMPTY_ROWS = [];
@@ -17,7 +20,9 @@ export function useActiveCategoryData({
     officeProductCatalogItems.find((item) => item.categoryName === activeCategoryName) ?? null;
 
   const isViewingRegisteredData = Boolean(registeredCatalogItem);
-  const shouldFetchRegisteredData = isViewingRegisteredData && !result;
+  // Also fetched while a new workbook is under review: the saved rows are what
+  // the carry-over reads img_url and note out of.
+  const shouldFetchRegisteredData = isViewingRegisteredData;
 
   const {
     data: registeredProductData,
@@ -30,11 +35,13 @@ export function useActiveCategoryData({
     refreshToken: registeredCatalogItem?.updatedAt ?? null,
   });
 
-  const extractedRows = result?.rows ?? registeredProductData?.rows ?? EMPTY_ROWS;
-  const registeredFingerprint = registeredCatalogItem
-    ? `registered:${activeCategoryName}:${registeredCatalogItem.updatedAt ?? ''}`
-    : null;
-  const effectiveFingerprint = workbookFingerprint ?? registeredFingerprint;
+  const registeredRows = registeredProductData?.rows ?? EMPTY_ROWS;
+  const extractedRows = result?.rows ?? registeredRows;
+  const effectiveFingerprint = buildActiveCategoryFingerprint(
+    activeCategoryName,
+    workbookFingerprint,
+    registeredCatalogItem?.updatedAt ?? null,
+  );
 
   const bannerStatusLabel = result
     ? '신규 데이터 검토 중'
@@ -50,6 +57,7 @@ export function useActiveCategoryData({
     isRegisteredProductDataLoading,
     registeredProductDataErrorMessage,
     extractedRows,
+    registeredRows,
     effectiveFingerprint,
     bannerStatusLabel,
     bannerStatusVariant,

@@ -20,6 +20,30 @@ The user message is JSON with:
   column layout is not fixed).
 
 Rules:
+- First choose exactly one action:
+  - append_rows when the instruction asks to add/register products from
+    reference_sheet, including when the current rows array is empty.
+  - edit_rows when the instruction asks to change existing products.
+  - none when neither operation is safely possible.
+- For append_rows, map only reference-sheet rows whose product_code is
+  explicitly present and confidently readable into new_rows. Preserve the
+  product_code exactly as a string, including leading zeroes. Never derive a
+  product_code from the product name or another field. Omit the entire row
+  when product_code is missing, ambiguous, or unreadable.
+- For append_rows, honor an explicit instruction that names which source
+  column should be treated as the price, even when that header is unfamiliar.
+  Otherwise, use the semantic meaning of price-like headers (such as 가격,
+  단가, 판매가, 공급가, or 공급액) only when the mapping is confident. Choose
+  zero_tax_price, tax_price, or exempt_tax_price from the row's tax
+  classification (영세/과세/면세). If either the source price column or tax
+  classification is ambiguous, leave all three price fields null.
+- Keep matches empty for append_rows. For every optional field, copy a value
+  only when the source cell and column meaning are clear. If a value is
+  missing, ambiguous, merged with unrelated text, or merely inferred, return
+  null instead of guessing. Do not output placeholders such as "미상",
+  "확인불가", "unknown", "N/A", or "-"; use null. Never invent values.
+- For edit_rows, keep new_rows empty and return changes in matches.
+- For none, keep both matches and new_rows empty.
 - Find every row that satisfies the condition in instruction, matching
   against product_name, spec, and the category fields as literally as
   possible. Prefer conservative, exact matches over guesses.

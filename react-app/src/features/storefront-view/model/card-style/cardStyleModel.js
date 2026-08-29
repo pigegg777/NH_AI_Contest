@@ -1,0 +1,457 @@
+import {
+  deriveLegacyCardLayoutPlan,
+  DEFAULT_CARD_LAYOUT_PLAN,
+  normalizeCardLayoutPlan,
+} from './cardLayoutPlanModel';
+import {
+  normalizeCardsPerRow,
+  normalizeTitleMode,
+  resolveStructuralPreset,
+} from './cardCompositionModel';
+import { toTrimmedString } from '../../../../common/utils/text';
+import { normalizeHexColor } from '../shared/styleColor';
+
+export const CARD_STYLE_SCHEMA_VERSION = 1;
+
+export const CARD_FIELD_COLOR_ROLE_OPTIONS = ['inherit', 'muted', 'blue', 'red', 'green', 'amber', 'ink'];
+export const CARD_FIELD_FONT_WEIGHT_OPTIONS = [400, 500, 600, 700, 800, 900];
+export const CARD_FIELD_FONT_SIZE_OPTIONS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+
+// The six steps above replaced a coarser three/four step scale. These maps exist so a
+// saved design keeps rendering at exactly the rem/weight it used to — every legacy
+// token has an exact equivalent in the new scale, so migration is lossless.
+const LEGACY_FIELD_FONT_SIZE_TOKENS = { small: 'xs', medium: 'md', large: 'xxl' };
+const LEGACY_FIELD_FONT_WEIGHT_TOKENS = { normal: 400, medium: 500, semibold: 700, bold: 800 };
+
+export function normalizeFieldFontSizeToken(value, fallback = 'md') {
+  if (CARD_FIELD_FONT_SIZE_OPTIONS.includes(value)) {
+    return value;
+  }
+
+  return LEGACY_FIELD_FONT_SIZE_TOKENS[value] ?? fallback;
+}
+
+export function normalizeFieldFontWeightToken(value, fallback = 400) {
+  if (CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(value)) {
+    return value;
+  }
+
+  return LEGACY_FIELD_FONT_WEIGHT_TOKENS[value] ?? fallback;
+}
+export const CARD_FIELD_EMPHASIS_OPTIONS = ['none', 'subtle', 'strong'];
+export const CARD_SHADOW_OPTIONS = ['none', 'soft', 'strong'];
+export const CARD_RADIUS_OPTIONS = ['md', 'lg', 'xl'];
+export const CARD_SPACING_OPTIONS = ['tight', 'normal', 'relaxed'];
+
+// Header title size is an offset onto the card body font size rather than an absolute
+// value, so "make the card text bigger" still grows the title, while these six steps
+// adjust the title on top of that. The md step is 0rem, i.e. the pre-token look.
+export const CARD_HEADER_TITLE_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
+export const CARD_HEADER_TITLE_SIZE_OFFSET_REM = {
+  xs: '-0.12rem',
+  sm: '-0.07rem',
+  md: '0rem',
+  lg: '0.08rem',
+  xl: '0.18rem',
+  xxl: '0.30rem',
+};
+export const CARD_IMAGE_FIT_OPTIONS = ['cover', 'contain'];
+export const CARD_CONDITION_OPERATOR_OPTIONS = ['equals', 'contains'];
+export const CARD_CONDITION_FIELD_OPTIONS = [
+  'product_name',
+  'img_url',
+  'spec',
+  'large_category',
+  'medium_category',
+  'small_category',
+  'detail_category',
+  'nutrient',
+  'product_url',
+  'note',
+  'sale_price_type_name',
+  'nutirent',
+  'indict_symbl',
+  'product_category',
+  'manufacturer_list',
+];
+// Low-cardinality classification fields worth showing the AI real sample values for,
+// so it can ground conditionField/conditionValue in what the data actually contains
+// instead of guessing from the field name alone. Free-text fields (product_name, spec,
+// nutrient, note) are excluded — they have too many distinct values to sample usefully.
+export const CARD_CONDITION_GROUNDING_FIELDS = [
+  'large_category',
+  'medium_category',
+  'small_category',
+  'detail_category',
+  'product_category',
+  'sale_price_type_name',
+  'indict_symbl',
+  'manufacturer_list',
+];
+const CARD_CONDITION_GROUNDING_MAX_VALUES_PER_FIELD = 15;
+
+export function collectConditionFieldValueSamples(rows) {
+  const rowList = Array.isArray(rows) ? rows : [];
+  const samples = {};
+
+  CARD_CONDITION_GROUNDING_FIELDS.forEach((field) => {
+    const values = new Set();
+
+    for (const row of rowList) {
+      if (values.size >= CARD_CONDITION_GROUNDING_MAX_VALUES_PER_FIELD) {
+        break;
+      }
+
+      const value = toTrimmedString(row?.[field]);
+
+      if (value) {
+        values.add(value);
+      }
+    }
+
+    if (values.size > 0) {
+      samples[field] = [...values];
+    }
+  });
+
+  return samples;
+}
+
+export const DEFAULT_CARD_STYLE = {
+  schemaVersion: CARD_STYLE_SCHEMA_VERSION,
+  cardsPerRow: 2,
+  structuralPreset: 'header-top',
+  titleMode: 'header',
+  layoutPlan: DEFAULT_CARD_LAYOUT_PLAN,
+  shell: {
+    borderColor: '#e5e7eb',
+    shadow: 'soft',
+    radius: 'lg',
+    spacing: 'relaxed',
+  },
+  header: {
+    backgroundColor: '#f8fafc',
+    titleColorHex: '#111827',
+    fontWeight: 700,
+    titleSizeToken: 'md',
+  },
+  image: {
+    fit: 'contain',
+    sizePx: 120,
+  },
+  info: {
+    backgroundColor: '',
+    labelColorRole: 'muted',
+    labelFontSizeToken: 'md',
+    labelFontWeight: 600,
+    // Grouping and ordering live on the saved style, not only on the rendered
+    // bodySlots, so a later unrelated request cannot silently flatten them.
+    requestedGroups: [],
+    requestedFieldOrder: [],
+  },
+  field: {
+    defaultColorRole: 'inherit',
+    defaultFontWeight: 400,
+    defaultFontSize: 'md',
+    priceColorRole: 'green',
+  },
+  conditionalStyles: [],
+};
+
+const CARD_FIELD_COLOR_ROLE_VALUES = {
+  inherit: 'inherit',
+  muted: '#6b7280',
+  blue: '#2563eb',
+  red: '#dc2626',
+  green: '#15803d',
+  amber: '#d97706',
+  ink: '#111827',
+};
+
+export function resolveFieldColorRoleValue(colorRole) {
+  return CARD_FIELD_COLOR_ROLE_VALUES[colorRole] || CARD_FIELD_COLOR_ROLE_VALUES.inherit;
+}
+
+function normalizeOptionalHex(value) {
+  return typeof value === 'string' && value ? normalizeHexColor(value, '') : '';
+}
+
+function normalizeShell(shell) {
+  const source = shell ?? {};
+
+  return {
+    borderColor: normalizeHexColor(source.borderColor, DEFAULT_CARD_STYLE.shell.borderColor),
+    shadow: CARD_SHADOW_OPTIONS.includes(source.shadow) ? source.shadow : DEFAULT_CARD_STYLE.shell.shadow,
+    radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : DEFAULT_CARD_STYLE.shell.radius,
+    spacing: CARD_SPACING_OPTIONS.includes(source.spacing) ? source.spacing : DEFAULT_CARD_STYLE.shell.spacing,
+  };
+}
+
+function normalizeHeader(header) {
+  const source = header ?? {};
+
+  return {
+    backgroundColor: normalizeHexColor(source.backgroundColor, DEFAULT_CARD_STYLE.header.backgroundColor),
+    titleColorHex: normalizeHexColor(source.titleColorHex, DEFAULT_CARD_STYLE.header.titleColorHex),
+    fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : DEFAULT_CARD_STYLE.header.fontWeight,
+    titleSizeToken: CARD_HEADER_TITLE_SIZE_TOKENS.includes(source.titleSizeToken)
+      ? source.titleSizeToken
+      : DEFAULT_CARD_STYLE.header.titleSizeToken,
+  };
+}
+
+function normalizeImage(image) {
+  const source = image ?? {};
+  const sizePx = Number(source.sizePx);
+
+  return {
+    fit: CARD_IMAGE_FIT_OPTIONS.includes(source.fit) ? source.fit : DEFAULT_CARD_STYLE.image.fit,
+    sizePx: Number.isFinite(sizePx) && sizePx > 0 ? sizePx : DEFAULT_CARD_STYLE.image.sizePx,
+  };
+}
+
+export const CARD_INFO_GROUP_DISPLAY_OPTIONS = ['inline-group', 'stack-group'];
+
+export function normalizeRequestedFieldOrder(requestedFieldOrder) {
+  if (!Array.isArray(requestedFieldOrder)) {
+    return [];
+  }
+
+  const seen = new Set();
+
+  return requestedFieldOrder
+    .map((field) => toTrimmedString(field))
+    .filter((field) => {
+      if (!field || seen.has(field)) {
+        return false;
+      }
+
+      seen.add(field);
+
+      return true;
+    });
+}
+
+export function normalizeRequestedGroups(requestedGroups) {
+  if (!Array.isArray(requestedGroups)) {
+    return [];
+  }
+
+  const seenGroupIds = new Set();
+  // A field may only belong to one group; applyFieldGrouping resolves ties by
+  // first match, so drop the duplicate here to keep the saved state honest.
+  const claimedFields = new Set();
+
+  return requestedGroups
+    .map((group) => {
+      const id = toTrimmedString(group?.id);
+      const fields = normalizeRequestedFieldOrder(group?.fields).filter(
+        (field) => !claimedFields.has(field),
+      );
+
+      if (!id || seenGroupIds.has(id) || fields.length === 0) {
+        return null;
+      }
+
+      seenGroupIds.add(id);
+      fields.forEach((field) => claimedFields.add(field));
+
+      return {
+        id,
+        label: toTrimmedString(group?.label),
+        display: CARD_INFO_GROUP_DISPLAY_OPTIONS.includes(group?.display)
+          ? group.display
+          : 'inline-group',
+        fields,
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeInfo(info) {
+  const source = info ?? {};
+
+  return {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    labelColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.labelColorRole)
+      ? source.labelColorRole
+      : DEFAULT_CARD_STYLE.info.labelColorRole,
+    labelFontSizeToken: CARD_FIELD_FONT_SIZE_OPTIONS.includes(source.labelFontSizeToken)
+      ? source.labelFontSizeToken
+      : DEFAULT_CARD_STYLE.info.labelFontSizeToken,
+    labelFontWeight: CARD_FIELD_FONT_WEIGHT_OPTIONS.includes(source.labelFontWeight)
+      ? source.labelFontWeight
+      : DEFAULT_CARD_STYLE.info.labelFontWeight,
+    requestedGroups: normalizeRequestedGroups(source.requestedGroups),
+    requestedFieldOrder: normalizeRequestedFieldOrder(source.requestedFieldOrder),
+  };
+}
+
+function normalizeFieldDefaults(field) {
+  const source = field ?? {};
+
+  return {
+    defaultColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.defaultColorRole) ? source.defaultColorRole : DEFAULT_CARD_STYLE.field.defaultColorRole,
+    defaultFontWeight: normalizeFieldFontWeightToken(source.defaultFontWeight, DEFAULT_CARD_STYLE.field.defaultFontWeight),
+    defaultFontSize: normalizeFieldFontSizeToken(source.defaultFontSize, DEFAULT_CARD_STYLE.field.defaultFontSize),
+    priceColorRole: source.priceColorRole === 'brand'
+      ? 'red'
+      : CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole)
+        ? source.priceColorRole
+        : DEFAULT_CARD_STYLE.field.priceColorRole,
+  };
+}
+
+function normalizeConditionalShellOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const override = {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    borderColor: normalizeOptionalHex(source.borderColor),
+    shadow: CARD_SHADOW_OPTIONS.includes(source.shadow) ? source.shadow : '',
+    radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : '',
+  };
+
+  return Object.values(override).some(Boolean) ? override : null;
+}
+
+function normalizeConditionalHeaderOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const override = {
+    backgroundColor: normalizeOptionalHex(source.backgroundColor),
+    titleColorHex: normalizeOptionalHex(source.titleColorHex),
+    fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : null,
+  };
+
+  return override.backgroundColor || override.titleColorHex || override.fontWeight != null
+    ? override
+    : null;
+}
+
+function normalizeConditionalImageOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const fit = CARD_IMAGE_FIT_OPTIONS.includes(source.fit) ? source.fit : '';
+
+  return fit ? { fit } : null;
+}
+
+function normalizeConditionalInfoOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const backgroundColor = normalizeOptionalHex(source.backgroundColor);
+
+  return backgroundColor ? { backgroundColor } : null;
+}
+
+function normalizeConditionalFieldOverride(source) {
+  if (!source) {
+    return null;
+  }
+
+  const priceColorRole = CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole) ? source.priceColorRole : '';
+
+  return priceColorRole ? { priceColorRole } : null;
+}
+
+function normalizeConditionalStyleRule(rule) {
+  const conditionField = CARD_CONDITION_FIELD_OPTIONS.includes(rule?.conditionField) ? rule.conditionField : '';
+  const conditionValue = toTrimmedString(rule?.conditionValue);
+
+  if (!conditionField || !conditionValue) {
+    return null;
+  }
+
+  const conditionOperator = CARD_CONDITION_OPERATOR_OPTIONS.includes(rule?.conditionOperator)
+    ? rule.conditionOperator
+    : 'contains';
+  const shell = normalizeConditionalShellOverride(rule?.shell);
+  const header = normalizeConditionalHeaderOverride(rule?.header);
+  const image = normalizeConditionalImageOverride(rule?.image);
+  const info = normalizeConditionalInfoOverride(rule?.info);
+  const field = normalizeConditionalFieldOverride(rule?.field);
+
+  if (!shell && !header && !image && !info && !field) {
+    return null;
+  }
+
+  return { conditionField, conditionOperator, conditionValue, shell, header, image, info, field };
+}
+
+export function normalizeConditionalStyleRules(rules) {
+  return (Array.isArray(rules) ? rules : [])
+    .map(normalizeConditionalStyleRule)
+    .filter(Boolean);
+}
+
+function buildDefaultLayoutPlanForCardsPerRow(cardsPerRow) {
+  return {
+    ...DEFAULT_CARD_LAYOUT_PLAN,
+    cardsPerRow,
+  };
+}
+
+function isDefaultLayoutPlanShape(layoutPlan, cardsPerRow) {
+  if (!layoutPlan) {
+    return false;
+  }
+
+  const normalizedLayoutPlan = normalizeCardLayoutPlan(
+    { ...layoutPlan, cardsPerRow },
+    buildDefaultLayoutPlanForCardsPerRow(cardsPerRow),
+  );
+  const defaultLayoutPlan = normalizeCardLayoutPlan(
+    buildDefaultLayoutPlanForCardsPerRow(cardsPerRow),
+  );
+
+  return (
+    normalizedLayoutPlan.sectionOrder.join('|') === defaultLayoutPlan.sectionOrder.join('|') &&
+    normalizedLayoutPlan.imagePlacement === defaultLayoutPlan.imagePlacement &&
+    normalizedLayoutPlan.titleClamp === defaultLayoutPlan.titleClamp &&
+    normalizedLayoutPlan.contentDensity === defaultLayoutPlan.contentDensity &&
+    normalizedLayoutPlan.emphasis === defaultLayoutPlan.emphasis &&
+    normalizedLayoutPlan.groupingHint === defaultLayoutPlan.groupingHint
+  );
+}
+
+export function normalizeCardStyle(style) {
+  const source = style ?? {};
+  const cardsPerRow = normalizeCardsPerRow(source.cardsPerRow, DEFAULT_CARD_STYLE.cardsPerRow);
+  const structuralPreset = resolveStructuralPreset(source.structuralPreset, cardsPerRow);
+  const titleMode = normalizeTitleMode(source.titleMode, DEFAULT_CARD_STYLE.titleMode);
+  const shell = normalizeShell(source.shell);
+  const legacyLayoutPlan = deriveLegacyCardLayoutPlan({
+    cardsPerRow,
+    structuralPreset,
+    titleMode,
+  });
+  const layoutPlan = normalizeCardLayoutPlan(
+    isDefaultLayoutPlanShape(source.layoutPlan, cardsPerRow)
+      ? legacyLayoutPlan
+      : { ...(source.layoutPlan ?? {}), cardsPerRow },
+    legacyLayoutPlan,
+  );
+
+  return {
+    schemaVersion: CARD_STYLE_SCHEMA_VERSION,
+    cardsPerRow,
+    structuralPreset,
+    titleMode,
+    layoutPlan,
+    shell,
+    header: normalizeHeader(source.header),
+    image: normalizeImage(source.image),
+    info: normalizeInfo(source.info),
+    field: normalizeFieldDefaults(source.field),
+    conditionalStyles: normalizeConditionalStyleRules(source.conditionalStyles),
+  };
+}

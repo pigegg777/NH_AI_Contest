@@ -1,4 +1,9 @@
 export const AI_FEATURE_NOTICES = {
+  excelUpload: {
+    label: '엑셀 등록',
+    description:
+      '지정된 엑셀 양식의 상품 데이터를 불러와 현재 분류에 등록합니다. 등록 전에 오른쪽 경고 영역에서 누락되거나 확인이 필요한 항목을 검토해 주세요.',
+  },
   similarity: {
     label: 'AI 기능',
     description:

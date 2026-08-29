@@ -1,0 +1,383 @@
+.section {
+  margin-bottom: 24px;
+  content-visibility: auto;
+  contain-intrinsic-size: 420px;
+}
+
+.sectionHeaderContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--card-columns, 2), minmax(0, 1fr));
+  gap: var(--card-grid-gap, 14px);
+  padding: var(--card-grid-padding, 0);
+  border: var(--card-grid-border, 0);
+  border-radius: var(--card-grid-radius, 0);
+  background: var(--card-grid-bg, transparent);
+}
+
+/* wrap 은 담기 버튼(flex-basis 100%)이 이미지·본문 아래 줄로 내려가게 한다.
+   이미지와 본문은 한 줄에 들어가므로 기존 배치는 그대로다. */
+.cardSideBySide {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.cardImageLeft,
+.cardImageRight {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.cardHeaderSplit {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardSplitRow {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.cardImageLeft .cardImageWrap {
+  flex: 0 0 var(--card-image-width, 140px);
+  padding: 12px 0 12px 12px;
+}
+
+.cardImageRight .cardImageWrap {
+  flex: 0 0 var(--card-image-width, 140px);
+  padding: 12px 12px 12px 0;
+}
+
+.cardImageLeft .cardImage {
+  height: 100%;
+  width: 100%;
+}
+
+.cardImageRight .cardImage {
+  height: 100%;
+  width: 100%;
+}
+
+.cardMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.section[data-structural-preset='compact-list'] .cardImageWrap {
+  display: none;
+}
+
+.section[data-structural-preset='compact-list'] .grid {
+  grid-template-columns: 1fr;
+}
+
+.section[data-structural-preset='compact-list'] .card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+}
+
+.section[data-structural-preset='compact-list'] .cardHeader {
+  flex: 0 0 auto;
+  padding: 0;
+  background: none;
+  border-bottom: none;
+}
+
+.section[data-structural-preset='compact-list'] .cardBody {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.card {
+  container-type: inline-size;
+  overflow: hidden;
+  border: 1px solid var(--card-border-color, var(--corp-line));
+  border-radius: 18px;
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  background: var(
+    --card-header-bg,
+    color-mix(in srgb, var(--card-accent, var(--corp-primary)) 8%, #ffffff)
+  );
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.cardName {
+  flex: 1;
+  min-width: 0;
+  font-size: calc(
+    var(--card-font-size, 0.85rem) - 0.07rem + var(--card-header-title-offset, 0rem)
+  );
+  font-weight: var(--card-header-title-weight, 700);
+  color: var(--card-header-title-color, var(--corp-text));
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.cardImageWrap {
+  position: relative;
+  padding: 14px 14px 0;
+}
+
+.cardImage {
+  width: 100%;
+  height: var(--card-image-height, 120px);
+  object-position: center 42%;
+  border-radius: 10px;
+  border: 1px solid #eef0f2;
+  background: var(--corp-panel);
+  display: block;
+}
+
+.cardImageLeft .cardImage {
+  height: 100%;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  background: var(--card-info-bg, transparent);
+}
+
+.section[data-content-density='compact'] .cardBody {
+  gap: 6px;
+  padding: 8px 12px 12px;
+}
+
+.section[data-card-radius='md'] .card {
+  border-radius: 14px;
+}
+
+.section[data-card-radius='lg'] .card {
+  border-radius: 18px;
+}
+
+.section[data-card-radius='xl'] .card {
+  border-radius: 24px;
+}
+
+.section[data-card-shadow='none'] .card {
+  box-shadow: none;
+}
+
+.section[data-card-shadow='soft'] .card {
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
+}
+
+.section[data-card-shadow='strong'] .card {
+  box-shadow: 0 18px 36px rgba(17, 24, 39, 0.14);
+}
+
+.section[data-card-spacing='tight'] .grid {
+  gap: var(--card-grid-gap, 10px);
+}
+
+.section[data-card-spacing='normal'] .grid {
+  gap: var(--card-grid-gap, 14px);
+}
+
+.section[data-card-spacing='relaxed'] .grid {
+  gap: var(--card-grid-gap, 18px);
+}
+
+.field,
+.priceField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inlineGroup,
+.stackGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.inlineGroupItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.inlineGroupItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stackGroupItems {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.priceField .fieldValue {
+  color: var(--field-text-color, var(--price-text-color, #d32f2f));
+  font-size: var(
+    --field-font-size,
+    calc(var(--card-font-size, 0.85rem) + 0.02rem)
+  );
+  font-weight: var(--field-font-weight, 700);
+}
+
+.fieldLabel {
+  font-size: var(--card-field-label-size, 0.68rem);
+  font-weight: var(--card-field-label-weight, 600);
+  color: var(--card-field-label-color, #6b7280);
+}
+
+.fieldValue {
+  font-size: var(--field-font-size, var(--card-font-size, 0.85rem));
+  color: var(--field-text-color, var(--field-default-color, var(--corp-text)));
+  font-weight: var(--field-font-weight, var(--card-field-value-weight, 400));
+  letter-spacing: var(--field-letter-spacing, normal);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+/* Falls back one step above .fieldLabel so the group hierarchy survives at the default
+   step; once a label token is chosen both labels resolve to the same value. */
+.groupFieldLabel {
+  font-size: var(--card-field-label-size, 0.72rem);
+  font-weight: var(--card-field-label-weight, 700);
+  color: var(--card-field-label-color, #6b7280);
+}
+
+.groupFieldValue,
+.groupPriceValue {
+  font-size: var(--card-font-size, 0.85rem);
+}
+
+.groupPriceValue {
+  color: var(--field-text-color, var(--price-text-color, #d32f2f));
+  font-weight: var(--field-font-weight, 700);
+}
+
+.fieldValueLink {
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--corp-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@container (max-width: 300px) {
+  .cardImageLeft,
+  .cardImageRight,
+  .cardSideBySide,
+  .cardSplitRow {
+    display: block;
+  }
+
+  .cardHeader {
+    padding: 10px 12px 8px;
+  }
+
+  .cardImageLeft .cardImageWrap,
+  .cardImageRight .cardImageWrap {
+    flex: none;
+    padding: 12px 12px 0;
+  }
+
+  .cardImageLeft .cardImage,
+  .cardImageRight .cardImage {
+    height: var(--card-image-height, 120px);
+    width: 100%;
+  }
+
+  .cardBody {
+    padding: 8px 12px 12px;
+  }
+}
+
+/* 담기 버튼 — 카드 맨 아래에 폭을 꽉 채운다. sectionOrder 나 titleMode 를
+   어떻게 바꾸든 <article> 직속이라 항상 있다.
+   측면 이미지 배치에서는 article 이 가로 flex 라 flex-basis 로 줄을 바꾼다. */
+.cardCartButton {
+  display: flex;
+  /* flex-basis 를 여기서 주면 안 된다 — 세로 flex 카드(header-split)에서는
+     주축이 높이라 100% 가 카드 높이를 통째로 먹는다. 줄바꿈이 필요한 가로
+     flex 카드에서만 아래에서 따로 지정한다. */
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 0;
+  background: transparent;
+  color: var(--card-header-title-color, var(--corp-text));
+  cursor: pointer;
+}
+
+/* 가로 flex 카드에서만: 이미지·본문 옆에 붙지 않고 아래 줄로 내려간다. */
+.cardSideBySide > .cardCartButton,
+.cardImageLeft > .cardCartButton,
+.cardImageRight > .cardCartButton {
+  flex: 0 0 100%;
+}
+
+.cardCartLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: keep-all;
+}
+
+.cardCartButton:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.cardCartButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cardCartIcon {
+  display: block;
+}
+
+/* 빌더 미리보기: 모양은 그대로, 클릭만 막는다. */
+.cardCartButtonInert {
+  pointer-events: none;
+}

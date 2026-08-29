@@ -1,0 +1,119 @@
+import AppliedDesignPanel from '../design-summary/AppliedDesignPanel';
+import FieldSelectionDock from './field-selection/FieldSelectionDock';
+import ChatComposerDock from './composer/ChatComposerDock';
+import ModeChoiceBubble from './mode-choice/ModeChoiceBubble';
+import StorefrontChatThread from './thread/StorefrontChatThread';
+import styles from './StorefrontChatWorkspace.module.css';
+
+function AiEditIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M8 2.4 9.45 6.55 13.6 8 9.45 9.45 8 13.6 6.55 9.45 2.4 8 6.55 6.55z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.6 11.6 15.4 13.8 17.6 14.6 15.4 15.4 14.6 17.6 13.8 15.4 11.6 14.6 13.8 13.8z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function StorefrontChatWorkspace({ session, builder }) {
+  const dataMode = builder?.dataMode;
+  const designMode = builder?.designMode;
+  const composerMode = builder?.composerMode;
+  const isDataMode = session.mode === 'data' && dataMode;
+  const isDesignMode = session.mode === 'design' && designMode;
+  const modeChoiceMessage = session.messages.find(
+    (message) => message.kind === 'mode-choice',
+  );
+  const isIdle = session.mode === 'idle';
+  const hasChosenMode = session.messages.some(
+    (message) => message.kind === 'mode-transition',
+  );
+  const showModeChoiceInThread = isIdle && !hasChosenMode;
+  const modeChoiceBubble = modeChoiceMessage ? (
+    <ModeChoiceBubble
+      activeModeId={session.mode}
+      message={modeChoiceMessage}
+      onChooseMode={session.chooseMode}
+      size={showModeChoiceInThread ? 'expanded' : 'compact'}
+    />
+  ) : null;
+  const pageDescription = (
+    <p className={styles.pageDescription}>
+      채팅으로 요청하면 미리보기에 바로 반영됩니다
+    </p>
+  );
+
+  async function handleApplyDataMode() {
+    if (!dataMode) {
+      return;
+    }
+
+    await dataMode.applyChanges?.();
+  }
+
+  return (
+    <section
+      className={styles.workspace}
+      data-testid="storefront-chat-workspace"
+    >
+      <div className={styles.workspaceHeader}>
+        <div className={styles.titleRowSplit}>
+          <div className={styles.titleCopy}>
+            <h2 className={styles.title}>
+              <span className={styles.titleIcon}>
+                <AiEditIcon />
+              </span>
+              AI 페이지 디자인
+            </h2>
+            {pageDescription}
+          </div>
+          {hasChosenMode ? modeChoiceBubble : null}
+        </div>
+      </div>
+
+      <StorefrontChatThread
+        appliedDesign={
+          /* 대화 패널 안 맨 위에 붙어 있는다. 메시지는 그 아래로 지나가고,
+             사장님은 방금 요청한 것이 무엇으로 바뀌었는지 미리보기까지
+             내려가지 않고 확인할 수 있다. */
+          <AppliedDesignPanel summary={builder?.appliedDesignSummary} />
+        }
+        canUndo={Boolean(session.lastApplySnapshot)}
+        intro={
+          showModeChoiceInThread && modeChoiceBubble ? (
+            <div className={styles.threadIntro}>
+              <p className={styles.threadIntroPrompt}>
+                {modeChoiceMessage.text}
+              </p>
+              {modeChoiceBubble}
+            </div>
+          ) : null
+        }
+        onUndo={builder.undoLastApply}
+        session={session}
+      />
+
+      {isDataMode ? (
+        <FieldSelectionDock dataMode={dataMode} onApply={handleApplyDataMode} />
+      ) : composerMode ? (
+        <div className={styles.composerShell}>
+          <ChatComposerDock
+            composer={composerMode}
+            categoryTabsMode={isDesignMode ? designMode : null}
+          />
+        </div>
+      ) : (
+        <div className={styles.scaffoldPanel} />
+      )}
+    </section>
+  );
+}

@@ -1,0 +1,353 @@
+.dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 12px 20px;
+  border-radius: var(--corp-radius-xl);
+  background: var(--corp-panel, #ffffff);
+  border: 1px solid var(--corp-line);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(16px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.headerText {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.categoryTabsWrap {
+  margin: -18px -10px 0;
+}
+
+.targetBubbleWrap {
+  margin: -8px -14px 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  white-space: nowrap;
+}
+
+.description {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--corp-muted);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.discardButton {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-pill);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--corp-text);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.targetBubble {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px 14px;
+}
+
+.targetBubbleLabel {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--corp-primary-hover);
+}
+
+.targetChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.targetChipButton,
+.targetChipButtonActive {
+  padding: 8px 13px;
+  border-radius: var(--corp-radius-pill);
+  border: 1px solid rgba(29, 74, 46, 0.16);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--corp-text);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.targetChipButtonActive {
+  background: var(--corp-primary-hover-bg);
+  border-color: rgba(29, 74, 46, 0.3);
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.cardControlsRow {
+  /* Both controls stay on one line; a narrow column scrolls rather than wraps. */
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+.cardControlsRow > * {
+  flex: 0 0 auto;
+}
+
+.cardsPerRowControl {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  /* border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg); */
+  /* background: var(--corp-primary-soft); */
+}
+
+.cardsPerRowLabel {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--corp-primary-hover);
+  white-space: nowrap;
+}
+
+.cardsPerRowChoices {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.cardsPerRowButton,
+.cardsPerRowButtonActive {
+  padding: 7px 13px;
+  border: 1px solid rgba(29, 74, 46, 0.16);
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cardsPerRowButtonActive {
+  border-color: var(--corp-primary-bright);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+}
+
+.scopeGuidePanel {
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-panel);
+  overflow: hidden;
+}
+
+.scopeGuideTitle {
+  margin: 0;
+  padding: 8px 12px;
+  /* background: var(--corp-primary-soft); */
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--corp-primary-hover);
+  word-break: keep-all;
+}
+
+.scopeGuideTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.76rem;
+}
+
+.scopeGuideTable th,
+.scopeGuideTable td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.scopeGuideSplit {
+  border-left: 1px solid var(--corp-line);
+}
+
+.scopeGuideTable thead th {
+  font-weight: 700;
+  color: var(--corp-table-header-text);
+  background: var(--corp-table-header-bg);
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.scopeGuideTable thead th:nth-child(1),
+.scopeGuideTable thead th:nth-child(3) {
+  width: 20%;
+}
+
+.scopeGuideTable tbody th {
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.scopeGuideTable tbody td {
+  color: var(--corp-muted);
+}
+
+.scopeGuideTable tbody tr:not(:last-child) th,
+.scopeGuideTable tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--corp-line);
+}
+
+/* 표 아래 회색 잔글씨였다. 여기 적힌 것은 "포인트 색을 정하면 일괄로 적용된다"
+   처럼 사장님이 놓치면 헛되이 여러 번 요청하게 되는 내용이라, 표에 딸린 각주가
+   아니라 눈에 걸리는 안내로 세운다.
+
+   왼쪽 굵은 선 + 옅은 배경으로 표와 분리하고, 앞의 느낌표 배지가 시선을 잡는다.
+   글자는 0.68 -> 0.78rem 으로 키우고 색도 흐린 회색에서 본문 색으로 올린다. */
+.scopeGuideNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-top: 1px solid var(--corp-line);
+  border-left: 3px solid var(--corp-primary-bright);
+  background: var(--corp-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--corp-primary-hover);
+  word-break: keep-all;
+}
+
+/* 장식이라 낭독기에는 읽히지 않게 둔다 — 문구 자체가 이미 안내다. */
+.scopeGuideNote::before {
+  content: '!';
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inputLabel {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--corp-muted);
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--corp-text);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.errorMessage {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--corp-danger);
+}
+
+.footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.applyButton,
+.sendButton {
+  padding: 8px 16px;
+  border-radius: var(--corp-radius-pill);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.applyButton {
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}
+
+.applyButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover);
+  border-color: var(--corp-primary-hover);
+}
+
+.sendButton {
+  border: 1px solid var(--corp-primary, #1d4a2e);
+  background: var(--corp-primary, #1d4a2e);
+  color: var(--corp-on-primary, #ffffff);
+}
+
+.sendButton:hover:not(:disabled) {
+  background: var(--corp-primary-hover, #163622);
+  border-color: var(--corp-primary-hover, #163622);
+}
+
+.applyButton:disabled,
+.sendButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

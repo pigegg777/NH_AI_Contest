@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { toLowerTrimmedString } from '../../../../common/utils/text';
 import { useAnnotations } from './useAnnotations';
 import {
@@ -11,7 +11,8 @@ import {
 } from '../../model/static-data-merge/staticPesticideMergeModel';
 import { ReviewTableAnnotationModel } from '../../model/review-table/reviewTableAnnotationModel';
 import { ReviewTableBuildModel } from '../../model/review-table/reviewTableBuildModel';
-import { fetchStaticProductLookup } from '../../services/staticProductLookupService';
+import { loadStaticMergeLookup } from '../../model/static-data-merge/staticDataMergeModel';
+import { useAiBulkRowDrafts } from '../ai-bulk-row-draft/useAiBulkRowDrafts';
 
 import { createInitialFilters } from '../../model/review-table/reviewTableBuildModel';
 
@@ -21,7 +22,6 @@ export function useWorkbookReviewTableState(
   extractedRows,
   workbookFingerprint,
   {
-    hasResult = false,
     isStaticMergeEnabled = false,
     tableNameMode = '',
   } = {},
@@ -38,6 +38,10 @@ export function useWorkbookReviewTableState(
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState(() => createInitialFilters());
   const [sortState, setSortState] = useState(DEFAULT_SORT_STATE);
+  const aiBulkRowDrafts = useAiBulkRowDrafts(
+    extractedRows,
+    workbookFingerprint,
+  );
 
   useEffect(() => {
     setSearchQuery('');
@@ -48,10 +52,10 @@ export function useWorkbookReviewTableState(
   const annotatedRows = useMemo(
     () =>
       new ReviewTableAnnotationModel(
-        extractedRows,
+        aiBulkRowDrafts.rows,
         annotations,
       ).mergeRowsWithAnnotations(),
-    [extractedRows, annotations],
+    [aiBulkRowDrafts.rows, annotations],
   );
 
   const mergeKind = tableNameMode === 'pesticide' ? 'pesticide' : 'fertilizer';
@@ -63,74 +67,57 @@ export function useWorkbookReviewTableState(
     mergeKind === 'pesticide'
       ? mergeRowsWithStaticPesticide
       : mergeRowsWithStaticFertilizer;
+  const staticMergeProductCodeKey = isStaticMergeEnabled
+    ? getStaticMergeProductCodes(aiBulkRowDrafts.rows).join('\u001f')
+    : '';
+  const staticMergeProductCodes = useMemo(
+    () =>
+      staticMergeProductCodeKey === ''
+        ? []
+        : staticMergeProductCodeKey.split('\u001f'),
+    [staticMergeProductCodeKey],
+  );
+  const staticMergeRequestKey = `${workbookFingerprint}:${mergeKind}:${staticMergeProductCodeKey}`;
   const [staticMergeLookup, setStaticMergeLookup] = useState(null);
   const [isStaticMergeLoading, setIsStaticMergeLoading] = useState(false);
-  const attemptedFingerprintRef = useRef(null);
 
   useEffect(() => {
     setStaticMergeLookup(null);
-    attemptedFingerprintRef.current = null;
     setIsStaticMergeLoading(false);
   }, [workbookFingerprint, tableNameMode]);
 
   useEffect(() => {
-    if (!isStaticMergeEnabled || !hasResult || !workbookFingerprint) {
+    if (
+      !isStaticMergeEnabled ||
+      staticMergeProductCodes.length === 0
+    ) {
+      setIsStaticMergeLoading(false);
       return;
     }
 
-    if (attemptedFingerprintRef.current === workbookFingerprint) {
-      return;
-    }
-
-    // Deliberately keyed on extractedRows, not annotatedRows: annotatedRows
-    // gets a brand-new array reference the moment useAnnotations' own
-    // hydration effect resolves (a separate effect, unrelated to this
-    // fetch) even though product_code — all this effect actually reads —
-    // never changes from that. Depending on annotatedRows made this effect
-    // see a "changed" dependency right after the fetch started, tear itself
-    // down (isCancelled = true) before the request resolved, and then get
-    // blocked from retrying by attemptedFingerprintRef — so the fetched
-    // static data was silently discarded and the table never showed it.
-    const productCodes = getStaticMergeProductCodes(extractedRows);
     let isCancelled = false;
 
-    attemptedFingerprintRef.current = workbookFingerprint;
     setIsStaticMergeLoading(true);
 
     void (async () => {
-      try {
-        const lookup =
-          productCodes.length > 0
-            ? await fetchStaticProductLookup(mergeKind, productCodes)
-            : {};
+      const lookup = await loadStaticMergeLookup(mergeKind, staticMergeProductCodes);
 
-        if (isCancelled) {
-          return;
-        }
-
-        setStaticMergeLookup(lookup);
-      } catch {
-        if (isCancelled) {
-          return;
-        }
-
-        setStaticMergeLookup({});
-      } finally {
-        if (!isCancelled) {
-          setIsStaticMergeLoading(false);
-        }
+      if (isCancelled) {
+        return;
       }
+
+      setStaticMergeLookup(lookup);
+      setIsStaticMergeLoading(false);
     })();
 
     return () => {
       isCancelled = true;
     };
   }, [
-    extractedRows,
-    getStaticMergeProductCodes,
-    hasResult,
     isStaticMergeEnabled,
     mergeKind,
+    staticMergeProductCodes,
+    staticMergeRequestKey,
     workbookFingerprint,
   ]);
 
@@ -197,6 +184,9 @@ export function useWorkbookReviewTableState(
     updateNote,
     updatePrice,
     updateImgUrl,
+    appendRows: aiBulkRowDrafts.appendRows,
+    patchRows: aiBulkRowDrafts.patchRows,
+    removeAppendedRow: aiBulkRowDrafts.removeAppendedRow,
     isStaticMergeLoading,
   };
 }

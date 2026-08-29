@@ -1,0 +1,81 @@
+/* 고객용 화면이므로 --corp-* 토큰이 아니라 하드코딩 hex를 쓴다. */
+.panel {
+  margin-bottom: 24px;
+  padding: 20px 22px 18px;
+  /* 브랜드 색을 섞지 않는 중립 회색. 카테고리 안내 카드와 같은 값을 쓴다. */
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: white;
+}
+
+.panelTitle {
+  margin: 0 0 14px;
+  color: var(--title-text-color, #173223);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.block {
+  padding-top: 16px;
+  border-top: 1px dashed
+    color-mix(in srgb, var(--brand-color, #4b5563) 22%, transparent);
+}
+
+.block:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.blockTitle {
+  margin: 0 0 10px;
+  color: #173223;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.entryList {
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* label과 description은 각자 클래스를 갖는다. AI 대상이 아니라 여기서 정한
+   값이 최종값이다. */
+.entryLabel {
+  margin: 0;
+  color: #2f4a39;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.entryDescription {
+  margin: 0;
+  max-width: 48rem;
+  color: #1f1f1f;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: pre-line;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+@container storefront (max-width: 720px) {
+  .panel {
+    padding: 18px 16px 16px;
+  }
+}

@@ -1,0 +1,69 @@
+.panel {
+  margin-bottom: 24px;
+  padding: 20px 22px 18px;
+  /* 고객용 화면이라 --corp-* 토큰이 아닌 하드코딩 hex. 브랜드 색을 섞지 않는
+     중립 회색이라 사장님이 어떤 색을 골라도 테두리는 그대로다. */
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: white;
+}
+
+.title {
+  margin: 0;
+  color: var(--title-text-color, #173223);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.entryList {
+  margin: 14px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.entryLabel {
+  margin: 0;
+  color: #2f4a39;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.entryDescription {
+  margin: 0;
+  max-width: 48rem;
+  color: #1f1f1f;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: pre-line;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.helper {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px dashed
+    color-mix(in srgb, var(--brand-color, #4b5563) 22%, transparent);
+  color: #718074;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+@container storefront (max-width: 720px) {
+  .panel {
+    padding: 18px 16px 16px;
+  }
+}

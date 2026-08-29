@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { FileWarningsPanel } from './FileWarningsPanel';
+import { PreviousDataCarryOverDialog } from './PreviousDataCarryOverDialog';
+import controls from '../shared/controlPrimitives.module.css';
 import styles from './ExcelUploadSection.module.css';
 
 function DropzoneArea({ onWorkbookChange }) {
@@ -43,48 +45,74 @@ export function ExcelUploadPanel({
   loadingErrorMessage,
   fileWarnings,
   warningRows = [],
+  carryOver = null,
+  showWarnings = true,
 }) {
-  return onWorkbookChange ? (
-    <div className={styles.tabColumns}>
-      <div className={styles.tabColumnLeft}>
-        <div className={styles.uploadBlock}>
-          <h3 className={styles.sectionTitle}>
-            📊 엑셀 업로드 (31-6447에서 엑셀파일을 다운로드한 뒤 선택하세요.)
-          </h3>
-          <p className={styles.desc}>
-            새 파일 선택 시 현재 저장된 데이터가 삭제되고 새 파일로 완전히
-            교체됩니다.
-          </p>
-          <label className={styles.uploadBtn} htmlFor="excel-workbook-input">
+  if (!onWorkbookChange) {
+    return null;
+  }
+
+  const uploadContent = (
+    <>
+      <div className={styles.uploadBlock}>
+        <div className={styles.uploadHeader}>
+          <div className={styles.uploadHeading}>
+            <h3 className={styles.sectionTitle}>📊 엑셀 업로드</h3>
+            <span className={styles.sectionHint}>
+              생산경제 시스템 31-6447에서 내려받은 파일
+            </span>
+          </div>
+          <label
+            className={controls.actionButton}
+            htmlFor="excel-workbook-input"
+          >
             📂 파일 선택
           </label>
           <input
             id="excel-workbook-input"
-            className={styles.fileInput}
+            className={controls.fileInput}
             type="file"
             accept=".xlsx,.xls"
             onChange={onWorkbookChange}
           />
-          <DropzoneArea onWorkbookChange={onWorkbookChange} />
         </div>
-
-        {isLoading || loadingErrorMessage ? (
-          <div className={styles.statusArea}>
-            {isLoading ? (
-              <div className={styles.statusMessage}>
-                등록 데이터를 불러오는 중...
-              </div>
-            ) : null}
-            {loadingErrorMessage ? (
-              <div className={styles.errorBox}>{loadingErrorMessage}</div>
-            ) : null}
-          </div>
-        ) : null}
+        <p className={styles.desc}>
+          새 파일을 올리면 저장된 데이터가 교체됩니다. 이전 데이터의
+          이미지,비고,숨길상품표시를 이어받을 수 있습니다
+        </p>
+        <DropzoneArea onWorkbookChange={onWorkbookChange} />
       </div>
 
+      {carryOver ? <PreviousDataCarryOverDialog {...carryOver} /> : null}
+
+      {isLoading || loadingErrorMessage ? (
+        <div className={styles.statusArea}>
+          {isLoading ? (
+            <div className={styles.statusMessage}>
+              등록 데이터를 불러오는 중...
+            </div>
+          ) : null}
+          {loadingErrorMessage ? (
+            <div className={styles.errorBox}>{loadingErrorMessage}</div>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (!showWarnings) {
+    return <div className={styles.tabColumnLeft}>{uploadContent}</div>;
+  }
+
+  return (
+    <div className={styles.tabColumns}>
+      <div className={styles.tabColumnLeft}>{uploadContent}</div>
       <div className={styles.tabColumnRight}>
-        <FileWarningsPanel fileWarnings={fileWarnings} warningRows={warningRows} />
+        <FileWarningsPanel
+          fileWarnings={fileWarnings}
+          warningRows={warningRows}
+        />
       </div>
     </div>
-  ) : null;
+  );
 }

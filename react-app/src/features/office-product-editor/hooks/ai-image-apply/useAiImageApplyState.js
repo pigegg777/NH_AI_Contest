@@ -1,23 +1,22 @@
 import { useRef, useState } from 'react';
 import { analyzeAiImageApplyMatches } from '../../model/ai-image-apply/aiImageApplyAnalysisModel';
 import {
-  requestAiImageDelete,
-  requestAiImageGenerate,
-  requestAiImageList,
-  requestAiImageUpload,
-} from '../../services/ai-image-apply/aiImageApplyClient';
+  AI_IMAGE_UPLOAD_ERROR,
+  deleteAiImage,
+  generateAiImage,
+  listAiImages,
+  readImageFileAsDataUri,
+  uploadAiImage,
+  validateUploadableImageFile,
+} from '../../model/ai-image-apply/aiImageStorageModel';
 
-const MAX_UPLOAD_FILE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
-
-function readFileAsDataUri(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error ?? new Error('파일을 읽을 수 없습니다.'));
-    reader.readAsDataURL(file);
-  });
-}
+const UPLOAD_ERROR_MESSAGES = {
+  [AI_IMAGE_UPLOAD_ERROR.UNSUPPORTED_TYPE]: () =>
+    'PNG, JPEG, WEBP 이미지만 업로드할 수 있습니다.',
+  [AI_IMAGE_UPLOAD_ERROR.TOO_LARGE]: (maxBytes) =>
+    `이미지는 ${Math.round(maxBytes / 1024 / 1024)}MB 이하만 업로드할 수 있습니다.`,
+  [AI_IMAGE_UPLOAD_ERROR.UNREADABLE]: () => '파일을 읽을 수 없습니다.',
+};
 
 export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
   const [previewImage, setPreviewImage] = useState(null);
@@ -56,13 +55,10 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
       return;
     }
 
-    if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
-      setPreviewError('PNG, JPEG, WEBP 이미지만 업로드할 수 있습니다.');
-      return;
-    }
+    const validation = validateUploadableImageFile(file);
 
-    if (file.size > MAX_UPLOAD_FILE_BYTES) {
-      setPreviewError('이미지는 5MB 이하만 업로드할 수 있습니다.');
+    if (validation) {
+      setPreviewError(UPLOAD_ERROR_MESSAGES[validation.error](validation.maxBytes));
       return;
     }
 
@@ -71,8 +67,8 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
     setIsUploadingFile(true);
 
     try {
-      const imageDataUri = await readFileAsDataUri(file);
-      await requestAiImageUpload({ officeCode, imageDataUri });
+      const imageDataUri = await readImageFileAsDataUri(file);
+      await uploadAiImage({ officeCode, imageDataUri });
       setUploadSuccessMessage('업로드 완료. "저장소에서 선택"에서 골라 적용하세요.');
     } catch (error) {
       setPreviewError(error instanceof Error ? error.message : '이미지를 업로드하지 못했습니다.');
@@ -94,7 +90,7 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
     resetResult();
 
     try {
-      const { imageDataUri } = await requestAiImageGenerate({ officeCode, prompt: trimmedPrompt });
+      const imageDataUri = await generateAiImage({ officeCode, prompt: trimmedPrompt });
       setPreviewImage({
         kind: 'generated',
         imageDataUri,
@@ -130,7 +126,7 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
     setIsSavingImage(true);
 
     try {
-      const { imageUrl } = await requestAiImageUpload({
+      const imageUrl = await uploadAiImage({
         officeCode,
         imageDataUri: targetPreviewImage.imageDataUri,
       });
@@ -210,8 +206,7 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
     setStorageListError('');
 
     try {
-      const { images } = await requestAiImageList({ officeCode });
-      setStorageImages(images);
+      setStorageImages(await listAiImages(officeCode));
     } catch (error) {
       setStorageListError(
         error instanceof Error ? error.message : '이미지 목록을 불러오지 못했습니다.',
@@ -240,7 +235,7 @@ export function useAiImageApplyState(officeCode, rows, updateImgUrl) {
 
   async function handleDeleteStorageImage(image) {
     try {
-      await requestAiImageDelete({ officeCode, path: image.path });
+      await deleteAiImage({ officeCode, path: image.path });
       setStorageImages((current) => current.filter((entry) => entry.path !== image.path));
 
       if (previewImage?.storageUrl === image.url) {

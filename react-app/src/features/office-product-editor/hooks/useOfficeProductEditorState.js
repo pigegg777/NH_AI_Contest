@@ -8,7 +8,8 @@ import { useAiMarketResearchState } from './ai-market-research/useAiMarketResear
 import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterState';
 import { useAiImageApplyState } from './ai-image-apply/useAiImageApplyState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
-import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
+import { useWorkbookExtraction } from './excel-extraction/useWorkbookExtraction';
+import { usePreviousDataCarryOver } from './office-product-data/usePreviousDataCarryOver';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
@@ -56,12 +57,23 @@ export function useOfficeProductEditorState(user) {
     onActiveDataDeleted: extraction.resetWorkbook,
   });
 
-  const { effectiveFingerprint, extractedRows } = activeCategoryData;
+  const { effectiveFingerprint, extractedRows, registeredRows } =
+    activeCategoryData;
   const hasExtractedResult = Boolean(extraction.result);
   const isStaticMergeEnabled = shouldUseStaticDataMerge(tableNameMode);
 
+  // Sits before the review table so the merchant sees the carried-over values in
+  // the table and can still hand-edit them before saving.
+  const carryOver = usePreviousDataCarryOver({
+    newRows: extractedRows,
+    previousRows: registeredRows,
+    isReviewingNewWorkbook: hasExtractedResult,
+    isCategoryRegistered: activeCategoryData.isViewingRegisteredData,
+    workbookFingerprint: extraction.workbookFingerprint,
+  });
+
   const tableState = useWorkbookReviewTableState(
-    extractedRows,
+    carryOver.rows,
     effectiveFingerprint,
     {
       hasResult: hasExtractedResult,
@@ -79,13 +91,15 @@ export function useOfficeProductEditorState(user) {
 
   const marketResearchState = useAiMarketResearchState(user?.office_code, tableState.annotatedRows);
 
-  const bulkNoteWriterState = useAiBulkNoteWriterState(
-    user?.office_code,
-    tableState.mergedRows,
+  const bulkNoteWriterState = useAiBulkNoteWriterState({
+    officeCode: user?.office_code,
+    rows: tableState.mergedRows,
     tableNameMode,
-    tableState.updateNote,
-    tableState.updatePrice,
-  );
+    updateNote: tableState.updateNote,
+    updatePrice: tableState.updatePrice,
+    appendRows: tableState.appendRows,
+    patchRows: tableState.patchRows,
+  });
 
   const imageApplyState = useAiImageApplyState(
     user?.office_code,
@@ -246,6 +260,14 @@ export function useOfficeProductEditorState(user) {
   const uploadValue = useMemo(
     () => ({
       canUploadFile,
+      carryOver: {
+        isOpen: carryOver.isDialogOpen,
+        categoryName: activeCategoryData.activeCategoryName,
+        carriedImageCount: carryOver.carriedImageCount,
+        carriedNoteCount: carryOver.carriedNoteCount,
+        onChoose: carryOver.choose,
+        onDismiss: carryOver.dismiss,
+      },
       tableNameCardProps: {
         customTableName: selection.customTableName,
         onTableNameChange: selection.handleCustomTableNameChange,
@@ -256,6 +278,12 @@ export function useOfficeProductEditorState(user) {
     }),
     [
       canUploadFile,
+      carryOver.isDialogOpen,
+      carryOver.carriedImageCount,
+      carryOver.carriedNoteCount,
+      carryOver.choose,
+      carryOver.dismiss,
+      activeCategoryData.activeCategoryName,
       selection.customTableName,
       selection.handleCustomTableNameChange,
       selection.showsCustomTableNameInput,
@@ -301,6 +329,7 @@ export function useOfficeProductEditorState(user) {
       onNoteChange: tableState.updateNote,
       onPriceChange: tableState.updatePrice,
       onImgUrlChange: tableState.updateImgUrl,
+      onRemoveAppendedRow: tableState.removeAppendedRow,
     }),
     [
       draftOfficeCode,
@@ -319,6 +348,7 @@ export function useOfficeProductEditorState(user) {
       tableState.updateNote,
       tableState.updatePrice,
       tableState.updateImgUrl,
+      tableState.removeAppendedRow,
     ],
   );
 

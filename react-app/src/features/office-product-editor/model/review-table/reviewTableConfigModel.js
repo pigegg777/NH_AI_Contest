@@ -26,8 +26,8 @@ const FERTILIZER_ONLY_TABLE_COLUMNS = [
 const PESTICIDE_ONLY_TABLE_COLUMNS = [
   { key: 'nutirent', label: '성분' },
   { key: 'product_category', label: '용도' },
-  { key: 'product_usage', label: '사용법' },
   { key: 'indict_symbl', label: '작용기작' },
+  { key: 'pesticide_info_link', label: '농약상세정보', width: 120, noWrap: true },
 ];
 
 function insertColumnsAfter(columns, afterKey, columnsToInsert) {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import controls from '../../shared/controlPrimitives.module.css';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiMarketResearchPromptInput.module.css';
 
@@ -34,18 +35,18 @@ export function AiMarketResearchPromptInput({ marketResearch }) {
           className={primitives.promptInput}
           value={promptDraft}
           onChange={(event) => setPromptDraft(event.target.value)}
-          placeholder="예: 마진율이 낮은 상품 위주로 검토해줘"
+          placeholder="예: 멀칭필름 0.02x100x500기준으로 가격 및 관련기사 검색해줘"
           rows={1}
         />
 
         {marketResearch ? (
           <button
             type="button"
-            className={styles.marketResearchButton}
+            className={controls.actionButton}
             disabled={promptDraft.trim() === '' || marketResearch.isLoading}
             onClick={handleSubmit}
           >
-            시장조사
+            AI 시장조사 실행
           </button>
         ) : null}
       </div>

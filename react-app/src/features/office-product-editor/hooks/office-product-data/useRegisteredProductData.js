@@ -1,17 +1,19 @@
-import { toTrimmedString } from '../../../../common/utils/text';
-import { fetchOfficeProductData } from '../../services/office-product-data/officeProductDataReadService';
+import {
+  loadRegisteredProductData,
+  resolveOfficeProductDataQuery,
+} from '../../model/office-product-data/officeProductDataReadModel';
 import { useAsyncFetch } from '../useAsyncFetch';
 
 const DEFAULT_ERROR_MESSAGE = '등록 데이터를 불러오지 못했습니다.';
 
 export function useRegisteredProductData({ user, categoryName, isEnabled, refreshToken }) {
-  const officeCode = toTrimmedString(user?.office_code);
-  const normalizedCategoryName = toTrimmedString(categoryName);
-  const enabled = Boolean(officeCode && normalizedCategoryName && isEnabled);
+  const { officeCode, categoryName: normalizedCategoryName, hasCategory } =
+    resolveOfficeProductDataQuery({ user, categoryName });
+  const enabled = Boolean(hasCategory && isEnabled);
 
   const { data, isLoading, errorMessage } = useAsyncFetch(
     () =>
-      fetchOfficeProductData({
+      loadRegisteredProductData({
         officeCode,
         categoryName: normalizedCategoryName,
       }),

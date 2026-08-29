@@ -1,7 +1,11 @@
 import { useState } from 'react';
 
 import { OfficeProductEditorProvider } from '../contexts/OfficeProductEditorProvider';
-import { useEditorMeta, useExtractionCtx } from '../contexts/editorContexts';
+import {
+  useEditorMeta,
+  useExtractionCtx,
+  useTableCtx,
+} from '../contexts/editorContexts';
 import { DataUploadSection } from '../components/DataUploadSection';
 import { DataEditorSection } from '../components/DataEditorSection';
 import { DataTableSection } from '../components/DataTableSection';
@@ -26,6 +30,7 @@ function EmptySelectionState() {
 function EditorWorkspace() {
   const { tableNameMode, isViewingRegisteredData } = useEditorMeta();
   const { result } = useExtractionCtx();
+  const { rows } = useTableCtx();
 
   if (tableNameMode === '') {
     return <EmptySelectionState />;
@@ -43,7 +48,7 @@ function EditorWorkspace() {
   return (
     <>
       <DataUploadSection />
-      {result ? <DataTableSection /> : null}
+      {result || rows.length > 0 ? <DataTableSection /> : null}
     </>
   );
 }

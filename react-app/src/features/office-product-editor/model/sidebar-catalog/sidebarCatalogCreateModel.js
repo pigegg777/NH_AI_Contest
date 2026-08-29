@@ -65,6 +65,26 @@ export function resolveActiveCategoryName(
   return '';
 }
 
+export function buildActiveCategoryFingerprint(
+  categoryName,
+  workbookFingerprint,
+  registeredUpdatedAt,
+) {
+  const normalizedCategoryName = toTrimmedString(categoryName);
+
+  if (normalizedCategoryName === '') {
+    return workbookFingerprint || null;
+  }
+
+  const sourceFingerprint = workbookFingerprint
+    ? `workbook:${workbookFingerprint}`
+    : registeredUpdatedAt
+      ? `registered:${registeredUpdatedAt}`
+      : 'empty';
+
+  return `category:${normalizedCategoryName}:${sourceFingerprint}`;
+}
+
 export function validateCustomCategoryCreation(
   categoryName,
   existingCategoryNames = [],

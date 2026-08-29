@@ -1,4 +1,5 @@
 import { AiSimilarityExtractionMatchList } from './AiSimilarityExtractionMatchList';
+import controls from '../../shared/controlPrimitives.module.css';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiSimilarityExtractionPanel.module.css';
 
@@ -33,16 +34,16 @@ export function AiSimilarityExtractionPanel({
             className={primitives.promptInput}
             value={analysisHint}
             onChange={(event) => onAnalysisHintChange(event.target.value)}
-            placeholder="예: 필름과 비닐은 같은 상품으로 봐주세요 (선택)"
+            placeholder="예: 필름과 비닐은 같은 상품으로 봐주세요 (선택)/ 멀칭필름 위조로 검사 실행해주세요"
             rows={1}
           />
           <button
             type="button"
-            className={styles.aiButton}
+            className={controls.actionButton}
             onClick={() => onAiAnalyze(analysisHint)}
             disabled={aiDisabled || !hasRows || aiIsLoading}
           >
-            AI 분석하기
+            AI 검사실행
           </button>
         </div>
       </section>

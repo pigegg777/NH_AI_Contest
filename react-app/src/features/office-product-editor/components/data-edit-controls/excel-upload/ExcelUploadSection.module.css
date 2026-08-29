@@ -1,54 +1,48 @@
 .uploadBlock {
   display: flex;
   flex-direction: column;
-  /* gap: 10px; */
+  gap: 8px;
+}
+
+/* 제목·안내와 파일 선택 버튼을 한 줄에 둬서 AI 작업실 패널 헤더와 결을 맞춘다. */
+.uploadHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.uploadHeading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
 }
 
 .sectionTitle {
-  margin: 0 0 6px;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--corp-text);
   letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.sectionHint {
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  word-break: keep-all;
 }
 
 .desc {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--corp-muted);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 600;
   line-height: 1.5;
-}
-
-.uploadBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  min-height: 36px;
-  padding: 0 18px;
-  border-radius: var(--corp-radius);
-  border: 1px solid rgba(29, 74, 46, 0.6);
-  background: rgb(57, 57, 199);
-  color: var(--corp-on-primary);
-  font-size: 0.86rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background var(--corp-transition);
-}
-
-.uploadBtn:hover {
-  background: rgb(117, 117, 236);
-}
-
-.fileInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .statusMessage {
@@ -101,8 +95,7 @@
 }
 
 .dropzone {
-  margin-top: 10px;
-  padding: 18px 12px;
+  padding: 14px 12px;
   border: 1px dashed var(--corp-line);
   border-radius: var(--corp-radius);
   background: var(--corp-surface-muted);
@@ -126,4 +119,79 @@
   .tabColumns {
     grid-template-columns: 1fr;
   }
+}
+
+.carryOverOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.carryOverDialog {
+  width: 420px;
+  max-width: 92vw;
+  padding: 20px;
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.carryOverDialogTitle {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.carryOverDialogBody {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.carryOverDialogNote {
+  margin: 0 0 18px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--corp-muted);
+  word-break: keep-all;
+}
+
+.carryOverDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.carryOverPrimaryButton,
+.carryOverSecondaryButton {
+  padding: 9px 16px;
+  border-radius: var(--corp-radius-sm);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.carryOverPrimaryButton {
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: #ffffff;
+}
+
+.carryOverSecondaryButton {
+  border: 1px solid var(--corp-line-strong);
+  background: var(--corp-panel);
+  color: var(--corp-text);
 }

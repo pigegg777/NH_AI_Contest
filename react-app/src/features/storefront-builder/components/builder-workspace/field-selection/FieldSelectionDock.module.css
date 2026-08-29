@@ -1,0 +1,402 @@
+.dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--corp-line);
+  background:
+    linear-gradient(
+      180deg,
+      var(--corp-surface-muted),
+      rgba(255, 255, 255, 0.99)
+    ),
+    rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -18px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.headerText {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.footer {
+  align-items: right;
+}
+
+.categoryTabsWrap {
+  margin-top: -18px;
+}
+
+.title,
+.subtitle,
+.helperText,
+.summaryLabel,
+.summaryValue {
+  margin: 0;
+}
+
+.title {
+  font-size: 0.9rem;
+  color: var(--corp-text);
+}
+
+.subtitle,
+.helperText,
+.summaryLabel {
+  color: var(--corp-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.subtitle {
+  margin-top: 0;
+  max-width: 54ch;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.summary {
+  min-width: 68px;
+  padding: 8px 10px;
+  border-radius: var(--corp-radius-xl);
+  background: rgba(29, 74, 46, 0.08);
+  border: 1px solid rgba(29, 74, 46, 0.16);
+  text-align: right;
+}
+
+.summaryValue {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--corp-text);
+}
+
+.tables {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: start;
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.backButton {
+  flex-shrink: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--corp-text);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.backButton:hover {
+  border-color: rgba(29, 74, 46, 0.28);
+}
+
+.applyButton {
+  padding: 8px 16px;
+  border-radius: var(--corp-radius-pill);
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  border: 1px solid var(--corp-primary);
+  background: var(--corp-primary);
+  color: var(--corp-on-primary);
+}
+
+.applyButton:hover {
+  background: var(--corp-primary-hover);
+  border-color: var(--corp-primary-hover);
+}
+
+@media (max-width: 960px) {
+  .tables {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .dock {
+    padding: 10px 12px;
+  }
+
+  .header,
+  .footer {
+    flex-direction: column;
+  }
+
+  .summary {
+    text-align: left;
+  }
+
+  .footerActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .backButton,
+  .applyButton {
+    width: 100%;
+  }
+}
+
+.textFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 12px;
+}
+
+.textField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.textFieldLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--corp-text);
+  word-break: keep-all;
+}
+
+.textFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.textFieldInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+  font-size: 0.84rem;
+}
+
+.textFieldTextarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.textFieldHint {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--corp-muted);
+  word-break: keep-all;
+}
+
+.entryFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.entryFieldsLegend {
+  padding: 0;
+  color: var(--corp-text);
+  font-size: 0.84rem;
+  font-weight: 700;
+  word-break: keep-all;
+}
+
+.entryRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: var(--corp-panel);
+}
+
+.entryRowInputs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.entryFieldLabel {
+  padding-top: 8px;
+  color: var(--corp-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.entryDescriptionCell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.entryEmphasisRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.entryEmojiPicker {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  z-index: 5;
+  width: min(350px, 100%);
+  max-width: calc(100vw - 48px);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.2);
+}
+
+.entryEmphasisButton {
+  padding: 4px 10px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  background: transparent;
+  color: var(--corp-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.entryEmphasisButton:hover {
+  border-color: var(--corp-focus);
+  background: var(--corp-panel-strong, transparent);
+}
+
+/* 툴팁이 아니라 상시 노출한다. 판매자는 hover 하지 않는다.
+
+   여기 적힌 << >> / [[ ]] 는 사장님이 직접 타이핑해야 하는 문법이다. 흐린
+   회색 잔글씨로 두면 안내문의 배경처럼 읽히고, 모르면 안내가 통째로 잘못
+   써진다. 디자인 안내(.scopeGuideNote)와 같은 말투 — 왼쪽 굵은 선, 옅은
+   배경, 느낌표 배지 — 로 세워 빌더 안에서 '이건 규칙이다'가 같은 모양으로
+   보이게 한다. */
+.entryHelp {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--corp-primary-bright);
+  border-radius: 0 var(--corp-radius) var(--corp-radius) 0;
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary-hover);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* 장식이라 낭독기에는 읽히지 않게 둔다 — 문구 자체가 이미 안내다. */
+.entryHelp::before {
+  content: '!';
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 문장 속에서 '이건 그대로 쳐야 하는 글자'임이 드러나야 한다. 등폭 글꼴과
+   상자를 주면 설명하지 않아도 구분된다. */
+.entryHelpToken {
+  padding: 1px 5px;
+  border: 1px solid var(--corp-accent-border);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.entryRemoveButton {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  background: transparent;
+  color: var(--corp-muted);
+  font-size: 0.76rem;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.entryRemoveButton:hover {
+  border-color: var(--corp-focus);
+  color: var(--corp-text);
+}
+
+.entryAddButton {
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: 1px dashed var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  background: transparent;
+  color: var(--corp-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.entryAddButton:hover {
+  border-style: solid;
+  border-color: var(--corp-focus);
+}
+
+.entryEmojiLoading {
+  margin: 0;
+  padding: 12px;
+  color: var(--corp-muted);
+  font-size: 0.74rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}

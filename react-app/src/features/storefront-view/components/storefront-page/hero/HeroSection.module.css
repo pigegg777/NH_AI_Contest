@@ -1,0 +1,198 @@
+/* The gap sets the title-to-description distance. It was dead space before —
+   .brandBlock was the only in-flow child — so tightening it costs nothing. */
+.heroTop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brandBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.brandIdentity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.logoShell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+}
+
+.logo {
+  width: 30px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.brandCopy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 제목은 한 줄로 고정한다. 좁은 폰에서 접히려 하면 useFitTitleToOneLine 이
+   --title-fit-scale 을 낮춰 글자를 줄인다. 사장님이 AI 페이지 디자인에서 고른
+   크기(--title-font-size)는 그대로 출발점이 되고, 안 들어갈 때만 작아진다. */
+.title {
+  margin: 1px 0 0;
+  font-size: calc(var(--title-font-size, 1.1rem) * var(--title-fit-scale, 1));
+  font-weight: var(--typography-heading-weight, 800);
+  letter-spacing: var(--typography-letter-spacing, normal);
+  line-height: 1.12;
+  color: var(--title-text-color, #173223);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 86%;
+  margin: 0 auto;
+  min-height: var(--search-min-height, var(--page-search-min-height, 40px));
+  padding: 7px 12px;
+  border-width: var(--page-search-border-width, 1px);
+  border-style: solid;
+  border-color: var(
+    --search-border-color,
+    var(--page-search-border-color, rgba(29, 74, 46, 0.18))
+  );
+  border-radius: var(--search-radius, var(--corp-radius));
+  background: var(--search-bg, var(--page-search-bg, #ffffff));
+  transition:
+    border-color var(--corp-transition),
+    box-shadow var(--corp-transition);
+}
+
+/* 클릭·포커스 시 테두리 변화 없음: 검색창은 어떤 상태에서도 같은 모습을 유지한다. */
+
+.searchBoxPill {
+  border-radius: var(--search-radius, 999px);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--search-accent, #173223);
+  font-size: var(--search-font-size, var(--page-search-font-size, 0.94rem));
+  text-align: center;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.searchInput::placeholder {
+  color: #7a8b80;
+}
+
+.searchIcon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  opacity: 0.82;
+}
+
+.searchIcon::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #7a8b80;
+  border-radius: 999px;
+}
+
+.searchIcon::after {
+  content: '';
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 7px;
+  height: 2px;
+  border-radius: 999px;
+  background: #7a8b80;
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+@container storefront (max-width: 720px) {
+  .brandBlock {
+      width: 100%;
+    }
+
+  .brandIdentity {
+      gap: 4px;
+    }
+
+  .logoShell {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+    }
+
+  .logo {
+      width: 30px;
+      height: 30px;
+    }
+
+  /* Scales off its token rather than pinning a value, so a size the merchant
+     picks in AI 페이지 디자인 still applies on phones. The offset reproduces
+     what the pinned value gave at the default token: the title grows on
+     small screens — 다만 한 줄에 안 들어가면 --title-fit-scale 이 다시 줄인다. */
+  .title {
+      font-size: calc(
+        (var(--title-font-size, 1.1rem) + 0.2rem) * var(--title-fit-scale, 1)
+      );
+    }
+
+  .searchBox {
+      min-height: 38px;
+    }
+}
+
+/* Pinned to the hero's top-right rather than left in the column flow, so it can
+   sit tight against the top edge without pushing the brand block down or
+   shrinking the hero. .hero is position: sticky, which is what it resolves
+   against. Merchant-themed surface, so a hardcoded muted hex, not a --corp-*
+   token. */
+.updatedAt {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  margin: 0;
+  font-size: 0.66rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #9aa79c;
+  letter-spacing: 0.01em;
+  word-break: keep-all;
+}

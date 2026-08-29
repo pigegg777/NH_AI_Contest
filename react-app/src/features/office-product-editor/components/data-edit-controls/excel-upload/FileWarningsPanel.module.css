@@ -14,12 +14,15 @@
   box-shadow: none;
 }
 
+/* 제목 아래 연한 선. 여백만으로는 '파일 경고'가 목록의 첫 줄처럼 붙어 보인다. */
 .panelHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  padding-bottom: 8px;
   margin-bottom: 10px;
+  border-bottom: 1px solid var(--corp-line);
 }
 
 .panelTitle {
