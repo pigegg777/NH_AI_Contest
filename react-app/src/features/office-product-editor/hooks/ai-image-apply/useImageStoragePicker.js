@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { requestAiImageList } from '../../services/ai-image-apply/aiImageApplyClient';
+import { listAiImages } from '../../model/ai-image-apply/aiImageStorageModel';
 
 export function useImageStoragePicker({ rowId, officeCode, onSelect }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,8 +14,7 @@ export function useImageStoragePicker({ rowId, officeCode, onSelect }) {
     setError('');
 
     try {
-      const { images: fetchedImages } = await requestAiImageList({ officeCode });
-      setImages(fetchedImages);
+      setImages(await listAiImages(officeCode));
     } catch (err) {
       setError(err instanceof Error ? err.message : '이미지 목록을 불러오지 못했습니다.');
       setImages([]);

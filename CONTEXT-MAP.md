@@ -15,7 +15,7 @@
 
 방향은 `hooks → model → services` 이고, 다른 feature 를 부를 때는 그 feature 의 `model/` 을 통한다.
 
-2026-08-29 기준 **남의 feature 의 `services/` 를 직접 부르는 곳은 없다.** feature 안에서의 예외는 각 CONTEXT.md 에 적는다(현재는 office product editor 의 ai-image-apply 한 건).
+2026-08-29 기준 **남의 feature 의 `services/` 를 직접 부르는 곳은 없다.** feature 안에서의 예외도 현재는 없다. 생기면 각 CONTEXT.md 에 적는다.
 
 feature 사이를 잇는 model 함수:
 

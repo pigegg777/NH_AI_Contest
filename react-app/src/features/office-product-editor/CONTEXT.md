@@ -42,16 +42,18 @@ hooks/*  ->  model/*  ->  services/*  ->  Supabase · HTTP · xlsx
 `hooks/` 하위는 `model/` 만 참조한다. 다른 feature 를 부를 때도 그 feature 의
 `model/` 을 통한다 — 남의 `services/` 를 직접 부르지 않는다.
 
-### 예외: 도메인 변환이 없는 저장소 I/O
+2026-08-29 기준 `hooks/` 하위에서 `services/` 를 부르는 곳은 없다.
 
-`hooks/ai-image-apply/` 두 훅은 `services/ai-image-apply/aiImageApplyClient`
-를 직접 부른다. 이미지 생성·목록·업로드 호출부는 `await` 뒤에 setState 만
-하고 도메인 판단이 없어서, model 로 감싸면 interface 가 implementation 과
-같아진다 — 지워도 복잡도가 어디에도 다시 나타나지 않는 얕은 모듈이 된다.
+### 감쌀 때 무엇을 함께 내리는가
 
-**규칙보다 깊이가 우선이다.** 감싸는 쪽이 진짜 무언가를 숨길 때만 model 을
-만든다. 정규화·순서·실패 정책 중 하나라도 옮겨갈 것이 있으면 감싸고,
-없으면 그대로 둔다.
+`model/ai-image-apply/aiImageStorageModel` 을 만들 때 처음에는 "감싸도
+숨길 게 없다"고 판단했었다. 호출부의 `await` 줄만 봤기 때문이고, 틀렸다.
+한 화면 넓게 보니 업로드 허용 형식·크기 상한·파일을 data URI 로 바꾸는
+일이 훅에 앉아 있었다.
+
+**호출 줄만 보고 판단하지 않는다.** 그 호출을 감싸고 있는 검증·변환·
+응답 해체까지 함께 보고, 옮겨갈 것이 있으면 감싼다. 진짜로 아무것도
+없다면 그대로 두는 편이 낫다 — 규칙보다 깊이가 우선이다.
 
 ## 옮기지 않은 것
 
