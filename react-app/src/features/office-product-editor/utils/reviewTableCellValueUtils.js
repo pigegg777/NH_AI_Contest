@@ -35,11 +35,6 @@ export function getCellTextValue(row, key) {
     return row[key] ?? '-';
   }
 
-  if (key === 'product_usage') {
-    const entries = Array.isArray(row.product_usage) ? row.product_usage : [];
-    return entries.length > 0 ? `${entries.length}건` : '-';
-  }
-
   if (NUMERIC_FORMAT_COLUMN_KEYS.has(key)) {
     return formatPriceValue(row[key]);
   }

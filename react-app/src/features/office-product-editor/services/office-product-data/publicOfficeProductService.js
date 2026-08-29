@@ -1,5 +1,6 @@
 import supabase from '../../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../../common/utils/text';
+import { removeProductUsageFromRows } from '../../utils/officeProductDataUtils';
 
 export async function fetchAllOfficeProductRows({ officeCode }) {
   const normalizedOfficeCode = toTrimmedString(officeCode);
@@ -12,7 +13,7 @@ export async function fetchAllOfficeProductRows({ officeCode }) {
     throw new Error(error.message || '상품 정보를 불러오지 못했습니다.');
   }
 
-  return Array.isArray(data) ? data : [];
+  return removeProductUsageFromRows(data);
 }
 
 export async function fetchPublicOfficeIdentity({ officeCode }) {

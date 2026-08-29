@@ -78,13 +78,13 @@ describe('static fertilizer merge model', () => {
     expect(result[0].img_url).toBe('https://example.com/static-a100.png');
   });
 
-  it('flags img_url_is_static when the effective img_url came from the static lookup', () => {
+  it('keeps img_url_is_static false when the effective img_url came from the static lookup', () => {
     const result = mergeRowsWithStaticFertilizer(
       [{ row_id: 'A100__01', product_code: 'A100', img_url: '' }],
       { A100: { product_code: 'A100', img_url: 'https://example.com/static-a100.png' } },
     );
 
-    expect(result[0].img_url_is_static).toBe(true);
+    expect(result[0].img_url_is_static).toBe(false);
   });
 
   it('does not flag img_url_is_static when the row already has its own img_url', () => {
@@ -102,7 +102,7 @@ describe('static fertilizer merge model', () => {
     expect(result[0].img_url_is_static).toBe(false);
   });
 
-  it('still flags img_url_is_static after the static value was previously saved onto the row itself (reload-after-save)', () => {
+  it('keeps img_url_is_static false after the static value was previously saved onto the row itself', () => {
     // Once a row is saved, the merged img_url gets persisted as the row's
     // own field — on the next load, row.img_url is no longer empty, it now
     // literally equals the static registry's current value.
@@ -111,7 +111,7 @@ describe('static fertilizer merge model', () => {
       { A100: { product_code: 'A100', img_url: 'https://example.com/static-a100.png' } },
     );
 
-    expect(result[0].img_url_is_static).toBe(true);
+    expect(result[0].img_url_is_static).toBe(false);
   });
 
   it('does not flag img_url_is_static when neither the row nor the static lookup has an image', () => {

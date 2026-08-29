@@ -21,7 +21,11 @@ const FIELD_LABELS = {
   exempt_tax_price: '면세단가',
 };
 
-const PRICE_FIELDS = new Set(['zero_tax_price', 'tax_price', 'exempt_tax_price']);
+const PRICE_FIELDS = new Set([
+  'zero_tax_price',
+  'tax_price',
+  'exempt_tax_price',
+]);
 
 // Stable display order regardless of which fields the sheet happened to fill.
 const UPDATE_FIELD_ORDER = [
@@ -67,8 +71,12 @@ function AiBulkNoteAppendedEntry({ entry }) {
       <p className={styles.matchNoteDiff}>
         {buildUpdateFields(entry.newRow).map(({ field, value }) => (
           <span key={field} className={styles.planFieldChip}>
-            <span className={styles.matchFieldLabel}>{FIELD_LABELS[field]} </span>
-            <span className={styles.matchNewNote}>{formatFieldValue(field, value)}</span>
+            <span className={styles.matchFieldLabel}>
+              {FIELD_LABELS[field]}{' '}
+            </span>
+            <span className={styles.matchNewNote}>
+              {formatFieldValue(field, value)}
+            </span>
           </span>
         ))}
       </p>
@@ -85,8 +93,12 @@ function AiBulkNoteUpdateDiff({ newRow, targetRow }) {
 
         return (
           <p key={field} className={styles.matchNoteDiff}>
-            <span className={styles.matchFieldLabel}>{FIELD_LABELS[field]}: </span>
-            {oldValue ? <span className={styles.matchOldNote}>{oldValue}</span> : null}
+            <span className={styles.matchFieldLabel}>
+              {FIELD_LABELS[field]}:{' '}
+            </span>
+            {oldValue ? (
+              <span className={styles.matchOldNote}>{oldValue}</span>
+            ) : null}
             {oldValue ? <span className={styles.matchArrow}> → </span> : null}
             <span className={styles.matchNewNote}>{newValue}</span>
           </p>
@@ -112,7 +124,11 @@ function AiBulkNoteConflictEntry({ entry }) {
   );
 }
 
-function AiBulkNoteAmbiguousEntry({ entry, ambiguousSelection, onToggleTarget }) {
+function AiBulkNoteAmbiguousEntry({
+  entry,
+  ambiguousSelection,
+  onToggleTarget,
+}) {
   return (
     <li className={styles.matchItem}>
       <div className={styles.matchHeader}>
@@ -126,26 +142,39 @@ function AiBulkNoteAmbiguousEntry({ entry, ambiguousSelection, onToggleTarget })
         <label key={targetRow.row_id} className={styles.planTargetOption}>
           <input
             type="checkbox"
-            checked={ambiguousSelection.has(`${entry.productCode}::${targetRow.row_id}`)}
+            checked={ambiguousSelection.has(
+              `${entry.productCode}::${targetRow.row_id}`,
+            )}
             onChange={() => onToggleTarget(entry.productCode, targetRow.row_id)}
           />
           <span>
             {targetRow.product_name || targetRow.row_id}
-            {targetRow.sale_price_type_name ? ` · ${targetRow.sale_price_type_name}` : ''}
+            {targetRow.sale_price_type_name
+              ? ` · ${targetRow.sale_price_type_name}`
+              : ''}
           </span>
         </label>
       ))}
-      <AiBulkNoteUpdateDiff newRow={entry.newRow} targetRow={entry.targetRows[0]} />
+      <AiBulkNoteUpdateDiff
+        newRow={entry.newRow}
+        targetRow={entry.targetRows[0]}
+      />
     </li>
   );
 }
 
-export function AiBulkNoteRowPlanList({ rowPlan, ambiguousSelection, onToggleTarget }) {
+export function AiBulkNoteRowPlanList({
+  rowPlan,
+  ambiguousSelection,
+  onToggleTarget,
+}) {
   return (
     <div className={styles.planGroups}>
       {rowPlan.appended.length > 0 ? (
         <section>
-          <p className={styles.planGroupTitle}>신규 {rowPlan.appended.length}건</p>
+          <p className={styles.planGroupTitle}>
+            신규 {rowPlan.appended.length}건
+          </p>
           <ul className={styles.matchList}>
             {rowPlan.appended.map((entry) => (
               <AiBulkNoteAppendedEntry key={entry.productCode} entry={entry} />
@@ -169,7 +198,9 @@ export function AiBulkNoteRowPlanList({ rowPlan, ambiguousSelection, onToggleTar
 
       {rowPlan.ambiguous.length > 0 ? (
         <section>
-          <p className={styles.planGroupTitle}>확인 필요 {rowPlan.ambiguous.length}건</p>
+          <p className={styles.planGroupTitle}>
+            확인 필요 {rowPlan.ambiguous.length}건
+          </p>
           <ul className={styles.matchList}>
             {rowPlan.ambiguous.map((entry) => (
               <AiBulkNoteAmbiguousEntry

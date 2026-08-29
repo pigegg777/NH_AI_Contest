@@ -230,9 +230,7 @@ describe('excel extract workbook review table', () => {
     expect(renderedColumnKeys).not.toContain('product_url');
   });
 
-  it('renders the pesticide-only usage popup and column set', async () => {
-    const user = userEvent.setup();
-
+  it('omits product_usage from the pesticide column set even for legacy rows', () => {
     renderTable({
       tableNameMode: 'pesticide',
       rows: [
@@ -269,23 +267,50 @@ describe('excel extract workbook review table', () => {
     ]);
     expect(renderedColumnKeys).toContain('nutirent');
     expect(renderedColumnKeys).toContain('product_category');
-    expect(renderedColumnKeys).toContain('product_usage');
+    expect(renderedColumnKeys).not.toContain('product_usage');
     expect(renderedColumnKeys).toContain('indict_symbl');
     expect(renderedColumnKeys).not.toContain('price_subsidy');
     expect(renderedColumnKeys).toContain('img_url');
 
-    const usageButton = screen.getByRole('button', { name: 'usage-cell-A100__01' });
-    expect(usageButton.textContent).toContain('(1)');
+    expect(screen.queryByRole('button', { name: 'usage-cell-A100__01' })).not.toBeInTheDocument();
+  });
 
-    await user.click(usageButton);
+  it('renders a computed pesticide detail shortcut without adding data to the row', () => {
+    const pesticideRows = [
+      {
+        ...rows[0],
+        row_id: 'P100__01',
+        product_name: '포르티스브이 10%',
+        large_category: '농약',
+      },
+      {
+        ...rows[1],
+        row_id: 'F100__01',
+        product_name: '4종복비 상품',
+        large_category: '4종복비',
+      },
+    ];
 
-    expect(screen.getByRole('dialog', { name: 'usage-popover-A100__01' })).toBeInTheDocument();
-    expect(screen.getByText('pepper')).toBeInTheDocument();
-    expect(screen.getByText('thrips')).toBeInTheDocument();
+    renderTable({ tableNameMode: 'pesticide', rows: pesticideRows });
 
-    await user.click(screen.getByRole('button', { name: 'usage-close-A100__01' }));
+    const link = screen.getByRole('link', { name: 'pesticide-info-P100__01' });
+    expect(link).toHaveTextContent('바로가기');
+    expect(link).toHaveAttribute(
+      'href',
+      'https://psis.rda.go.kr/psis/agc/res/agchmRegistStusLst.ps?sAgBrandNm=%ED%8F%AC%EB%A5%B4%ED%8B%B0%EC%8A%A4%EB%B8%8C%EC%9D%B4&sType=A&pageIndex=1',
+    );
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(screen.queryByRole('link', { name: 'pesticide-info-F100__01' })).not.toBeInTheDocument();
+    expect(pesticideRows[0]).not.toHaveProperty('pesticide_info_link');
+  });
 
-    expect(screen.queryByRole('dialog', { name: 'usage-popover-A100__01' })).not.toBeInTheDocument();
+  it('keeps the pesticide detail column wide enough to show its shortcut without wrapping', () => {
+    const { container } = renderTable({ tableNameMode: 'pesticide' });
+    const header = container.querySelector("th[data-col='pesticide_info_link']");
+    const cell = container.querySelector("td[data-col='pesticide_info_link']");
+
+    expect(getComputedStyle(header).width).toBe('120px');
+    expect(getComputedStyle(cell).whiteSpace).toBe('nowrap');
   });
 
   it('shows a down arrow for the active descending sort column', () => {

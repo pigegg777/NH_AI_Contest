@@ -16,8 +16,7 @@ describe('static pesticide merge model', () => {
 
     expect(getStaticPesticideProductCodes(rows)).toEqual(['A100', 'B200']);
 
-    expect(
-      mergeRowsWithStaticPesticide(
+    const mergedRows = mergeRowsWithStaticPesticide(
         [{ row_id: 'A100__01', product_code: 'A100' }, { row_id: 'B200__01', product_code: 'B200' }],
         {
           A100: {
@@ -37,24 +36,23 @@ describe('static pesticide merge model', () => {
             indict_symbl: '13',
           },
         },
-      ),
-    ).toEqual([
+      );
+
+    expect(mergedRows).toEqual([
       expect.objectContaining({
         row_id: 'A100__01',
         nutirent: '클로르페나피르 액상수화제',
         product_category: '살충',
-        product_usage: [
-          expect.objectContaining({ cropName: '고추' }),
-        ],
         indict_symbl: '13',
       }),
       expect.objectContaining({
         row_id: 'B200__01',
         nutirent: null,
         product_category: null,
-        product_usage: [],
         indict_symbl: null,
       }),
     ]);
+    expect(mergedRows[0]).not.toHaveProperty('product_usage');
+    expect(mergedRows[1]).not.toHaveProperty('product_usage');
   });
 });

@@ -22,7 +22,6 @@ describe('table cell value utils', () => {
       manufacturer_list: [{ manufacturer_name: '제조사A' }],
       img_url: null,
       product_url: 'https://example.com/product',
-      product_usage: [{ cropName: 'pepper' }, { cropName: 'rice' }],
       tax_price: 1200,
       product_name: '테스트비료',
     };
@@ -32,7 +31,6 @@ describe('table cell value utils', () => {
     expect(getCellTextValue(row, 'product_url')).toBe(
       'https://example.com/product',
     );
-    expect(getCellTextValue(row, 'product_usage')).toBe('2건');
     expect(getCellTextValue(row, 'tax_price')).toBe('1,200');
     expect(getCellTextValue(row, 'product_name')).toBe('테스트비료');
   });

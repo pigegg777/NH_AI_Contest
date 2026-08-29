@@ -79,6 +79,39 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     );
   });
 
+  it('removes product_usage before saving office product rows', async () => {
+    const { select: readSelect } = mockOfficeProductDataRow(null);
+    const single = vi.fn().mockResolvedValue({
+      data: { id: 1, updated_at: '2026-06-07T00:00:00Z' },
+      error: null,
+    });
+    const upsert = vi.fn(() => ({
+      select: vi.fn(() => ({ single })),
+    }));
+    const rows = [
+      {
+        row_id: 'P1',
+        product_name: '테스트농약',
+        product_usage: [{ cropName: '벼' }],
+      },
+    ];
+
+    supabase.from.mockReturnValue({ select: readSelect, upsert });
+
+    await saveOfficeProductData({
+      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
+      rows,
+      categoryName: '농약',
+      sourceFileName: 'pesticide.xlsx',
+    });
+
+    const [savedRow] = upsert.mock.calls[0];
+    expect(savedRow.product_data[0].rows).toEqual([
+      { row_id: 'P1', product_name: '테스트농약' },
+    ]);
+    expect(rows[0]).toHaveProperty('product_usage');
+  });
+
   it('replaces only the matching category entry, preserving the others', async () => {
     const existingRow = {
       id: 1,
@@ -212,6 +245,38 @@ describe('officeProductDataService.fetchOfficeProductDataEntries', () => {
       },
     ]);
   });
+
+  it('removes legacy product_usage from saved rows while reading entries', async () => {
+    const { select } = mockOfficeProductDataRow({
+      id: 11,
+      office_code: 'OFF-1',
+      office_name: '본점',
+      product_data: [
+        {
+          category_name: '농약',
+          rows: [
+            {
+              row_id: 'P1',
+              product_name: '테스트농약',
+              product_usage: [{ cropName: '벼' }],
+            },
+          ],
+        },
+      ],
+    });
+
+    supabase.from.mockReturnValue({ select });
+
+    const [entry] = await fetchOfficeProductDataEntries({ officeCode: 'OFF-1' });
+
+    expect(entry.rows).toEqual([
+      {
+        row_id: 'P1',
+        product_name: '테스트농약',
+        product_category_name: '농약',
+      },
+    ]);
+  });
 });
 
 describe('officeProductDataService.fetchOfficeProductData', () => {
@@ -296,6 +361,23 @@ describe('officeProductDataService.fetchAllOfficeProductRows', () => {
     expect(result).toEqual(rows);
     expect(Object.keys(result[0])).not.toContain('price_subsidy');
     expect(Object.keys(result[0])).not.toContain('manufacturer_list');
+  });
+
+  it('removes legacy product_usage returned by the public product RPC', async () => {
+    supabase.rpc.mockResolvedValue({
+      data: [
+        {
+          row_id: 'P1',
+          product_name: '테스트농약',
+          product_usage: '[{"cropName":"벼"}]',
+        },
+      ],
+      error: null,
+    });
+
+    const result = await fetchAllOfficeProductRows({ officeCode: 'OFF-1' });
+
+    expect(result).toEqual([{ row_id: 'P1', product_name: '테스트농약' }]);
   });
 
   it('throws when the RPC returns an error', async () => {

@@ -119,8 +119,9 @@ describe('excel extract workbook review table model', () => {
     expect(pesticideKeys.slice(0, defaultKeys.length)).toEqual(defaultKeys);
     expect(pesticideKeys).toContain('nutirent');
     expect(pesticideKeys).toContain('product_category');
-    expect(pesticideKeys).toContain('product_usage');
+    expect(pesticideKeys).not.toContain('product_usage');
     expect(pesticideKeys).toContain('indict_symbl');
+    expect(pesticideKeys).toContain('pesticide_info_link');
     expect(pesticideKeys).not.toContain('nutrient');
     expect(pesticideKeys).toContain('img_url');
     expect(pesticideKeys).not.toContain('product_url');

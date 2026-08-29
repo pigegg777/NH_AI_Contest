@@ -44,17 +44,9 @@ export function mergeRowsWithStaticFertilizer(rows, lookup) {
       // registry's value. The other static fields have no such live
       // override path, so they keep being unconditionally refreshed.
       img_url: effectiveImgUrl,
-      // True when the effective img_url is (still) the static registry's
-      // value — the office-product-editor data table uses this to disable
-      // editing that default image. This can't just check "row has no
-      // img_url of its own": once a row is saved, the merged value gets
-      // persisted onto the row itself, so on reload row.img_url is no
-      // longer empty — it now literally equals the static value. Comparing
-      // against the static value directly keeps the lock correct across a
-      // save/reload, while a genuinely different (user-set) img_url still
-      // unlocks it.
-      img_url_is_static:
-        Boolean(staticFertilizerRow.img_url) && effectiveImgUrl === staticFertilizerRow.img_url,
+      // Fertilizer images must remain editable regardless of whether the
+      // effective URL came from the static lookup.
+      img_url_is_static: false,
       product_url: staticFertilizerRow.product_url ?? null,
       nutrient: staticFertilizerRow.nutrient ?? null,
       price_subsidy: staticFertilizerRow.price_subsidy ?? null,

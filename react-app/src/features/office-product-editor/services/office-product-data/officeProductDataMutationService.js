@@ -1,6 +1,9 @@
 import supabase from '../../../../lib/supabaseClient';
 import { toTrimmedString } from '../../../../common/utils/text';
-import { getProductDataEntries } from '../../utils/officeProductDataUtils';
+import {
+  getProductDataEntries,
+  removeProductUsageFromRows,
+} from '../../utils/officeProductDataUtils';
 import { fetchOfficeProductDataRow } from './officeProductDataRowService';
 
 export async function saveOfficeProductData({
@@ -13,8 +16,8 @@ export async function saveOfficeProductData({
   const officeName = toTrimmedString(user?.office_name);
   const updatedWho = user?.id;
   const normalizedCategoryName = toTrimmedString(categoryName);
-  const normalizedRows = JSON.parse(
-    JSON.stringify(Array.isArray(rows) ? rows : []),
+  const normalizedRows = removeProductUsageFromRows(
+    JSON.parse(JSON.stringify(Array.isArray(rows) ? rows : [])),
   );
   const updatedAt = new Date().toISOString();
 

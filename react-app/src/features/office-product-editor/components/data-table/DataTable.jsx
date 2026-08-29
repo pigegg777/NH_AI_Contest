@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 
+import { buildPesticideInfoUrl } from '../../../../common/utils/pesticideInfoUrl';
 import { ImageThumbnailCell } from './data-table-cell/ImageThumbnailCell';
 import { LinkCell } from './data-table-cell/LinkCell';
 import { NoteCell } from './data-table-cell/NoteCell';
 import { PriceCell } from './data-table-cell/PriceCell';
 import { SelectionHeaderCheckbox } from './data-table-cell/SelectionHeaderCheckbox';
-import { UsageCell } from './data-table-cell/UsageCell';
 import {
   formatManufacturerList,
   formatPriceValue,
@@ -40,12 +40,11 @@ function renderCellContent(row, key, onPriceChange, onImgUrlChange, officeCode) 
     );
   }
 
-  if (key === 'product_usage') {
+  if (key === 'pesticide_info_link') {
     return (
-      <UsageCell
-        usage={row.product_usage}
-        productName={row.product_name}
-        rowId={row.row_id}
+      <LinkCell
+        href={buildPesticideInfoUrl(row)}
+        ariaLabel={`pesticide-info-${row.row_id}`}
       />
     );
   }
@@ -128,6 +127,7 @@ export function DataTable({
                 <th
                   key={column.key}
                   data-col={column.key}
+                  style={column.width ? { width: `${column.width}px` } : undefined}
                   aria-sort={
                     sortState?.key !== column.key
                       ? 'none'
@@ -178,6 +178,14 @@ export function DataTable({
                   <td
                     key={`${row.row_id}-${column.key}`}
                     data-col={column.key}
+                    style={
+                      column.width || column.noWrap
+                        ? {
+                            width: column.width ? `${column.width}px` : undefined,
+                            whiteSpace: column.noWrap ? 'nowrap' : undefined,
+                          }
+                        : undefined
+                    }
                     title={String(getCellTextValue(row, column.key))}
                   >
                     {renderCellContent(row, column.key, onPriceChange, onImgUrlChange, officeCode)}

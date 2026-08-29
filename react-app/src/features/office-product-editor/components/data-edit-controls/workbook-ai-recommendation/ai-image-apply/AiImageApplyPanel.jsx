@@ -66,11 +66,17 @@ export function AiImageApplyPanel({ imageApply }) {
       </div>
       <p className={styles.flowHint}>
         이미지 업로드 또는 AI 생성
-        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        <span className={styles.flowArrow} aria-hidden="true">
+          →
+        </span>
         저장
-        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        <span className={styles.flowArrow} aria-hidden="true">
+          →
+        </span>
         저장소에서 이미지 선택
-        <span className={styles.flowArrow} aria-hidden="true">→</span>
+        <span className={styles.flowArrow} aria-hidden="true">
+          →
+        </span>
         적용할 상품 조건 입력 후 적용
       </p>
       <div className={styles.sourceRow}>
@@ -79,7 +85,7 @@ export function AiImageApplyPanel({ imageApply }) {
           htmlFor="ai-image-apply-file-input"
           aria-disabled={isUploadingFile}
         >
-          {isUploadingFile ? '업로드 중...' : '📎 이미지 업로드'}
+          {isUploadingFile ? '업로드 중...' : '🗂️ 선택 이미지 업로드'}
         </label>
         <input
           id="ai-image-apply-file-input"
@@ -98,7 +104,7 @@ export function AiImageApplyPanel({ imageApply }) {
               : handleOpenStorageBrowser
           }
         >
-          {isStorageBrowserOpen ? '닫기' : '🗂️ 저장소에서 선택'}
+          {isStorageBrowserOpen ? '닫기' : '저장소에서 선택'}
         </button>
       </div>
 
@@ -122,7 +128,7 @@ export function AiImageApplyPanel({ imageApply }) {
           className={primitives.promptInput}
           value={generatePromptDraft}
           onChange={(event) => setGeneratePromptDraft(event.target.value)}
-          placeholder="예: 복합비료 20kg 포대 스튜디오 컷 이미지 생성해줘"
+          placeholder="예: 가축분퇴비 기본이미지 생성해줘/비료 기본이미지 생성해줘"
           rows={1}
         />
         <button
@@ -131,7 +137,7 @@ export function AiImageApplyPanel({ imageApply }) {
           disabled={generatePromptDraft.trim() === '' || isGenerating}
           onClick={handleGenerateSubmit}
         >
-          {isGenerating ? '생성 중...' : 'AI 생성'}
+          {isGenerating ? '이미지생성 중...' : 'AI 이미지생성'}
         </button>
       </div>
 
@@ -179,11 +185,13 @@ export function AiImageApplyPanel({ imageApply }) {
           type="button"
           className={styles.applyButton}
           disabled={
-            !previewImage?.storageUrl || instructionDraft.trim() === '' || isApplying
+            !previewImage?.storageUrl ||
+            instructionDraft.trim() === '' ||
+            isApplying
           }
           onClick={handleApplySubmit}
         >
-          {isApplying ? '적용 중...' : '적용'}
+          {isApplying ? '이미지 적용 중...' : 'AI 이미지적용'}
         </button>
       </div>
 

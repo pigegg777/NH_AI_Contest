@@ -31,15 +31,24 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
     handleRemoveReferenceSheet,
   } = bulkNoteWriter ?? {};
 
-  const { instructionDraft, setInstructionDraft, handleSubmit, handleReferenceSheetInputChange } =
-    useAiBulkNoteInstructionForm({ handlePreview, handleUploadReferenceSheet });
+  const {
+    instructionDraft,
+    setInstructionDraft,
+    handleSubmit,
+    handleReferenceSheetInputChange,
+  } = useAiBulkNoteInstructionForm({
+    handlePreview,
+    handleUploadReferenceSheet,
+  });
 
   if (!bulkNoteWriter) {
     return null;
   }
 
   return (
-    <section className={`${primitives.panel} ${primitives.compactPanel} ${styles.panelBlock}`}>
+    <section
+      className={`${primitives.panel} ${primitives.compactPanel} ${styles.panelBlock}`}
+    >
       {/* 엑셀 업로드 패널과 같은 배치: 제목 왼쪽, 파일 선택 버튼 오른쪽. */}
       <div className={primitives.panelHeader}>
         <h4 id="bulk-note-writer-label" className={primitives.panelTitle}>
@@ -48,7 +57,8 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
         {referenceSheet ? (
           <div className={styles.referenceSheetInfo}>
             <span className={styles.referenceSheetLabel}>
-              📎 {referenceSheet.fileName} · {referenceSheet.sheetName} · {referenceSheet.rows.length}행
+              📎 {referenceSheet.fileName} · {referenceSheet.sheetName} ·{' '}
+              {referenceSheet.rows.length}행
             </span>
             <button
               type="button"
@@ -77,7 +87,9 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
         )}
       </div>
       {referenceSheetError ? (
-        <p className={styles.referenceSheetErrorMessage}>{referenceSheetError}</p>
+        <p className={styles.referenceSheetErrorMessage}>
+          {referenceSheetError}
+        </p>
       ) : null}
 
       <div className={primitives.promptRow}>
@@ -87,8 +99,8 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
           className={primitives.promptInput}
           value={instructionDraft}
           onChange={(event) => setInstructionDraft(event.target.value)}
-          placeholder="예: 소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘"
-          rows={1}
+          placeholder="예: 소분류가 가축분퇴비인 상품에 '보조 1500원' 비고 작성해줘 / 업로드한 엑셀 데이터 추가해줘(조합원 정상가를 가격으로 판단해줘)"
+          rows={2}
         />
         <button
           type="button"
@@ -102,14 +114,23 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
 
       {isLoading ? <p className={styles.status}>매칭 중...</p> : null}
       {!isLoading && mode === 'error' ? (
-        <p className={styles.status}>{message || '일괄비고 작성에 실패했습니다.'}</p>
+        <p className={styles.status}>
+          {message || '일괄비고 작성에 실패했습니다.'}
+        </p>
       ) : null}
-      {!isLoading && mode === 'openai' && matches.length === 0 && rowPlanCount === 0 ? (
-        <p className={styles.status}>{unmatchedReason || '조건에 맞는 상품을 찾지 못했습니다.'}</p>
+      {!isLoading &&
+      mode === 'openai' &&
+      matches.length === 0 &&
+      rowPlanCount === 0 ? (
+        <p className={styles.status}>
+          {unmatchedReason || '조건에 맞는 상품을 찾지 못했습니다.'}
+        </p>
       ) : null}
       {!isLoading && action === 'append_rows' && rowPlanCount > 0 ? (
         <div className={styles.previewBlock}>
-          <p className={styles.matchCount}>상품 {rowPlanCount}건을 읽었습니다. 등록 내용을 확인해 주세요.</p>
+          <p className={styles.matchCount}>
+            상품 {rowPlanCount}건을 읽었습니다. 등록 내용을 확인해 주세요.
+          </p>
           <AiBulkNoteRowPlanList
             rowPlan={rowPlan}
             ambiguousSelection={ambiguousSelection}
@@ -136,7 +157,11 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
                   : `${rowPlan.conflicting.length + selectedAmbiguousCount}건 갱신`}
               </button>
             ) : null}
-            <button type="button" className={styles.cancelButton} onClick={handleClear}>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={handleClear}
+            >
               취소
             </button>
           </div>
@@ -145,21 +170,32 @@ export function AiBulkNoteWriterPanel({ bulkNoteWriter }) {
       {!isLoading && matches.length > 0 ? (
         <div className={styles.previewBlock}>
           <p className={styles.matchCount}>
-            {matches.length}개 상품이 매칭되었습니다. 선택된 필드를 새 값으로 덮어씁니다.
+            {matches.length}개 상품이 매칭되었습니다. 선택된 필드를 새 값으로
+            덮어씁니다.
           </p>
           <AiBulkNoteMatchList matches={matches} rows={rows} />
           <div className={styles.previewActions}>
-            <button type="button" className={styles.applyButton} onClick={handleApply}>
+            <button
+              type="button"
+              className={styles.applyButton}
+              onClick={handleApply}
+            >
               적용
             </button>
-            <button type="button" className={styles.cancelButton} onClick={handleClear}>
+            <button
+              type="button"
+              className={styles.cancelButton}
+              onClick={handleClear}
+            >
               취소
             </button>
           </div>
         </div>
       ) : null}
       {!isLoading && appliedCount > 0 ? (
-        <p className={styles.status}>{appliedCount}개 행에 비고를 적용했습니다.</p>
+        <p className={styles.status}>
+          {appliedCount}개 행에 비고를 적용했습니다.
+        </p>
       ) : null}
       {!isLoading && appliedSummary ? (
         <p className={styles.status}>{appliedSummary}</p>

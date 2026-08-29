@@ -259,9 +259,9 @@ describe('useWorkbookReviewTableState', () => {
       });
       expect(result.current.rows[0]).toMatchObject({
         nutirent: '살충제',
-        product_usage: ['진딧물'],
         indict_symbl: '접촉독',
       });
+      expect(result.current.rows[0]).not.toHaveProperty('product_usage');
     });
   });
 

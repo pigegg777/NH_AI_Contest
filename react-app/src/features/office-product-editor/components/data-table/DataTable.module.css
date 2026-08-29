@@ -21,7 +21,7 @@
 }
 
 .table[data-mode='pesticide'] {
-  width: max(100%, 1400px);
+  width: max(100%, 1840px);
 }
 
 .table[data-mode='default'] {
@@ -108,11 +108,6 @@
 .table th[data-col='product_category'],
 .table td[data-col='product_category'] {
   width: 92px;
-}
-
-.table th[data-col='product_usage'],
-.table td[data-col='product_usage'] {
-  width: 80px;
 }
 
 .table th[data-col='indict_symbl'],
