@@ -1,14 +1,14 @@
-import { toTrimmedString } from '../../../../common/utils/text';
+import { toTrimmedString } from '../../../common/utils/text';
 import {
   normalizeCategoryConfigRow,
   normalizeNavConfig,
   normalizePageConfig,
-} from './storefrontBuilderModel';
+} from '../../storefront/model/storefront-config/storefrontBuilderModel';
 import {
   migrateLegacyPageConfigToPageStyle,
   pageConfigNeedsPageStyleMigration,
-} from '../page-design/style/pageStyleMigration';
-import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../../services/storefront-config/storefrontConfigService';
+} from './pageStyleMigration';
+import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../services/storefrontConfigService';
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];

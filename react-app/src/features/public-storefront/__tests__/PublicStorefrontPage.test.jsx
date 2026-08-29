@@ -5,7 +5,7 @@ import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
-import { fetchStorefrontConfig } from '../../storefront/model/storefront-config/storefrontConfigOrchestrator';
+import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 
 vi.mock(
@@ -16,7 +16,7 @@ vi.mock(
   }),
 );
 
-vi.mock('../../storefront/model/storefront-config/storefrontConfigOrchestrator', () => ({
+vi.mock('../../storefront-config/model/storefrontConfigOrchestrator', () => ({
   fetchStorefrontConfig: vi.fn(),
 }));
 

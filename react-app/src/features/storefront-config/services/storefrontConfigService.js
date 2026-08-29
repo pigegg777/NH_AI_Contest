@@ -1,5 +1,5 @@
-import supabase from '../../../../lib/supabaseClient';
-import { toTrimmedString } from '../../../../common/utils/text';
+import supabase from '../../../lib/supabaseClient';
+import { toTrimmedString } from '../../../common/utils/text';
 
 function toArray(value) {
   return Array.isArray(value) ? value : [];

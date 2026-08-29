@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/office-product-data/officeProductDataReadService';
 import StorefrontBuilderPage from '../pages/StorefrontBuilderPage';
-import { fetchStorefrontConfig } from '../model/storefront-config/storefrontConfigOrchestrator';
+import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 
 vi.mock(
   '../../office-product-editor/services/office-product-data/officeProductDataReadService',
@@ -12,7 +12,7 @@ vi.mock(
   }),
 );
 
-vi.mock('../model/storefront-config/storefrontConfigOrchestrator', () => ({
+vi.mock('../../storefront-config/model/storefrontConfigOrchestrator', () => ({
   fetchStorefrontConfig: vi.fn(),
   upsertStorefrontConfig: vi.fn(),
 }));

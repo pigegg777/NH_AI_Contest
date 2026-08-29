@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import supabase from '../../../lib/supabaseClient';
-import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../services/storefront-config/storefrontConfigService';
+import { fetchOfficeConfigRows, saveOfficeConfigRows } from '../services/storefrontConfigService';
 
 vi.mock('../../../lib/supabaseClient', () => ({
   default: {

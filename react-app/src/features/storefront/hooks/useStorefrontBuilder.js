@@ -27,7 +27,7 @@ import { sanitizeMobileUiTree } from "../model/storefront-config/storefrontUiMod
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
-} from "../model/storefront-config/storefrontConfigOrchestrator";
+} from "../../storefront-config/model/storefrontConfigOrchestrator";
 import { getStorefrontDesignComposerCopy } from "../components/builder-workspace/mode-choice/storefrontChatModes";
 import { buildDerivedPageTitle } from "../model/storefront-view/pageTitleModel";
 import { resolveLatestProductUpdatedAt } from "../model/storefront-view/productUpdatedAtModel";

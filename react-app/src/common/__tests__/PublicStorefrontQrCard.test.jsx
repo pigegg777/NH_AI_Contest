@@ -2,14 +2,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchStorefrontConfig } from '../../features/storefront/model/storefront-config/storefrontConfigOrchestrator';
+import { fetchStorefrontConfig } from '../../features/storefront-config/model/storefrontConfigOrchestrator';
 import PublicStorefrontQrCard from '../components/PublicStorefrontQrCard';
 import {
   buildStorefrontQrAssets,
   printStorefrontQr,
 } from '../services/publicStorefrontQrService';
 
-vi.mock('../../features/storefront/model/storefront-config/storefrontConfigOrchestrator', () => ({
+vi.mock('../../features/storefront-config/model/storefrontConfigOrchestrator', () => ({
   fetchStorefrontConfig: vi.fn(),
 }));
 

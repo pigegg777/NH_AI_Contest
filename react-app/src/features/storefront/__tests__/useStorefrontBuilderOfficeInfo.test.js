@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchOfficeProductDataEntries } from '../../office-product-editor/services/office-product-data/officeProductDataReadService';
-import { fetchStorefrontConfig } from '../model/storefront-config/storefrontConfigOrchestrator';
+import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 import { useStorefrontBuilder } from '../hooks/useStorefrontBuilder';
 
 vi.mock(
@@ -12,7 +12,7 @@ vi.mock(
   }),
 );
 
-vi.mock('../model/storefront-config/storefrontConfigOrchestrator', () => ({
+vi.mock('../../storefront-config/model/storefrontConfigOrchestrator', () => ({
   fetchStorefrontConfig: vi.fn(),
   upsertStorefrontConfig: vi.fn(),
 }));

@@ -12,7 +12,7 @@ import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pa
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
-} from "../model/storefront-config/storefrontConfigOrchestrator";
+} from "../../storefront-config/model/storefrontConfigOrchestrator";
 
 // Mode labels are UI copy that gets renamed; read them off the options so a rename
 // never breaks these cases.
@@ -30,7 +30,7 @@ vi.mock(
   }),
 );
 
-vi.mock("../model/storefront-config/storefrontConfigOrchestrator", () => ({
+vi.mock("../../storefront-config/model/storefrontConfigOrchestrator", () => ({
   fetchStorefrontConfig: vi.fn(),
   upsertStorefrontConfig: vi.fn(),
 }));

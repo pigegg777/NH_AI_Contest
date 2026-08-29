@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { deleteOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
-import { removeCategoryDetailConfig } from '../../../storefront/services/storefront-config/storefrontConfigService';
+import { removeCategoryDetailConfig } from '../../../storefront-config/services/storefrontConfigService';
 
 export function useOfficeProductDataDeletion({
   user,
