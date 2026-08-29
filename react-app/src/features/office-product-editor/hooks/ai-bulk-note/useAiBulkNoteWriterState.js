@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
 import { analyzeAiBulkNoteMatches } from '../../model/ai-bulk-note/aiBulkNoteAnalysisModel';
-import { AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS } from '../../model/ai-bulk-note/aiBulkNoteRequestBodyModel';
+import {
+  AI_BULK_NOTE_REFERENCE_SHEET_ERROR,
+  readAiBulkNoteReferenceSheet,
+} from '../../model/ai-bulk-note/aiBulkNoteReferenceSheetModel';
 import { AI_BULK_NOTE_PRICE_FIELD_KEYS } from '../../model/ai-bulk-note/aiBulkNoteMatchModel';
 import {
   buildAiBulkNoteRowPlan,
@@ -9,14 +12,14 @@ import {
   resolveAiBulkNoteRowPlanStaticData,
   splitAiBulkRowUpdate,
 } from '../../model/ai-bulk-note/aiBulkNoteRowPlanModel';
-import { readWorkbookSheet } from '../../services/workbookSheetReader';
 
-const REFERENCE_SHEET_ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
-
-function hasAllowedReferenceSheetExtension(fileName) {
-  const lowerName = (fileName || '').toLowerCase();
-  return REFERENCE_SHEET_ALLOWED_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
-}
+const REFERENCE_SHEET_ERROR_MESSAGES = {
+  [AI_BULK_NOTE_REFERENCE_SHEET_ERROR.UNSUPPORTED_EXTENSION]: () =>
+    '엑셀(.xlsx, .xls) 파일만 업로드할 수 있습니다.',
+  [AI_BULK_NOTE_REFERENCE_SHEET_ERROR.UNREADABLE]: () => '엑셀 파일을 읽을 수 없습니다.',
+  [AI_BULK_NOTE_REFERENCE_SHEET_ERROR.TOO_MANY_ROWS]: (maxRows) =>
+    `참고 엑셀은 ${maxRows}행 이하만 지원합니다.`,
+};
 
 function normalizeWriterOptions(optionsOrOfficeCode, rows, tableNameMode, updateNote, updatePrice) {
   return optionsOrOfficeCode && typeof optionsOrOfficeCode === 'object'
@@ -65,27 +68,15 @@ export function useAiBulkNoteWriterState(
       return;
     }
 
-    if (!hasAllowedReferenceSheetExtension(file.name)) {
-      setReferenceSheetError('엑셀(.xlsx, .xls) 파일만 업로드할 수 있습니다.');
+    const { referenceSheet: readSheet, error, maxRows } =
+      await readAiBulkNoteReferenceSheet(file);
+
+    if (error) {
+      setReferenceSheetError(REFERENCE_SHEET_ERROR_MESSAGES[error](maxRows));
       return;
     }
 
-    let sheetName;
-    let sheetRows;
-
-    try {
-      ({ sheetName, sheetRows } = await readWorkbookSheet(file));
-    } catch {
-      setReferenceSheetError('엑셀 파일을 읽을 수 없습니다.');
-      return;
-    }
-
-    if (sheetRows.length > AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS) {
-      setReferenceSheetError(`참고 엑셀은 ${AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS}행 이하만 지원합니다.`);
-      return;
-    }
-
-    setReferenceSheet({ fileName: file.name, sheetName, rows: sheetRows });
+    setReferenceSheet(readSheet);
     setReferenceSheetError(null);
   }
 

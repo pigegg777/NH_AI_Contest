@@ -1,7 +1,51 @@
 import { toNullableTrimmedString, toTrimmedString } from '../../../../common/utils/text';
+import { readWorkbookSheet } from '../../services/workbookSheetReader';
 import { sanitizeAiBulkNoteNewRows } from './aiBulkNoteNewRowModel';
+import { AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS } from './aiBulkNoteRequestBodyModel';
 
 const HEADER_SCAN_LIMIT = 30;
+const ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
+
+export const AI_BULK_NOTE_REFERENCE_SHEET_ERROR = {
+  UNSUPPORTED_EXTENSION: 'unsupported-extension',
+  UNREADABLE: 'unreadable',
+  TOO_MANY_ROWS: 'too-many-rows',
+};
+
+function hasAllowedExtension(fileName) {
+  const lowerName = toTrimmedString(fileName).toLowerCase();
+  return ALLOWED_EXTENSIONS.some((extension) => lowerName.endsWith(extension));
+}
+
+/**
+ * 참고 엑셀 한 건을 읽어 검증까지 마친다. 성공하면 { referenceSheet },
+ * 실패하면 { error } 를 돌려준다 — 문구는 호출자가 정한다.
+ */
+export async function readAiBulkNoteReferenceSheet(file) {
+  if (!hasAllowedExtension(file?.name)) {
+    return { error: AI_BULK_NOTE_REFERENCE_SHEET_ERROR.UNSUPPORTED_EXTENSION };
+  }
+
+  let sheetName;
+  let sheetRows;
+
+  try {
+    ({ sheetName, sheetRows } = await readWorkbookSheet(file));
+  } catch {
+    return { error: AI_BULK_NOTE_REFERENCE_SHEET_ERROR.UNREADABLE };
+  }
+
+  if (sheetRows.length > AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS) {
+    return {
+      error: AI_BULK_NOTE_REFERENCE_SHEET_ERROR.TOO_MANY_ROWS,
+      maxRows: AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS,
+    };
+  }
+
+  return {
+    referenceSheet: { fileName: file.name, sheetName, rows: sheetRows },
+  };
+}
 const APPEND_INSTRUCTION_PATTERN = /(?:추가|신규\s*(?:상품|데이터)?\s*등록|(?:상품|제품|품목|데이터|엑셀).{0,8}등록|등록.{0,8}(?:상품|제품|품목|데이터|엑셀))/;
 
 const FIELD_ALIASES = {

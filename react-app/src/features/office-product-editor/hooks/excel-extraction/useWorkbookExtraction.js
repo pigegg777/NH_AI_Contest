@@ -1,6 +1,5 @@
 import { startTransition, useCallback, useReducer } from 'react';
-import { extractSalesPriceSheetData } from '../../model/excel-extranction/workbookExtractionModel';
-import { readWorkbookSheet } from '../../services/workbookSheetReader';
+import { readSalesPriceWorkbook } from '../../model/excel-extraction/workbookExtractionModel';
 
 const initialState = {
   selectedFileName: '',
@@ -63,11 +62,7 @@ export function useWorkbookExtraction(initialDraft = null) {
     dispatch({ type: 'FILE_SELECTED', file });
 
     try {
-      const { sheetName, sheetRows } = await readWorkbookSheet(file);
-      const result = {
-        sheetName,
-        ...extractSalesPriceSheetData(sheetRows),
-      };
+      const result = await readSalesPriceWorkbook(file);
 
       startTransition(() => {
         dispatch({ type: 'EXTRACTION_COMPLETE', result });

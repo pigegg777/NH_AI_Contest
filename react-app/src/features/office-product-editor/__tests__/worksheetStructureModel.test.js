@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { analyzeWorksheetStructure } from '../model/excel-extranction/worksheetStructureModel';
+import { analyzeWorksheetStructure } from '../model/excel-extraction/worksheetStructureModel';
 
 describe('worksheet structure model', () => {
   it('detects header row, column map, data range, and warnings', () => {

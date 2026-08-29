@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildAggregatedWorksheetRows } from '../model/excel-extranction/worksheetRowsModel';
+import { buildAggregatedWorksheetRows } from '../model/excel-extraction/worksheetRowsModel';
 
 const COLUMN_MAP = {
   sale_price_type_name: 0,

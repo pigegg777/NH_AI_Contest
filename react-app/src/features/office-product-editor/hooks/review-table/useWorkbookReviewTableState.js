@@ -11,7 +11,7 @@ import {
 } from '../../model/static-data-merge/staticPesticideMergeModel';
 import { ReviewTableAnnotationModel } from '../../model/review-table/reviewTableAnnotationModel';
 import { ReviewTableBuildModel } from '../../model/review-table/reviewTableBuildModel';
-import { fetchStaticProductLookup } from '../../services/staticProductLookupService';
+import { loadStaticMergeLookup } from '../../model/static-data-merge/staticDataMergeModel';
 import { useAiBulkRowDrafts } from '../ai-bulk-row-draft/useAiBulkRowDrafts';
 
 import { createInitialFilters } from '../../model/review-table/reviewTableBuildModel';
@@ -100,28 +100,14 @@ export function useWorkbookReviewTableState(
     setIsStaticMergeLoading(true);
 
     void (async () => {
-      try {
-        const lookup = await fetchStaticProductLookup(
-          mergeKind,
-          staticMergeProductCodes,
-        );
+      const lookup = await loadStaticMergeLookup(mergeKind, staticMergeProductCodes);
 
-        if (isCancelled) {
-          return;
-        }
-
-        setStaticMergeLookup(lookup);
-      } catch {
-        if (isCancelled) {
-          return;
-        }
-
-        setStaticMergeLookup({});
-      } finally {
-        if (!isCancelled) {
-          setIsStaticMergeLoading(false);
-        }
+      if (isCancelled) {
+        return;
       }
+
+      setStaticMergeLookup(lookup);
+      setIsStaticMergeLoading(false);
     })();
 
     return () => {

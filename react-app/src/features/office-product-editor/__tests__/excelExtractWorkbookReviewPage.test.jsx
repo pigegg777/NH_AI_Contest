@@ -16,7 +16,7 @@ const saveOfficeProductData = vi.fn();
 const fetchOfficeProductData = vi.fn();
 const fetchStaticProductLookup = vi.fn();
 
-vi.mock('../hooks/excel-extranction/useWorkbookExtraction', () => ({
+vi.mock('../hooks/excel-extraction/useWorkbookExtraction', () => ({
   useWorkbookExtraction: () => ({
     selectedFileName: 'demo.xlsx',
     workbookFingerprint: 'workbook-fingerprint',

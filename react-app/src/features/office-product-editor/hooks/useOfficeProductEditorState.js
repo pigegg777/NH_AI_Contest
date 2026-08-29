@@ -8,7 +8,7 @@ import { useAiMarketResearchState } from './ai-market-research/useAiMarketResear
 import { useAiBulkNoteWriterState } from './ai-bulk-note/useAiBulkNoteWriterState';
 import { useAiImageApplyState } from './ai-image-apply/useAiImageApplyState';
 import { useWorkbookCatalogSelection } from './sidebar-catalog/useWorkbookCatalogSelection';
-import { useWorkbookExtraction } from './excel-extranction/useWorkbookExtraction';
+import { useWorkbookExtraction } from './excel-extraction/useWorkbookExtraction';
 import { usePreviousDataCarryOver } from './office-product-data/usePreviousDataCarryOver';
 import { useWorkbookReviewTableState } from './review-table/useWorkbookReviewTableState';
 import { useWorkbookSave } from './office-product-data/useWorkbookSave';

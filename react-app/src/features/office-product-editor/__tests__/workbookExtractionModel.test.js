@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { extractSalesPriceSheetData } from '../model/excel-extranction/workbookExtractionModel';
+import { extractSalesPriceSheetData } from '../model/excel-extraction/workbookExtractionModel';
 
 describe('workbook extraction model', () => {
   it('extracts aggregated workbook rows from plain sheet rows', () => {
