@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { toTrimmedString } from "../../../common/utils/text";
-import { fetchOfficeProductDataEntries } from "../../office-product-editor/services/office-product-data/officeProductDataReadService";
+import { loadOfficeProductEntries } from "../../office-product-editor/model/office-product-data/officeProductDataReadModel";
 import { CARD_AI_TARGET_SCOPE_OPTIONS } from "../model/card-design/ai-request/cardAiDesignModel";
 import { CARD_DESIGN_LAYOUT_OPTIONS } from "../model/card-design/ai-request/cardDesignLayoutOptions";
 import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
@@ -332,7 +332,7 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setErrorMessage("");
 
     Promise.all([
-      fetchOfficeProductDataEntries({ officeCode }),
+      loadOfficeProductEntries({ officeCode }),
       fetchStorefrontConfig({ officeCode }),
     ])
       .then(([nextProductEntries, config]) => {

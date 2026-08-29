@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import {
-  fetchAllOfficeProductRows,
-  fetchPublicOfficeIdentity,
-} from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
+import { loadPublicOfficeProducts } from '../../office-product-editor/model/office-product-data/publicOfficeProductModel';
 import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 import styles from './PublicStorefrontPage.module.css';
 import PublicStorefrontScreen from '../components/PublicStorefrontScreen';
@@ -39,15 +36,14 @@ export default function PublicStorefrontPage({ officeCode }) {
 
     Promise.all([
       fetchStorefrontConfig({ officeCode: normalizedOfficeCode }),
-      fetchAllOfficeProductRows({ officeCode: normalizedOfficeCode }),
-      fetchPublicOfficeIdentity({ officeCode: normalizedOfficeCode }),
+      loadPublicOfficeProducts(normalizedOfficeCode),
     ])
-      .then(([config, productRows, officeIdentity]) => {
+      .then(([config, products]) => {
         if (isCancelled) {
           return;
         }
 
-        if (!config || productRows.length === 0) {
+        if (!config || products.productRows.length === 0) {
           setState(EMPTY_STATE);
           return;
         }
@@ -55,10 +51,7 @@ export default function PublicStorefrontPage({ officeCode }) {
         setState({
           status: 'ready',
           config,
-          productRows,
-          officeName: officeIdentity?.officeName ?? '',
-          productUpdatedAt: officeIdentity?.productUpdatedAt ?? '',
-          nhName: officeIdentity?.nhName ?? '',
+          ...products,
         });
       })
       .catch(() => {

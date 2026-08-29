@@ -2,6 +2,7 @@ import { toTrimmedString } from '../../../../common/utils/text';
 import {
   fetchOfficeProductData,
   fetchOfficeProductDataCatalog,
+  fetchOfficeProductDataEntries,
 } from '../../services/office-product-data/officeProductDataReadService';
 
 /**
@@ -28,4 +29,16 @@ export async function loadOfficeProductCatalog(officeCode) {
 
 export async function loadRegisteredProductData({ officeCode, categoryName }) {
   return fetchOfficeProductData({ officeCode, categoryName });
+}
+
+/**
+ * 등록된 카테고리 전부를 행까지 함께 읽는다. Storefront builder 가 쓴다.
+ *
+ * 서비스가 이미 정규화된 배열을 돌려주므로 여기서 더할 변환은 없다 — 이
+ * 함수는 깊이가 아니라 표면이다. office-product-editor 가 밖에 내주는
+ * 읽기 연산을 여기 모아두면, services/ 내부를 바꿔도 storefront 쪽이
+ * 깨지지 않는다.
+ */
+export async function loadOfficeProductEntries({ officeCode }) {
+  return fetchOfficeProductDataEntries({ officeCode });
 }
