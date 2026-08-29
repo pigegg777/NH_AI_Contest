@@ -5,7 +5,7 @@ import {
   fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
 import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
-import styles from '../../storefront/pages/PublicStorefrontPage.module.css';
+import styles from './PublicStorefrontPage.module.css';
 import PublicStorefrontScreen from '../components/PublicStorefrontScreen';
 
 const EMPTY_STATE = {

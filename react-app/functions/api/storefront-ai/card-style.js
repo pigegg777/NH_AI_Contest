@@ -1,11 +1,11 @@
-import { normalizeCardAiDesignInput } from '../../../src/features/storefront/model/card-design/ai-request/cardAiDesignModel.js';
-import { normalizeCardStyle } from '../../../src/features/storefront/model/card-design/style/cardStyleModel.js';
+import { normalizeCardAiDesignInput } from '../../../src/features/storefront-builder/model/card-design/ai-request/cardAiDesignModel.js';
+import { normalizeCardStyle } from '../../../src/features/storefront-view/model/card-design/style/cardStyleModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
-import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront/model/card-design/ai-request/cardStyleOpenAiRequest.js';
+import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront-builder/model/card-design/ai-request/cardStyleOpenAiRequest.js';
 import {
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,
-} from '../../../src/features/storefront/model/card-design/ai-response/cardStyleAiResponseNormalizer.js';
+} from '../../../src/features/storefront-builder/model/card-design/ai-response/cardStyleAiResponseNormalizer.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
   assertHistoryWithinLimits,

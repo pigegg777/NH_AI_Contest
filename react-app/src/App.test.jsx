@@ -29,7 +29,7 @@ vi.mock('./common/components/PublicStorefrontQrCard', () => ({
   default: () => <div data-testid="dashboard-public-storefront-qr-card" />,
 }));
 
-vi.mock('./features/storefront/pages/StorefrontBuilderPage', () => ({
+vi.mock('./features/storefront-builder/pages/StorefrontBuilderPage', () => ({
   default: ({ officeCode }) => <div>storefront-builder-page:{officeCode}</div>,
 }));
 
