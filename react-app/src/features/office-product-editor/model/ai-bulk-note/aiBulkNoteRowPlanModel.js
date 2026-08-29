@@ -4,6 +4,8 @@ import {
   buildAiBulkRowId,
 } from '../ai-bulk-row-draft/aiBulkRowDraftModel';
 import { normalizeAppendedRow } from '../ai-bulk-row-draft/aiBulkRowDraftStorageModel';
+import { shouldUseStaticDataMerge } from '../static-data-merge/staticDataMergeModel';
+import { fetchStaticProductLookup } from '../../services/staticProductLookupService';
 
 // Written through updateNote/updatePrice rather than the draft layer, because
 // the annotation layer sits above drafts and would otherwise mask them.
@@ -142,4 +144,32 @@ export function markAiBulkNoteRowPlanStaticData(plan, staticProductCodes) {
     conflicting: plan.conflicting.map(markEntry),
     ambiguous: plan.ambiguous.map(markEntry),
   };
+}
+
+function collectRowPlanProductCodes(plan) {
+  return [
+    ...plan.appended,
+    ...plan.conflicting,
+    ...plan.ambiguous,
+  ].map((entry) => entry.productCode);
+}
+
+// Fetching the lookup belongs to the row plan itself: the plan is the only
+// thing that knows which product codes need looking up, and the static badge
+// is meaningless without it.
+export async function resolveAiBulkNoteRowPlanStaticData(plan, tableNameMode) {
+  if (!shouldUseStaticDataMerge(tableNameMode)) {
+    // Left unmarked rather than marked false, so the panel shows no badge.
+    return plan;
+  }
+
+  let lookup = {};
+
+  try {
+    lookup = await fetchStaticProductLookup(tableNameMode, collectRowPlanProductCodes(plan));
+  } catch {
+    lookup = {};
+  }
+
+  return markAiBulkNoteRowPlanStaticData(plan, new Set(Object.keys(lookup)));
 }

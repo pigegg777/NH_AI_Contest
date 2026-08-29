@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   buildAiBulkNoteRowPlan,
@@ -6,6 +6,12 @@ import {
   markAiBulkNoteRowPlanStaticData,
   splitAiBulkRowUpdate,
 } from '../model/ai-bulk-note/aiBulkNoteRowPlanModel';
+
+// Only the pure planning functions are exercised here; the mock keeps the
+// supabase-backed lookup out of this suite.
+vi.mock('../services/staticProductLookupService', () => ({
+  fetchStaticProductLookup: vi.fn(),
+}));
 
 function buildNewRow(overrides = {}) {
   return {

@@ -6,10 +6,9 @@ import {
   buildAiBulkNoteRowPlan,
   countAiBulkNoteRowPlan,
   createEmptyAiBulkNoteRowPlan,
-  markAiBulkNoteRowPlanStaticData,
+  resolveAiBulkNoteRowPlanStaticData,
   splitAiBulkRowUpdate,
 } from '../../model/ai-bulk-note/aiBulkNoteRowPlanModel';
-import { fetchStaticProductLookup } from '../../services/staticProductLookupService';
 import { readWorkbookSheet } from '../../services/workbookSheetReader';
 
 const REFERENCE_SHEET_ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
@@ -124,30 +123,13 @@ export function useAiBulkNoteWriterState(
     let nextRowPlan = createEmptyAiBulkNoteRowPlan();
 
     if (nextAction === 'append_rows') {
-      nextRowPlan = buildAiBulkNoteRowPlan(result.newRows, rows);
+      nextRowPlan = await resolveAiBulkNoteRowPlanStaticData(
+        buildAiBulkNoteRowPlan(result.newRows, rows),
+        tableNameMode,
+      );
 
-      if (tableNameMode === 'fertilizer' || tableNameMode === 'pesticide') {
-        const productCodes = [
-          ...nextRowPlan.appended,
-          ...nextRowPlan.conflicting,
-          ...nextRowPlan.ambiguous,
-        ].map((entry) => entry.productCode);
-        let lookup = {};
-
-        try {
-          lookup = await fetchStaticProductLookup(tableNameMode, productCodes);
-        } catch {
-          lookup = {};
-        }
-
-        if (requestIdRef.current !== requestId) {
-          return;
-        }
-
-        nextRowPlan = markAiBulkNoteRowPlanStaticData(
-          nextRowPlan,
-          new Set(Object.keys(lookup)),
-        );
+      if (requestIdRef.current !== requestId) {
+        return;
       }
     }
 

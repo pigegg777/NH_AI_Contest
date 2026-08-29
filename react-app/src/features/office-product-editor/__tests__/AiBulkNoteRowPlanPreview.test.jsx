@@ -4,6 +4,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { AiBulkNoteWriterPanel } from '../components/data-edit-controls/workbook-ai-recommendation/ai-bulk-note/AiBulkNoteWriterPanel';
 import { buildAiBulkNoteRowPlan } from '../model/ai-bulk-note/aiBulkNoteRowPlanModel';
 
+// The panel only renders a prebuilt plan, so the supabase-backed lookup the
+// row plan model can call is kept out of this suite.
+vi.mock('../services/staticProductLookupService', () => ({
+  fetchStaticProductLookup: vi.fn(),
+}));
+
 const newRowTemplate = {
   product_name: '새 상품',
   spec: '20kg',
