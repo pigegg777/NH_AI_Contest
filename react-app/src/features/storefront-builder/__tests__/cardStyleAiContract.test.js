@@ -58,6 +58,16 @@ describe('CARD_STYLE_AI_SCHEMA', () => {
     expect(collectStrictModeViolations(CARD_STYLE_AI_SCHEMA)).toEqual([]);
   });
 
+  it('does not offer the page accent brand role to card design', () => {
+    expect(
+      CARD_STYLE_AI_SCHEMA.properties.field.properties.priceColorRole.enum,
+    ).not.toContain('brand');
+    expect(
+      CARD_STYLE_AI_SCHEMA.properties.field.properties.targetedFieldStyles
+        .items.properties.colorRole.enum,
+    ).not.toContain('brand');
+  });
+
   it('exposes layout and requestedGroups in the strict schema', () => {
     expect(CARD_STYLE_AI_SCHEMA.properties.layout).toBeDefined();
     expect(
@@ -153,7 +163,7 @@ describe('normalizeOpenAiCardIntent', () => {
         header: { backgroundColor: null, titleColorHex: '#111827', letterSpacing: null, fontWeight: null },
         image: null,
         info: null,
-        field: { priceColorRole: 'brand', targetedFieldStyles: null },
+        field: { priceColorRole: 'green', targetedFieldStyles: null },
       },
       'header',
     );

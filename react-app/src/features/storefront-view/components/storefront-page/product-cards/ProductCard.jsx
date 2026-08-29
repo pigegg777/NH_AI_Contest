@@ -4,6 +4,7 @@ import {
   buildConditionalInfoBodyStyle,
   resolveActiveConditionalStyle,
 } from '../../../model/card-grid-section/cardGridConditionalStyleModel';
+import CardCartAddButton from '../cart/CardCartAddButton';
 import CardHeaderSection from './CardHeaderSection';
 import CardImageSection from './CardImageSection';
 import CardInfoSection from './CardInfoSection';
@@ -81,6 +82,7 @@ export default function ProductCard({
           </div>
           {imageAfter}
         </div>
+        <CardCartAddButton product={product} />
       </article>
     );
   }
@@ -102,6 +104,7 @@ export default function ProductCard({
           {mainSectionOrder.map((sectionName) => sectionNodes[sectionName])}
         </div>
         {imageAfter}
+        <CardCartAddButton product={product} />
       </article>
     );
   }
@@ -114,6 +117,7 @@ export default function ProductCard({
       data-image-placement={imagePlacement}
     >
       {sectionOrder.map((sectionName) => sectionNodes[sectionName])}
+      <CardCartAddButton product={product} />
     </article>
   );
 }

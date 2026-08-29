@@ -303,13 +303,58 @@
   background: var(--corp-panel-strong, transparent);
 }
 
-/* 툴팁이 아니라 상시 노출한다. 판매자는 hover 하지 않는다. */
+/* 툴팁이 아니라 상시 노출한다. 판매자는 hover 하지 않는다.
+
+   여기 적힌 << >> / [[ ]] 는 사장님이 직접 타이핑해야 하는 문법이다. 흐린
+   회색 잔글씨로 두면 안내문의 배경처럼 읽히고, 모르면 안내가 통째로 잘못
+   써진다. 디자인 안내(.scopeGuideNote)와 같은 말투 — 왼쪽 굵은 선, 옅은
+   배경, 느낌표 배지 — 로 세워 빌더 안에서 '이건 규칙이다'가 같은 모양으로
+   보이게 한다. */
 .entryHelp {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  color: var(--corp-muted);
-  font-size: 0.74rem;
+  padding: 10px 12px;
+  border-left: 3px solid var(--corp-primary-bright);
+  border-radius: 0 var(--corp-radius) var(--corp-radius) 0;
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary-hover);
+  font-size: 0.78rem;
+  font-weight: 600;
   line-height: 1.6;
   word-break: keep-all;
+}
+
+/* 장식이라 낭독기에는 읽히지 않게 둔다 — 문구 자체가 이미 안내다. */
+.entryHelp::before {
+  content: '!';
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 문장 속에서 '이건 그대로 쳐야 하는 글자'임이 드러나야 한다. 등폭 글꼴과
+   상자를 주면 설명하지 않아도 구분된다. */
+.entryHelpToken {
+  padding: 1px 5px;
+  border: 1px solid var(--corp-accent-border);
+  border-radius: var(--corp-radius-sm);
+  background: var(--corp-panel);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .entryRemoveButton {

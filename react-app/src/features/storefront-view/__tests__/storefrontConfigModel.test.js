@@ -8,6 +8,7 @@ import {
   normalizePageConfig,
   normalizeCardFields,
   deriveAvailableCategoryFields,
+  deriveEffectiveScalarKeys,
   STOREFRONT_FIELD_DISPLAY_ORDER,
 } from '../model/config-schema/storefrontConfigModel';
 import { DEFAULT_CARD_STYLE } from '../model/card-style/cardStyleModel';
@@ -202,6 +203,27 @@ describe('normalizeCardFields', () => {
 });
 
 describe('deriveAvailableCategoryFields', () => {
+  it('offers the official pesticide information link for pesticide rows', () => {
+    const fields = deriveAvailableCategoryFields([
+      { product_name: '프레바톤', large_category: '농약' },
+    ]);
+
+    expect(fields.find((field) => field.key === 'pesticide_info_link')).toMatchObject({
+      label: '농약정보',
+      isSelectable: true,
+    });
+    expect(deriveEffectiveScalarKeys([{ product_name: '프레바톤', large_category: '농약' }]))
+      .toContain('pesticide_info_link');
+  });
+
+  it('does not offer the pesticide information link for non-pesticide rows', () => {
+    const fields = deriveAvailableCategoryFields([
+      { product_name: '복합비료', large_category: '비료' },
+    ]);
+
+    expect(fields.find((field) => field.key === 'pesticide_info_link')).toBeUndefined();
+  });
+
   it('marks manufacturer_list as selectable even though its raw value is structured, not scalar', () => {
     const fields = deriveAvailableCategoryFields([
       {
@@ -212,6 +234,33 @@ describe('deriveAvailableCategoryFields', () => {
     const manufacturerField = fields.find((field) => field.key === 'manufacturer_list');
 
     expect(manufacturerField.isSelectable).toBe(true);
+  });
+
+  it('excludes product_usage from storefront fields even when pesticide usage data exists', () => {
+    const rows = [
+      {
+        product_name: '안전한 농약',
+        product_usage: [{ cropName: '벼', diseaseWeedName: '도열병' }],
+      },
+    ];
+    const fields = deriveAvailableCategoryFields(rows);
+
+    expect(fields.find((field) => field.key === 'product_usage')).toBeUndefined();
+    expect(deriveEffectiveScalarKeys(rows)).not.toContain('product_usage');
+  });
+
+  it('excludes the fertilizer image source flag from storefront field choices', () => {
+    const rows = [
+      {
+        product_name: '복합비료',
+        large_category: '비료',
+        img_url_is_static: false,
+      },
+    ];
+    const fields = deriveAvailableCategoryFields(rows);
+
+    expect(fields.find((field) => field.key === 'img_url_is_static')).toBeUndefined();
+    expect(deriveEffectiveScalarKeys(rows)).not.toContain('img_url_is_static');
   });
 
   it('still marks other structured fields as not selectable', () => {

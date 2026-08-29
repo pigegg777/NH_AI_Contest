@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  buildAppliedDesignHeadline,
+  buildCardDesignSummary,
+  buildPageDesignSummary,
+} from '../model/design-summary/designSummaryModel';
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { toTrimmedString } from "../../../common/utils/text";
 import { loadOfficeProductEntries } from "../../office-product-editor/model/office-product-data/officeProductDataReadModel";
@@ -19,6 +24,7 @@ import {
   findCategoryConfigRow,
   flattenProductEntries,
   normalizeNavConfig,
+  normalizeCategoryConfig,
   normalizePageConfig,
   resolveCategoryDraft,
   resolveOfficeInfoOwnership,
@@ -129,6 +135,13 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
   const [productEntries, setProductEntries] = useState([]);
   const [existingConfig, setExistingConfig] = useState(null);
   const [hiddenProducts, setHiddenProducts] = useState([]);
+  // 폰 미리보기가 지금 보여주고 있는 대분류. 편집 대상
+  // (selectedProductCategoryName) 과는 별개다 — 사장님이 폰 안에서 칩을 눌러
+  // 둘러볼 때 편집 세션까지 갈아엎지 않기 위해서.
+  // null = 미리보기가 아직 아무것도 알려주지 않음, '' = 보여줄 분류가 없음
+  // (안내 화면이거나 고른 칩이 없음). 둘을 섞으면 안내를 보고 있는데도
+  // 편집 대상의 카드 디자인이 남는다.
+  const [previewedCategoryName, setPreviewedCategoryName] = useState(null);
   const [selectedProductCategoryName, setSelectedProductCategoryName] =
     useState("");
   const [selectedMediumCategories, setSelectedMediumCategories] = useState([]);
@@ -929,11 +942,54 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       ? ""
       : selectedProductCategoryName;
 
+  // "적용된 디자인"은 미리보기에 실제로 그려지는 것을 말한다. 그래서 편집 중인
+  // 분류가 아니라 폰이 지금 띄우고 있는 분류를 따라간다. 폰이 아직 아무것도
+  // 알려주지 않았을 때만 편집 대상으로 되돌아간다.
+  const summarizedCategoryName =
+    previewedCategoryName === null
+      ? previewSelectedCategoryName
+      : previewedCategoryName;
+  // 편집 중인 분류면 아직 저장하지 않은 수정까지 보여야 하므로 살아 있는 값을,
+  // 그냥 둘러보는 분류면 저장본을 읽는다.
+  const summarizedCardStyle = useMemo(() => {
+    if (!summarizedCategoryName) {
+      return null;
+    }
+
+    if (summarizedCategoryName === selectedProductCategoryName) {
+      return cardAi.cardStyle;
+    }
+
+    return normalizeCategoryConfig(
+      findCategoryConfigRow(existingConfig?.categoryConfigs, summarizedCategoryName)
+        ?.categoryConfig,
+      summarizedCategoryName,
+    ).cardDesign.cardStyle;
+  }, [
+    summarizedCategoryName,
+    selectedProductCategoryName,
+    cardAi.cardStyle,
+    existingConfig,
+  ]);
+
+  const appliedDesignSummary = useMemo(
+    () => ({
+      categoryName: summarizedCategoryName,
+      headline: buildAppliedDesignHeadline(pageAi.pageStyle, summarizedCardStyle),
+      page: buildPageDesignSummary(pageAi.pageStyle),
+      // 폰이 분류가 아니라 사무소 안내를 띄우고 있으면 카드도 없다.
+      card: summarizedCardStyle ? buildCardDesignSummary(summarizedCardStyle) : null,
+    }),
+    [summarizedCategoryName, summarizedCardStyle, pageAi.pageStyle],
+  );
+
   return {
     status,
     errorMessage,
     selectedProductCategoryName,
     previewSelectedCategoryName,
+    appliedDesignSummary,
+    notePreviewedCategory: setPreviewedCategoryName,
     // The preview shows the same upload timestamp the public storefront will,
     // aggregated here from the entries the builder already holds.
     previewProductUpdatedAt: resolveLatestProductUpdatedAt(productEntries),

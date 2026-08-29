@@ -11,7 +11,7 @@ const LEGACY_TEMPLATE_TO_STRUCTURAL_PRESET = {
 const LEGACY_PRICE_TEXT_COLOR_TO_FIELD_COLOR_ROLE = {
   default: 'red',
   muted: 'muted',
-  brand: 'brand',
+  brand: 'red',
 };
 
 const LEGACY_IMAGE_SIZE_TO_PX = {

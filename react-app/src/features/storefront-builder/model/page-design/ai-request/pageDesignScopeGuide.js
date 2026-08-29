@@ -18,7 +18,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
       { element: '배경색', example: '페이지 배경을 아주 연한 베이지로 해줘' },
       { element: '포인트 색', example: '포인트 색을 짙은 초록으로 바꿔줘' },
     ],
-    note: '색감만 바꿔도 헤더·칩·검색창 색은 따라 바뀌지 않습니다. 그건 옆의 칩에서 따로 요청하세요.',
+    note: '포인트 색은 헤더·카테고리 칩·검색창 등 페이지 요소의 강조색에 함께 적용됩니다. 디자인이 어려울때 포인트색을 지정하면 일괄 디자인 됩니다.',
   },
   {
     scopeId: 'header',
@@ -29,7 +29,7 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
       { element: '글자 크기', example: '제목을 조금 크게 해줘' },
       { element: '자간', example: '제목 자간을 넓혀줘' },
     ],
-    note: '제목 문구 자체는 바꿀 수 없습니다.',
+    note: '제목문구의 글자크기가 1줄을 넘어가면 글자크기는 자동 조정됩니다',
   },
   {
     scopeId: 'categoryChips',

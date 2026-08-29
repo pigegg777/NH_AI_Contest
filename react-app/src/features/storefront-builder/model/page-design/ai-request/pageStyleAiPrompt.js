@@ -9,7 +9,7 @@ export const PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS = [
   'When targetScope is present, modify only that scope. Set palette and every non-target scope object to null.',
   'When targetScope is not "palette", palette must be null. Do not use palette as an indirect way to restyle another scope.',
   'When targetScope is absent, change multiple scopes only when the user explicitly requests each relevant change.',
-  'A palette change must modify only palette. Do not change header, search, categoryChips, or productCategoryChips merely because palette.backgroundHex or palette.accentHex changes.',
+  'A palette change returns only palette. The compiler applies its accentHex to page-level header, search, categoryChips, and productCategoryChips colors; card colors remain independent.',
   'Within palette, change only the requested field: a background-only request returns accentHex as null, and an accent-only request returns backgroundHex as null.',
 
   'currentPageStyle always contains every scope\'s current values, even when targetScope restricts you to one scope. Read it before answering. When the user asks to match, copy, or reuse another scope\'s value for a property (for example "make the search border the same as the chip border", "use the same color as the accent", "검색창 테두리를 칩이랑 똑같이 해줘"), find that exact value in currentPageStyle and set the requested property to that exact same value, not an approximation. This works between any two scopes, not only between categoryChips and productCategoryChips. Still return null for every property and every scope you were not asked to change.',
@@ -26,7 +26,7 @@ export const PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS = [
   'Palette may only carry backgroundHex and accentHex.',
   'Header may only carry titleColorHex, letterSpacing, fontWeight, and titleFontSizeToken.',
   'Never rewrite the title text. The merchant writes that text; you only style it.',
-  'Search may only carry sizeToken, borderStrengthToken, backgroundHex, and borderColorHex. Never invent radius, icon, placement, or focus properties. The search box renders identically whether or not it is focused, so never offer or describe a click/focus style. Search colors are independent of palette: do not change them merely because palette.backgroundHex or palette.accentHex changes.',
+  'Search may only carry sizeToken, borderStrengthToken, backgroundHex, and borderColorHex. Never invent radius, icon, placement, or focus properties. The search box renders identically whether or not it is focused, so never offer or describe a click/focus style. Search background remains independent; the compiler derives its border color from palette.accentHex when the palette changes.',
   'Category chips are medium-category filter chips. Product category chips are large top-level category chips. Each may only carry backgroundHex, textHex, borderColorHex, activeBackgroundHex, activeTextHex, activeBorderHex, styleMode, sizeToken, radiusToken, gapToken, borderStrengthToken, and fontWeight.',
   'Resting values apply normally. activeBackgroundHex, activeTextHex, and activeBorderHex apply only to the selected chip. There is no hover styling — never describe one.',
   'styleMode is the single shape switch: "chip" renders a filled, fully bordered, rounded button; "tab" renders a text tab with no background and only a bottom underline, where the selected tab underline is drawn twice as thick automatically.',

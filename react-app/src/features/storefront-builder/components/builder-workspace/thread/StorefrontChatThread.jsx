@@ -27,6 +27,7 @@ function renderMessage(message, options) {
 }
 
 export default function StorefrontChatThread({
+  appliedDesign,
   canUndo,
   intro,
   onUndo,
@@ -38,6 +39,7 @@ export default function StorefrontChatThread({
 
   return (
     <div className={styles.threadFrame}>
+      {appliedDesign}
       {intro}
       <ol className={styles.threadList} data-testid="storefront-chat-thread">
         {visibleMessages.map((message) =>

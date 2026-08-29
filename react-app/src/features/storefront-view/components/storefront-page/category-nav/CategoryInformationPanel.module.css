@@ -1,7 +1,9 @@
 .panel {
   margin-bottom: 24px;
   padding: 20px 22px 18px;
-  border: 1px solid color-mix(in srgb, var(--brand-color, #1d4a2e) 24%, #dfe8dc);
+  /* 고객용 화면이라 --corp-* 토큰이 아닌 하드코딩 hex. 브랜드 색을 섞지 않는
+     중립 회색이라 사장님이 어떤 색을 골라도 테두리는 그대로다. */
+  border: 1px solid #d1d5db;
   border-radius: 14px;
   background: white;
 }
@@ -53,14 +55,14 @@
   margin: 0;
   padding-top: 10px;
   border-top: 1px dashed
-    color-mix(in srgb, var(--brand-color, #1d4a2e) 22%, transparent);
+    color-mix(in srgb, var(--brand-color, #4b5563) 22%, transparent);
   color: #718074;
   font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.5;
 }
 
-@media (max-width: 720px) {
+@container storefront (max-width: 720px) {
   .panel {
     padding: 18px 16px 16px;
   }

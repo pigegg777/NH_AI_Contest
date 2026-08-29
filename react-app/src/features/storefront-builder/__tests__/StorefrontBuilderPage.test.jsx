@@ -9,6 +9,7 @@ import StorefrontBuilderPage from "../pages/StorefrontBuilderPage";
 import { STOREFRONT_CHAT_MODE_OPTIONS } from "../components/builder-workspace/mode-choice/storefrontChatModes";
 import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
+import { DEFAULT_PAGE_STYLE } from "../../storefront-view/model/page-style/pageStyleModel";
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
@@ -413,7 +414,7 @@ describe("StorefrontBuilderPage", () => {
     // page style back to its original, unmodified value before this
     // (unrelated, card-design) save happened.
     expect(savedPayload.pageConfig.pageStyle.palette.accentHex).toBe(
-      "#1d4a2e",
+      DEFAULT_PAGE_STYLE.palette.accentHex,
     );
     expect(savedPayload.pageConfig.pageStyle.palette.accentHex).not.toBe(
       "#14532d",

@@ -13,7 +13,7 @@ import { normalizeHexColor } from '../shared/styleColor';
 
 export const CARD_STYLE_SCHEMA_VERSION = 1;
 
-export const CARD_FIELD_COLOR_ROLE_OPTIONS = ['inherit', 'brand', 'muted', 'blue', 'red', 'green', 'amber', 'ink'];
+export const CARD_FIELD_COLOR_ROLE_OPTIONS = ['inherit', 'muted', 'blue', 'red', 'green', 'amber', 'ink'];
 export const CARD_FIELD_FONT_WEIGHT_OPTIONS = [400, 500, 600, 700, 800, 900];
 export const CARD_FIELD_FONT_SIZE_OPTIONS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
 
@@ -71,7 +71,6 @@ export const CARD_CONDITION_FIELD_OPTIONS = [
   'sale_price_type_name',
   'nutirent',
   'indict_symbl',
-  'product_usage',
   'product_category',
   'manufacturer_list',
 ];
@@ -85,7 +84,6 @@ export const CARD_CONDITION_GROUNDING_FIELDS = [
   'small_category',
   'detail_category',
   'product_category',
-  'product_usage',
   'sale_price_type_name',
   'indict_symbl',
   'manufacturer_list',
@@ -155,14 +153,13 @@ export const DEFAULT_CARD_STYLE = {
     defaultColorRole: 'inherit',
     defaultFontWeight: 400,
     defaultFontSize: 'md',
-    priceColorRole: 'brand',
+    priceColorRole: 'green',
   },
   conditionalStyles: [],
 };
 
 const CARD_FIELD_COLOR_ROLE_VALUES = {
   inherit: 'inherit',
-  brand: 'var(--brand-color, var(--corp-primary))',
   muted: '#6b7280',
   blue: '#2563eb',
   red: '#dc2626',
@@ -297,7 +294,11 @@ function normalizeFieldDefaults(field) {
     defaultColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.defaultColorRole) ? source.defaultColorRole : DEFAULT_CARD_STYLE.field.defaultColorRole,
     defaultFontWeight: normalizeFieldFontWeightToken(source.defaultFontWeight, DEFAULT_CARD_STYLE.field.defaultFontWeight),
     defaultFontSize: normalizeFieldFontSizeToken(source.defaultFontSize, DEFAULT_CARD_STYLE.field.defaultFontSize),
-    priceColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole) ? source.priceColorRole : DEFAULT_CARD_STYLE.field.priceColorRole,
+    priceColorRole: source.priceColorRole === 'brand'
+      ? 'red'
+      : CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.priceColorRole)
+        ? source.priceColorRole
+        : DEFAULT_CARD_STYLE.field.priceColorRole,
   };
 }
 

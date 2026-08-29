@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  CARD_FIELD_COLOR_ROLE_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
   CARD_HEADER_TITLE_SIZE_OFFSET_REM,
@@ -215,11 +216,16 @@ describe('collectConditionFieldValueSamples', () => {
 });
 
 describe('resolveFieldColorRoleValue', () => {
-  it('resolves known roles to CSS color values, with brand pointing at the page brand color var', () => {
+  it('keeps page accent roles out of card colors and normalizes old brand values', () => {
+    expect(CARD_FIELD_COLOR_ROLE_OPTIONS).not.toContain('brand');
     expect(resolveFieldColorRoleValue('inherit')).toBe('inherit');
-    expect(resolveFieldColorRoleValue('brand')).toBe('var(--brand-color, var(--corp-primary))');
+    expect(resolveFieldColorRoleValue('brand')).toBe('inherit');
     expect(resolveFieldColorRoleValue('red')).toBe('#dc2626');
     expect(resolveFieldColorRoleValue('unknown')).toBe('inherit');
+    expect(
+      normalizeCardStyle({ field: { priceColorRole: 'brand' } }).field
+        .priceColorRole,
+    ).toBe('red');
   });
 });
 

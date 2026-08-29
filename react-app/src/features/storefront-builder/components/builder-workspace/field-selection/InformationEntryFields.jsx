@@ -251,7 +251,6 @@ export function InformationEntryFields({
                     </Suspense>
                   </div>
                 ) : null}
-
               </div>
             </div>
 
@@ -267,8 +266,8 @@ export function InformationEntryFields({
       })}
 
       <p className={styles.entryHelp} data-testid="information-entry-help">
-        글자를 선택하고 버튼을 누르면 표시됩니다. {'<< >>'} 는 제목, {'[[ ]]'} 는
-        중요로 보입니다. {'[비료]'} 처럼 하나만 쓴 괄호는 그대로 나옵니다.
+        글자를 선택하고 버튼을 누르면 표시됩니다. {'<< >>'} 는 제목, {'[[ ]]'}{' '}
+        는 중요로 보입니다.
       </p>
 
       {rows.length < MAX_INFORMATION_ENTRIES ? (

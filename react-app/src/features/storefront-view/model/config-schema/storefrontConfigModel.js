@@ -3,6 +3,10 @@ import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCar
 import { normalizeCardStyle } from '../card-style/cardStyleModel';
 import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-style/pageStyleModel';
 import {
+  PESTICIDE_INFO_LINK_FIELD,
+  buildPesticideInfoUrl,
+} from '../view/pesticideInfoLinkModel';
+import {
   normalizeInformationEntries,
   replaceLegacyInformationEntry,
 } from './informationEntriesModel';
@@ -28,7 +32,7 @@ export const STOREFRONT_FIELD_LABELS = {
   price_subsidy: '보조금',
   nutirent: '성분',
   indict_symbl: '작용기작',
-  product_usage: '작물별 용도',
+  [PESTICIDE_INFO_LINK_FIELD]: '농약정보',
   product_category: '용도',
   manufacturer_list: '업체',
 };
@@ -49,6 +53,7 @@ export const STOREFRONT_FIELD_DISPLAY_ORDER = [
   'nutrient',
   'nutirent',
   'product_url',
+  PESTICIDE_INFO_LINK_FIELD,
 ];
 
 export function sortFieldKeysByDisplayOrder(keys) {
@@ -73,6 +78,8 @@ const STOREFRONT_FIELD_TABLE_HIDDEN_KEYS = new Set([
   'warnings',
   'shadow',
   'row_id',
+  'product_usage',
+  'img_url_is_static',
 ]);
 
 function isScalarFieldValue(value) {
@@ -90,10 +97,24 @@ function collectCategoryFieldKeys(rows) {
     }
   });
 
+  if ((Array.isArray(rows) ? rows : []).some((row) => buildPesticideInfoUrl(row))) {
+    keySet.add(PESTICIDE_INFO_LINK_FIELD);
+  }
+
   return [...keySet];
 }
 
 function getFieldExampleValue(key, rows) {
+  if (key === PESTICIDE_INFO_LINK_FIELD) {
+    for (const row of Array.isArray(rows) ? rows : []) {
+      const pesticideInfoUrl = buildPesticideInfoUrl(row);
+
+      if (pesticideInfoUrl) {
+        return pesticideInfoUrl;
+      }
+    }
+  }
+
   for (const row of Array.isArray(rows) ? rows : []) {
     const value = row?.[key];
 
@@ -105,9 +126,11 @@ function getFieldExampleValue(key, rows) {
   return null;
 }
 
-// Structured fields the card-render layer already knows how to flatten into text
-// (see cardFieldRenderModel.js), so they're selectable despite failing the scalar check.
-const STRUCTURED_FIELD_KEYS_WITH_DISPLAY_SUPPORT = new Set(['manufacturer_list']);
+// Structured fields the storefront view already knows how to present, so they stay
+// selectable despite failing the scalar check.
+const STRUCTURED_FIELD_KEYS_WITH_DISPLAY_SUPPORT = new Set([
+  'manufacturer_list',
+]);
 
 function isFieldKeySelectable(key, rows) {
   if (STRUCTURED_FIELD_KEYS_WITH_DISPLAY_SUPPORT.has(key)) {

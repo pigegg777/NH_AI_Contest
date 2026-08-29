@@ -198,3 +198,27 @@ describe('CardGridSection image rendering', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });
+
+describe('CardGridSection pesticide usage safety', () => {
+  it('does not render product_usage from a previously saved visible field', () => {
+    render(
+      <CardGridSection
+        section={{
+          products: [
+            {
+              row_id: 'pesticide-usage-1',
+              product_name: '안전한 농약',
+              product_usage: [{ cropName: '벼', diseaseWeedName: '도열병' }],
+            },
+          ],
+        }}
+        fields={['product_name', 'product_usage']}
+        cardStyle={DEFAULT_CARD_STYLE}
+        sectionId="pesticide-usage-safety"
+      />,
+    );
+
+    expect(screen.queryByText('작물별 용도')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /보기/ })).not.toBeInTheDocument();
+  });
+});

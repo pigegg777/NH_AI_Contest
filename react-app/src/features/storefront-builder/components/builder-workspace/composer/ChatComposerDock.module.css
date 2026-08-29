@@ -235,13 +235,44 @@
   border-bottom: 1px solid var(--corp-line);
 }
 
+/* 표 아래 회색 잔글씨였다. 여기 적힌 것은 "포인트 색을 정하면 일괄로 적용된다"
+   처럼 사장님이 놓치면 헛되이 여러 번 요청하게 되는 내용이라, 표에 딸린 각주가
+   아니라 눈에 걸리는 안내로 세운다.
+
+   왼쪽 굵은 선 + 옅은 배경으로 표와 분리하고, 앞의 느낌표 배지가 시선을 잡는다.
+   글자는 0.68 -> 0.78rem 으로 키우고 색도 흐린 회색에서 본문 색으로 올린다. */
 .scopeGuideNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  padding: 6px 8px 8px;
-  font-size: 0.68rem;
-  line-height: 1.4;
-  color: var(--corp-muted);
+  padding: 10px 12px;
+  border-top: 1px solid var(--corp-line);
+  border-left: 3px solid var(--corp-primary-bright);
+  background: var(--corp-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--corp-primary-hover);
   word-break: keep-all;
+}
+
+/* 장식이라 낭독기에는 읽히지 않게 둔다 — 문구 자체가 이미 안내다. */
+.scopeGuideNote::before {
+  content: '!';
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border-radius: var(--corp-radius-pill);
+  background: var(--corp-primary-bright);
+  color: var(--corp-on-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .form {

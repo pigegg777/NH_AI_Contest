@@ -11,7 +11,7 @@
 }
 
 .highlightBox {
-  background: color-mix(in srgb, var(--brand-color, #1d4a2e) 10%, #ffffff);
+  background: color-mix(in srgb, var(--brand-color, #4b5563) 10%, #ffffff);
 }
 
 .helperTitle {
@@ -32,12 +32,12 @@
   padding: 0 16px;
   border: 0;
   border-radius: 14px;
-  background: var(--brand-color, #1d4a2e);
+  background: var(--brand-color, #4b5563);
   color: #ffffff;
   font-size: 0.84rem;
   font-weight: 700;
   box-shadow: 0 12px 22px
-    color-mix(in srgb, var(--brand-color, #1d4a2e) 24%, transparent);
+    color-mix(in srgb, var(--brand-color, #4b5563) 24%, transparent);
 }
 
 .divider {

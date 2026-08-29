@@ -1,9 +1,30 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { normalizeInformationEntries } from './informationEntriesModel';
+import { withPesticideInfoLink } from '../view/pesticideInfoLinkModel';
 import {
   DEFAULT_CARD_FIELDS,
   deriveEffectiveScalarKeys,
 } from './storefrontConfigModel';
+
+const PESTICIDE_LARGE_CATEGORY = '농약';
+const CATEGORY_SORT_PRIORITY = new Map([
+  ['비료', 0],
+  [PESTICIDE_LARGE_CATEGORY, 1],
+]);
+const KOREAN_CATEGORY_COLLATOR = new Intl.Collator('ko-KR');
+
+function compareSectionsByCategory(left, right) {
+  const leftName = toTrimmedString(left?.productCategoryName || left?.title);
+  const rightName = toTrimmedString(right?.productCategoryName || right?.title);
+  const leftPriority = CATEGORY_SORT_PRIORITY.get(leftName) ?? 2;
+  const rightPriority = CATEGORY_SORT_PRIORITY.get(rightName) ?? 2;
+
+  if (leftPriority !== rightPriority) {
+    return leftPriority - rightPriority;
+  }
+
+  return KOREAN_CATEGORY_COLLATOR.compare(leftName, rightName);
+}
 
 function normalizeSpec(spec) {
   return spec === undefined || spec === null ? null : spec;
@@ -59,22 +80,43 @@ export function filterHiddenProducts(productRows, hiddenProducts) {
   return rows.filter((row) => !hidden.some((productRef) => matchesProductRef(row, productRef)));
 }
 
+/**
+ * 칩은 언제나 medium_category 로 만든다. 다만 large_category 가 농약인
+ * 중분류를 앞으로 모으고, 각 그룹은 가나다순으로 정렬한다.
+ *
+ * 같은 중분류가 여러 행에 걸쳐 있으면 그중 하나라도 농약이면 농약으로 본다.
+ */
 export function buildUniqueMediumCategories(products) {
+  const rows = Array.isArray(products) ? products : [];
+  const pesticideMediumCategories = new Set();
   const seen = new Set();
-  const values = [];
+  const ordered = [];
 
-  for (const product of Array.isArray(products) ? products : []) {
-    const value = typeof product?.medium_category === 'string' ? product.medium_category.trim() : '';
+  for (const product of rows) {
+    const value = toTrimmedString(product?.medium_category);
 
-    if (!value || seen.has(value)) {
+    if (!value) {
       continue;
     }
 
-    seen.add(value);
-    values.push(value);
+    if (toTrimmedString(product?.large_category) === PESTICIDE_LARGE_CATEGORY) {
+      pesticideMediumCategories.add(value);
+    }
+
+    if (!seen.has(value)) {
+      seen.add(value);
+      ordered.push(value);
+    }
   }
 
-  return values;
+  return [
+    ...ordered
+      .filter((value) => pesticideMediumCategories.has(value))
+      .sort(KOREAN_CATEGORY_COLLATOR.compare),
+    ...ordered
+      .filter((value) => !pesticideMediumCategories.has(value))
+      .sort(KOREAN_CATEGORY_COLLATOR.compare),
+  ];
 }
 
 /**
@@ -131,7 +173,7 @@ function buildDefaultSection(productCategoryName, rows) {
 }
 
 export function buildSections(categoryConfigs, productRows) {
-  const rows = Array.isArray(productRows) ? productRows : [];
+  const rows = (Array.isArray(productRows) ? productRows : []).map(withPesticideInfoLink);
 
   const configuredSections = (Array.isArray(categoryConfigs) ? categoryConfigs : []).map(
     (categoryConfigRow) => {
@@ -154,13 +196,11 @@ export function buildSections(categoryConfigs, productRows) {
     },
   );
 
-  // Appended after the configured ones so saving a storefront never reshuffles
-  // the categories a shopper already knows the order of.
   const defaultSections = findUnconfiguredCategoryNames(categoryConfigs, rows).map((name) =>
     buildDefaultSection(name, rows),
   );
 
-  return [...configuredSections, ...defaultSections].filter(
-    (section) => section.products.length > 0,
-  );
+  return [...configuredSections, ...defaultSections]
+    .filter((section) => section.products.length > 0)
+    .sort(compareSectionsByCategory);
 }

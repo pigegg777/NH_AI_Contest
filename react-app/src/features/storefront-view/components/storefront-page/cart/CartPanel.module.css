@@ -1,0 +1,224 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #e4e4e7;
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #18181b;
+  word-break: keep-all;
+}
+
+.closeButton {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 1px solid #d4d4d8;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #52525b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.empty {
+  margin: 0;
+  padding: 40px 18px;
+  color: #71717a;
+  font-size: 0.88rem;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.list {
+  flex: 1;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.item {
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.itemUnavailable {
+  opacity: 0.5;
+}
+
+.itemLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+.checkbox {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #18181b;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.itemSpec {
+  font-weight: 500;
+  color: #52525b;
+}
+
+.itemNotice {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b91c1c;
+  word-break: keep-all;
+}
+
+.itemCategories {
+  font-size: 0.78rem;
+  color: #71717a;
+  word-break: keep-all;
+}
+
+.itemPrices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.itemPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 0.82rem;
+  word-break: keep-all;
+}
+
+.itemPriceLabel {
+  color: #71717a;
+}
+
+.itemPriceValue {
+  font-weight: 700;
+  color: #18181b;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 18px;
+  border-top: 1px solid #e4e4e7;
+}
+
+.removeButton {
+  padding: 9px 18px;
+  border: 1px solid #dc2626;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.removeButton:disabled {
+  border-color: #d4d4d8;
+  color: #a1a1aa;
+  cursor: default;
+}
+
+/* 장바구니 진입점 — 화면 오른쪽 아래 고정. 헤더 구성과 무관하게 자리를 지킨다. */
+.openButton {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid #e4e4e7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+}
+
+.openButtonIcon {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.openButtonCount {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* 빌더 미리보기: 모양은 그대로, 클릭만 막는다.
+ *
+ * 위치는 건드리지 않는다 — 미리보기 화면(.previewDeviceScreen)에 transform 이
+ * 걸려 있어 이 fixed 가 브라우저 창이 아니라 폰 화면을 기준으로 잡힌다. */
+/* 빌더 미리보기: 모양은 그대로, 클릭만 막는다.
+ *
+ * 위치는 폰 바깥 틀(.previewDevice)을 기준으로 잡히는데 그 틀에는 안쪽 여백이
+ * 있어서(우 10px / 하 12px), 같은 16px 을 줘도 화면 가장자리에는 그만큼 더
+ * 붙는다. 그 여백을 더해 손님 폰과 같은 간격으로 보이게 한다. */
+.openButtonInert {
+  pointer-events: none;
+  right: 26px;
+  bottom: 28px;
+}

@@ -109,12 +109,12 @@
 .categoryRailSectionButtonActive {
   border-color: color-mix(
     in srgb,
-    var(--brand-color, var(--corp-primary)) 34%,
+    var(--brand-color, #4b5563) 34%,
     rgba(29, 74, 46, 0.12)
   );
   background: color-mix(
     in srgb,
-    var(--brand-color, var(--corp-primary)) 10%,
+    var(--brand-color, #4b5563) 10%,
     #ffffff
   );
   box-shadow: 0 10px 18px rgba(20, 33, 25, 0.06);
@@ -143,12 +143,12 @@
 .categoryRailChipActive {
   /* border-color: color-mix(
     in srgb,
-    var(--brand-color, var(--corp-primary)) 24%,
+    var(--brand-color, #4b5563) 24%,
     rgba(29, 74, 46, 0.12)
   ); */
   background: color-mix(
     in srgb,
-    var(--brand-color, var(--corp-primary)) 10%,
+    var(--brand-color, #4b5563) 10%,
     #ffffff
   );
   color: #173223;
@@ -169,7 +169,7 @@
 
 .productCategoryChip {
   min-height: var(--page-product-chip-height, 36px);
-  padding: 0 var(--page-product-chip-padding-inline, 16px);
+  padding: 0 var(--product-chip-inline);
   border-width: var(--page-product-chip-border-width, 1px);
   border-style: solid;
   border-color: var(--page-product-chip-border, rgba(29, 74, 46, 0.14));
@@ -193,7 +193,7 @@
   box-shadow: 0 0 0 2px
     color-mix(
       in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 45%,
+      var(--page-product-chip-active-bg, var(--brand-color, #4b5563)) 45%,
       transparent
     );
 }
@@ -203,7 +203,7 @@
     --page-product-chip-active-border,
     color-mix(
       in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
+      var(--page-product-chip-active-bg, var(--brand-color, #4b5563))
         48%,
       rgba(29, 74, 46, 0.14)
     )
@@ -214,7 +214,7 @@
   );
   background: var(
     --page-product-chip-active-bg,
-    color-mix(in srgb, var(--brand-color, var(--corp-primary)) 12%, #ffffff)
+    color-mix(in srgb, var(--brand-color, #4b5563) 12%, #ffffff)
   );
   color: var(--page-product-chip-active-text, #173223);
 }
@@ -308,7 +308,7 @@
   box-shadow: 0 0 0 2px
     color-mix(
       in srgb,
-      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))) 45%,
+      var(--page-chip-active-bg, var(--chip-accent, #4b5563)) 45%,
       transparent
     );
 }
@@ -326,7 +326,7 @@
   box-shadow: 0 4px 12px
     color-mix(
       in srgb,
-      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))) 22%,
+      var(--page-chip-active-bg, var(--chip-accent, #4b5563)) 22%,
       transparent
     );
 }
@@ -347,7 +347,7 @@
   box-shadow: 0 4px 12px
     color-mix(
       in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 22%,
+      var(--page-product-chip-active-bg, var(--brand-color, #4b5563)) 22%,
       transparent
     );
 }
@@ -362,6 +362,21 @@
   box-shadow: none;
 }
 
+/* 위 대분류 줄이 탭 모드면 배경이 없어 글자가 왼쪽 기준선이 된다. 이 줄의
+   알약은 상자가 보이므로 그대로 두면 대분류 글자보다 왼쪽으로 튀어나온다.
+   대분류 칩이 글자를 밀어낸 만큼(안쪽 여백 + 테두리)을 그대로 들여써서 두 줄의
+   왼쪽을 맞춘다. 대분류가 알약 모드일 때는 두 줄 다 상자가 보여 이미 맞으므로
+   건드리지 않는다.
+
+   기본값을 여기 직접 쓰지 않고 --product-chip-inline 을 거치는 이유: 그 값이
+   폭에 따라 달라지는데(넓은 화면 16px, 좁은 화면 14px) 여기에 숫자를 또 적으면
+   한쪽만 고쳐졌을 때 조용히 어긋난다. 실제로 그렇게 어긋났었다. */
+.categoryWrap[data-product-chip-style-mode='tab'] {
+  padding-left: calc(
+    var(--product-chip-inline) + var(--page-product-chip-border-width, 1px)
+  );
+}
+
 .categoryWrap[data-category-layout='wrap'] {
   flex-wrap: wrap;
   overflow-x: visible;
@@ -373,7 +388,12 @@
   overflow-x: auto;
 }
 
-@media (max-width: 720px) {
+@container storefront (max-width: 720px) {
+  .productCategorySection,
+  .categoryChipsSection {
+      margin-inline-start: -8px;
+    }
+
   .categoryRail {
       display: none;
     }
@@ -388,7 +408,7 @@
 
   .productCategoryChip {
       min-height: var(--page-product-chip-height, 34px);
-      padding: 0 var(--page-product-chip-padding-inline, 14px);
+      padding: 0 var(--product-chip-inline);
       font-size: var(--page-product-chip-font-size, 0.78rem);
     }
 

@@ -29,6 +29,27 @@ function buildConfig({ officeInfo, fertilizerInfo } = {}) {
 }
 
 describe('information intro rendering', () => {
+  it('keeps the guide category chips in the same aligned header as the large-category chips', () => {
+    render(<StorefrontView
+      config={buildConfig({
+        officeInfo: [{ id: 'o1', label: '영세가격', description: '등록자 구매가격' }],
+        fertilizerInfo: [{ id: 'c1', label: '봄철 밑거름', description: '3월부터' }],
+      })}
+      productRows={PRODUCT_ROWS}
+    />);
+
+    const largeCategoryChips = screen.getByTestId(
+      'storefront-product-category-chips',
+    );
+    const guideCategoryChips = screen.getByTestId(
+      'storefront-information-category-chips',
+    );
+
+    expect(guideCategoryChips.closest('header')).toBe(
+      largeCategoryChips.closest('header'),
+    );
+  });
+
   it('shows office information and guide children on first render', () => {
     render(<StorefrontView
       config={buildConfig({

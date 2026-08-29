@@ -1,9 +1,27 @@
 /* Only two children, so this gap is exactly the hero-to-cards distance. */
-.page {
+/* 반응형 기준을 브라우저 창이 아니라 스토어프론트 자신의 폭으로 잡는다. 빌더
+   미리보기는 폰 목업 안에 이것을 360px 로 그리는데, @media 는 브라우저 창을
+   보므로 데스크톱에서는 모바일 스타일이 미리보기에 적용되지 않았다.
+   이름을 주는 이유는 카드(.card)가 이미 익명 컨테이너라 섞이지 않게.
+
+   .page 를 감싸는 별도 요소인 이유: 컨테이너는 자기 자신을 컨테이너 쿼리로
+   스타일할 수 없어서, .page 의 여백을 폭에 따라 바꾸려면 한 겹 위여야 한다. */
+.pageShell {
+  container: storefront / inline-size;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   min-height: 100%;
+}
+
+.page {
+  /* 대분류 칩의 좌우 안쪽 여백. 칩 자신과, 그 아래에서 왼쪽을 맞추는 세부
+     분류·안내 분류 줄이 같은 값을 써야 한다. 세 줄이 형제라 상속이 닿는 이
+     공통 조상에 둔다 (CategoryNav.module.css 가 읽는다). */
+  --product-chip-inline: var(--page-product-chip-padding-inline, 16px);
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 8px;
   padding: 18px 16px 32px;
   background: var(--page-bg, #f3f1ec);
 }
@@ -53,12 +71,14 @@
   overflow-wrap: break-word;
 }
 
-@media (max-width: 720px) {
+@container storefront (max-width: 720px) {
   .bodyShell {
       grid-template-columns: minmax(0, 1fr);
     }
 
   .page {
+      /* 좁은 화면에서는 대분류 칩 여백이 줄어든다 (CategoryNav 의 같은 쿼리). */
+      --product-chip-inline: var(--page-product-chip-padding-inline, 14px);
       padding: 14px 12px 24px;
       gap: 8px;
     }

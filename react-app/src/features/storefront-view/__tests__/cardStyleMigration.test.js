@@ -75,7 +75,7 @@ describe('migrateLegacyCategoryConfigToCardStyle', () => {
     expect(
       migrateLegacyCategoryConfigToCardStyle({ cardDesign: { style: { priceTextColor: 'brand' } } }).field
         .priceColorRole,
-    ).toBe('brand');
+    ).toBe('red');
   });
 
   it('carries a compact legacy layout or density onto the layout plan density', () => {

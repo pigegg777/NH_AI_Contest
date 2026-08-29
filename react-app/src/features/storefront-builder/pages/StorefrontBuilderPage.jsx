@@ -68,6 +68,12 @@ export default function StorefrontBuilderPage({ officeCode, nhName }) {
                   nhName={builder.nh_name}
                   selectedSectionName={builder.previewSelectedCategoryName}
                   productUpdatedAt={builder.previewProductUpdatedAt}
+                  // 손님이 보는 그대로 담기 버튼까지 보여준다. 핸들러는 넘기지
+                  // 않으므로 눌리지 않고, 사장님 브라우저에도 아무것도 안 쌓인다.
+                  isCartPreview
+                  // 폰 안에서 대분류를 누르면 '적용된 디자인'이 그 분류를
+                  // 따라간다. 편집 대상은 바뀌지 않는다 — 읽기만 한다.
+                  onActiveCategoryChange={builder.notePreviewedCategory}
                 />
               </div>
             </div>

@@ -1,6 +1,11 @@
 import { normalizeHexColor } from '../../../storefront-view/model/shared/styleColor';
 import { normalizePageAiTargetScope } from './ai-request/pageAiDesignModel';
-import { deriveCategoryChipsFromPalette, normalizePageStyle } from '../../../storefront-view/model/page-style/pageStyleModel';
+import {
+  deriveCategoryChipsFromPalette,
+  deriveProductCategoryChipsFromPalette,
+  deriveSearchDefaultsFromPalette,
+  normalizePageStyle,
+} from '../../../storefront-view/model/page-style/pageStyleModel';
 
 function resolvePalette(intentPalette, previousPalette) {
   if (!intentPalette) {
@@ -48,14 +53,14 @@ const CHIP_FIELDS = [
   'fontWeight',
 ];
 
-function resolveChips(intentChips, previousChips, palette, shouldRefreshPaletteDefaults) {
-  if (!intentChips && !shouldRefreshPaletteDefaults) {
+function resolveChips(intentChips, previousChips, paletteColors) {
+  if (!intentChips && !paletteColors) {
     return previousChips;
   }
 
   // Palette changes only ever refresh colors; shape/size/gap tokens stay put.
-  const baseChips = shouldRefreshPaletteDefaults
-    ? { ...previousChips, ...deriveCategoryChipsFromPalette(palette) }
+  const baseChips = paletteColors
+    ? { ...previousChips, ...paletteColors }
     : previousChips;
 
   return Object.fromEntries(
@@ -75,35 +80,58 @@ export function compilePageStyle({ intent, previousPageStyle, targetScope }) {
 
   if (!normalizedTargetScope) {
     const palette = resolvePalette(intent?.palette, previous.palette);
+    const shouldRefreshPageColors = Boolean(intent?.palette);
+    const previousHeader = shouldRefreshPageColors
+      ? { ...previous.header, titleColorHex: palette.accentHex }
+      : previous.header;
+    const paletteSearchColors = deriveSearchDefaultsFromPalette(palette);
+    const previousSearch = shouldRefreshPageColors
+      ? {
+          ...previous.search,
+          borderColorHex: paletteSearchColors.borderColorHex,
+        }
+      : previous.search;
 
     return normalizePageStyle({
       palette,
-      header: resolveHeader(intent.header, previous.header),
-      search: resolveSearch(intent.search, previous.search),
+      header: resolveHeader(intent.header, previousHeader),
+      search: resolveSearch(intent.search, previousSearch),
       categoryChips: resolveChips(
         intent.categoryChips,
         previous.categoryChips,
-        palette,
-        false,
+        shouldRefreshPageColors
+          ? deriveCategoryChipsFromPalette(palette)
+          : null,
       ),
       productCategoryChips: resolveChips(
         intent.productCategoryChips,
         previous.productCategoryChips,
-        palette,
-        false,
+        shouldRefreshPageColors
+          ? deriveProductCategoryChipsFromPalette(palette)
+          : null,
       ),
     });
   }
 
   if (normalizedTargetScope === 'palette') {
     const palette = resolvePalette(intent?.palette, previous.palette);
+    const paletteSearchColors = deriveSearchDefaultsFromPalette(palette);
 
     return normalizePageStyle({
       palette,
-      header: previous.header,
-      search: previous.search,
-      categoryChips: previous.categoryChips,
-      productCategoryChips: previous.productCategoryChips,
+      header: { ...previous.header, titleColorHex: palette.accentHex },
+      search: {
+        ...previous.search,
+        borderColorHex: paletteSearchColors.borderColorHex,
+      },
+      categoryChips: {
+        ...previous.categoryChips,
+        ...deriveCategoryChipsFromPalette(palette),
+      },
+      productCategoryChips: {
+        ...previous.productCategoryChips,
+        ...deriveProductCategoryChipsFromPalette(palette),
+      },
     });
   }
 

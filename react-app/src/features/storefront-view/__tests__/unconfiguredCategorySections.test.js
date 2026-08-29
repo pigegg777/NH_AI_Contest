@@ -37,11 +37,9 @@ describe('buildSections with unconfigured categories', () => {
     ]);
   });
 
-  it('puts unconfigured categories after the configured ones', () => {
+  it('prioritizes fertilizer ahead of other categories regardless of row order', () => {
     const sections = buildSections([FERTILIZER_CONFIG], [NEW_CATEGORY_ROW, FERTILIZER_ROW]);
 
-    // Row order does not decide it: configured categories keep their place so
-    // saving a storefront never reshuffles what shoppers already know.
     expect(sections[0].productCategoryName).toBe('비료');
     expect(sections[1].productCategoryName).toBe('신규자재');
   });

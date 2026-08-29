@@ -8,7 +8,10 @@ import {
 function resolveAllowedInfoFields(visibleFields) {
   return sortFieldKeysByDisplayOrder(
     visibleFields.filter(
-      (field) => field !== 'img_url' && field !== 'product_name',
+      (field) =>
+        field !== 'img_url' &&
+        field !== 'product_name' &&
+        field !== 'product_usage',
     ),
   );
 }

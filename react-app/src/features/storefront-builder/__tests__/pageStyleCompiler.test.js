@@ -39,6 +39,37 @@ describe('compilePageStyle precedence: palette', () => {
     expect(result.palette.backgroundHex).toBe('#fff7ed');
     expect(result.palette.accentHex).toBe('#7c3aed');
   });
+
+  it('applies a changed accent to page elements while preserving their non-color settings', () => {
+    const previousPageStyle = {
+      ...DEFAULT_PAGE_STYLE,
+      header: { ...DEFAULT_PAGE_STYLE.header, fontWeight: 900 },
+      search: { ...DEFAULT_PAGE_STYLE.search, sizeToken: 'lg' },
+    };
+
+    const result = compilePageStyle({
+      intent: { palette: { backgroundHex: null, accentHex: '#14532d' } },
+      previousPageStyle,
+      targetScope: 'palette',
+    });
+
+    expect(result.header).toMatchObject({
+      titleColorHex: '#14532d',
+      fontWeight: 900,
+    });
+    expect(result.search).toMatchObject({
+      borderColorHex: '#b9cbc0',
+      sizeToken: 'lg',
+    });
+    expect(result.categoryChips).toMatchObject({
+      activeBackgroundHex: '#14532d',
+      activeBorderHex: '#14532d',
+    });
+    expect(result.productCategoryChips).toMatchObject({
+      activeTextHex: '#14532d',
+      activeBorderHex: '#14532d',
+    });
+  });
 });
 
 describe('compilePageStyle precedence: header/search', () => {
@@ -72,7 +103,7 @@ describe('compilePageStyle precedence: header/search', () => {
 });
 
 describe('compilePageStyle precedence: category chips', () => {
-  it('keeps chip colors unchanged when only the palette changes', () => {
+  it('refreshes chip colors when the palette accent changes', () => {
     const previousPageStyle = compilePageStyle({
       intent: { ...BASE_INTENT, categoryChips: { activeBackgroundHex: '#7c3aed' } },
       previousPageStyle: undefined,
@@ -83,7 +114,8 @@ describe('compilePageStyle precedence: category chips', () => {
     const nextIntent = { ...BASE_INTENT, palette: { ...BASE_INTENT.palette, accentHex: '#ea580c' }, categoryChips: null };
     const result = compilePageStyle({ intent: nextIntent, previousPageStyle });
 
-    expect(result.categoryChips.activeBackgroundHex).toBe('#7c3aed');
+    expect(result.categoryChips.activeBackgroundHex).toBe('#ea580c');
+    expect(result.categoryChips.activeBorderHex).toBe('#ea580c');
   });
 
   it('uses the chip override when present instead of the palette-derived default', () => {
@@ -108,12 +140,12 @@ describe('compilePageStyle precedence: category chips', () => {
     expect(result.categoryChips.sizeToken).toBe('lg');
     expect(result.categoryChips.radiusToken).toBe('square');
     expect(result.categoryChips.gapToken).toBe('tight');
-    expect(result.categoryChips.activeBackgroundHex).toBe(DEFAULT_PAGE_STYLE.categoryChips.activeBackgroundHex);
+    expect(result.categoryChips.activeBackgroundHex).toBe('#ea580c');
   });
 });
 
 describe('compilePageStyle precedence: product category chips', () => {
-  it('keeps product category chip colors unchanged when only the palette changes', () => {
+  it('refreshes product category chip colors when the palette accent changes', () => {
     const previousPageStyle = compilePageStyle({
       intent: {
         ...BASE_INTENT,
@@ -131,7 +163,13 @@ describe('compilePageStyle precedence: product category chips', () => {
       previousPageStyle,
     });
 
-    expect(result.productCategoryChips.activeBackgroundHex).toBe('#7c3aed');
+    expect(result.productCategoryChips.activeBorderHex).toBe('#ea580c');
+    expect(
+      contrastRatio(
+        result.productCategoryChips.activeTextHex,
+        result.productCategoryChips.activeBackgroundHex,
+      ),
+    ).toBeGreaterThanOrEqual(4.5);
   });
 });
 
@@ -309,14 +347,14 @@ describe('compilePageStyle property boundaries', () => {
     ]);
   });
 
-  it('keeps search colors unchanged when only its size is requested', () => {
+  it('keeps search background independent while deriving its border from the palette', () => {
     const result = compilePageStyle({
       intent: { ...BASE_INTENT, search: { sizeToken: 'lg' } },
       previousPageStyle: undefined,
     });
 
     expect(result.search.backgroundHex).toBe(DEFAULT_PAGE_STYLE.search.backgroundHex);
-    expect(result.search.borderColorHex).toBe(DEFAULT_PAGE_STYLE.search.borderColorHex);
+    expect(result.search.borderColorHex).toBe('#bed0f9');
   });
 });
 

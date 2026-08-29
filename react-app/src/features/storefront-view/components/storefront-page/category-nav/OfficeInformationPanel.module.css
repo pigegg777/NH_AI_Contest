@@ -2,7 +2,8 @@
 .panel {
   margin-bottom: 24px;
   padding: 20px 22px 18px;
-  border: 1px solid color-mix(in srgb, var(--brand-color, #1d4a2e) 24%, #dfe8dc);
+  /* 브랜드 색을 섞지 않는 중립 회색. 카테고리 안내 카드와 같은 값을 쓴다. */
+  border: 1px solid #d1d5db;
   border-radius: 14px;
   background: white;
 }
@@ -19,7 +20,7 @@
 .block {
   padding-top: 16px;
   border-top: 1px dashed
-    color-mix(in srgb, var(--brand-color, #1d4a2e) 22%, transparent);
+    color-mix(in srgb, var(--brand-color, #4b5563) 22%, transparent);
 }
 
 .block:first-of-type {
@@ -73,7 +74,7 @@
   text-wrap: pretty;
 }
 
-@media (max-width: 720px) {
+@container storefront (max-width: 720px) {
   .panel {
     padding: 18px 16px 16px;
   }

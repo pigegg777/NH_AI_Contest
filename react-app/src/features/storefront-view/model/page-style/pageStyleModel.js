@@ -70,23 +70,28 @@ export const PAGE_STYLE_TAB_ACTIVE_BORDER_WIDTH_VALUES = {
   bold: '5px',
 };
 
+// 기본값은 색을 정하지 않은 가게의 모습이다. 예전에는 여기에 농협 진녹
+// (#1d4a2e 계열)이 박혀 있어서, 아무것도 고르지 않은 가게가 "초록 브랜드"로
+// 보였다. 사장님이 포인트 색을 고르기 전까지는 아무 색도 주장하지 않도록
+// 회색 계열 중립으로 둔다. AI 페이지 디자인으로 색을 고르면 그 값이 여기를
+// 덮어쓰고, 이미 색을 저장해 둔 가게는 그대로다.
 export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
-  palette: { backgroundHex: '#ffffff', accentHex: '#1d4a2e' },
-  header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
+  palette: { backgroundHex: '#ffffff', accentHex: '#4b5563' },
+  header: { titleColorHex: '#111827', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
   search: {
     sizeToken: 'md',
     borderStrengthToken: 'normal',
     backgroundHex: '#ffffff',
-    borderColorHex: '#d8e2dc',
+    borderColorHex: '#d1d5db',
   },
   categoryChips: {
     backgroundHex: '#ffffff',
-    textHex: '#5f6d5b',
-    borderColorHex: '#d8e2dc',
-    activeBackgroundHex: '#6cc24a',
+    textHex: '#6b7280',
+    borderColorHex: '#e5e7eb',
+    activeBackgroundHex: '#f3f4f6',
     activeTextHex: '#111827',
-    activeBorderHex: '#4f9e33',
+    activeBorderHex: '#d1d5db',
     styleMode: 'chip',
     sizeToken: 'md',
     radiusToken: 'pill',
@@ -96,11 +101,11 @@ export const DEFAULT_PAGE_STYLE = {
   },
   productCategoryChips: {
     backgroundHex: '#ffffff',
-    textHex: '#5f6d5b',
-    borderColorHex: '#e2e8e4',
+    textHex: '#6b7280',
+    borderColorHex: '#e5e7eb',
     activeBackgroundHex: '#ffffff',
-    activeTextHex: '#1d4a2e',
-    activeBorderHex: '#1d4a2e',
+    activeTextHex: '#111827',
+    activeBorderHex: '#111827',
     styleMode: 'tab',
     sizeToken: 'md',
     radiusToken: 'none',
@@ -221,6 +226,20 @@ export function deriveCategoryChipsFromPalette(palette) {
     borderColorHex: mixHexColors(palette.accentHex, '#ffffff', 0.7),
     activeBackgroundHex,
     activeTextHex: ensureReadableTextColor('#ffffff', activeBackgroundHex),
+    activeBorderHex: palette.accentHex,
+  };
+}
+
+export function deriveProductCategoryChipsFromPalette(palette) {
+  const backgroundHex = palette.backgroundHex;
+
+  return {
+    backgroundHex,
+    textHex: ensureReadableTextColor('#5f6d5b', backgroundHex),
+    borderColorHex: mixHexColors(palette.accentHex, '#ffffff', 0.7),
+    activeBackgroundHex: backgroundHex,
+    activeTextHex: ensureReadableTextColor(palette.accentHex, backgroundHex),
+    activeBorderHex: palette.accentHex,
   };
 }
 

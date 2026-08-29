@@ -1,3 +1,4 @@
+import AppliedDesignPanel from '../design-summary/AppliedDesignPanel';
 import FieldSelectionDock from './field-selection/FieldSelectionDock';
 import ChatComposerDock from './composer/ChatComposerDock';
 import ModeChoiceBubble from './mode-choice/ModeChoiceBubble';
@@ -80,6 +81,12 @@ export default function StorefrontChatWorkspace({ session, builder }) {
       </div>
 
       <StorefrontChatThread
+        appliedDesign={
+          /* 대화 패널 안 맨 위에 붙어 있는다. 메시지는 그 아래로 지나가고,
+             사장님은 방금 요청한 것이 무엇으로 바뀌었는지 미리보기까지
+             내려가지 않고 확인할 수 있다. */
+          <AppliedDesignPanel summary={builder?.appliedDesignSummary} />
+        }
         canUndo={Boolean(session.lastApplySnapshot)}
         intro={
           showModeChoiceInThread && modeChoiceBubble ? (

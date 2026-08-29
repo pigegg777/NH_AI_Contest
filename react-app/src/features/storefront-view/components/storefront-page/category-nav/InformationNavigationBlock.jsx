@@ -12,6 +12,9 @@ export default function InformationNavigationBlock({ view }) {
   // page-design request aimed at the 세부카테고리 버튼 moves both rows together. It
   // wraps rather than scrolls, though, so it lines up under the 상품 분류 row above it.
   const categoryChipStyleMode = view.pageStyle.categoryChips.styleMode;
+  // 세부 분류 줄과 같은 이유로 대분류 칩 모드를 따라 왼쪽을 들여쓴다.
+  const productCategoryChipStyleMode =
+    view.pageStyle?.productCategoryChips?.styleMode ?? '';
 
   return (
     <nav className={styles.categoryChipsSection} aria-label="안내 분류">
@@ -19,6 +22,7 @@ export default function InformationNavigationBlock({ view }) {
         className={`${styles.categoryWrap} ${CHIP_STYLE_MODE_CLASS_NAMES[categoryChipStyleMode] || ''}`}
         data-testid="storefront-information-category-chips"
         data-chip-style-mode={categoryChipStyleMode}
+        data-product-chip-style-mode={productCategoryChipStyleMode}
         data-category-layout="wrap"
         data-chip-size="compact"
       >

@@ -4,6 +4,7 @@ import { loadPublicOfficeProducts } from '../../office-product-editor/model/offi
 import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 import styles from './PublicStorefrontPage.module.css';
 import PublicStorefrontScreen from '../components/PublicStorefrontScreen';
+import { useShoppingCart } from '../hooks/useShoppingCart';
 
 const EMPTY_STATE = {
   status: 'placeholder',
@@ -15,6 +16,7 @@ const EMPTY_STATE = {
 };
 
 export default function PublicStorefrontPage({ officeCode }) {
+  const cart = useShoppingCart();
   const normalizedOfficeCode = (officeCode ?? '').trim();
   const [state, setState] = useState(EMPTY_STATE);
 
@@ -108,6 +110,9 @@ export default function PublicStorefrontPage({ officeCode }) {
         officeName={state.officeName}
         nhName={state.nhName}
         productUpdatedAt={state.productUpdatedAt}
+        cartItemRefs={cart.cartItemRefs}
+        onAddToCart={cart.addToCart}
+        onRemoveCartItems={cart.removeCartItems}
       />
     </div>
   );

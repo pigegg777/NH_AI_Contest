@@ -1,0 +1,190 @@
+/* 사장님이 관리하는 화면(어드민 크롬)이라 --corp-* 토큰을 쓴다. 미리보기 안쪽의
+   가게 색과 섞이면 어느 쪽이 디자인 결과인지 헷갈리므로 여기 색은 중립으로 둔다. */
+/* 대화 패널(.threadFrame) 안 맨 위에 붙어 있는다. 그 안이 스크롤 컨테이너라
+   sticky 가 걸리고, 메시지는 이 아래로 지나간다.
+
+   음수 여백으로 프레임의 안쪽 여백(14px)을 상쇄해 위·좌·우로 꽉 채운다.
+   그러지 않으면 그 14px 틈으로 지나가는 메시지가 비친다. 틈을 색으로 덮는
+   방법도 있지만 프레임이 반투명이라 정확히 맞출 색이 없다 — 틈 자체를 없앤다.
+   배경을 불투명 흰색으로 두는 것도 같은 이유다.
+
+   위 모서리를 각지게 두는 것은 프레임이 이미 그 모서리를 둥글게 잘라내기
+   때문이다(overflow: auto 는 테두리 반경대로 자른다). */
+.panel {
+  position: sticky;
+  top: -14px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: -14px -14px 0;
+  border: 1px solid var(--corp-border, #e5e7eb);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--corp-surface-muted, #f8fafc);
+}
+
+.toggleMain {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.toggleTitle {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--corp-text, #111827);
+}
+
+/* 접힌 상태에서 보이는 한 줄. 색 점 + 핵심 문구 순서라 색부터 눈에 들어온다. */
+.headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.swatchRow {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.swatchDot {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.14);
+  border-radius: 999px;
+}
+
+.headlineFacts {
+  font-size: 0.76rem;
+  color: var(--corp-text-muted, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--corp-text-muted, #6b7280);
+  border-bottom: 2px solid var(--corp-text-muted, #6b7280);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--corp-transition, 150ms ease);
+}
+
+.chevronOpen {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+/* 왼쪽 페이지 전체 / 오른쪽 선택한 분류의 카드. auto-fit 이라 칸이 좁아지면
+   따로 분기를 두지 않아도 한 줄로 접힌다 (열이 둘뿐이라 셋으로 늘지 않는다). */
+.body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: start;
+  gap: 14px 18px;
+  max-height: 280px;
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--corp-border, #e5e7eb);
+  overflow-y: auto;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sectionTitle {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--corp-primary, #1d4a2e);
+  word-break: keep-all;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--corp-text-muted, #6b7280);
+  word-break: keep-all;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 0;
+}
+
+.rowLabel {
+  font-size: 0.76rem;
+  color: var(--corp-text-muted, #6b7280);
+  word-break: keep-all;
+}
+
+.rowValue {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--corp-text, #111827);
+  text-align: right;
+  word-break: keep-all;
+}
+
+.swatch {
+  display: block;
+  width: 34px;
+  height: 16px;
+  border: 1px solid rgba(17, 24, 39, 0.14);
+  border-radius: 5px;
+}
+
+.note {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--corp-text-muted, #6b7280);
+  word-break: keep-all;
+}
