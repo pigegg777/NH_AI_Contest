@@ -127,10 +127,6 @@ export async function register(form) {
     throw error;
   }
 
-  // When Confirm Email is disabled, signUp also creates a session.
-  // Return to the explicit login flow so the UI stays predictable.
-  await supabase.auth.signOut();
-
   return {
     status: 'success',
     authUserId: data?.user?.id ?? null,

@@ -106,7 +106,7 @@ describe('authService', () => {
     expect(supabase.auth.signInWithPassword).not.toHaveBeenCalled();
   });
 
-  it('registers a new auth user with current-project metadata and signs out the auto-created session', async () => {
+  it('registers a new auth user and keeps the auto-created session active', async () => {
     supabase.auth.signUp.mockResolvedValue({
       data: {
         user: {
@@ -116,8 +116,6 @@ describe('authService', () => {
       },
       error: null,
     });
-    supabase.auth.signOut.mockResolvedValue({ error: null });
-
     const result = await register({
       nhName: 'NH',
       officeName: 'Main Office',
@@ -140,7 +138,7 @@ describe('authService', () => {
         },
       },
     });
-    expect(supabase.auth.signOut).toHaveBeenCalledTimes(1);
+    expect(supabase.auth.signOut).not.toHaveBeenCalled();
     expect(result).toEqual({
       status: 'success',
       authUserId: 'auth-user-2',
