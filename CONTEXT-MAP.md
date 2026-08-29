@@ -7,17 +7,20 @@
 
 ## Relationships
 
-- **Office product editor → Storefront**: 등록한 상품 행이 storefront view 가 그리는 재료다. Storefront builder 는 `officeProductDataReadService.fetchOfficeProductDataEntries` 로, 공개 페이지는 `publicOfficeProductService` 로 읽는다.
+- **Office product editor → Storefront**: 등록한 상품 행이 storefront view 가 그리는 재료다. Storefront builder 는 `loadOfficeProductEntries` 로, 공개 페이지는 `loadPublicOfficeProducts` 로 읽는다.
 - **Office product editor → Storefront config**: 카테고리 데이터를 지우면 그 카테고리로 키가 걸린 디자인도 지워야 한다. `officeProductDataWriteModel.deleteOfficeProductCategory` 가 `storefrontConfigOrchestrator.removeStorefrontCategoryConfig` 를 부른다.
 - 두 맥락 모두 `officeCode` 를 영업점 식별자로 쓴다.
 
 ## 층 규칙
 
-지향하는 방향은 `hooks → model → services` 이고, 다른 feature 를 부를 때는 그 feature 의 `model/` 을 통한다. 예외와 미달 지점은 각 CONTEXT.md 에 적는다.
+방향은 `hooks → model → services` 이고, 다른 feature 를 부를 때는 그 feature 의 `model/` 을 통한다.
 
-Office product editor 는 2026-08-29 에 이 방향으로 정리했다(남은 예외는 그쪽 CONTEXT.md 참고). **Storefront 쪽은 아직 아니다** — 확인된 곳:
+2026-08-29 기준 **남의 feature 의 `services/` 를 직접 부르는 곳은 없다.** feature 안에서의 예외는 각 CONTEXT.md 에 적는다(현재는 office product editor 의 ai-image-apply 한 건).
 
-- `storefront-builder/hooks/useStorefrontBuilder.js` 가 `office-product-editor/services/office-product-data/officeProductDataReadService` 를 직접 부른다
-- `public-storefront/pages/PublicStorefrontPage.jsx` 가 `office-product-editor/services/office-product-data/publicOfficeProductService` 를 직접 부른다
+feature 사이를 잇는 model 함수:
 
-둘 다 office product editor 의 `model/office-product-data/` 를 경유하도록 옮길 수 있지만, 그 판단은 아직 하지 않았다.
+| 부르는 쪽 | 함수 |
+|---|---|
+| `storefront-builder/hooks/useStorefrontBuilder` | `officeProductDataReadModel.loadOfficeProductEntries` |
+| `public-storefront/pages/PublicStorefrontPage` | `publicOfficeProductModel.loadPublicOfficeProducts` |
+| `office-product-editor` 삭제 흐름 | `storefrontConfigOrchestrator.removeStorefrontCategoryConfig` |
