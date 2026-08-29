@@ -50,3 +50,9 @@ common (QR 카드) ───────┘
 ```
 
 Storefront view는 어떤 모듈도 역참조하지 않는다. 이 방향이 깨지면 빌더 미리보기와 공개 페이지가 갈라진다.
+
+`functions/api/storefront-ai/{card-style,page-style}.js`는 브라우저 코드가
+아니면서도 `src/features/storefront-builder/model/{card,page}-design/ai-*`와
+`storefront-view/model/*/style`을 직접 import한다. 클라이언트 진입점만
+따라가면 이 모듈들이 죽은 코드로 보이므로, 사용처를 셀 때 `functions/`를
+반드시 함께 본다.
