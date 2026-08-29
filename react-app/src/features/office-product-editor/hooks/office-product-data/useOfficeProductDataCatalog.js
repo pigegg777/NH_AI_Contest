@@ -1,17 +1,19 @@
 import { startTransition, useCallback } from 'react';
 
-import { toTrimmedString } from '../../../../common/utils/text';
-import { fetchOfficeProductDataCatalog } from '../../services/office-product-data/officeProductDataReadService';
+import {
+  loadOfficeProductCatalog,
+  resolveOfficeProductDataQuery,
+} from '../../model/office-product-data/officeProductDataReadModel';
 import { useAsyncFetch } from '../useAsyncFetch';
 
 const DEFAULT_ERROR_MESSAGE = '등록 데이터를 불러오지 못했습니다.';
 
 export function useOfficeProductDataCatalog(user) {
-  const officeCode = toTrimmedString(user?.office_code);
+  const { officeCode, hasOffice } = resolveOfficeProductDataQuery({ user });
   const { data: items, isLoading, errorMessage, setData } = useAsyncFetch(
-    () => fetchOfficeProductDataCatalog({ officeCode }).then((r) => (Array.isArray(r) ? r : [])),
+    () => loadOfficeProductCatalog(officeCode),
     [officeCode],
-    { enabled: Boolean(officeCode), initialData: [], defaultErrorMessage: DEFAULT_ERROR_MESSAGE },
+    { enabled: hasOffice, initialData: [], defaultErrorMessage: DEFAULT_ERROR_MESSAGE },
   );
 
   const removeItem = useCallback(

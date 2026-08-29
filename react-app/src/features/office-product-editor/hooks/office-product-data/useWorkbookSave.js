@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { toNullableTrimmedString, toTrimmedString } from '../../../../common/utils/text';
+import { toTrimmedString } from '../../../../common/utils/text';
+import { saveOfficeProductWorkbook } from '../../model/office-product-data/officeProductDataWriteModel';
 import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
-import { saveOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
 
 const SAVE_ERROR_MESSAGE = '검토 데이터를 저장하지 못했습니다.';
 
@@ -55,24 +55,15 @@ export function useWorkbookSave({
     setSaveSuccessMessage('');
 
     try {
-      const currentRowsToSave = rowsToSaveRef.current;
-      const savedData = await saveOfficeProductData({
+      const { rowCount, catalogEntry } = await saveOfficeProductWorkbook({
         user,
-        rows: currentRowsToSave,
+        rows: rowsToSaveRef.current,
         categoryName: resolvedCategoryName,
         sourceFileName: selectedFileName,
       });
-      const savedRowCount = savedData?.row_count ?? currentRowsToSave.length;
-      setSaveSuccessMessage(`${resolvedCategoryName} 데이터 ${savedRowCount}건을 저장했습니다.`);
-      onSaved?.({
-        id: savedData?.id ?? null,
-        officeCode: toTrimmedString(user?.office_code),
-        officeName: toTrimmedString(user?.office_name),
-        categoryName: resolvedCategoryName,
-        rowCount: savedRowCount,
-        sourceFileName: toNullableTrimmedString(selectedFileName),
-        updatedAt: savedData?.updated_at ?? new Date().toISOString(),
-      });
+
+      setSaveSuccessMessage(`${resolvedCategoryName} 데이터 ${rowCount}건을 저장했습니다.`);
+      onSaved?.(catalogEntry);
     } catch (error) {
       setSaveErrorMessage(error instanceof Error ? error.message : SAVE_ERROR_MESSAGE);
     } finally {

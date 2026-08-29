@@ -85,6 +85,12 @@ function buildCategoryRows({ categoryConfigs }) {
     }));
 }
 
+/**
+ * 한 카테고리의 저장된 디자인을 지운다. storefront-config 가 밖에 내주는
+ * 연산이므로 여기 둔다 — 다른 feature 는 services/ 를 직접 보지 않는다.
+ */
+export { removeCategoryDetailConfig as removeStorefrontCategoryConfig } from '../services/storefrontConfigService';
+
 export async function fetchStorefrontConfig({ officeCode }) {
   const { officeRow, categoryRows } = await fetchOfficeConfigRows({ officeCode });
 
