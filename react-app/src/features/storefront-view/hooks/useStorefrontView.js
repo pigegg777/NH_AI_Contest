@@ -11,17 +11,17 @@ import {
   buildSections,
   buildUniqueMediumCategories,
   filterHiddenProducts,
-} from '../model/storefront-config/sectionMatching';
-import { normalizeInformationEntries } from '../model/storefront-config/informationEntriesModel';
-import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
-import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
-import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
-import { buildInformationNavigationItems } from '../model/storefront-view/informationNavigationModel';
-import { formatProductUpdatedAt } from '../model/storefront-view/productUpdatedAtModel';
+} from '../model/config-schema/sectionMatching';
+import { normalizeInformationEntries } from '../model/config-schema/informationEntriesModel';
+import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-style/pageStyleModel';
+import { normalizePageConfig } from '../model/config-schema/storefrontConfigModel';
+import { buildDerivedPageTitle } from '../model/view/pageTitleModel';
+import { buildInformationNavigationItems } from '../model/view/informationNavigationModel';
+import { formatProductUpdatedAt } from '../model/view/productUpdatedAtModel';
 import {
   MOBILE_UI_HELPER_TYPES,
   normalizeMobileUiTree,
-} from '../model/storefront-config/storefrontUiModel';
+} from '../model/config-schema/mobileUiTreeModel';
 
 const ALL_MEDIUM_CATEGORY_LABEL = '전체';
 

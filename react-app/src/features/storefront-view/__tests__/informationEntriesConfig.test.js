@@ -4,8 +4,8 @@ import {
   buildStorefrontSavePayload,
   normalizeCategoryConfig,
   normalizePageConfig,
-} from '../model/storefront-config/storefrontBuilderModel';
-import { buildSections } from '../model/storefront-config/sectionMatching';
+} from '../model/config-schema/storefrontConfigModel';
+import { buildSections } from '../model/config-schema/sectionMatching';
 
 describe('page config information entries', () => {
   it('normalizes the saved entries', () => {

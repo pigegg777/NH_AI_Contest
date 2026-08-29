@@ -1,4 +1,4 @@
-import { getDefaultBlock } from '../storefront-config/storefrontUiModel';
+import { getDefaultBlock } from '../config-schema/mobileUiTreeModel';
 
 const TOP_SLOT_BLOCK_ORDER = {
   hero: 0,

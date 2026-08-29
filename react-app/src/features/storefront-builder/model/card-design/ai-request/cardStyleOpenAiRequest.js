@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
 import { buildCardAiTargetScopeInstruction } from './cardAiDesignModel';
 import { CARD_STYLE_AI_SCHEMA } from '../ai-response/cardStyleAiResponseSchema';
-import { normalizeCardStyle } from '../../../../storefront-view/model/card-design/style/cardStyleModel';
+import { normalizeCardStyle } from '../../../../storefront-view/model/card-style/cardStyleModel';
 import {
   buildCardStyleAiSystemPrompt,
   selectCardStyleSkillPackIds,

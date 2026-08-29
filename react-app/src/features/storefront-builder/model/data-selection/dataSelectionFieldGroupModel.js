@@ -1,4 +1,4 @@
-import { NUTRIENT_FIELD_KEYS } from '../../../storefront-view/model/storefront-config/storefrontUiModel';
+import { NUTRIENT_FIELD_KEYS } from '../../../storefront-view/model/config-schema/mobileUiTreeModel';
 
 export const PRICE_GROUP_FIELD_KEYS = [
   'sale_price_type_name',

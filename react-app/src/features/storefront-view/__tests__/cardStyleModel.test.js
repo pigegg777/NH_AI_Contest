@@ -12,7 +12,7 @@ import {
   normalizeFieldFontSizeToken,
   normalizeFieldFontWeightToken,
   resolveFieldColorRoleValue,
-} from '../model/card-design/style/cardStyleModel';
+} from '../model/card-style/cardStyleModel';
 
 describe('normalizeCardStyle', () => {
   it('keeps allowed values for every section and falls back to defaults otherwise', () => {

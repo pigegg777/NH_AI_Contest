@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildSections } from '../model/storefront-config/sectionMatching';
+import { buildSections } from '../model/config-schema/sectionMatching';
 
 const FERTILIZER_ROW = {
   product_category_name: '비료',

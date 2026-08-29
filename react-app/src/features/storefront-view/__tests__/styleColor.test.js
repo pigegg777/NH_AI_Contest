@@ -7,7 +7,7 @@ import {
   mixHexColors,
   normalizeHexColor,
   pickReadableTextColor,
-} from '../model/shared/pageStyleColor';
+} from '../model/shared/styleColor';
 
 describe('isHexColor', () => {
   it('accepts 3- and 6-digit hex, rejects everything else', () => {

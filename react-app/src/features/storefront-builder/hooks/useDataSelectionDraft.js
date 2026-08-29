@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { normalizeCardFields } from '../../storefront-view/model/storefront-config/storefrontBuilderModel';
+import { normalizeCardFields } from '../../storefront-view/model/config-schema/storefrontConfigModel';
 
 export function useDataSelectionDraft({ allowedScalarKeys, initialFields } = {}) {
   const [draft, setDraft] = useState(() => normalizeCardFields(initialFields, allowedScalarKeys));

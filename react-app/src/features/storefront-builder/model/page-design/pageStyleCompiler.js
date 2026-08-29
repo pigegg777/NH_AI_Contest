@@ -1,6 +1,6 @@
-import { normalizeHexColor } from '../../../../storefront-view/model/shared/pageStyleColor';
-import { normalizePageAiTargetScope } from '../ai-request/pageAiDesignModel';
-import { deriveCategoryChipsFromPalette, normalizePageStyle } from '../../../../storefront-view/model/page-design/style/pageStyleModel';
+import { normalizeHexColor } from '../../../storefront-view/model/shared/styleColor';
+import { normalizePageAiTargetScope } from './ai-request/pageAiDesignModel';
+import { deriveCategoryChipsFromPalette, normalizePageStyle } from '../../../storefront-view/model/page-style/pageStyleModel';
 
 function resolvePalette(intentPalette, previousPalette) {
   if (!intentPalette) {

@@ -5,7 +5,7 @@ import {
   PAGE_STYLE_CHIP_SIZE_VALUES,
   PAGE_STYLE_SEARCH_SIZE_VALUES,
   PAGE_STYLE_TAB_ACTIVE_BORDER_WIDTH_VALUES,
-} from '../page-design/style/pageStyleModel';
+} from '../page-style/pageStyleModel';
 
 // 탭 모드는 아래쪽 한 면만 그리고, 선택된 탭은 그 두 배 두께로 그린다.
 function resolveChipBorderWidths(chips) {

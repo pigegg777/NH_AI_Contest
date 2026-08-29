@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
+import { buildDerivedPageTitle } from '../model/view/pageTitleModel';
 
 describe('buildDerivedPageTitle', () => {
   it('joins both names with the suffix when both are present', () => {

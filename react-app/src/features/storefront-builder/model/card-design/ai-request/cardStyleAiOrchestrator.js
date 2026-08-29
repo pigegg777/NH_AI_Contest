@@ -1,6 +1,6 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
 import { normalizeCardAiDesignInput } from './cardAiDesignModel';
-import { normalizeCardStyle } from '../../../../storefront-view/model/card-design/style/cardStyleModel';
+import { normalizeCardStyle } from '../../../../storefront-view/model/card-style/cardStyleModel';
 import {
   normalizeOpenAiCardExplanation,
   normalizeOpenAiCardIntent,

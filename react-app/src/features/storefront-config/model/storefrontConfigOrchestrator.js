@@ -3,7 +3,7 @@ import {
   normalizeCategoryConfigRow,
   normalizeNavConfig,
   normalizePageConfig,
-} from '../../storefront-view/model/storefront-config/storefrontBuilderModel';
+} from '../../storefront-view/model/config-schema/storefrontConfigModel';
 import {
   migrateLegacyPageConfigToPageStyle,
   pageConfigNeedsPageStyleMigration,

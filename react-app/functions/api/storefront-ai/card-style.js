@@ -1,5 +1,5 @@
 import { normalizeCardAiDesignInput } from '../../../src/features/storefront-builder/model/card-design/ai-request/cardAiDesignModel.js';
-import { normalizeCardStyle } from '../../../src/features/storefront-view/model/card-design/style/cardStyleModel.js';
+import { normalizeCardStyle } from '../../../src/features/storefront-view/model/card-style/cardStyleModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
 import { buildCardStyleOpenAiRequestBody } from '../../../src/features/storefront-builder/model/card-design/ai-request/cardStyleOpenAiRequest.js';
 import {

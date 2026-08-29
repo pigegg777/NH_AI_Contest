@@ -1,4 +1,4 @@
-import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../../shared/pageStyleColor';
+import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../shared/styleColor';
 
 export const PAGE_STYLE_SCHEMA_VERSION = 2;
 

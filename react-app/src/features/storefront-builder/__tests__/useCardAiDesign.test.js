@@ -3,12 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useCardAiDesign } from '../hooks/useCardAiDesign';
 import { DEFAULT_CARD_AI_DESIGN } from '../model/card-design/ai-request/cardAiDesignModel';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-style/cardStyleModel';
 import { requestCardStyleAiIntent } from '../model/card-design/ai-request/cardStyleAiOrchestrator';
-import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
 vi.mock('../model/card-design/ai-request/cardStyleAiOrchestrator', () => ({ requestCardStyleAiIntent: vi.fn() }));
-vi.mock('../model/card-design/style/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
+vi.mock('../model/card-design/cardStyleCompiler', () => ({ compileCardStyle: vi.fn() }));
 
 describe('useCardAiDesign', () => {
   afterEach(() => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
-import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
+import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-style/cardStyleModel';
 
 const visibleFields = ['tax_price', 'zero_tax_price', 'company', 'large_category', 'spec'];
 const fieldLabels = {

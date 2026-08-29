@@ -4,7 +4,7 @@ import {
   normalizeFieldFontSizeToken,
   normalizeFieldFontWeightToken,
   resolveFieldColorRoleValue,
-} from '../card-design/style/cardStyleModel';
+} from '../card-style/cardStyleModel';
 
 export const PRICE_FIELD_SET = new Set([
   'zero_tax_price',

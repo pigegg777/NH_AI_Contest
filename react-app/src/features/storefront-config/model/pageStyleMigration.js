@@ -1,9 +1,9 @@
-import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../../storefront-view/model/shared/pageStyleColor';
+import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../../storefront-view/model/shared/styleColor';
 import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../../storefront-view/model/page-design/style/pageStyleModel';
+} from '../../storefront-view/model/page-style/pageStyleModel';
 
 const LEGACY_DESIGN_DIRECTION_ACCENT_SEED_HEX = {
   friendly: '#2f9e6e',

@@ -9,9 +9,9 @@ import {
   isHeaderAboveSplit,
   resolveStructuralPreset,
   resolveStructuralPresetFromLayoutPlan,
-} from '../../storefront-view/model/card-design/style/cardCompositionModel';
-import { deriveLegacyCardLayoutPlan } from '../../storefront-view/model/card-design/style/cardLayoutPlanModel';
-import { normalizeCardStyle } from '../../storefront-view/model/card-design/style/cardStyleModel';
+} from '../../storefront-view/model/card-style/cardCompositionModel';
+import { deriveLegacyCardLayoutPlan } from '../../storefront-view/model/card-style/cardLayoutPlanModel';
+import { normalizeCardStyle } from '../../storefront-view/model/card-style/cardStyleModel';
 
 const SECTION = {
   products: [

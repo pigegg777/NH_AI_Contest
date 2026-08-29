@@ -1,5 +1,5 @@
 import { toTrimmedString } from '../../../../../common/utils/text';
-import { isHexColor, mixHexColors, normalizeHexColor } from '../../../../storefront-view/model/shared/pageStyleColor';
+import { isHexColor, mixHexColors, normalizeHexColor } from '../../../../storefront-view/model/shared/styleColor';
 import {
   PAGE_STYLE_BORDER_STRENGTH_TOKENS,
   PAGE_STYLE_CHIP_GAP_TOKENS,
@@ -8,7 +8,7 @@ import {
   PAGE_STYLE_CHIP_STYLE_MODE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
-} from '../../../../storefront-view/model/page-design/style/pageStyleModel';
+} from '../../../../storefront-view/model/page-style/pageStyleModel';
 
 const PAGE_STYLE_AI_DEFAULT_EXPLANATION_MESSAGE = '요청하신 내용을 페이지 스타일에 반영했습니다.';
 

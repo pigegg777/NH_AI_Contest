@@ -6,7 +6,7 @@ import {
   PAGE_STYLE_CHIP_STYLE_MODE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
-} from '../../../../storefront-view/model/page-design/style/pageStyleModel';
+} from '../../../../storefront-view/model/page-style/pageStyleModel';
 
 const HEX_COLOR_SCHEMA_PATTERN = '^#[0-9a-fA-F]{6}$';
 const LETTER_SPACING_SCHEMA_PATTERN = '^normal$|^-?\\d+(\\.\\d+)?(em|rem|px)$';

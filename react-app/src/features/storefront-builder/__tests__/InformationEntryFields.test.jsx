@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MAX_INFORMATION_ENTRIES } from '../../storefront-view/model/storefront-config/informationEntriesModel';
+import { MAX_INFORMATION_ENTRIES } from '../../storefront-view/model/config-schema/informationEntriesModel';
 import { InformationEntryFields } from '../components/builder-workspace/field-selection/InformationEntryFields';
 
 function Stateful({ initialEntries = [] }) {

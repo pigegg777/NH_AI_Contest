@@ -8,8 +8,8 @@ import {
   normalizeTitleMode,
   resolveStructuralPreset,
 } from './cardCompositionModel';
-import { toTrimmedString } from '../../../../../common/utils/text';
-import { normalizeHexColor } from '../../shared/pageStyleColor';
+import { toTrimmedString } from '../../../../common/utils/text';
+import { normalizeHexColor } from '../shared/styleColor';
 
 export const CARD_STYLE_SCHEMA_VERSION = 1;
 

@@ -4,16 +4,16 @@ import {
   CARD_STRUCTURAL_PRESETS,
   normalizeCardsPerRow,
   resolveStructuralPreset,
-} from '../../storefront-view/model/card-design/style/cardCompositionModel';
-import { deriveLegacyCardLayoutPlan } from '../../storefront-view/model/card-design/style/cardLayoutPlanModel';
+} from '../../storefront-view/model/card-style/cardCompositionModel';
+import { deriveLegacyCardLayoutPlan } from '../../storefront-view/model/card-style/cardLayoutPlanModel';
 import {
   DEFAULT_CARD_AI_DESIGN,
   normalizeCardAiDesignInput,
   normalizeCardAiTargetScope,
 } from '../model/card-design/ai-request/cardAiDesignModel';
-import { collectConditionFieldValueSamples, normalizeCardStyle } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { collectConditionFieldValueSamples, normalizeCardStyle } from '../../storefront-view/model/card-style/cardStyleModel';
 import { requestCardStyleAiIntent } from '../model/card-design/ai-request/cardStyleAiOrchestrator';
-import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
 
 const MISSING_CARD_PROMPT_ERROR_MESSAGE = '카드 디자인 요청을 먼저 입력해 주세요.';
 const APPLY_FAILED_ERROR_MESSAGE = '카드 디자인을 적용하지 못했습니다.';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseInformationText } from '../model/storefront-view/informationTextModel';
+import { parseInformationText } from '../model/view/informationTextModel';
 
 describe('parseInformationText', () => {
   it('returns one plain segment for text with no markers', () => {

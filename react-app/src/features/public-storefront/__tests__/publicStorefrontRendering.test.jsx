@@ -6,7 +6,7 @@ import {
   fetchAllOfficeProductRows,
   fetchPublicOfficeIdentity,
 } from '../../office-product-editor/services/office-product-data/publicOfficeProductService';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-style/cardStyleModel';
 import { fetchStorefrontConfig } from '../../storefront-config/model/storefrontConfigOrchestrator';
 import PublicStorefrontPage from '../pages/PublicStorefrontPage';
 

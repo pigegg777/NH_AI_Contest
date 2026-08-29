@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatProductUpdatedAt,
   resolveLatestProductUpdatedAt,
-} from '../model/storefront-view/productUpdatedAtModel';
+} from '../model/view/productUpdatedAtModel';
 
 describe('formatProductUpdatedAt', () => {
   it('formats an ISO timestamp as a Korean date and time', () => {

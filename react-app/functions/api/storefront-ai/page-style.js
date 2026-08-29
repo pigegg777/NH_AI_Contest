@@ -3,7 +3,7 @@ import {
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
 } from '../../../src/features/storefront-builder/model/page-design/ai-response/pageStyleAiResponseNormalizer.js';
-import { normalizePageStyle } from '../../../src/features/storefront-view/model/page-design/style/pageStyleModel.js';
+import { normalizePageStyle } from '../../../src/features/storefront-view/model/page-style/pageStyleModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
 import { buildPageStyleOpenAiRequestBody } from '../../../src/features/storefront-builder/model/page-design/ai-request/pageStyleOpenAiRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';

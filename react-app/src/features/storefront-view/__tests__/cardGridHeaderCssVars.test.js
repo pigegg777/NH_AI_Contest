@@ -5,7 +5,7 @@ import {
   CARD_HEADER_TITLE_SIZE_TOKENS,
   DEFAULT_CARD_STYLE,
   normalizeCardStyle,
-} from '../model/card-design/style/cardStyleModel';
+} from '../model/card-style/cardStyleModel';
 
 function cssVarsForHeader(header) {
   return buildShellCssVars(normalizeCardStyle({ header }));

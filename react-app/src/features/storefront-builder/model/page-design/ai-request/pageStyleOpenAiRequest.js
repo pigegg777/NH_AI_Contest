@@ -2,7 +2,7 @@ import { toTrimmedString } from '../../../../../common/utils/text';
 import { PAGE_STYLE_AI_OPENAI_SYSTEM_INSTRUCTIONS } from './pageStyleAiPrompt';
 import { buildPageAiTargetScopeInstruction } from './pageAiDesignModel';
 import { PAGE_STYLE_AI_SCHEMA } from '../ai-response/pageStyleAiResponseSchema';
-import { normalizePageStyle } from '../../../../storefront-view/model/page-design/style/pageStyleModel';
+import { normalizePageStyle } from '../../../../storefront-view/model/page-style/pageStyleModel';
 
 const PAGE_STYLE_AI_OPENAI_RESPONSE_FORMAT_NAME = 'storefront_page_style_suggestion';
 const PAGE_STYLE_AI_OPENAI_MAX_OUTPUT_TOKENS = 800;

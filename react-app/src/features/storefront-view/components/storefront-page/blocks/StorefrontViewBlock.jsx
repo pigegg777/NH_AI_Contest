@@ -1,4 +1,4 @@
-import { MOBILE_UI_HELPER_TYPES } from '../../../model/storefront-config/storefrontUiModel';
+import { MOBILE_UI_HELPER_TYPES } from '../../../model/config-schema/mobileUiTreeModel';
 import HelperBlock from './HelperBlock';
 import HeroBlock from '../hero/HeroBlock';
 import ProductCategoryNavBlock from '../category-nav/ProductCategoryNavBlock';

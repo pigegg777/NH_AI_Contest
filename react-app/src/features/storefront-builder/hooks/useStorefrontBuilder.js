@@ -7,7 +7,7 @@ import { CARD_DESIGN_LAYOUT_OPTIONS } from "../model/card-design/ai-request/card
 import { getCardDesignScopeGuide } from "../model/card-design/ai-request/cardDesignScopeGuide";
 import { PAGE_AI_TARGET_SCOPE_OPTIONS } from "../model/page-design/ai-request/pageAiDesignModel";
 import { getPageDesignScopeGuide } from "../model/page-design/ai-request/pageDesignScopeGuide";
-import { normalizeInformationEntries } from "../../storefront-view/model/storefront-config/informationEntriesModel";
+import { normalizeInformationEntries } from "../../storefront-view/model/config-schema/informationEntriesModel";
 import {
   DEFAULT_NAV_CONFIG,
   DEFAULT_PAGE_CONFIG,
@@ -22,15 +22,15 @@ import {
   normalizePageConfig,
   resolveCategoryDraft,
   resolveOfficeInfoOwnership,
-} from "../../storefront-view/model/storefront-config/storefrontBuilderModel";
-import { sanitizeMobileUiTree } from "../../storefront-view/model/storefront-config/storefrontUiModel";
+} from "../../storefront-view/model/config-schema/storefrontConfigModel";
+import { sanitizeMobileUiTree } from "../../storefront-view/model/config-schema/mobileUiTreeModel";
 import {
   fetchStorefrontConfig,
   upsertStorefrontConfig,
 } from "../../storefront-config/model/storefrontConfigOrchestrator";
 import { getStorefrontDesignComposerCopy } from "../components/builder-workspace/mode-choice/storefrontChatModes";
-import { buildDerivedPageTitle } from "../../storefront-view/model/storefront-view/pageTitleModel";
-import { resolveLatestProductUpdatedAt } from "../../storefront-view/model/storefront-view/productUpdatedAtModel";
+import { buildDerivedPageTitle } from "../../storefront-view/model/view/pageTitleModel";
+import { resolveLatestProductUpdatedAt } from "../../storefront-view/model/view/productUpdatedAtModel";
 import { useCardAiDesign } from "./useCardAiDesign";
 import { useDataSelectionDraft } from "./useDataSelectionDraft";
 import { usePageAiDesign } from "./usePageAiDesign";

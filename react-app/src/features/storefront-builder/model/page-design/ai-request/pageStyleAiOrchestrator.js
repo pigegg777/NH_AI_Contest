@@ -4,7 +4,7 @@ import {
   normalizePageStyleAiExplanation,
   normalizePageStyleAiIntent,
 } from '../ai-response/pageStyleAiResponseNormalizer';
-import { normalizePageStyle } from '../../../../storefront-view/model/page-design/style/pageStyleModel';
+import { normalizePageStyle } from '../../../../storefront-view/model/page-style/pageStyleModel';
 import { postPageStyleAiRequest } from '../../../services/page-design/pageStyleAiGateway';
 
 export async function requestPageStyleAiIntent({

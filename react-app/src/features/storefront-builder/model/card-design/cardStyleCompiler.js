@@ -8,18 +8,18 @@ import {
   resolveImageSizeFromDeltaSteps,
   resolveImageSizeRange,
   resolveStructuralPresetFromLayoutPlan,
-} from '../../../../storefront-view/model/card-design/style/cardCompositionModel';
+} from '../../../storefront-view/model/card-style/cardCompositionModel';
 import {
   deriveLegacyCardLayoutPlan,
   normalizeCardLayoutPlan,
-} from '../../../../storefront-view/model/card-design/style/cardLayoutPlanModel';
-import { normalizeCardStyle } from '../../../../storefront-view/model/card-design/style/cardStyleModel';
+} from '../../../storefront-view/model/card-style/cardLayoutPlanModel';
+import { normalizeCardStyle } from '../../../storefront-view/model/card-style/cardStyleModel';
 import {
   contrastRatio,
   ensureReadableTextColor,
   mixHexColors,
   pickReadableTextColor,
-} from '../../../../storefront-view/model/shared/pageStyleColor';
+} from '../../../storefront-view/model/shared/styleColor';
 
 const MIN_HEADER_CONTRAST_RATIO = 4.5;
 const HEADER_LOW_CONTRAST_WARNING =

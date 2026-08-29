@@ -4,7 +4,7 @@ import {
   MAX_INFORMATION_ENTRIES,
   createInformationEntry,
   normalizeInformationEntries,
-} from '../model/storefront-config/informationEntriesModel';
+} from '../model/config-schema/informationEntriesModel';
 
 describe('normalizeInformationEntries', () => {
   it('keeps the label and description of each entry', () => {

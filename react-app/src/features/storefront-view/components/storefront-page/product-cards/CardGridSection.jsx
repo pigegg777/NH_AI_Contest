@@ -1,5 +1,5 @@
-import { normalizeCardStyle } from '../../../model/card-design/style/cardStyleModel';
-import { resolveSectionOrderFromLayoutPlan } from '../../../model/card-design/style/cardCompositionModel';
+import { normalizeCardStyle } from '../../../model/card-style/cardStyleModel';
+import { resolveSectionOrderFromLayoutPlan } from '../../../model/card-style/cardCompositionModel';
 import { buildResolvedInfoSlots } from '../../../model/card-grid-section/cardGridSlotModel';
 import { buildShellCssVars } from '../../../model/card-grid-section/cardGridFieldStyleModel';
 import ProductCard from './ProductCard';

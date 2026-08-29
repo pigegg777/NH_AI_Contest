@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../../storefront-view/model/shared/pageStyleColor';
+import { contrastRatio } from '../../storefront-view/model/shared/styleColor';
 import { migrateLegacyPageConfigToPageStyle, pageConfigNeedsPageStyleMigration } from '../model/pageStyleMigration';
 
 describe('pageConfigNeedsPageStyleMigration', () => {

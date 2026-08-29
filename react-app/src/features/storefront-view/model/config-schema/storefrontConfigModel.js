@@ -1,12 +1,12 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-design/style/cardStyleMigration';
-import { normalizeCardStyle } from '../card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-design/style/pageStyleModel';
+import { categoryConfigNeedsCardStyleMigration, migrateLegacyCategoryConfigToCardStyle } from '../card-style/cardStyleMigration';
+import { normalizeCardStyle } from '../card-style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE, normalizePageStyle } from '../page-style/pageStyleModel';
 import {
   normalizeInformationEntries,
   replaceLegacyInformationEntry,
 } from './informationEntriesModel';
-import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './storefrontUiModel';
+import { buildDefaultMobileUiTree, normalizeMobileUiTree } from './mobileUiTreeModel';
 
 export const DEFAULT_CARD_FIELDS = ['product_name', 'spec', 'nutrient', 'tax_price'];
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../model/shared/pageStyleColor';
+import { contrastRatio } from '../model/shared/styleColor';
 import {
   DEFAULT_PAGE_STYLE,
   PAGE_STYLE_CHIP_GAP_TOKENS,
@@ -20,7 +20,7 @@ import {
   deriveCategoryChipsFromPalette,
   deriveSearchDefaultsFromPalette,
   normalizePageStyle,
-} from '../model/page-design/style/pageStyleModel';
+} from '../model/page-style/pageStyleModel';
 
 describe('DEFAULT_PAGE_STYLE', () => {
   it('is an explicit white default, not a fallback branch', () => {

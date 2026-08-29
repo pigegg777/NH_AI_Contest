@@ -1,4 +1,4 @@
-import { isHeaderAboveSplit } from '../../../model/card-design/style/cardCompositionModel';
+import { isHeaderAboveSplit } from '../../../model/card-style/cardCompositionModel';
 import {
   buildConditionalArticleStyle,
   buildConditionalInfoBodyStyle,

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-style/cardStyleModel';
 import { requestCardStyleAiIntent } from '../model/card-design/ai-request/cardStyleAiOrchestrator';
 
 vi.mock('../../../lib/supabaseClient', () => ({

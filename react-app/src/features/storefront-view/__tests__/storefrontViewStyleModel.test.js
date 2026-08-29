@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/style/pageStyleModel';
-import { buildStorefrontViewCssVars } from '../model/storefront-view/storefrontViewStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-style/pageStyleModel';
+import { buildStorefrontViewCssVars } from '../model/view/storefrontViewStyleModel';
 
 function buildView(pageStyleOverrides = {}) {
   return {

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import supabase from '../../../lib/supabaseClient';
-import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE } from '../../storefront-view/model/page-design/style/pageStyleModel';
+import { DEFAULT_CARD_STYLE, normalizeCardStyle } from '../../storefront-view/model/card-style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../../storefront-view/model/page-style/pageStyleModel';
 import { fetchStorefrontConfig, upsertStorefrontConfig } from '../model/storefrontConfigOrchestrator';
 
 vi.mock('../../../lib/supabaseClient', () => ({

@@ -3,7 +3,7 @@ import { normalizeInformationEntries } from './informationEntriesModel';
 import {
   DEFAULT_CARD_FIELDS,
   deriveEffectiveScalarKeys,
-} from './storefrontBuilderModel';
+} from './storefrontConfigModel';
 
 function normalizeSpec(spec) {
   return spec === undefined || spec === null ? null : spec;

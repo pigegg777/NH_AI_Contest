@@ -9,9 +9,9 @@ import {
   normalizeCardFields,
   deriveAvailableCategoryFields,
   STOREFRONT_FIELD_DISPLAY_ORDER,
-} from '../model/storefront-config/storefrontBuilderModel';
-import { DEFAULT_CARD_STYLE } from '../model/card-design/style/cardStyleModel';
-import { DEFAULT_PAGE_STYLE } from '../model/page-design/style/pageStyleModel';
+} from '../model/config-schema/storefrontConfigModel';
+import { DEFAULT_CARD_STYLE } from '../model/card-style/cardStyleModel';
+import { DEFAULT_PAGE_STYLE } from '../model/page-style/pageStyleModel';
 
 describe('categoryConfig cardStyle', () => {
   it('normalizes a missing cardDesign to the default cardStyle', () => {

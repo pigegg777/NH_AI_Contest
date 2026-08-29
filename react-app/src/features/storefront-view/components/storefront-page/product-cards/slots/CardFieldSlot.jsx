@@ -1,4 +1,4 @@
-import { STOREFRONT_FIELD_LABELS } from '../../../../model/storefront-config/storefrontBuilderModel';
+import { STOREFRONT_FIELD_LABELS } from '../../../../model/config-schema/storefrontConfigModel';
 import {
   PRICE_FIELD_SET,
   buildFieldValueStyle,

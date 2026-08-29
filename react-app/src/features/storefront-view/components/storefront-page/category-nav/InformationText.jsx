@@ -1,4 +1,4 @@
-import { parseInformationText } from '../../../model/storefront-view/informationTextModel';
+import { parseInformationText } from '../../../model/view/informationTextModel';
 import styles from './InformationText.module.css';
 
 const SEGMENT_CLASS_NAMES = {

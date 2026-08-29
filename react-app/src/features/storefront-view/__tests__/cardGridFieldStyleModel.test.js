@@ -7,7 +7,7 @@ import {
 import {
   DEFAULT_CARD_STYLE,
   normalizeCardStyle,
-} from '../model/card-design/style/cardStyleModel';
+} from '../model/card-style/cardStyleModel';
 
 function cssVarsForInfo(info) {
   return buildShellCssVars(normalizeCardStyle({ info }));

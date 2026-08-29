@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeCategoryConfig } from '../model/storefront-config/storefrontBuilderModel';
-import { buildSections } from '../model/storefront-config/sectionMatching';
+import { normalizeCategoryConfig } from '../model/config-schema/storefrontConfigModel';
+import { buildSections } from '../model/config-schema/sectionMatching';
 
 describe('categoryConfig.description', () => {
   it('defaults to an empty string', () => {

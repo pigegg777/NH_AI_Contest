@@ -6,8 +6,8 @@ import {
 import { buildCardStyleOpenAiRequestBody } from '../model/card-design/ai-request/cardStyleOpenAiRequest';
 import { CARD_STYLE_AI_SCHEMA } from '../model/card-design/ai-response/cardStyleAiResponseSchema';
 import { normalizeOpenAiCardIntent } from '../model/card-design/ai-response/cardStyleAiResponseNormalizer';
-import { compileCardStyle } from '../model/card-design/style/cardStyleCompiler';
-import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-design/style/cardStyleModel';
+import { compileCardStyle } from '../model/card-design/cardStyleCompiler';
+import { DEFAULT_CARD_STYLE } from '../../storefront-view/model/card-style/cardStyleModel';
 
 // The card-design system prompt used to live in two places: the skill packs and a
 // second inline array inside the request builder. The inline array was absorbed into

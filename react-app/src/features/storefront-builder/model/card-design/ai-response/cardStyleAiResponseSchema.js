@@ -6,7 +6,7 @@ import {
   CARD_LAYOUT_GROUPING_HINT_OPTIONS,
   CARD_LAYOUT_IMAGE_PLACEMENT_OPTIONS,
   CARD_LAYOUT_SECTION_OPTIONS,
-} from '../../../../storefront-view/model/card-design/style/cardLayoutPlanModel';
+} from '../../../../storefront-view/model/card-style/cardLayoutPlanModel';
 import {
   CARD_CONDITION_FIELD_OPTIONS,
   CARD_CONDITION_OPERATOR_OPTIONS,
@@ -21,12 +21,12 @@ import {
   CARD_SPACING_OPTIONS,
   normalizeCardStyle,
   normalizeConditionalStyleRules,
-} from '../../../../storefront-view/model/card-design/style/cardStyleModel';
+} from '../../../../storefront-view/model/card-style/cardStyleModel';
 import {
   CARD_STRUCTURAL_PRESETS,
   CARD_TITLE_MODE_OPTIONS,
-} from '../../../../storefront-view/model/card-design/style/cardCompositionModel';
-import { isHexColor, normalizeHexColor } from '../../../../storefront-view/model/shared/pageStyleColor';
+} from '../../../../storefront-view/model/card-style/cardCompositionModel';
+import { isHexColor, normalizeHexColor } from '../../../../storefront-view/model/shared/styleColor';
 import {
   buildCardStyleAiSystemPrompt,
   selectCardStyleSkillPackIds,

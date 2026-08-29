@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   categoryConfigNeedsCardStyleMigration,
   migrateLegacyCategoryConfigToCardStyle,
-} from '../model/card-design/style/cardStyleMigration';
+} from '../model/card-style/cardStyleMigration';
 
 describe('categoryConfigNeedsCardStyleMigration', () => {
   it('is true for a legacy category config with the old flat style/elementConfig shape', () => {

@@ -1,9 +1,9 @@
 import { hasRenderableValue } from './cardFieldRenderModel';
-import { buildFieldSlots } from '../card-design/style/cardCompositionModel';
+import { buildFieldSlots } from '../card-style/cardCompositionModel';
 import {
   STOREFRONT_FIELD_LABELS,
   sortFieldKeysByDisplayOrder,
-} from '../storefront-config/storefrontBuilderModel';
+} from '../config-schema/storefrontConfigModel';
 
 function resolveAllowedInfoFields(visibleFields) {
   return sortFieldKeysByDisplayOrder(

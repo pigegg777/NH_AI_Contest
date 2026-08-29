@@ -1,4 +1,4 @@
-import { STOREFRONT_FIELD_LABELS } from '../../../../model/storefront-config/storefrontBuilderModel';
+import { STOREFRONT_FIELD_LABELS } from '../../../../model/config-schema/storefrontConfigModel';
 import { filterVisibleSlotItems } from '../../../../model/card-grid-section/cardGridSlotModel';
 import {
   PRICE_FIELD_SET,

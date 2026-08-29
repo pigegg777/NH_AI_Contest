@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react';
 import {
   MAX_INFORMATION_ENTRIES,
   createInformationEntry,
-} from '../../../../storefront-view/model/storefront-config/informationEntriesModel';
+} from '../../../../storefront-view/model/config-schema/informationEntriesModel';
 import styles from './FieldSelectionDock.module.css';
 
 const EMPHASIS_BUTTONS = [

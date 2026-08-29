@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio } from '../../storefront-view/model/shared/pageStyleColor';
-import { DEFAULT_PAGE_STYLE } from '../../storefront-view/model/page-design/style/pageStyleModel';
-import { compilePageStyle } from '../model/page-design/style/pageStyleCompiler';
+import { contrastRatio } from '../../storefront-view/model/shared/styleColor';
+import { DEFAULT_PAGE_STYLE } from '../../storefront-view/model/page-style/pageStyleModel';
+import { compilePageStyle } from '../model/page-design/pageStyleCompiler';
 
 const BASE_INTENT = {
   palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },

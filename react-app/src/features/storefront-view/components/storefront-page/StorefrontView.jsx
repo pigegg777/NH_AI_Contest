@@ -5,8 +5,8 @@ import {
   resolveSlotBlocks,
   HEADER_SLOT_ORDER,
   BODY_SLOT_ORDER,
-} from '../../model/storefront-view/storefrontViewLayoutModel';
-import { buildStorefrontViewCssVars } from '../../model/storefront-view/storefrontViewStyleModel';
+} from '../../model/view/storefrontViewLayoutModel';
+import { buildStorefrontViewCssVars } from '../../model/view/storefrontViewStyleModel';
 import CardGridSection from './product-cards/CardGridSection';
 import CategoryInformationPanel from './category-nav/CategoryInformationPanel';
 import DesktopCategoryRail from './category-nav/DesktopCategoryRail';
