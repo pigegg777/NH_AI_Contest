@@ -95,7 +95,12 @@ describe('POST /api/ai-bulk-note/analyze', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({ matches: [], unmatchedReason: null });
+    expect(body).toEqual({
+      action: 'none',
+      matches: [],
+      newRows: [],
+      unmatchedReason: null,
+    });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 

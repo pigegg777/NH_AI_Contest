@@ -154,5 +154,20 @@ describe('worksheet structure model', () => {
     });
     expect(result.warnings).toEqual([]);
   });
+
+  it('does not hard-code 조합원정상가 as the sale price column', () => {
+    const result = analyzeWorksheetStructure([
+      ['시설원예자재 재고조사표'],
+      [],
+      ['상품코드', '상품명', '상품구분', '규격', '조합원정상가'],
+      ['8809925743298', '시설원예자재', '중본-과세-매취매취', null, 4500],
+      [],
+      [],
+    ]);
+
+    expect(result.headerRowIndex).toBe(2);
+    expect(result.columnMap.sale_price).toBeUndefined();
+    expect(result.warnings).toContain('필수 컬럼이 누락되었습니다: sale_price');
+  });
 });
 

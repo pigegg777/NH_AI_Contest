@@ -1,6 +1,11 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 import { requestAiBulkNoteMatches } from '../../services/ai-bulk-note/aiBulkNoteClient';
 import { serializeRowsForAiBulkNoteReview } from './aiBulkNoteRequestBodyModel';
+import {
+  extractRecognizedReferenceSheetRows,
+  isReferenceSheetAppendInstruction,
+  requiresAiPriceColumnMapping,
+} from './aiBulkNoteReferenceSheetModel';
 
 export async function analyzeAiBulkNoteMatches(
   rows,
@@ -9,8 +14,29 @@ export async function analyzeAiBulkNoteMatches(
   const safeInstruction = toTrimmedString(instruction);
   const safeRows = Array.isArray(rows) ? rows : [];
 
-  if (safeInstruction === '' || safeRows.length === 0) {
-    return { mode: 'idle', matches: [], unmatchedReason: null };
+  if (safeInstruction === '' || (safeRows.length === 0 && !referenceSheet)) {
+    return { mode: 'idle', action: 'none', matches: [], newRows: [], unmatchedReason: null };
+  }
+
+  if (
+    referenceSheet &&
+    isReferenceSheetAppendInstruction(safeInstruction) &&
+    !requiresAiPriceColumnMapping(referenceSheet, safeInstruction)
+  ) {
+    const recognizedRows = extractRecognizedReferenceSheetRows(
+      referenceSheet,
+      safeInstruction,
+    );
+
+    if (recognizedRows.length > 0) {
+      return {
+        mode: 'local',
+        action: 'append_rows',
+        matches: [],
+        newRows: recognizedRows,
+        unmatchedReason: null,
+      };
+    }
   }
 
   if (!toTrimmedString(officeCode)) {
@@ -18,7 +44,7 @@ export async function analyzeAiBulkNoteMatches(
   }
 
   try {
-    const { matches, unmatchedReason } = await requestAiBulkNoteMatches({
+    const { action, matches, newRows, unmatchedReason } = await requestAiBulkNoteMatches({
       officeCode,
       tableNameMode,
       instruction: safeInstruction,
@@ -26,7 +52,13 @@ export async function analyzeAiBulkNoteMatches(
       referenceSheet,
     });
 
-    return { mode: 'openai', matches, unmatchedReason: unmatchedReason ?? null };
+    return {
+      mode: 'openai',
+      action,
+      matches,
+      newRows,
+      unmatchedReason: unmatchedReason ?? null,
+    };
   } catch (error) {
     return {
       mode: 'error',

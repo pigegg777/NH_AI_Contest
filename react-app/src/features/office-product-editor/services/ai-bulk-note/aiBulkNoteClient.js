@@ -23,7 +23,9 @@ export async function requestAiBulkNoteMatches({
   );
 
   return {
+    action: body?.action ?? 'none',
     matches: Array.isArray(body?.matches) ? body.matches : [],
+    newRows: Array.isArray(body?.newRows) ? body.newRows : [],
     unmatchedReason: body?.unmatchedReason ?? null,
   };
 }

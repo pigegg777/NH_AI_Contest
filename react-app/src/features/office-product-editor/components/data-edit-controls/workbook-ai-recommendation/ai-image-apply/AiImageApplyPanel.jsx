@@ -1,6 +1,7 @@
 import { useAiImageApplyInstructionForm } from '../../../../hooks/ai-image-apply/useAiImageApplyInstructionForm';
 import { AiImageStorageBrowser } from './AiImageStorageBrowser';
 import { AiImageApplyMatchList } from './AiImageApplyMatchList';
+import controls from '../../shared/controlPrimitives.module.css';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiImageApplyPanel.module.css';
 
@@ -126,7 +127,7 @@ export function AiImageApplyPanel({ imageApply }) {
         />
         <button
           type="button"
-          className={styles.generateButton}
+          className={controls.actionButton}
           disabled={generatePromptDraft.trim() === '' || isGenerating}
           onClick={handleGenerateSubmit}
         >

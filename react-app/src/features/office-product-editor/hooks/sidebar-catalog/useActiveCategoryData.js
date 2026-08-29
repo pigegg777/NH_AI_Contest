@@ -1,4 +1,7 @@
-import { resolveActiveCategoryName } from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
+import {
+  buildActiveCategoryFingerprint,
+  resolveActiveCategoryName,
+} from '../../model/sidebar-catalog/sidebarCatalogCreateModel';
 import { useRegisteredProductData } from '../office-product-data/useRegisteredProductData';
 
 const EMPTY_ROWS = [];
@@ -34,10 +37,11 @@ export function useActiveCategoryData({
 
   const registeredRows = registeredProductData?.rows ?? EMPTY_ROWS;
   const extractedRows = result?.rows ?? registeredRows;
-  const registeredFingerprint = registeredCatalogItem
-    ? `registered:${activeCategoryName}:${registeredCatalogItem.updatedAt ?? ''}`
-    : null;
-  const effectiveFingerprint = workbookFingerprint ?? registeredFingerprint;
+  const effectiveFingerprint = buildActiveCategoryFingerprint(
+    activeCategoryName,
+    workbookFingerprint,
+    registeredCatalogItem?.updatedAt ?? null,
+  );
 
   const bannerStatusLabel = result
     ? '신규 데이터 검토 중'

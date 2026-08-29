@@ -4,11 +4,20 @@ import { getCell, normalizeHeaderCell } from '../../utils/worksheetCellUtils';
 const HEADER_SCAN_LIMIT = 30;
 const DATA_END_BLANK_ROW_STREAK = 2;
 const HEADER_CONFIDENCE_THRESHOLD = 8;
+const SALE_PRICE_LABELS = [
+  '매출단가',
+  '조합원가격',
+  '정상가',
+  '판매단가',
+];
 
 const HEADER_WEIGHTS = new Map([
   ['상품코드', 4],
   ['상품명', 3],
   ['매출단가', 3],
+  ['조합원가격', 3],
+  ['정상가', 3],
+  ['판매단가', 3],
   ['상품구분', 3],
   ['매출단가유형', 2],
   ['규격', 1],
@@ -26,7 +35,7 @@ const COLUMN_RULES = [
   { field: 'product_code', labels: ['상품코드'] },
   { field: 'product_name', labels: ['상품명'] },
   { field: 'product_type', labels: ['상품구분'] },
-  { field: 'sale_price', labels: ['매출단가'] },
+  { field: 'sale_price', labels: SALE_PRICE_LABELS },
   { field: 'spec', labels: ['규격'] },
   { field: 'large_category', labels: ['대분류'] },
   { field: 'medium_category', labels: ['중분류'] },

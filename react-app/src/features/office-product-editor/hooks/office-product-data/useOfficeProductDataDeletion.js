@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { deleteOfficeProductData } from '../../services/office-product-data/officeProductDataMutationService';
+import { removeCategoryDetailConfig } from '../../../storefront/services/storefront-config/storefrontConfigService';
 
 export function useOfficeProductDataDeletion({
   user,
@@ -16,6 +17,23 @@ export function useOfficeProductDataDeletion({
 
       try {
         await deleteOfficeProductData({ officeCode: user?.office_code, categoryName });
+
+        // The storefront design is keyed by category name, so it has to go with the
+        // data. A failure here leaves an orphan design, not an orphan category: the
+        // deletion itself already stuck, so report it and let the removal stand.
+        try {
+          await removeCategoryDetailConfig({
+            officeCode: user?.office_code,
+            categoryName,
+          });
+        } catch (designError) {
+          window.alert(
+            designError instanceof Error
+              ? `데이터는 삭제했지만 저장된 디자인을 지우지 못했습니다. ${designError.message}`
+              : '데이터는 삭제했지만 저장된 디자인을 지우지 못했습니다.',
+          );
+        }
+
         onRemoved(categoryName);
         return true;
       } catch (error) {

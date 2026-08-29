@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -55,6 +56,59 @@ describe('useWorkbookReviewTableState', () => {
   });
 
   describe('static merge loading state', () => {
+    it('finishes static merge loading when mounted in React Strict Mode', async () => {
+      let resolveLookup;
+      fetchStaticProductLookup.mockReturnValue(
+        new Promise((resolve) => {
+          resolveLookup = resolve;
+        }),
+      );
+
+      const { result } = renderHook(
+        () =>
+          useWorkbookReviewTableState(sampleRows, 'fp-strict', {
+            isStaticMergeEnabled: true,
+            tableNameMode: 'fertilizer',
+          }),
+        { wrapper: StrictMode },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(true);
+      });
+
+      await act(async () => {
+        resolveLookup({});
+      });
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(false);
+      });
+    });
+
+    it('clears static merge loading when there are no longer rows to look up', async () => {
+      fetchStaticProductLookup.mockReturnValue(new Promise(() => {}));
+
+      const { result, rerender } = renderHook(
+        ({ rows }) =>
+          useWorkbookReviewTableState(rows, 'fp-rows-cleared', {
+            isStaticMergeEnabled: true,
+            tableNameMode: 'fertilizer',
+          }),
+        { initialProps: { rows: sampleRows } },
+      );
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(true);
+      });
+
+      rerender({ rows: [] });
+
+      await waitFor(() => {
+        expect(result.current.isStaticMergeLoading).toBe(false);
+      });
+    });
+
     it('reports isStaticMergeLoading true while the static lookup fetch is in flight, then false once it resolves', async () => {
       let resolveLookup;
       fetchStaticProductLookup.mockReturnValue(
@@ -126,6 +180,88 @@ describe('useWorkbookReviewTableState', () => {
 
       expect(result.current.isStaticMergeLoading).toBe(false);
       expect(fetchStaticProductLookup).not.toHaveBeenCalled();
+    });
+
+    it('merges static fertilizer data when an AI row is appended to an empty category', async () => {
+      fetchStaticProductLookup.mockResolvedValue({
+        F900: {
+          product_code: 'F900',
+          img_url: 'https://example.com/f900.png',
+          product_url: 'https://example.com/f900',
+          nutrient: '21-17-17',
+          price_subsidy: 1500,
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState([], null, {
+          hasResult: false,
+          isStaticMergeEnabled: true,
+          tableNameMode: 'fertilizer',
+        }),
+      );
+
+      await act(async () => {});
+      act(() => {
+        result.current.appendRows([
+          {
+            row_id: 'F900__01',
+            product_code: 'F900',
+            product_name: 'AI 신규 비료',
+            warnings: [],
+          },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(result.current.rows[0]?.nutrient).toBe('21-17-17');
+      });
+      expect(result.current.rows[0]).toMatchObject({
+        img_url: 'https://example.com/f900.png',
+        product_url: 'https://example.com/f900',
+        price_subsidy: 1500,
+      });
+    });
+
+    it('merges static pesticide data when an AI row is appended to an empty category', async () => {
+      fetchStaticProductLookup.mockResolvedValue({
+        P900: {
+          product_code: 'P900',
+          nutirent: '살충제',
+          product_category: '농약',
+          product_usage: ['진딧물'],
+          indict_symbl: '접촉독',
+        },
+      });
+
+      const { result } = renderHook(() =>
+        useWorkbookReviewTableState([], null, {
+          hasResult: false,
+          isStaticMergeEnabled: true,
+          tableNameMode: 'pesticide',
+        }),
+      );
+
+      await act(async () => {});
+      act(() => {
+        result.current.appendRows([
+          {
+            row_id: 'P900__01',
+            product_code: 'P900',
+            product_name: 'AI 신규 농약',
+            warnings: [],
+          },
+        ]);
+      });
+
+      await waitFor(() => {
+        expect(result.current.rows[0]?.product_category).toBe('농약');
+      });
+      expect(result.current.rows[0]).toMatchObject({
+        nutirent: '살충제',
+        product_usage: ['진딧물'],
+        indict_symbl: '접촉독',
+      });
     });
   });
 

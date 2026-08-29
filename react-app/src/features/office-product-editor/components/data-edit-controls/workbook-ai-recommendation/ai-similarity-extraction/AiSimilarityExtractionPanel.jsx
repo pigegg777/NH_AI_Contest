@@ -1,4 +1,5 @@
 import { AiSimilarityExtractionMatchList } from './AiSimilarityExtractionMatchList';
+import controls from '../../shared/controlPrimitives.module.css';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiSimilarityExtractionPanel.module.css';
 
@@ -38,7 +39,7 @@ export function AiSimilarityExtractionPanel({
           />
           <button
             type="button"
-            className={styles.aiButton}
+            className={controls.actionButton}
             onClick={() => onAiAnalyze(analysisHint)}
             disabled={aiDisabled || !hasRows || aiIsLoading}
           >

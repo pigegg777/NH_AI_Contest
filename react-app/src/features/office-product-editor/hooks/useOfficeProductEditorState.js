@@ -91,13 +91,15 @@ export function useOfficeProductEditorState(user) {
 
   const marketResearchState = useAiMarketResearchState(user?.office_code, tableState.annotatedRows);
 
-  const bulkNoteWriterState = useAiBulkNoteWriterState(
-    user?.office_code,
-    tableState.mergedRows,
+  const bulkNoteWriterState = useAiBulkNoteWriterState({
+    officeCode: user?.office_code,
+    rows: tableState.mergedRows,
     tableNameMode,
-    tableState.updateNote,
-    tableState.updatePrice,
-  );
+    updateNote: tableState.updateNote,
+    updatePrice: tableState.updatePrice,
+    appendRows: tableState.appendRows,
+    patchRows: tableState.patchRows,
+  });
 
   const imageApplyState = useAiImageApplyState(
     user?.office_code,
@@ -327,6 +329,7 @@ export function useOfficeProductEditorState(user) {
       onNoteChange: tableState.updateNote,
       onPriceChange: tableState.updatePrice,
       onImgUrlChange: tableState.updateImgUrl,
+      onRemoveAppendedRow: tableState.removeAppendedRow,
     }),
     [
       draftOfficeCode,
@@ -345,6 +348,7 @@ export function useOfficeProductEditorState(user) {
       tableState.updateNote,
       tableState.updatePrice,
       tableState.updateImgUrl,
+      tableState.removeAppendedRow,
     ],
   );
 

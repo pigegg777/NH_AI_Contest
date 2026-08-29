@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import controls from '../../shared/controlPrimitives.module.css';
 import primitives from '../shared/panelPrimitives.module.css';
 import styles from './AiMarketResearchPromptInput.module.css';
 
@@ -41,7 +42,7 @@ export function AiMarketResearchPromptInput({ marketResearch }) {
         {marketResearch ? (
           <button
             type="button"
-            className={styles.marketResearchButton}
+            className={controls.actionButton}
             disabled={promptDraft.trim() === '' || marketResearch.isLoading}
             onClick={handleSubmit}
           >

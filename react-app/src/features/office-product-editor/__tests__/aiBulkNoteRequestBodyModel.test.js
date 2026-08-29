@@ -109,6 +109,12 @@ describe('buildAiBulkNoteRequestBody', () => {
 
     expect(requestBody.model).toBe('gpt-4.1-mini');
     expect(requestBody.input[0]).toEqual({ role: 'system', content: AI_BULK_NOTE_WRITER_PROMPT });
+    expect(AI_BULK_NOTE_WRITER_PROMPT).toContain(
+      'when product_code is missing, ambiguous, or unreadable.',
+    );
+    expect(AI_BULK_NOTE_WRITER_PROMPT).toContain(
+      'null instead of guessing',
+    );
 
     const userContent = JSON.parse(requestBody.input[1].content);
     expect(userContent.table_name_mode).toBe('fertilizer');
@@ -132,7 +138,12 @@ describe('buildAiBulkNoteRequestBody', () => {
 
     expect(requestBody.text.format.type).toBe('json_schema');
     expect(requestBody.text.format.strict).toBe(true);
-    expect(requestBody.text.format.schema.required).toEqual(['matches', 'unmatched_reason']);
+    expect(requestBody.text.format.schema.required).toEqual([
+      'action',
+      'matches',
+      'new_rows',
+      'unmatched_reason',
+    ]);
     expect(requestBody.text.format.schema.properties.matches.items.required).toEqual([
       'row_id',
       'note',

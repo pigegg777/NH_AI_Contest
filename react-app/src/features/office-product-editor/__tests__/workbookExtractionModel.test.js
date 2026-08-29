@@ -138,5 +138,23 @@ describe('workbook extraction model', () => {
       }),
     ]);
   });
+
+  it('does not use 조합원정상가 as a hard-coded taxable price', () => {
+    const result = extractSalesPriceSheetData([
+      ['시설원예자재 재고조사표'],
+      [],
+      ['상품코드', '상품명', '상품구분', '규격', '조합원정상가'],
+      ['8809925743298', '시설원예자재', '중본-과세-매취매취', null, '4,500'],
+    ]);
+
+    expect(result.warnings).toContain('필수 컬럼이 누락되었습니다: sale_price');
+    expect(result.rows).toEqual([
+      expect.objectContaining({
+        product_code: '8809925743298',
+        tax_price: null,
+        warnings: ['매출단가를 숫자로 해석할 수 없는 행이 있습니다.'],
+      }),
+    ]);
+  });
 });
 

@@ -67,6 +67,88 @@ describe('analyzeAiBulkNoteMatches', () => {
     );
   });
 
+  it('extracts a non-standard reference sheet locally for a clear add instruction', async () => {
+    const result = await analyzeAiBulkNoteMatches([], {
+      officeCode: 'OFF-1',
+      tableNameMode: 'custom',
+      instruction: '이 엑셀 상품을 전부 추가해줘',
+      referenceSheet: {
+        sheetName: 'Sheet0',
+        rows: [
+          ['재고조사표'],
+          ['기준일자 : 2025-11-14'],
+          ['상품코드', '상품명', '규격'],
+          ['8809925743298', '3발괭이', '24'],
+        ],
+      },
+    });
+
+    expect(result).toMatchObject({
+      mode: 'local',
+      action: 'append_rows',
+      newRows: [
+        expect.objectContaining({
+          product_code: '8809925743298',
+          product_name: '3발괭이',
+          spec: '24',
+        }),
+      ],
+    });
+    expect(requestAiBulkNoteMatches).not.toHaveBeenCalled();
+  });
+
+  it('maps an explicitly requested 조합원정상가 column locally to avoid a large AI response', async () => {
+    requestAiBulkNoteMatches.mockResolvedValue({
+      action: 'append_rows',
+      matches: [],
+      newRows: [],
+      unmatchedReason: null,
+    });
+    const referenceSheet = {
+      sheetName: 'Sheet0',
+      rows: [
+        ['상품코드', '상품명', '상품구분', '조합원정상가'],
+        ['P-001', '테스트비료', '중본-과세-매취', 4500],
+      ],
+    };
+
+    const result = await analyzeAiBulkNoteMatches([], {
+      officeCode: 'OFF-1',
+      tableNameMode: 'fertilizer',
+      instruction: '엑셀 상품을 추가하고 조합원정상가를 가격으로 사용해줘',
+      referenceSheet,
+    });
+
+    expect(result).toMatchObject({
+      mode: 'local',
+      action: 'append_rows',
+      newRows: [expect.objectContaining({ product_code: 'P-001', tax_price: 4500 })],
+    });
+    expect(requestAiBulkNoteMatches).not.toHaveBeenCalled();
+  });
+
+  it('maps the only sale-price-like column locally for a generic AI registration request', async () => {
+    const result = await analyzeAiBulkNoteMatches([], {
+      officeCode: 'OFF-1',
+      tableNameMode: 'custom',
+      instruction: '이 엑셀 데이터 AI 등록해줘',
+      referenceSheet: {
+        sheetName: 'Sheet0',
+        rows: [
+          ['상품코드', '상품명', '상품구분', '입고금액', '출고금액', '조합원정상가'],
+          ['P-001', '테스트비료', '중본-과세-매취', 10000, 5000, 4500],
+        ],
+      },
+    });
+
+    expect(result).toMatchObject({
+      mode: 'local',
+      action: 'append_rows',
+      newRows: [expect.objectContaining({ product_code: 'P-001', tax_price: 4500 })],
+    });
+    expect(requestAiBulkNoteMatches).not.toHaveBeenCalled();
+  });
+
   it('returns an idle result when instruction is empty', async () => {
     const result = await analyzeAiBulkNoteMatches(sampleRows, { officeCode: 'OFF-1', instruction: '' });
 

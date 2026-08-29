@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FileWarningsPanel } from './FileWarningsPanel';
 import { PreviousDataCarryOverDialog } from './PreviousDataCarryOverDialog';
+import controls from '../shared/controlPrimitives.module.css';
 import styles from './ExcelUploadSection.module.css';
 
 function DropzoneArea({ onWorkbookChange }) {
@@ -45,28 +46,38 @@ export function ExcelUploadPanel({
   fileWarnings,
   warningRows = [],
   carryOver = null,
+  showWarnings = true,
 }) {
-  return onWorkbookChange ? (
-    <div className={styles.tabColumns}>
-      <div className={styles.tabColumnLeft}>
+  if (!onWorkbookChange) {
+    return null;
+  }
+
+  const uploadContent = (
+    <>
         <div className={styles.uploadBlock}>
-          <h3 className={styles.sectionTitle}>
-            📊 엑셀 업로드 (31-6447에서 엑셀파일을 다운로드한 뒤 선택하세요.)
-          </h3>
+          <div className={styles.uploadHeader}>
+            <div className={styles.uploadHeading}>
+              <h3 className={styles.sectionTitle}>📊 엑셀 업로드</h3>
+              <span className={styles.sectionHint}>31-6447에서 내려받은 파일</span>
+            </div>
+            <label
+              className={controls.actionButton}
+              htmlFor="excel-workbook-input"
+            >
+              📂 파일 선택
+            </label>
+            <input
+              id="excel-workbook-input"
+              className={controls.fileInput}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={onWorkbookChange}
+            />
+          </div>
           <p className={styles.desc}>
-            새 파일을 선택하면 현재 저장된 데이터가 새 파일로 교체됩니다. 이미
-            등록된 분류라면 사진과 비고를 이어받을지 아래에서 고를 수 있습니다.
+            새 파일을 올리면 저장된 데이터가 교체됩니다. 이미 등록된 분류는
+            사진·비고를 이어받을 수 있습니다.
           </p>
-          <label className={styles.uploadBtn} htmlFor="excel-workbook-input">
-            📂 파일 선택
-          </label>
-          <input
-            id="excel-workbook-input"
-            className={styles.fileInput}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={onWorkbookChange}
-          />
           <DropzoneArea onWorkbookChange={onWorkbookChange} />
         </div>
 
@@ -84,11 +95,19 @@ export function ExcelUploadPanel({
             ) : null}
           </div>
         ) : null}
-      </div>
+    </>
+  );
 
+  if (!showWarnings) {
+    return <div className={styles.tabColumnLeft}>{uploadContent}</div>;
+  }
+
+  return (
+    <div className={styles.tabColumns}>
+      <div className={styles.tabColumnLeft}>{uploadContent}</div>
       <div className={styles.tabColumnRight}>
         <FileWarningsPanel fileWarnings={fileWarnings} warningRows={warningRows} />
       </div>
     </div>
-  ) : null;
+  );
 }

@@ -4,10 +4,53 @@ import { AI_BULK_NOTE_WRITER_PROMPT } from './aiBulkNoteWriterPrompt';
 
 const MAX_WORKBOOK_AI_ROWS = 500;
 
+export const AI_BULK_NOTE_NEW_ROW_STRING_FIELDS = [
+  'product_code',
+  'product_name',
+  'spec',
+  'large_category',
+  'medium_category',
+  'small_category',
+  'detail_category',
+  'sale_price_type_code',
+  'sale_price_type_name',
+  'note',
+];
+
+export const AI_BULK_NOTE_NEW_ROW_PRICE_FIELDS = [
+  'zero_tax_price',
+  'tax_price',
+  'exempt_tax_price',
+];
+
+const AI_BULK_NOTE_NEW_ROW_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    ...Object.fromEntries(
+      AI_BULK_NOTE_NEW_ROW_STRING_FIELDS.map((field) => [
+        field,
+        { type: ['string', 'null'] },
+      ]),
+    ),
+    ...Object.fromEntries(
+      AI_BULK_NOTE_NEW_ROW_PRICE_FIELDS.map((field) => [
+        field,
+        { type: ['number', 'null'] },
+      ]),
+    ),
+  },
+  required: [
+    ...AI_BULK_NOTE_NEW_ROW_STRING_FIELDS,
+    ...AI_BULK_NOTE_NEW_ROW_PRICE_FIELDS,
+  ],
+};
+
 const AI_BULK_NOTE_MATCH_SCHEMA = {
   type: 'object',
   additionalProperties: false,
   properties: {
+    action: { type: 'string', enum: ['edit_rows', 'append_rows', 'none'] },
     matches: {
       type: 'array',
       items: {
@@ -24,8 +67,12 @@ const AI_BULK_NOTE_MATCH_SCHEMA = {
       },
     },
     unmatched_reason: { type: ['string', 'null'] },
+    new_rows: {
+      type: 'array',
+      items: AI_BULK_NOTE_NEW_ROW_SCHEMA,
+    },
   },
-  required: ['matches', 'unmatched_reason'],
+  required: ['action', 'matches', 'new_rows', 'unmatched_reason'],
 };
 
 export const AI_BULK_NOTE_REFERENCE_SHEET_MAX_ROWS = 500;

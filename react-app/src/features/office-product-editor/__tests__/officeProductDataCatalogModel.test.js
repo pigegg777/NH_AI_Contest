@@ -1,12 +1,25 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildActiveCategoryFingerprint,
   resolveActiveCategoryName,
   validateCustomCategoryCreation,
 } from '../model/sidebar-catalog/sidebarCatalogCreateModel';
 import { buildOfficeProductDataCatalogModel } from '../model/sidebar-catalog/sidebarCatalogBuildModel';
 
 describe('buildOfficeProductDataCatalogModel', () => {
+  it('scopes table state fingerprints by sidebar category without workbook data', () => {
+    expect(buildActiveCategoryFingerprint('비료', null, null)).toBe(
+      'category:비료:empty',
+    );
+    expect(buildActiveCategoryFingerprint('농약', null, null)).toBe(
+      'category:농약:empty',
+    );
+    expect(buildActiveCategoryFingerprint('비료', 'same-file', null)).not.toBe(
+      buildActiveCategoryFingerprint('농약', 'same-file', null),
+    );
+  });
+
   it('builds default cards, extra registered cards, and the add card', () => {
     const model = buildOfficeProductDataCatalogModel([
       {

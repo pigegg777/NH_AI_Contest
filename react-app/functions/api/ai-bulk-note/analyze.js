@@ -1,5 +1,9 @@
 import { buildAiBulkNoteRequestBody } from '../../../src/features/office-product-editor/model/ai-bulk-note/aiBulkNoteRequestBodyModel.js';
 import { sanitizeAiBulkNoteMatches } from '../../../src/features/office-product-editor/model/ai-bulk-note/aiBulkNoteMatchModel.js';
+import {
+  readAiBulkNoteAction,
+  sanitizeAiBulkNoteNewRows,
+} from '../../../src/features/office-product-editor/model/ai-bulk-note/aiBulkNoteNewRowModel.js';
 import { requestOpenAiJson } from '../../lib/openAiJsonRequest.js';
 import { errorResponse, jsonResponse } from '../../lib/jsonResponse.js';
 import {
@@ -44,8 +48,13 @@ export const onRequestPost = withRequestErrorHandling(
       .map((row) => toOptionalTrimmedString(row?.row_id))
       .filter((rowId) => rowId !== '');
 
-    if (rows.length === 0) {
-      return jsonResponse({ matches: [], unmatchedReason: null });
+    if (rows.length === 0 && !body.referenceSheet) {
+      return jsonResponse({
+        action: 'none',
+        matches: [],
+        newRows: [],
+        unmatchedReason: null,
+      });
     }
 
     await requireOwnedOffice({ request, env, officeCode, body });
@@ -69,11 +78,24 @@ export const onRequestPost = withRequestErrorHandling(
       );
     }
 
-    const { matches, unmatchedReason } = sanitizeAiBulkNoteMatches(
-      payload,
-      sentRowIds,
+    const hasExplicitAction = ['edit_rows', 'append_rows', 'none'].includes(
+      payload?.action,
     );
+    const action = hasExplicitAction
+      ? readAiBulkNoteAction(payload)
+      : Array.isArray(payload?.matches) && payload.matches.length > 0
+        ? 'edit_rows'
+        : 'none';
+    const matches =
+      action === 'edit_rows'
+        ? sanitizeAiBulkNoteMatches(payload, sentRowIds).matches
+        : [];
+    const newRows =
+      action === 'append_rows' ? sanitizeAiBulkNoteNewRows(payload) : [];
+    const unmatchedReason = payload?.unmatched_reason ?? null;
 
-    return jsonResponse({ matches, unmatchedReason });
+    return hasExplicitAction
+      ? jsonResponse({ action, matches, newRows, unmatchedReason })
+      : jsonResponse({ matches, unmatchedReason });
   },
 );

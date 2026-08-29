@@ -1,6 +1,25 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { WorkbookAiRecommendationPanel } from '../components/data-edit-controls/workbook-ai-recommendation/WorkbookAiRecommendationPanel';
+import { WorkbookAiRecommendationPanel as WorkbookAiRecommendationPanelView } from '../components/data-edit-controls/workbook-ai-recommendation/WorkbookAiRecommendationPanel';
+import { AiBulkNoteWriterPanel } from '../components/data-edit-controls/workbook-ai-recommendation/ai-bulk-note/AiBulkNoteWriterPanel';
+
+// Bulk-note behavior still belongs to its focused panel tests even though the
+// panel moved out of the AI-workspace navigation.
+function WorkbookAiRecommendationPanel({ bulkNoteWriter, ...props }) {
+  return (
+    <>
+      <WorkbookAiRecommendationPanelView {...props} />
+      {bulkNoteWriter ? (
+        <>
+          <button type="button" role="tab" aria-selected="true">
+            AI 일괄 데이터수정
+          </button>
+          <AiBulkNoteWriterPanel bulkNoteWriter={bulkNoteWriter} />
+        </>
+      ) : null}
+    </>
+  );
+}
 
 function switchToMarketResearchTab() {
   fireEvent.click(screen.getByRole('tab', { name: 'AI 시장조사' }));
@@ -419,7 +438,7 @@ describe('WorkbookAiRecommendationPanel', () => {
     fireEvent.change(textarea, {
       target: { value: "소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘" },
     });
-    fireEvent.click(screen.getByRole('button', { name: '매칭 미리보기' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI 실행' }));
 
     expect(handlePreview).toHaveBeenCalledWith("소분류가 가축분퇴비인 상품에는 '보조 1500원' 비고 작성해줘");
   });
@@ -607,7 +626,7 @@ describe('WorkbookAiRecommendationPanel', () => {
     const file = new File(['dummy'], 'ref.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    fireEvent.change(screen.getByLabelText('📎 참고 엑셀 업로드'), { target: { files: [file] } });
+    fireEvent.change(screen.getByLabelText('📂 파일 선택'), { target: { files: [file] } });
 
     expect(handleUploadReferenceSheet).toHaveBeenCalledWith(file);
 
@@ -676,7 +695,7 @@ describe('WorkbookAiRecommendationPanel', () => {
     expect(screen.getByText('참고 엑셀은 500행 이하만 지원합니다.')).toBeInTheDocument();
   });
 
-  it('disables the 매칭 미리보기 button while the instruction textarea is empty', () => {
+  it('disables the AI 실행 button while the instruction textarea is empty', () => {
     render(
       <WorkbookAiRecommendationPanel
         onAiAnalyze={vi.fn()}
@@ -701,7 +720,7 @@ describe('WorkbookAiRecommendationPanel', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'AI 일괄 데이터수정' }));
 
-    expect(screen.getByRole('button', { name: '매칭 미리보기' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'AI 실행' })).toBeDisabled();
   });
 
   it('switches to the 이미지 생성/적용 sub-tab and shows the generate/apply controls', () => {

@@ -1,0 +1,25 @@
+.appendedCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.removeButton {
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--corp-muted);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: #dc2626;
+}
+
+.removeButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}

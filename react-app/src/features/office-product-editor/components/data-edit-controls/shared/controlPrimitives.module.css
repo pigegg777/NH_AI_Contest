@@ -1,0 +1,45 @@
+/* 데이터 편집 컨트롤(엑셀 업로드 · AI 작업실)이 공유하는 버튼/입력 프리미티브.
+   두 패널이 각자 같은 버튼을 다시 선언하다 서로 어긋나는 일을 막는다. */
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid rgba(38, 38, 150, 0.55);
+  border-radius: var(--corp-radius);
+  background: rgb(57, 57, 199);
+  color: var(--corp-on-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--corp-transition);
+}
+
+.actionButton:hover:not(:disabled) {
+  background: rgb(117, 117, 236);
+}
+
+.actionButton:focus-visible {
+  outline: none;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 파일 입력은 화면에서 감추고 label(.actionButton)이 트리거 역할을 한다. */
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
