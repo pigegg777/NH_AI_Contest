@@ -55,17 +55,6 @@ export const CARD_HEADER_TITLE_SIZE_OFFSET_REM = {
   xl: '0.18rem',
   xxl: '0.30rem',
 };
-export const CARD_HEADER_BORDER_STRENGTH_TOKENS = ['none', 'hairline', 'soft', 'normal', 'strong', 'bold'];
-export const CARD_HEADER_BORDER_WIDTH_VALUES = {
-  none: '0px',
-  hairline: '0.5px',
-  soft: '1px',
-  normal: '1.5px',
-  strong: '2px',
-  bold: '2.5px',
-};
-export const CARD_HEADER_BORDER_SIDE_TOKENS = ['bottom', 'all', 'none'];
-export const CARD_HEADER_TEXT_ALIGN_TOKENS = ['left', 'center', 'right'];
 export const CARD_IMAGE_FIT_OPTIONS = ['cover', 'contain'];
 export const CARD_CONDITION_OPERATOR_OPTIONS = ['equals', 'contains'];
 export const CARD_CONDITION_FIELD_OPTIONS = [
@@ -137,7 +126,6 @@ export const DEFAULT_CARD_STYLE = {
   titleMode: 'header',
   layoutPlan: DEFAULT_CARD_LAYOUT_PLAN,
   shell: {
-    backgroundColor: '#ffffff',
     borderColor: '#e5e7eb',
     shadow: 'soft',
     radius: 'lg',
@@ -145,15 +133,9 @@ export const DEFAULT_CARD_STYLE = {
   },
   header: {
     backgroundColor: '#f8fafc',
-    borderColor: '',
-    padding: 'normal',
     titleColorHex: '#111827',
-    letterSpacing: 'normal',
     fontWeight: 700,
     titleSizeToken: 'md',
-    borderStrengthToken: 'soft',
-    borderSide: 'bottom',
-    textAlign: 'left',
   },
   image: {
     fit: 'contain',
@@ -161,10 +143,6 @@ export const DEFAULT_CARD_STYLE = {
   },
   info: {
     backgroundColor: '',
-    borderColor: '',
-    padding: 'normal',
-    fieldGap: 'normal',
-    fieldGroupGap: 'normal',
     labelColorRole: 'muted',
     labelFontSizeToken: 'md',
     labelFontWeight: 600,
@@ -205,7 +183,6 @@ function normalizeShell(shell) {
   const source = shell ?? {};
 
   return {
-    backgroundColor: normalizeHexColor(source.backgroundColor, DEFAULT_CARD_STYLE.shell.backgroundColor),
     borderColor: normalizeHexColor(source.borderColor, DEFAULT_CARD_STYLE.shell.borderColor),
     shadow: CARD_SHADOW_OPTIONS.includes(source.shadow) ? source.shadow : DEFAULT_CARD_STYLE.shell.shadow,
     radius: CARD_RADIUS_OPTIONS.includes(source.radius) ? source.radius : DEFAULT_CARD_STYLE.shell.radius,
@@ -215,27 +192,14 @@ function normalizeShell(shell) {
 
 function normalizeHeader(header) {
   const source = header ?? {};
-  const backgroundColor = normalizeHexColor(source.backgroundColor, DEFAULT_CARD_STYLE.header.backgroundColor);
 
   return {
-    backgroundColor,
-    borderColor: normalizeOptionalHex(source.borderColor),
-    padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : DEFAULT_CARD_STYLE.header.padding,
+    backgroundColor: normalizeHexColor(source.backgroundColor, DEFAULT_CARD_STYLE.header.backgroundColor),
     titleColorHex: normalizeHexColor(source.titleColorHex, DEFAULT_CARD_STYLE.header.titleColorHex),
-    letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : DEFAULT_CARD_STYLE.header.letterSpacing,
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : DEFAULT_CARD_STYLE.header.fontWeight,
     titleSizeToken: CARD_HEADER_TITLE_SIZE_TOKENS.includes(source.titleSizeToken)
       ? source.titleSizeToken
       : DEFAULT_CARD_STYLE.header.titleSizeToken,
-    borderStrengthToken: CARD_HEADER_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
-      ? source.borderStrengthToken
-      : DEFAULT_CARD_STYLE.header.borderStrengthToken,
-    borderSide: CARD_HEADER_BORDER_SIDE_TOKENS.includes(source.borderSide)
-      ? source.borderSide
-      : DEFAULT_CARD_STYLE.header.borderSide,
-    textAlign: CARD_HEADER_TEXT_ALIGN_TOKENS.includes(source.textAlign)
-      ? source.textAlign
-      : DEFAULT_CARD_STYLE.header.textAlign,
   };
 }
 
@@ -312,10 +276,6 @@ function normalizeInfo(info) {
 
   return {
     backgroundColor: normalizeOptionalHex(source.backgroundColor),
-    borderColor: normalizeOptionalHex(source.borderColor),
-    padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : DEFAULT_CARD_STYLE.info.padding,
-    fieldGap: CARD_SPACING_OPTIONS.includes(source.fieldGap) ? source.fieldGap : DEFAULT_CARD_STYLE.info.fieldGap,
-    fieldGroupGap: CARD_SPACING_OPTIONS.includes(source.fieldGroupGap) ? source.fieldGroupGap : DEFAULT_CARD_STYLE.info.fieldGroupGap,
     labelColorRole: CARD_FIELD_COLOR_ROLE_OPTIONS.includes(source.labelColorRole)
       ? source.labelColorRole
       : DEFAULT_CARD_STYLE.info.labelColorRole,
@@ -364,11 +324,10 @@ function normalizeConditionalHeaderOverride(source) {
   const override = {
     backgroundColor: normalizeOptionalHex(source.backgroundColor),
     titleColorHex: normalizeOptionalHex(source.titleColorHex),
-    letterSpacing: typeof source.letterSpacing === 'string' && source.letterSpacing ? source.letterSpacing : '',
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : null,
   };
 
-  return override.backgroundColor || override.titleColorHex || override.letterSpacing || override.fontWeight != null
+  return override.backgroundColor || override.titleColorHex || override.fontWeight != null
     ? override
     : null;
 }
@@ -388,14 +347,9 @@ function normalizeConditionalInfoOverride(source) {
     return null;
   }
 
-  const override = {
-    backgroundColor: normalizeOptionalHex(source.backgroundColor),
-    borderColor: normalizeOptionalHex(source.borderColor),
-    padding: CARD_SPACING_OPTIONS.includes(source.padding) ? source.padding : '',
-    fieldGap: CARD_SPACING_OPTIONS.includes(source.fieldGap) ? source.fieldGap : '',
-  };
+  const backgroundColor = normalizeOptionalHex(source.backgroundColor);
 
-  return Object.values(override).some(Boolean) ? override : null;
+  return backgroundColor ? { backgroundColor } : null;
 }
 
 function normalizeConditionalFieldOverride(source) {
@@ -478,7 +432,6 @@ export function normalizeCardStyle(style) {
     cardsPerRow,
     structuralPreset,
     titleMode,
-    info: source.info,
   });
   const layoutPlan = normalizeCardLayoutPlan(
     isDefaultLayoutPlanShape(source.layoutPlan, cardsPerRow)

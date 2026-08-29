@@ -39,7 +39,7 @@ describe('buildStorefrontViewCssVars', () => {
   it('exposes chip activeBorderHex, borderStrengthToken width, and fontWeight as their own CSS vars', () => {
     const view = buildView({
       categoryChips: { activeBorderHex: '#334155', borderStrengthToken: 'bold', fontWeight: 800 },
-      productCategoryChips: { activeBorderHex: '#1e293b', borderStrengthToken: 'none', fontWeight: 500 },
+      productCategoryChips: { activeBorderHex: '#1e293b', borderStrengthToken: 'none', styleMode: 'chip', fontWeight: 500 },
     });
 
     const cssVars = buildStorefrontViewCssVars(view);
@@ -52,15 +52,17 @@ describe('buildStorefrontViewCssVars', () => {
     expect(cssVars['--page-product-chip-font-weight']).toBe(500);
   });
 
-  it('turns chip borderSides into a per-side border-width shorthand, leaving "all" as a plain single value', () => {
+  it('draws tab mode as a bottom-only border and doubles it for the selected tab, leaving chip mode a plain single value', () => {
     const view = buildView({
-      categoryChips: { borderStrengthToken: 'bold', borderSides: 'bottom' },
-      productCategoryChips: { borderStrengthToken: 'strong', borderSides: 'all' },
+      categoryChips: { borderStrengthToken: 'bold', styleMode: 'tab' },
+      productCategoryChips: { borderStrengthToken: 'strong', styleMode: 'chip' },
     });
 
     const cssVars = buildStorefrontViewCssVars(view);
 
     expect(cssVars['--page-chip-border-width']).toBe('0px 0px 2.5px 0px');
+    expect(cssVars['--page-chip-active-border-width']).toBe('0px 0px 5px 0px');
     expect(cssVars['--page-product-chip-border-width']).toBe('2px');
+    expect(cssVars['--page-product-chip-active-border-width']).toBe('2px');
   });
 });

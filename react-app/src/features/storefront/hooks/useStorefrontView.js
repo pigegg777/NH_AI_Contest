@@ -16,10 +16,7 @@ import { normalizeInformationEntries } from '../model/storefront-config/informat
 import { PAGE_STYLE_HEADER_TITLE_SIZE_VALUES } from '../model/page-design/style/pageStyleModel';
 import { normalizePageConfig } from '../model/storefront-config/storefrontBuilderModel';
 import { buildDerivedPageTitle } from '../model/storefront-view/pageTitleModel';
-import {
-  buildInformationNavigationItems,
-  resolveActiveInformationItem,
-} from '../model/storefront-view/informationNavigationModel';
+import { buildInformationNavigationItems } from '../model/storefront-view/informationNavigationModel';
 import { formatProductUpdatedAt } from '../model/storefront-view/productUpdatedAtModel';
 import {
   MOBILE_UI_HELPER_TYPES,
@@ -114,7 +111,11 @@ export function useStorefrontView({
   const [activeMediumCategory, setActiveMediumCategory] = useState(
     ALL_MEDIUM_CATEGORY_LABEL,
   );
-  const [activeInformationItemId, setActiveInformationItemId] = useState('');
+  const [activeIntroTarget, setActiveIntroTarget] = useState(
+    OFFICE_INFORMATION_ITEM_ID,
+  );
+  const [isGuideNavigationRequested, setIsGuideNavigationRequested] =
+    useState(true);
   const [activeSectionName, setActiveSectionName] = useState(selectedSectionName);
   const [isDesktopCategoryNavOpen, setIsDesktopCategoryNavOpen] =
     useState(true);
@@ -129,6 +130,11 @@ export function useStorefrontView({
     if (selectedSectionName) {
       setActiveSectionName(selectedSectionName);
       setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
+      setActiveIntroTarget(selectedSectionName);
+      setIsGuideNavigationRequested(false);
+    } else {
+      setActiveIntroTarget(OFFICE_INFORMATION_ITEM_ID);
+      setIsGuideNavigationRequested(true);
     }
   }
 
@@ -153,22 +159,33 @@ export function useStorefrontView({
     config?.pageConfig?.officeInfo,
     { legacyText: resolvedPageConfig.nav.subtitle },
   );
-  const informationNavigationItems = buildInformationNavigationItems({
-    officeEntries: officeInformationEntries,
-    catalogSectionEntries,
-  });
-  const activeInformationItem = resolveActiveInformationItem(
-    informationNavigationItems,
-    activeInformationItemId,
-  );
-  const canRenderInformationNavigation = informationNavigationItems.length > 0;
-  const isInformationNavigationActive =
-    canRenderInformationNavigation &&
-    activeSectionName === OFFICE_INFORMATION_ITEM_ID &&
-    searchQuery === '';
-  // The sentinel matches no catalog section, so without the short-circuit the
-  // fallback below would quietly resolve the office tab to the first category.
-  const activeSectionEntry = isInformationNavigationActive
+  const activeCategoryInformationEntries =
+    catalogSectionEntries.find(
+      (entry) => entry.sectionName === activeIntroTarget,
+    )?.section?.infoEntries ?? [];
+  const activeInformationIntro =
+    activeIntroTarget === OFFICE_INFORMATION_ITEM_ID &&
+    officeInformationEntries.length > 0
+      ? { kind: 'office', categoryName: '', entries: officeInformationEntries }
+      : activeIntroTarget && activeCategoryInformationEntries.length > 0
+        ? {
+            kind: 'category',
+            categoryName: activeIntroTarget,
+            entries: activeCategoryInformationEntries,
+          }
+        : null;
+  const hasInformationContent =
+    officeInformationEntries.length > 0 ||
+    catalogSectionEntries.some(
+      (entry) => (entry.section?.infoEntries?.length ?? 0) > 0,
+    );
+  const isInformationIntroActive =
+    activeInformationIntro !== null && searchQuery === '';
+  const isOfficeInformationIntroActive =
+    isInformationIntroActive && activeInformationIntro.kind === 'office';
+  // The office intro has no catalog section, so keep it from quietly falling
+  // through to the first category while that intro is visible.
+  const activeSectionEntry = isOfficeInformationIntroActive
     ? null
     : catalogSectionEntries.find(
         (entry) => entry.sectionName === activeSectionName,
@@ -186,6 +203,21 @@ export function useStorefrontView({
   const isActiveMediumCategoryAvailable = mediumCategoryItems.includes(
     activeMediumCategory,
   );
+  const informationNavigationItems = buildInformationNavigationItems({
+    officeEntries: officeInformationEntries,
+    catalogSectionEntries,
+  });
+  const activeInformationNavigationItem =
+    informationNavigationItems.find((item) =>
+      item.kind === 'office'
+        ? activeIntroTarget === OFFICE_INFORMATION_ITEM_ID
+        : item.categoryName === activeIntroTarget,
+    ) ?? informationNavigationItems[0] ?? null;
+  const isGuideNavigationActive =
+    isGuideNavigationRequested &&
+    informationNavigationItems.length > 0 &&
+    (activeIntroTarget !== OFFICE_INFORMATION_ITEM_ID ||
+      officeInformationEntries.length > 0);
   const normalizedActiveMediumCategory = isActiveMediumCategoryAvailable
     ? activeMediumCategory
     : mediumCategoryItems[0];
@@ -196,7 +228,7 @@ export function useStorefrontView({
   const sectionScopedProducts =
     activeSectionEntry?.section?.products ?? baseVisibleProducts;
   const visibleProducts =
-    isInformationNavigationActive
+    isInformationIntroActive
       ? []
       : sectionScopedProducts.filter(
           (product) =>
@@ -271,18 +303,12 @@ export function useStorefrontView({
       (block) => block.type === 'productSections' && block.enabled !== false,
     ) && sectionEntries.length > 0;
   const canRenderEmptyState =
-    !isInformationNavigationActive &&
+    !isInformationIntroActive &&
     mobileUiTree.some(
       (block) => block.type === 'emptyState' && block.enabled !== false,
     ) && sectionEntries.length === 0;
 
   useEffect(() => {
-    // The office tab is not a catalog section, so the snap-back below would
-    // kick the shopper out of it the moment they select it.
-    if (activeSectionName === OFFICE_INFORMATION_ITEM_ID) {
-      return;
-    }
-
     const firstSectionName = catalogSectionEntries[0]?.sectionName || '';
 
     if (!firstSectionName) {
@@ -313,6 +339,8 @@ export function useStorefrontView({
   }, [activeMediumCategory, mediumCategoryItems]);
 
   function handleMediumCategorySelect(item) {
+    setActiveIntroTarget('');
+    setIsGuideNavigationRequested(false);
     startTransition(() => {
       setActiveMediumCategory(item);
     });
@@ -326,15 +354,17 @@ export function useStorefrontView({
   }
 
   function handleCategoryRailSectionSelect(sectionName, sectionId) {
-    if (sectionName === OFFICE_INFORMATION_ITEM_ID) {
-      setActiveSectionName(OFFICE_INFORMATION_ITEM_ID);
-      setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
-      return;
-    }
-
     setActiveSectionName(sectionName);
     setActiveMediumCategory(ALL_MEDIUM_CATEGORY_LABEL);
-    scrollToSection(sectionId);
+    const hasCategoryInformation =
+      catalogSectionEntries.find((entry) => entry.sectionName === sectionName)
+        ?.section?.infoEntries?.length > 0;
+    setActiveIntroTarget(hasCategoryInformation ? sectionName : '');
+    setIsGuideNavigationRequested(false);
+
+    if (!hasCategoryInformation) {
+      scrollToSection(sectionId);
+    }
   }
 
   function handleCategoryRailMediumSelect(
@@ -343,20 +373,48 @@ export function useStorefrontView({
     mediumCategory,
   ) {
     setActiveSectionName(sectionName);
+    setActiveIntroTarget('');
+    setIsGuideNavigationRequested(false);
     startTransition(() => {
       setActiveMediumCategory(mediumCategory);
     });
     scrollToSection(sectionId);
   }
 
-  function handleInformationItemSelect(itemId) {
-    setActiveInformationItemId(itemId);
+  function handleSearchTextChange(value) {
+    setSearchText(value);
+
+    if (value.trim() !== '') {
+      setActiveIntroTarget('');
+      setIsGuideNavigationRequested(false);
+    }
+  }
+
+  function handleGuideNavigationSelect() {
+    const firstItem = informationNavigationItems[0];
+
+    if (!firstItem) return;
+
+    setIsGuideNavigationRequested(true);
+    setActiveIntroTarget(
+      firstItem.kind === 'office'
+        ? OFFICE_INFORMATION_ITEM_ID
+        : firstItem.categoryName,
+    );
+  }
+
+  function handleInformationItemSelect(item) {
+    setActiveIntroTarget(
+      item.kind === 'office' ? OFFICE_INFORMATION_ITEM_ID : item.categoryName,
+    );
   }
 
   return {
     searchText,
-    setSearchText,
-    activeMediumCategory: effectiveActiveMediumCategory,
+    setSearchText: handleSearchTextChange,
+    activeMediumCategory: isInformationIntroActive
+      ? ''
+      : effectiveActiveMediumCategory,
     isDesktopCategoryNavOpen,
     setIsDesktopCategoryNavOpen,
     mobileUiTree,
@@ -365,12 +423,13 @@ export function useStorefrontView({
     activeSectionTitle,
     activeSectionMediumCategories,
     activeCategoryCardStyle: activeSectionEntry?.section?.cardStyle,
-    officeInformationItemId: OFFICE_INFORMATION_ITEM_ID,
+    activeInformationIntro,
+    hasInformationContent,
     informationNavigationItems,
-    activeInformationItem,
-    activeInformationItemId,
-    canRenderInformationNavigation,
-    isInformationNavigationActive,
+    activeInformationNavigationItem,
+    isGuideNavigationActive,
+    isInformationIntroActive,
+    isOfficeInformationIntroActive,
     mediumCategoryItems,
     sectionEntries,
     sectionHeaderBlocks,
@@ -391,6 +450,7 @@ export function useStorefrontView({
     handleMediumCategorySelect,
     handleCategoryRailSectionSelect,
     handleCategoryRailMediumSelect,
+    handleGuideNavigationSelect,
     handleInformationItemSelect,
   };
 }

@@ -267,6 +267,13 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
     setComposerApplyPending("category", true);
   }
 
+  // The title rides the same save payload the design composer already writes, so
+  // typing it only has to arm that composer's 저장하기.
+  function changePageTitle(value) {
+    setTextDraft("pageTitle", value);
+    setComposerApplyPending("common", true);
+  }
+
   // Both load paths resolve the saved copy the same way navConfig does, so the
   // input box always shows exactly what the storefront is rendering today.
   function hydratePageTextDraft(config, normalizedPageConfig) {
@@ -828,9 +835,6 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
       ? COMMON_TAB_ID
       : selectedProductCategoryName,
     selectCategory: selectDataTab,
-    derivedPageTitle,
-    textDraft,
-    setTextDraft,
     officeInfoEntries,
     setOfficeInfoEntries: changeOfficeInfoEntries,
     categoryInfoEntries,
@@ -910,14 +914,18 @@ export function useStorefrontBuilder({ officeCode, nhName }) {
               : cardAi.cardAiDesign.targetScope,
           setTargetId:
             designTarget === "common" ? pageAi.setTargetScope : cardAi.setTargetScope,
+          pageTitleDraft: designTarget === "common" ? textDraft.pageTitle : null,
+          setPageTitle: designTarget === "common" ? changePageTitle : null,
+          pageTitlePlaceholder:
+            designTarget === "common" ? derivedPageTitle : null,
         }
       : null;
 
-  // Drives the preview's category selection from whichever tab is active. The
-  // design mode's first tab is 공통 요소, which is not a category — an empty
-  // string there leaves the preview's own selection alone.
+  // Drives the preview from the active editor tab. Common settings map to the
+  // office intro, while a category tab maps to that category's intro.
   const previewSelectedCategoryName =
-    chatSession.mode === "design" && designTarget === "common"
+    (chatSession.mode === "data" && isCommonDataTab) ||
+    (chatSession.mode === "design" && designTarget === "common")
       ? ""
       : selectedProductCategoryName;
 

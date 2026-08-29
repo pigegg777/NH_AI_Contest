@@ -65,11 +65,11 @@ describe('PAGE_STYLE_AI_SCHEMA', () => {
     ).toContain('null');
   });
 
-  it('lets the AI set search backgroundHex, borderColorHex, and focusBorderColorHex independently of palette', () => {
+  it('lets the AI set search backgroundHex and borderColorHex independently of palette, with no focus property at all', () => {
     expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.backgroundHex.type).toContain('null');
     expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.backgroundHex.pattern).toBe('^#[0-9a-fA-F]{6}$');
     expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.borderColorHex.type).toContain('null');
-    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.focusBorderColorHex.type).toContain('null');
+    expect(PAGE_STYLE_AI_SCHEMA.properties.search.properties.focusBorderColorHex).toBeUndefined();
   });
 
   it('lets the AI set chip activeBorderHex, borderStrengthToken, and fontWeight for both chip scopes', () => {
@@ -81,12 +81,19 @@ describe('PAGE_STYLE_AI_SCHEMA', () => {
     });
   });
 
-  it('lets the AI set chip borderSides to one of all/bottom/top/left/right', () => {
+  it('lets the AI switch a chip scope between chip and tab, and offers no hover properties at all', () => {
     ['categoryChips', 'productCategoryChips'].forEach((scope) => {
-      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderSides.type).toContain('null');
-      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderSides.enum).toEqual(
-        expect.arrayContaining(['all', 'bottom', 'top', 'left', 'right', null]),
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.styleMode.type).toContain('null');
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.styleMode.enum).toEqual(
+        expect.arrayContaining(['chip', 'tab', null]),
       );
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.variant).toBeUndefined();
+      expect(PAGE_STYLE_AI_SCHEMA.properties[scope].properties.borderSides).toBeUndefined();
+      expect(
+        Object.keys(PAGE_STYLE_AI_SCHEMA.properties[scope].properties).filter((key) =>
+          key.startsWith('hover'),
+        ),
+      ).toEqual([]);
     });
   });
 
@@ -160,22 +167,19 @@ describe('normalizeCategoryChipsIntent', () => {
     });
   });
 
-  it('keeps hover colors and shape tokens', () => {
+  it('keeps shape tokens and drops hover colors the AI is no longer allowed to send', () => {
     expect(
       normalizeCategoryChipsIntent({
         hoverBackgroundHex: '#f4f7f5',
         hoverTextHex: '#355a30',
         hoverBorderHex: '#a9c2af',
-        variant: 'filled',
+        styleMode: 'tab',
         sizeToken: 'lg',
         radiusToken: 'square',
         gapToken: 'tight',
       }),
     ).toEqual({
-      hoverBackgroundHex: '#f4f7f5',
-      hoverTextHex: '#355a30',
-      hoverBorderHex: '#a9c2af',
-      variant: 'filled',
+      styleMode: 'tab',
       sizeToken: 'lg',
       radiusToken: 'square',
       gapToken: 'tight',
@@ -185,7 +189,7 @@ describe('normalizeCategoryChipsIntent', () => {
   it('rejects tokens outside the approved enums', () => {
     expect(
       normalizeCategoryChipsIntent({
-        variant: 'glossy',
+        styleMode: 'glossy',
         sizeToken: 'huge',
         radiusToken: 'circle',
         gapToken: 'huge',
@@ -215,9 +219,9 @@ describe('normalizeCategoryChipsIntent', () => {
     ).toBeNull();
   });
 
-  it('keeps a valid borderSides token and rejects an unapproved one', () => {
-    expect(normalizeCategoryChipsIntent({ borderSides: 'bottom' })).toEqual({ borderSides: 'bottom' });
-    expect(normalizeCategoryChipsIntent({ borderSides: 'diagonal' })).toBeNull();
+  it('keeps a valid styleMode token and rejects an unapproved one', () => {
+    expect(normalizeCategoryChipsIntent({ styleMode: 'tab' })).toEqual({ styleMode: 'tab' });
+    expect(normalizeCategoryChipsIntent({ styleMode: 'underline' })).toBeNull();
   });
 });
 
@@ -243,7 +247,7 @@ describe('normalizeProductCategoryChipsIntent', () => {
   it('accepts matching values for both scopes, supporting explicit "make them the same" requests', () => {
     const sharedIntent = {
       backgroundHex: '#f4f7f5',
-      variant: 'outline',
+      styleMode: 'chip',
       sizeToken: 'sm',
       radiusToken: 'rounded',
       gapToken: 'relaxed',
@@ -266,14 +270,12 @@ describe('normalizeSearchIntent', () => {
         radius: 'pill',
         backgroundHex: '#000000',
         borderColorHex: '#111111',
-        focusBorderColorHex: '#222222',
         iconPosition: 'right',
       }),
     ).toEqual({
       sizeToken: 'lg',
       backgroundHex: '#000000',
       borderColorHex: '#111111',
-      focusBorderColorHex: '#222222',
     });
   });
 

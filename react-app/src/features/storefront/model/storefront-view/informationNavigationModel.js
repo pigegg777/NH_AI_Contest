@@ -19,8 +19,12 @@ export function buildInformationNavigationItems({
     : [];
 
   for (const { sectionName, section } of catalogSectionEntries) {
-    const entries = Array.isArray(section?.infoEntries) ? section.infoEntries : [];
+    const entries = Array.isArray(section?.infoEntries)
+      ? section.infoEntries
+      : [];
+
     if (!sectionName || entries.length === 0) continue;
+
     items.push({
       id: buildCategoryInformationId(sectionName),
       kind: 'category',
@@ -31,9 +35,4 @@ export function buildInformationNavigationItems({
   }
 
   return items;
-}
-
-export function resolveActiveInformationItem(items, requestedId) {
-  const source = Array.isArray(items) ? items : [];
-  return source.find((item) => item.id === requestedId) ?? source[0] ?? null;
 }

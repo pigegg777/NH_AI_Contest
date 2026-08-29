@@ -505,7 +505,7 @@ describe("StorefrontBuilderPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows a saved category description through its guide child", async () => {
+  it("shows a saved category description when its category is selected", async () => {
     const configWithDescription = {
       ...EXISTING_CONFIG,
       categoryConfigs: EXISTING_CONFIG.categoryConfigs.map((row) =>
@@ -526,18 +526,17 @@ describe("StorefrontBuilderPage", () => {
     const user = userEvent.setup();
     render(<StorefrontBuilderPage officeCode="OFF-1" />);
 
-    await user.click(await screen.findByRole("button", { name: "안내" }));
+    const preview = await screen.findByTestId("mobile-preview-device");
+    await user.click(
+      within(preview).getByRole("button", { name: "Fertilizer Upload" }),
+    );
 
-    const informationChild = await screen.findByRole("button", {
-      name: "Fertilizer Upload 안내",
-    });
-    await user.click(informationChild);
-
-    expect(informationChild).toHaveAttribute("aria-pressed", "true");
     expect(
-      await screen.findByRole("heading", { name: "Fertilizer Upload 안내" }),
+      within(preview).getByRole("heading", { name: "Fertilizer Upload 안내" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("비료 사용 전 안내를 확인하세요.")).toBeInTheDocument();
+    expect(
+      within(preview).getByText("비료 사용 전 안내를 확인하세요."),
+    ).toBeInTheDocument();
   });
 
   it("keeps an edited category entry after switching away and back", async () => {
@@ -586,11 +585,6 @@ describe("StorefrontBuilderPage", () => {
       "비료 사용 전 안내를 확인하세요.",
     );
 
-    await user.click(screen.getByRole("button", { name: "안내" }));
-    await user.click(
-      await screen.findByRole("button", { name: "Fertilizer Upload 안내" }),
-    );
-
     expect(
       within(screen.getByTestId("mobile-preview-device")).getByText(
         "비료 사용 전 안내를 확인하세요.",
@@ -616,7 +610,10 @@ describe("StorefrontBuilderPage", () => {
 
     // The saved copy hydrates into the office entry — the old nav subtitle
     // falls back into one unlabeled entry.
-    expect(await screen.findByText("사무소 안내")).toBeInTheDocument();
+    const preview = await screen.findByTestId("mobile-preview-device");
+    expect(
+      within(preview).getByRole("heading", { name: "사무소 안내" }),
+    ).toBeInTheDocument();
 
     const descriptionInput = await screen.findByLabelText("설명");
 
@@ -626,8 +623,6 @@ describe("StorefrontBuilderPage", () => {
     await user.type(descriptionInput, "영세가격 안내");
 
     expect(descriptionInput).toHaveValue("영세가격 안내");
-
-    await user.click(screen.getByRole("button", { name: "안내" }));
 
     expect(
       within(screen.getByTestId("mobile-preview-device")).getByText(

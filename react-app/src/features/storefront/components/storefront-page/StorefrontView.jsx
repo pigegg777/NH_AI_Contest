@@ -35,7 +35,7 @@ export default function StorefrontView({
   const brandLogoSrc = config?.navConfig?.logoUrl || nhCyberSymbolUrl;
   const renderableMobileUiTree = buildRenderableMobileUiTree(
     view.mobileUiTree,
-    view.catalogSectionEntries.length > 0 || view.informationNavigationItems.length > 0,
+    view.catalogSectionEntries.length > 0 || view.hasInformationContent,
   );
 
   function renderSlot(slot) {
@@ -91,15 +91,16 @@ export default function StorefrontView({
             return renderSlot(slot);
           })}
 
-          {view.isInformationNavigationActive ? <InformationNavigationBlock view={view} /> : null}
-          {view.isInformationNavigationActive && view.activeInformationItem?.kind === 'office' ? (
-            <OfficeInformationPanel entries={view.activeInformationItem.entries} />
+          <InformationNavigationBlock view={view} />
+
+          {view.isInformationIntroActive && view.activeInformationIntro?.kind === 'office' ? (
+            <OfficeInformationPanel entries={view.activeInformationIntro.entries} />
           ) : null}
 
-          {view.isInformationNavigationActive && view.activeInformationItem?.kind === 'category' ? (
+          {view.isInformationIntroActive && view.activeInformationIntro?.kind === 'category' ? (
             <CategoryInformationPanel
-              categoryName={view.activeInformationItem.categoryName}
-              entries={view.activeInformationItem.entries}
+              categoryName={view.activeInformationIntro.categoryName}
+              entries={view.activeInformationIntro.entries}
             />
           ) : null}
 

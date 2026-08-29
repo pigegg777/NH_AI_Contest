@@ -1,6 +1,6 @@
 import { ensureReadableTextColor, mixHexColors, normalizeHexColor } from '../../shared/pageStyleColor';
 
-export const PAGE_STYLE_SCHEMA_VERSION = 1;
+export const PAGE_STYLE_SCHEMA_VERSION = 2;
 
 export const PAGE_STYLE_SEARCH_SIZE_TOKENS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];
 export const PAGE_STYLE_BORDER_STRENGTH_TOKENS = ['none', 'hairline', 'soft', 'normal', 'strong', 'bold'];
@@ -33,8 +33,9 @@ export const PAGE_STYLE_BORDER_WIDTH_VALUES = {
   bold: '2.5px',
 };
 
-export const PAGE_STYLE_CHIP_VARIANT_TOKENS = ['soft', 'outline', 'filled'];
-export const PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS = ['all', 'bottom', 'top', 'left', 'right'];
+// chip = 배경·전체 테두리·둥근 모서리, tab = 배경 없이 아래쪽 밑줄만.
+// schemaVersion 1의 variant(soft/outline/filled) + borderSides를 이 한 토큰이 대신한다.
+export const PAGE_STYLE_CHIP_STYLE_MODE_TOKENS = ['chip', 'tab'];
 export const PAGE_STYLE_CHIP_SIZE_TOKENS = ['sm', 'md', 'lg'];
 export const PAGE_STYLE_CHIP_RADIUS_TOKENS = ['none', 'square', 'rounded', 'pill'];
 export const PAGE_STYLE_CHIP_GAP_TOKENS = ['none', 'tight', 'normal', 'relaxed'];
@@ -59,6 +60,16 @@ export const PAGE_STYLE_CHIP_GAP_VALUES = {
   relaxed: '20px',
 };
 
+// 탭 모드에서 선택된 탭의 밑줄은 기본 밑줄의 두 배로 그린다.
+export const PAGE_STYLE_TAB_ACTIVE_BORDER_WIDTH_VALUES = {
+  none: '0px',
+  hairline: '1px',
+  soft: '2px',
+  normal: '3px',
+  strong: '4px',
+  bold: '5px',
+};
+
 export const DEFAULT_PAGE_STYLE = {
   schemaVersion: PAGE_STYLE_SCHEMA_VERSION,
   palette: { backgroundHex: '#ffffff', accentHex: '#1d4a2e' },
@@ -68,45 +79,52 @@ export const DEFAULT_PAGE_STYLE = {
     borderStrengthToken: 'normal',
     backgroundHex: '#ffffff',
     borderColorHex: '#d8e2dc',
-    focusBorderColorHex: '#1d4a2e',
   },
   categoryChips: {
     backgroundHex: '#ffffff',
     textHex: '#5f6d5b',
     borderColorHex: '#d8e2dc',
-    activeBackgroundHex: '#1d4a2e',
-    activeTextHex: '#ffffff',
-    activeBorderHex: '#1d4a2e',
-    hoverBackgroundHex: '#f4f7f5',
-    hoverTextHex: '#355a30',
-    hoverBorderHex: '#a9c2af',
-    variant: 'soft',
-    sizeToken: 'md',
-    radiusToken: 'pill',
-    gapToken: 'relaxed',
-    borderStrengthToken: 'soft',
-    borderSides: 'all',
-    fontWeight: 600,
-  },
-  productCategoryChips: {
-    backgroundHex: '#ffffff',
-    textHex: '#355a30',
-    borderColorHex: '#d8e2dc',
-    activeBackgroundHex: '#1d4a2e',
-    activeTextHex: '#ffffff',
-    activeBorderHex: '#1d4a2e',
-    hoverBackgroundHex: '#ffffff',
-    hoverTextHex: '#1d4a2e',
-    hoverBorderHex: '#7fa688',
-    variant: 'soft',
+    activeBackgroundHex: '#6cc24a',
+    activeTextHex: '#111827',
+    activeBorderHex: '#4f9e33',
+    styleMode: 'chip',
     sizeToken: 'md',
     radiusToken: 'pill',
     gapToken: 'normal',
     borderStrengthToken: 'soft',
-    borderSides: 'all',
+    fontWeight: 600,
+  },
+  productCategoryChips: {
+    backgroundHex: '#ffffff',
+    textHex: '#5f6d5b',
+    borderColorHex: '#e2e8e4',
+    activeBackgroundHex: '#ffffff',
+    activeTextHex: '#1d4a2e',
+    activeBorderHex: '#1d4a2e',
+    styleMode: 'tab',
+    sizeToken: 'md',
+    radiusToken: 'none',
+    gapToken: 'normal',
+    borderStrengthToken: 'soft',
     fontWeight: 700,
   },
 };
+
+const LEGACY_CHIP_TAB_BORDER_SIDES = ['bottom', 'top'];
+
+// schemaVersion 1로 저장된 스토어를 읽을 때 variant/borderSides를 styleMode로 옮긴다.
+// 밑줄 한 면만 쓰던 칩이 탭, 나머지는 전부 칩이다.
+function resolveLegacyChipStyleMode(source, fallbackStyleMode) {
+  if (LEGACY_CHIP_TAB_BORDER_SIDES.includes(source.borderSides)) {
+    return 'tab';
+  }
+
+  if (typeof source.borderSides === 'string' || typeof source.variant === 'string') {
+    return 'chip';
+  }
+
+  return fallbackStyleMode;
+}
 
 function normalizePalette(palette) {
   const source = palette ?? {};
@@ -141,7 +159,6 @@ function normalizeSearch(search) {
       : DEFAULT_PAGE_STYLE.search.borderStrengthToken,
     backgroundHex: normalizeHexColor(source.backgroundHex, DEFAULT_PAGE_STYLE.search.backgroundHex),
     borderColorHex: normalizeHexColor(source.borderColorHex, DEFAULT_PAGE_STYLE.search.borderColorHex),
-    focusBorderColorHex: normalizeHexColor(source.focusBorderColorHex, DEFAULT_PAGE_STYLE.search.focusBorderColorHex),
   };
 }
 
@@ -149,10 +166,8 @@ function normalizeChips(chips, defaults) {
   const source = chips ?? {};
   const backgroundHex = normalizeHexColor(source.backgroundHex, defaults.backgroundHex);
   const activeBackgroundHex = normalizeHexColor(source.activeBackgroundHex, defaults.activeBackgroundHex);
-  const hoverBackgroundHex = normalizeHexColor(source.hoverBackgroundHex, defaults.hoverBackgroundHex);
   const candidateTextHex = normalizeHexColor(source.textHex, defaults.textHex);
   const candidateActiveTextHex = normalizeHexColor(source.activeTextHex, defaults.activeTextHex);
-  const candidateHoverTextHex = normalizeHexColor(source.hoverTextHex, defaults.hoverTextHex);
 
   return {
     backgroundHex,
@@ -160,20 +175,16 @@ function normalizeChips(chips, defaults) {
     borderColorHex: normalizeHexColor(source.borderColorHex, defaults.borderColorHex),
     activeBackgroundHex,
     activeTextHex: ensureReadableTextColor(candidateActiveTextHex, activeBackgroundHex),
-    hoverBackgroundHex,
-    hoverTextHex: ensureReadableTextColor(candidateHoverTextHex, hoverBackgroundHex),
-    hoverBorderHex: normalizeHexColor(source.hoverBorderHex, defaults.hoverBorderHex),
     activeBorderHex: normalizeHexColor(source.activeBorderHex, defaults.activeBorderHex),
-    variant: PAGE_STYLE_CHIP_VARIANT_TOKENS.includes(source.variant) ? source.variant : defaults.variant,
+    styleMode: PAGE_STYLE_CHIP_STYLE_MODE_TOKENS.includes(source.styleMode)
+      ? source.styleMode
+      : resolveLegacyChipStyleMode(source, defaults.styleMode),
     sizeToken: PAGE_STYLE_CHIP_SIZE_TOKENS.includes(source.sizeToken) ? source.sizeToken : defaults.sizeToken,
     radiusToken: PAGE_STYLE_CHIP_RADIUS_TOKENS.includes(source.radiusToken) ? source.radiusToken : defaults.radiusToken,
     gapToken: PAGE_STYLE_CHIP_GAP_TOKENS.includes(source.gapToken) ? source.gapToken : defaults.gapToken,
     borderStrengthToken: PAGE_STYLE_BORDER_STRENGTH_TOKENS.includes(source.borderStrengthToken)
       ? source.borderStrengthToken
       : defaults.borderStrengthToken,
-    borderSides: PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS.includes(source.borderSides)
-      ? source.borderSides
-      : defaults.borderSides,
     fontWeight: Number.isFinite(source.fontWeight) ? source.fontWeight : defaults.fontWeight,
   };
 }
@@ -203,7 +214,6 @@ export function normalizePageStyle(pageStyle) {
 export function deriveCategoryChipsFromPalette(palette) {
   const backgroundHex = mixHexColors(palette.accentHex, '#ffffff', 0.88);
   const activeBackgroundHex = palette.accentHex;
-  const hoverBackgroundHex = mixHexColors(palette.accentHex, '#ffffff', 0.82);
 
   return {
     backgroundHex,
@@ -211,9 +221,6 @@ export function deriveCategoryChipsFromPalette(palette) {
     borderColorHex: mixHexColors(palette.accentHex, '#ffffff', 0.7),
     activeBackgroundHex,
     activeTextHex: ensureReadableTextColor('#ffffff', activeBackgroundHex),
-    hoverBackgroundHex,
-    hoverTextHex: ensureReadableTextColor('#173223', hoverBackgroundHex),
-    hoverBorderHex: mixHexColors(palette.accentHex, '#ffffff', 0.55),
   };
 }
 
@@ -222,6 +229,5 @@ export function deriveSearchDefaultsFromPalette(palette) {
     sizeToken: 'md',
     borderStrengthToken: 'normal',
     borderColorHex: mixHexColors(palette.accentHex, '#ffffff', 0.7),
-    focusBorderColorHex: palette.accentHex,
   };
 }

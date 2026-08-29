@@ -13,21 +13,45 @@
   gap: 4px;
 }
 
+/* The mode toggle sits on the title's own line, hard against the right edge. It
+   shrinks rather than wrapping, so a longer mode label never pushes it down. */
 .titleRowSplit {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
   width: 100%;
 }
 
+/* Pinned left at its natural width: the toggle is the side that gives way, so the
+   title never shifts or reflows as the mode label changes. */
 .titleCopy {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 2px 10px;
+  flex: 0 0 auto;
+}
+
+/* :not(:first-child) so this only fires when the toggle is actually rendered.
+   Before a mode is chosen the title is the row's only child, and an unguarded
+   margin-left: auto pushed it off to the right edge. */
+.titleRowSplit > :last-child:not(:first-child) {
+  flex: 0 1 auto;
   min-width: 0;
+  margin-left: auto;
+}
+
+/* Below the tablet width the two no longer fit side by side, so let them stack. */
+@media (max-width: 720px) {
+  .titleRowSplit {
+    flex-wrap: wrap;
+  }
+
+  .titleRowSplit > :last-child:not(:first-child) {
+    margin-left: 0;
+  }
 }
 
 .threadIntro {

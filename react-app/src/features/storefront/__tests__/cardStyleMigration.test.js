@@ -78,15 +78,19 @@ describe('migrateLegacyCategoryConfigToCardStyle', () => {
     ).toBe('brand');
   });
 
-  it('tightens info spacing when the legacy layout or density was compact', () => {
+  it('carries a compact legacy layout or density onto the layout plan density', () => {
     expect(
-      migrateLegacyCategoryConfigToCardStyle({ cardDesign: { style: { layout: 'compact' } } }).info.padding,
-    ).toBe('tight');
+      migrateLegacyCategoryConfigToCardStyle({ cardDesign: { style: { layout: 'compact' } } }).layoutPlan
+        .contentDensity,
+    ).toBe('compact');
     expect(
       migrateLegacyCategoryConfigToCardStyle({
         cardDesign: { style: {}, elementConfig: { metaDensity: 'compact' } },
-      }).info.fieldGap,
-    ).toBe('tight');
+      }).layoutPlan.contentDensity,
+    ).toBe('compact');
+    expect(
+      migrateLegacyCategoryConfigToCardStyle({ cardDesign: { style: {} } }).layoutPlan.contentDensity,
+    ).toBe('comfortable');
   });
 
   it('always migrates to header title mode since the legacy system had no inline mode', () => {

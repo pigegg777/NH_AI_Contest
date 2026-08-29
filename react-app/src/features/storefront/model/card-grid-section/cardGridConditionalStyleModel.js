@@ -77,7 +77,6 @@ export function buildConditionalArticleStyle(activeStyle) {
   const headerBg = resolveCssColor(activeStyle.header.backgroundColor);
   const headerTitleColor = resolveCssColor(activeStyle.header.titleColorHex);
   const infoBg = resolveCssColor(activeStyle.info.backgroundColor);
-  const infoBorder = resolveCssColor(activeStyle.info.borderColor);
 
   if (shellBg) style['--card-bg'] = shellBg;
   if (shellBorder) style['--card-border-color'] = shellBorder;
@@ -85,14 +84,10 @@ export function buildConditionalArticleStyle(activeStyle) {
   if (activeStyle.shell.shadow) style.boxShadow = CARD_SHADOW_VALUES[activeStyle.shell.shadow];
   if (headerBg) style['--card-header-bg'] = headerBg;
   if (headerTitleColor) style['--card-header-title-color'] = headerTitleColor;
-  if (activeStyle.header.letterSpacing) {
-    style['--card-header-title-letter-spacing'] = activeStyle.header.letterSpacing;
-  }
   if (Number.isFinite(activeStyle.header.fontWeight)) {
     style['--card-header-title-weight'] = activeStyle.header.fontWeight;
   }
   if (infoBg) style['--card-info-bg'] = infoBg;
-  if (infoBorder) style['--card-info-border'] = infoBorder;
   if (activeStyle.field.priceColorRole) {
     style['--price-text-color'] = resolveFieldColorRoleValue(activeStyle.field.priceColorRole);
   }

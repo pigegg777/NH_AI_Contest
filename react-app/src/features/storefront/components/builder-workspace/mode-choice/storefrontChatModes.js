@@ -1,8 +1,8 @@
 export const STOREFRONT_CHAT_MODE_OPTIONS = [
   {
     id: 'data',
-    label: '카테고리별 표시항목선택',
-    description: '카드에 보여줄 항목을 고릅니다',
+    label: '카테고리별 표시항목·안내 작성',
+    description: '표시항목을 고르고 안내 문구를 씁니다',
   },
   {
     id: 'design',

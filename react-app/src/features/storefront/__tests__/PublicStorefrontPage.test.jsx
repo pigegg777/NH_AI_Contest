@@ -20,6 +20,16 @@ vi.mock('../model/storefront-config/storefrontConfigOrchestrator', () => ({
 }));
 
 describe('PublicStorefrontPage', () => {
+  async function openCategoryProducts(categoryName = 'Fertilizer Upload') {
+    const user = userEvent.setup();
+    const categoryNav = await screen.findByTestId(
+      'storefront-product-category-chips',
+    );
+    await user.click(
+      within(categoryNav).getByRole('button', { name: categoryName }),
+    );
+  }
+
   afterEach(() => {
     vi.clearAllMocks();
   });
@@ -248,6 +258,7 @@ describe('PublicStorefrontPage', () => {
     const user = userEvent.setup();
     const { container } = render(<PublicStorefrontPage officeCode="OFF-1" />);
 
+    await openCategoryProducts();
     expect(await screen.findByText('Alpha')).toBeInTheDocument();
     const categoryChips = screen.getByTestId('storefront-category-chips');
     expect(within(categoryChips).getAllByRole('button')).toHaveLength(3);
@@ -318,6 +329,7 @@ describe('PublicStorefrontPage', () => {
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
+    await openCategoryProducts();
     expect(await screen.findByText('경농, 팜한농')).toBeInTheDocument();
     const cards = screen.getAllByRole('article');
     const betaCard = cards.find((card) => within(card).queryByText('Beta'));
@@ -379,7 +391,7 @@ describe('PublicStorefrontPage', () => {
         nav: { title: 'NH Demo Storefront', subtitle: 'Seasonal products', logoUrl: '' },
         searchSection: { enabled: true, placeholder: 'Search products', variant: 'outlined' },
         categoryChips: { enabled: true, sticky: true },
-        pageStyle: { categoryChips: { variant: 'filled' } },
+        pageStyle: { categoryChips: { styleMode: 'tab' } },
       },
       navConfig: {
         title: 'NH Demo Storefront',
@@ -426,7 +438,8 @@ describe('PublicStorefrontPage', () => {
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
     expect(await screen.findByTestId('storefront-search')).toHaveAttribute('data-search-variant', 'outlined');
-    expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-variant', 'filled');
+    await openCategoryProducts();
+    expect(screen.getByTestId('storefront-category-chips')).toHaveAttribute('data-chip-style-mode', 'tab');
 
     const sectionEl = screen.getByRole('article').closest('section');
     expect(sectionEl).toHaveAttribute('data-card-radius', 'xl');
@@ -499,6 +512,7 @@ describe('PublicStorefrontPage', () => {
 
     render(<PublicStorefrontPage officeCode="OFF-1" />);
 
+    await openCategoryProducts();
     expect(await screen.findByText('Mobile only benefit')).toBeInTheDocument();
     expect(screen.queryByRole('img', { name: 'Alpha' })).not.toBeInTheDocument();
     expect(screen.getByText('20kg')).toBeInTheDocument();
@@ -825,7 +839,7 @@ describe('PublicStorefrontPage', () => {
           schemaVersion: 1,
           palette: { backgroundHex: '#eef3fb', surfaceHex: '#ffffff', accentHex: '#2563eb', textHex: '#111827' },
           header: { titleColorHex: '#0f172a', letterSpacing: '-0.01em', fontWeight: 750 },
-          search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#bcd2ef', focusBorderColorHex: '#2563eb' },
+          search: { sizeToken: 'md', borderStrengthToken: 'normal', borderColorHex: '#bcd2ef' },
           categoryChips: {
             backgroundHex: '#ffffff',
             textHex: '#1d4ed8',
@@ -872,6 +886,7 @@ describe('PublicStorefrontPage', () => {
 
     const { container } = render(<PublicStorefrontPage officeCode="OFF-1" />);
 
+    await openCategoryProducts();
     expect(await screen.findByText('Alpha')).toBeInTheDocument();
 
     const sectionEl = container.querySelector('section[id]');
@@ -1049,7 +1064,7 @@ describe('PublicStorefrontPage', () => {
           schemaVersion: 1,
           palette: { backgroundHex: '#fdf2e9', surfaceHex: '#ffffff', accentHex: '#ea580c', textHex: '#1f2937' },
           header: { titleColorHex: '#1f2937', letterSpacing: 'normal', fontWeight: 800 },
-          search: { sizeToken: 'lg', borderStrengthToken: 'strong', borderColorHex: '#f3c9a4', focusBorderColorHex: '#ea580c' },
+          search: { sizeToken: 'lg', borderStrengthToken: 'strong', borderColorHex: '#f3c9a4' },
           categoryChips: {
             backgroundHex: '#fde8d4',
             textHex: '#1f2937',

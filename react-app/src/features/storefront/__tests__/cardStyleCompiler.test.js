@@ -87,7 +87,10 @@ describe('compileCardStyle merges intent onto the previous style', () => {
   });
 
   it('keeps untouched sections unchanged from the previous style', () => {
-    const previousCardStyle = { ...DEFAULT_CARD_STYLE, info: { ...DEFAULT_CARD_STYLE.info, padding: 'tight' } };
+    const previousCardStyle = {
+      ...DEFAULT_CARD_STYLE,
+      info: { ...DEFAULT_CARD_STYLE.info, labelColorRole: 'blue' },
+    };
     const result = compileCardStyle({
       intent: { header: { fontWeight: 800 } },
       previousCardStyle,
@@ -96,7 +99,7 @@ describe('compileCardStyle merges intent onto the previous style', () => {
       fieldLabels: FIELD_LABELS,
     });
 
-    expect(result.cardStyle.info.padding).toBe('tight');
+    expect(result.cardStyle.info.labelColorRole).toBe('blue');
   });
 
   it('leaves every section unchanged when an area was nulled out by scope gating', () => {
@@ -116,7 +119,6 @@ describe('compileCardStyle merges intent onto the previous style', () => {
     const previousCardStyle = {
       ...DEFAULT_CARD_STYLE,
       shell: {
-        backgroundColor: '#fff7ed',
         borderColor: '#fdba74',
         shadow: 'strong',
         radius: 'md',
@@ -125,7 +127,7 @@ describe('compileCardStyle merges intent onto the previous style', () => {
     };
     const result = compileCardStyle({
       // AI nulls out every shell field it isn't changing, per the system prompt contract.
-      intent: { shell: { backgroundColor: null, borderColor: null, shadow: null, radius: 'xl', spacing: null } },
+      intent: { shell: { borderColor: null, shadow: null, radius: 'xl', spacing: null } },
       previousCardStyle,
       cardsPerRow: 2,
       visibleFields: ['product_name'],
@@ -133,7 +135,6 @@ describe('compileCardStyle merges intent onto the previous style', () => {
     });
 
     expect(result.cardStyle.shell).toEqual({
-      backgroundColor: '#fff7ed',
       borderColor: '#fdba74',
       shadow: 'strong',
       radius: 'xl',
@@ -515,38 +516,18 @@ describe('compileCardStyle body composition', () => {
 describe('compileCardStyle header appearance tokens', () => {
   it('applies every new header token from the intent', () => {
     const result = compileCardStyle({
-      intent: {
-        header: {
-          titleSizeToken: 'xl',
-          borderColor: '#94a3b8',
-          borderStrengthToken: 'strong',
-          borderSide: 'all',
-          padding: 'relaxed',
-          textAlign: 'center',
-        },
-      },
+      intent: { header: { titleSizeToken: 'xl' } },
       previousCardStyle: DEFAULT_CARD_STYLE,
       fieldLabels: FIELD_LABELS,
     });
 
     expect(result.cardStyle.header.titleSizeToken).toBe('xl');
-    expect(result.cardStyle.header.borderColor).toBe('#94a3b8');
-    expect(result.cardStyle.header.borderStrengthToken).toBe('strong');
-    expect(result.cardStyle.header.borderSide).toBe('all');
-    expect(result.cardStyle.header.padding).toBe('relaxed');
-    expect(result.cardStyle.header.textAlign).toBe('center');
   });
 
   it('keeps the previous header tokens when the intent omits them', () => {
     const previousCardStyle = {
       ...DEFAULT_CARD_STYLE,
-      header: {
-        ...DEFAULT_CARD_STYLE.header,
-        titleSizeToken: 'lg',
-        borderStrengthToken: 'bold',
-        borderSide: 'none',
-        textAlign: 'right',
-      },
+      header: { ...DEFAULT_CARD_STYLE.header, titleSizeToken: 'lg' },
     };
     const result = compileCardStyle({
       intent: { header: { fontWeight: 800 } },
@@ -555,10 +536,26 @@ describe('compileCardStyle header appearance tokens', () => {
     });
 
     expect(result.cardStyle.header.titleSizeToken).toBe('lg');
-    expect(result.cardStyle.header.borderStrengthToken).toBe('bold');
-    expect(result.cardStyle.header.borderSide).toBe('none');
-    expect(result.cardStyle.header.textAlign).toBe('right');
     expect(result.cardStyle.header.fontWeight).toBe(800);
+  });
+
+  it('ignores the retired border, spacing and alignment knobs on the intent', () => {
+    const result = compileCardStyle({
+      intent: {
+        header: {
+          borderColor: '#94a3b8',
+          borderStrengthToken: 'strong',
+          borderSide: 'all',
+          padding: 'relaxed',
+          textAlign: 'center',
+          letterSpacing: '0.02em',
+        },
+      },
+      previousCardStyle: DEFAULT_CARD_STYLE,
+      fieldLabels: FIELD_LABELS,
+    });
+
+    expect(result.cardStyle.header).toEqual(DEFAULT_CARD_STYLE.header);
   });
 });
 
@@ -598,7 +595,7 @@ describe('compileCardStyle field defaults and info labels', () => {
       info: { ...DEFAULT_CARD_STYLE.info, labelColorRole: 'red', labelFontWeight: 800 },
     };
     const result = compileCardStyle({
-      intent: { info: { padding: 'tight' } },
+      intent: { info: { labelFontSizeToken: 'lg' } },
       previousCardStyle,
       fieldLabels: FIELD_LABELS,
     });
@@ -607,6 +604,6 @@ describe('compileCardStyle field defaults and info labels', () => {
     expect(result.cardStyle.field.defaultFontSize).toBe('xs');
     expect(result.cardStyle.info.labelColorRole).toBe('red');
     expect(result.cardStyle.info.labelFontWeight).toBe(800);
-    expect(result.cardStyle.info.padding).toBe('tight');
+    expect(result.cardStyle.info.labelFontSizeToken).toBe('lg');
   });
 });

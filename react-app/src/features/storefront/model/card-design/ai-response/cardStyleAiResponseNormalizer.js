@@ -14,9 +14,6 @@ import {
   CARD_FIELD_EMPHASIS_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
-  CARD_HEADER_BORDER_SIDE_TOKENS,
-  CARD_HEADER_BORDER_STRENGTH_TOKENS,
-  CARD_HEADER_TEXT_ALIGN_TOKENS,
   CARD_HEADER_TITLE_SIZE_TOKENS,
   CARD_IMAGE_FIT_OPTIONS,
   CARD_RADIUS_OPTIONS,
@@ -65,8 +62,6 @@ function normalizeShellIntent(rawShell) {
 
   const intent = {};
 
-  if (isHexColor(rawShell.backgroundColor))
-    intent.backgroundColor = normalizeHexColor(rawShell.backgroundColor);
   if (isHexColor(rawShell.borderColor))
     intent.borderColor = normalizeHexColor(rawShell.borderColor);
   if (CARD_SHADOW_OPTIONS.includes(rawShell.shadow))
@@ -90,22 +85,10 @@ function normalizeHeaderIntent(rawHeader) {
     intent.backgroundColor = normalizeHexColor(rawHeader.backgroundColor);
   if (isHexColor(rawHeader.titleColorHex))
     intent.titleColorHex = normalizeHexColor(rawHeader.titleColorHex);
-  if (typeof rawHeader.letterSpacing === 'string' && rawHeader.letterSpacing)
-    intent.letterSpacing = rawHeader.letterSpacing;
   if (Number.isFinite(rawHeader.fontWeight))
     intent.fontWeight = rawHeader.fontWeight;
   if (CARD_HEADER_TITLE_SIZE_TOKENS.includes(rawHeader.titleSizeToken))
     intent.titleSizeToken = rawHeader.titleSizeToken;
-  if (isHexColor(rawHeader.borderColor))
-    intent.borderColor = normalizeHexColor(rawHeader.borderColor);
-  if (CARD_HEADER_BORDER_STRENGTH_TOKENS.includes(rawHeader.borderStrengthToken))
-    intent.borderStrengthToken = rawHeader.borderStrengthToken;
-  if (CARD_HEADER_BORDER_SIDE_TOKENS.includes(rawHeader.borderSide))
-    intent.borderSide = rawHeader.borderSide;
-  if (CARD_SPACING_OPTIONS.includes(rawHeader.padding))
-    intent.padding = rawHeader.padding;
-  if (CARD_HEADER_TEXT_ALIGN_TOKENS.includes(rawHeader.textAlign))
-    intent.textAlign = rawHeader.textAlign;
 
   return Object.keys(intent).length > 0 ? intent : null;
 }
@@ -133,14 +116,6 @@ function normalizeInfoIntent(rawInfo) {
 
   if (isHexColor(rawInfo.backgroundColor))
     intent.backgroundColor = normalizeHexColor(rawInfo.backgroundColor);
-  if (isHexColor(rawInfo.borderColor))
-    intent.borderColor = normalizeHexColor(rawInfo.borderColor);
-  if (CARD_SPACING_OPTIONS.includes(rawInfo.padding))
-    intent.padding = rawInfo.padding;
-  if (CARD_SPACING_OPTIONS.includes(rawInfo.fieldGap))
-    intent.fieldGap = rawInfo.fieldGap;
-  if (CARD_SPACING_OPTIONS.includes(rawInfo.fieldGroupGap))
-    intent.fieldGroupGap = rawInfo.fieldGroupGap;
   if (CARD_FIELD_COLOR_ROLE_OPTIONS.includes(rawInfo.labelColorRole))
     intent.labelColorRole = rawInfo.labelColorRole;
   if (CARD_FIELD_FONT_SIZE_OPTIONS.includes(rawInfo.labelFontSizeToken))
@@ -214,8 +189,6 @@ function normalizeLayoutIntent(rawLayout) {
   if (sectionOrder.length > 0) intent.sectionOrder = sectionOrder;
   if (CARD_LAYOUT_IMAGE_PLACEMENT_OPTIONS.includes(rawLayout.imagePlacement))
     intent.imagePlacement = rawLayout.imagePlacement;
-  if ([1, 2].includes(Number(rawLayout.titleClamp)))
-    intent.titleClamp = Number(rawLayout.titleClamp);
   if (CARD_LAYOUT_CONTENT_DENSITY_OPTIONS.includes(rawLayout.contentDensity))
     intent.contentDensity = rawLayout.contentDensity;
   if (CARD_LAYOUT_EMPHASIS_OPTIONS.includes(rawLayout.emphasis))

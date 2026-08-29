@@ -54,10 +54,6 @@ export default function CardGridSection({
       data-card-radius={resolvedStyle.shell.radius}
       data-card-shadow={resolvedStyle.shell.shadow}
       data-card-spacing={resolvedStyle.shell.spacing}
-      data-header-padding={resolvedStyle.header.padding}
-      data-header-border-side={resolvedStyle.header.borderSide}
-      data-info-padding={resolvedStyle.info.padding}
-      data-info-gap={resolvedStyle.info.fieldGap}
       data-content-density={resolvedStyle.layoutPlan.contentDensity}
       data-layout-emphasis={resolvedStyle.layoutPlan.emphasis}
     >

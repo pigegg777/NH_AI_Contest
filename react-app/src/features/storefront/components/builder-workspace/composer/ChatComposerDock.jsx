@@ -62,6 +62,9 @@ export default function ChatComposerDock({ composer, categoryTabsMode }) {
           layoutOptions={composer.layoutOptions}
           selectedLayoutId={composer.selectedLayoutId}
           onChangeLayout={composer.setLayoutId}
+          pageTitleDraft={composer.pageTitleDraft}
+          onChangePageTitle={composer.setPageTitle}
+          pageTitlePlaceholder={composer.pageTitlePlaceholder}
         />
       </div>
 

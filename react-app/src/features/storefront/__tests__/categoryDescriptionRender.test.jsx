@@ -74,12 +74,11 @@ describe('category description', () => {
     expect(screen.queryByRole('button', { name: '비료 정보' })).not.toBeInTheDocument();
   });
 
-  it('opens a category information screen from the guide child when a description exists', async () => {
+  it('opens category information when the category is selected', async () => {
     const user = userEvent.setup();
     renderStorefront('봄철 밑거름 모음');
 
-    await user.click(screen.getByRole('button', { name: '안내' }));
-    expect(screen.getByRole('button', { name: '비료 안내' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: '비료' }));
     expect(screen.getByRole('heading', { name: '비료 안내' })).toBeInTheDocument();
     expect(screen.getByText('봄철 밑거름 모음')).toBeInTheDocument();
     expect(screen.queryByText('알파 비료')).not.toBeInTheDocument();
@@ -89,9 +88,8 @@ describe('category description', () => {
     const user = userEvent.setup();
     renderStorefront('봄철 밑거름 모음');
 
-    await user.click(screen.getByRole('button', { name: '안내' }));
-    await user.click(screen.getByRole('button', { name: '비료 안내' }));
     await user.click(screen.getByRole('button', { name: '비료' }));
+    await user.click(screen.getByRole('button', { name: '전체' }));
 
     expect(screen.queryByRole('heading', { name: '비료 안내' })).not.toBeInTheDocument();
     expect(screen.getByText('알파 비료')).toBeInTheDocument();

@@ -101,26 +101,22 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
           { id: 'empty-state', type: 'emptyState', slot: 'bottom', enabled: true, props: {} },
         ],
         pageStyle: {
-          schemaVersion: 1,
+          schemaVersion: 2,
           palette: { backgroundHex: '#f1f4f2', accentHex: '#1d4a2e' },
           header: { titleColorHex: '#173223', letterSpacing: 'normal', fontWeight: 800, titleFontSizeToken: 'md' },
-          search: { sizeToken: 'md', borderStrengthToken: 'soft', backgroundHex: '#ffffff', borderColorHex: '#bbc9c0', focusBorderColorHex: '#1d4a2e' },
+          search: { sizeToken: 'md', borderStrengthToken: 'soft', backgroundHex: '#ffffff', borderColorHex: '#bbc9c0' },
           categoryChips: {
             backgroundHex: '#e4e9e6',
             textHex: '#173223',
             borderColorHex: '#bbc9c0',
             activeBackgroundHex: '#1d4a2e',
             activeTextHex: '#ffffff',
-            activeBorderHex: '#1d4a2e',
-            hoverBackgroundHex: '#d6ded9',
-            hoverTextHex: '#173223',
-            hoverBorderHex: '#99aea1',
-            variant: 'soft',
+            activeBorderHex: '#4f9e33',
+            styleMode: 'chip',
             sizeToken: 'md',
             radiusToken: 'pill',
-            gapToken: 'relaxed',
+            gapToken: 'normal',
             borderStrengthToken: 'soft',
-            borderSides: 'all',
             fontWeight: 600,
           },
           productCategoryChips: {
@@ -130,15 +126,11 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
             activeBackgroundHex: '#1d4a2e',
             activeTextHex: '#ffffff',
             activeBorderHex: '#1d4a2e',
-            hoverBackgroundHex: '#d6ded9',
-            hoverTextHex: '#173223',
-            hoverBorderHex: '#99aea1',
-            variant: 'soft',
+            styleMode: 'tab',
             sizeToken: 'md',
-            radiusToken: 'pill',
+            radiusToken: 'none',
             gapToken: 'normal',
             borderStrengthToken: 'soft',
-            borderSides: 'all',
             fontWeight: 700,
           },
         },
@@ -166,7 +158,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
               visibleFields: ['product_name', 'tax_price'],
               cardStyle: normalizeCardStyle({
                 ...DEFAULT_CARD_STYLE,
-                info: { ...DEFAULT_CARD_STYLE.info, padding: 'tight', fieldGap: 'tight' },
+                layoutPlan: { ...DEFAULT_CARD_STYLE.layoutPlan, contentDensity: 'compact' },
                 field: { ...DEFAULT_CARD_STYLE.field, defaultFontSize: 'large', priceColorRole: 'red' },
               }),
               bodySlots: [],
@@ -238,7 +230,7 @@ describe('storefrontConfigOrchestrator.fetchStorefrontConfig', () => {
 
     expect(result.pageConfig.pageStyle.palette.accentHex).toBe('#2563eb');
     expect(result.pageConfig.pageStyle.search.borderStrengthToken).toBe('strong');
-    expect(result.pageConfig.pageStyle.schemaVersion).toBe(1);
+    expect(result.pageConfig.pageStyle.schemaVersion).toBe(2);
   });
 });
 

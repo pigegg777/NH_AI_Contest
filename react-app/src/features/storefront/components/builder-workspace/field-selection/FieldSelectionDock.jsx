@@ -1,7 +1,6 @@
 import CategoryTabs from '../category-tabs/CategoryTabs';
 import DataFieldGroupTable from './DataFieldGroupTable';
 import { InformationEntryFields } from './InformationEntryFields';
-import { StorefrontTextFields } from './StorefrontTextFields';
 import { groupAvailableFields } from '../../../model/data-selection/dataSelectionFieldGroupModel';
 import styles from './FieldSelectionDock.module.css';
 
@@ -56,19 +55,6 @@ export default function FieldSelectionDock({ dataMode, onApply }) {
 
       {dataMode.selectedCategoryId === COMMON_TAB_ID ? (
         <>
-          <StorefrontTextFields
-            fields={[
-              {
-                id: 'pageTitle',
-                label: '페이지 제목',
-                value: dataMode.textDraft.pageTitle,
-                placeholder: dataMode.derivedPageTitle,
-                hint: '비워두면 위 문구가 그대로 표시됩니다.',
-              },
-            ]}
-            onChange={dataMode.setTextDraft}
-          />
-
           <InformationEntryFields
             legend="사무소 안내"
             entries={dataMode.officeInfoEntries}

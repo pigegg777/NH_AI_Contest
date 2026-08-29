@@ -3,7 +3,7 @@ import { useId } from 'react';
 import InformationText from './InformationText';
 import styles from './CategoryInformationPanel.module.css';
 
-/** 안내 분류에서 선택한 상품 분류의 항목을 보여주는 패널. */
+/** 상품 분류 탭을 열었을 때 먼저 보여주는 안내 패널. */
 export default function CategoryInformationPanel({
   categoryName,
   entries = [],
@@ -38,8 +38,6 @@ export default function CategoryInformationPanel({
           </div>
         ))}
       </dl>
-
-      <p className={styles.helper}>다른 안내는 위 안내 항목에서 선택하세요.</p>
     </section>
   );
 }

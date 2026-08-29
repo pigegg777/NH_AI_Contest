@@ -30,8 +30,6 @@ function resolveSearch(intentSearch, previousSearch) {
       intentSearch?.borderStrengthToken ?? previousSearch.borderStrengthToken,
     backgroundHex: intentSearch?.backgroundHex ?? previousSearch.backgroundHex,
     borderColorHex: intentSearch?.borderColorHex ?? previousSearch.borderColorHex,
-    focusBorderColorHex:
-      intentSearch?.focusBorderColorHex ?? previousSearch.focusBorderColorHex,
   };
 }
 
@@ -42,15 +40,11 @@ const CHIP_FIELDS = [
   'activeBackgroundHex',
   'activeTextHex',
   'activeBorderHex',
-  'hoverBackgroundHex',
-  'hoverTextHex',
-  'hoverBorderHex',
-  'variant',
+  'styleMode',
   'sizeToken',
   'radiusToken',
   'gapToken',
   'borderStrengthToken',
-  'borderSides',
   'fontWeight',
 ];
 

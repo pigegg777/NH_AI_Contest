@@ -1,24 +1,27 @@
 import styles from './CategoryNav.module.css';
 
-const CHIP_VARIANT_CLASS_NAMES = {
-  filled: styles.categoryWrapFilled,
-  outline: styles.categoryWrapOutline,
-  soft: styles.categoryWrapSoft,
+const CHIP_STYLE_MODE_CLASS_NAMES = {
+  chip: styles.categoryWrapChip,
+  tab: styles.categoryWrapTab,
 };
 
 export default function CategoryChipsBlock({ view, elementKey }) {
-  if (view.mediumCategoryItems.length <= 1) {
+  if (
+    view.isGuideNavigationActive ||
+    view.isOfficeInformationIntroActive ||
+    view.mediumCategoryItems.length <= 1
+  ) {
     return null;
   }
 
-  const categoryChipVariant = view.pageStyle.categoryChips.variant;
+  const categoryChipStyleMode = view.pageStyle.categoryChips.styleMode;
 
   return (
     <div className={styles.categoryChipsSection}>
       <div
-        className={`${styles.categoryWrap} ${CHIP_VARIANT_CLASS_NAMES[categoryChipVariant] || ''}`}
+        className={`${styles.categoryWrap} ${CHIP_STYLE_MODE_CLASS_NAMES[categoryChipStyleMode] || ''}`}
         data-testid="storefront-category-chips"
-        data-chip-variant={categoryChipVariant}
+        data-chip-style-mode={categoryChipStyleMode}
         data-category-layout="single-row-scroll"
         data-chip-size="compact"
         role="group"

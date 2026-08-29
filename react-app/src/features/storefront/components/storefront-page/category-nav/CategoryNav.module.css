@@ -188,12 +188,14 @@
     transform var(--corp-transition);
 }
 
-.productCategoryChip:hover {
-  background: var(--page-product-chip-hover-bg, var(--page-product-chip-bg, rgba(255, 255, 255, 0.86)));
-  border-color: var(--page-product-chip-hover-border, color-mix(in srgb, var(--brand-color, var(--corp-primary)) 36%, rgba(29, 74, 46, 0.14)));
-  color: var(--page-product-chip-hover-text, var(--brand-color, #1d4a2e));
-  box-shadow: 0 8px 18px rgba(20, 33, 25, 0.08);
-  transform: translateY(-1px);
+.productCategoryChip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px
+    color-mix(
+      in srgb,
+      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 45%,
+      transparent
+    );
 }
 
 .productCategoryChipActive {
@@ -206,18 +208,15 @@
       rgba(29, 74, 46, 0.14)
     )
   );
+  border-width: var(
+    --page-product-chip-active-border-width,
+    var(--page-product-chip-border-width, 1px)
+  );
   background: var(
     --page-product-chip-active-bg,
     color-mix(in srgb, var(--brand-color, var(--corp-primary)) 12%, #ffffff)
   );
   color: var(--page-product-chip-active-text, #173223);
-  box-shadow: 0 10px 22px
-    color-mix(
-      in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
-        18%,
-      transparent
-    );
 }
 
 .mobileCategoryBar {
@@ -304,133 +303,47 @@
     box-shadow var(--corp-transition);
 }
 
-.categoryChip:hover {
-  background: var(--page-chip-hover-bg, var(--page-chip-bg, #ffffff));
-  color: var(--page-chip-hover-text, #355a30);
-  border-color: var(--page-chip-hover-border, rgba(29, 74, 46, 0.28));
-  box-shadow: 0 3px 8px rgba(20, 33, 25, 0.1);
+.categoryChip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px
+    color-mix(
+      in srgb,
+      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))) 45%,
+      transparent
+    );
 }
 
 .categoryChipActive {
   background: var(--page-chip-active-bg, transparent);
   border-color: var(--page-chip-active-border, var(--page-chip-border, rgba(29, 74, 46, 0.16)));
+  border-width: var(--page-chip-active-border-width, var(--page-chip-border-width, 1px));
   color: var(--page-chip-active-text, #173223);
   font-weight: calc(var(--page-chip-font-weight, 600) + 100);
 }
 
-.categoryWrapSoft .categoryChip {
-  background: #ffffff;
-  border-color: rgba(29, 74, 46, 0.14);
-}
-
-.categoryWrapSoft .categoryChip:hover {
-  border-color: var(--page-chip-hover-border, rgba(29, 74, 46, 0.28));
-  box-shadow: 0 3px 10px rgba(20, 33, 25, 0.11);
-}
-
-.categoryWrapSoft .categoryChipActive {
-  background: color-mix(
-    in srgb,
-    var(
-        --category-chip-accent,
-        var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-      )
-      14%,
-    #ffffff
-  );
-  border-color: var(
-    --page-chip-active-border,
-    color-mix(
-      in srgb,
-      var(
-          --category-chip-accent,
-          var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-        )
-        40%,
-      #dfe9dc
-    )
-  );
+/* 칩 모드: 배경 + 전체 테두리 + 둥근 모서리. 기본 .categoryChip 규칙 그대로 쓴다. */
+.categoryWrapChip .categoryChipActive {
   box-shadow: 0 4px 12px
     color-mix(
       in srgb,
-      var(
-          --category-chip-accent,
-          var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-        )
-        22%,
+      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary))) 22%,
       transparent
     );
 }
 
-.categoryWrapOutline .categoryChip {
-  background: #ffffff;
-  border-color: rgba(29, 74, 46, 0.16);
+/* 탭 모드: 배경 없이 아래쪽 밑줄만. 밑줄 두께는 --page-chip-border-width가 결정하고
+   선택된 탭은 --page-chip-active-border-width(기본의 2배)로 그린다. */
+.categoryWrapTab .categoryChip {
+  background: transparent;
+  border-radius: 0;
 }
 
-.categoryWrapOutline .categoryChipActive {
-  border-color: var(
-    --page-chip-active-border,
-    var(
-      --category-chip-accent,
-      var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-    )
-  );
-  box-shadow: 0 0 0 1px
-    color-mix(
-      in srgb,
-      var(
-          --category-chip-accent,
-          var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-        )
-        24%,
-      transparent
-    );
+.categoryWrapTab .categoryChipActive {
+  background: transparent;
+  box-shadow: none;
 }
 
-.categoryWrapFilled .categoryChip {
-  background: #ffffff;
-  border-color: rgba(29, 74, 46, 0.16);
-}
-
-.categoryWrapFilled .categoryChipActive {
-  background: var(
-    --category-chip-accent,
-    var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-  );
-  border-color: var(--page-chip-active-border, var(--page-chip-border, rgba(29, 74, 46, 0.16)));
-  color: var(--page-chip-active-text, #ffffff);
-  box-shadow: 0 10px 20px
-    color-mix(
-      in srgb,
-      var(
-          --category-chip-accent,
-          var(--page-chip-active-bg, var(--chip-accent, var(--corp-primary)))
-        )
-        30%,
-      transparent
-    );
-}
-
-.productCategoryWrapSoft .productCategoryChip {
-  background: var(--page-product-chip-bg, #ffffff);
-  border-color: rgba(29, 74, 46, 0.14);
-}
-
-.productCategoryWrapSoft .productCategoryChipActive {
-  background: color-mix(
-    in srgb,
-    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 14%,
-    #ffffff
-  );
-  border-color: var(
-    --page-product-chip-active-border,
-    color-mix(
-      in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 40%,
-      #dfe9dc
-    )
-  );
-  color: var(--page-product-chip-active-text, #173223);
+.productCategoryWrapChip .productCategoryChipActive {
   box-shadow: 0 4px 12px
     color-mix(
       in srgb,
@@ -439,44 +352,14 @@
     );
 }
 
-.productCategoryWrapOutline .productCategoryChip {
-  background: var(--page-product-chip-bg, #ffffff);
-  border-color: rgba(29, 74, 46, 0.16);
+.productCategoryWrapTab .productCategoryChip {
+  background: transparent;
+  border-radius: 0;
 }
 
-.productCategoryWrapOutline .productCategoryChipActive {
-  background: var(--page-product-chip-bg, #ffffff);
-  border-color: var(
-    --page-product-chip-active-border,
-    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
-  );
-  color: var(--page-product-chip-active-text, #173223);
-  box-shadow: 0 0 0 1px
-    color-mix(
-      in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 24%,
-      transparent
-    );
-}
-
-.productCategoryWrapFilled .productCategoryChip {
-  background: var(--page-product-chip-bg, #ffffff);
-  border-color: rgba(29, 74, 46, 0.16);
-}
-
-.productCategoryWrapFilled .productCategoryChipActive {
-  background: var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)));
-  border-color: var(
-    --page-product-chip-active-border,
-    var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary)))
-  );
-  color: var(--page-product-chip-active-text, #ffffff);
-  box-shadow: 0 10px 20px
-    color-mix(
-      in srgb,
-      var(--page-product-chip-active-bg, var(--brand-color, var(--corp-primary))) 30%,
-      transparent
-    );
+.productCategoryWrapTab .productCategoryChipActive {
+  background: transparent;
+  box-shadow: none;
 }
 
 .categoryWrap[data-category-layout='wrap'] {

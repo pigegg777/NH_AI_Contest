@@ -78,12 +78,7 @@
     box-shadow var(--corp-transition);
 }
 
-/* The input suppresses its own ring, so the wrapper has to carry the focus
-   indicator. Border goes fully opaque; the token glow is supplementary. */
-.searchBox:focus-within {
-  border-color: var(--corp-focus);
-  box-shadow: var(--corp-focus-ring);
-}
+/* 클릭·포커스 시 테두리 변화 없음: 검색창은 어떤 상태에서도 같은 모습을 유지한다. */
 
 .searchBoxPill {
   border-radius: var(--search-radius, 999px);

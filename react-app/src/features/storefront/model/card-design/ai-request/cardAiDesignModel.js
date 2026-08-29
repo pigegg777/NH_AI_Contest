@@ -4,8 +4,7 @@ export const CARD_AI_TARGET_SCOPE_OPTIONS = [
   {
     id: 'header',
     label: '상품명(제목) 영역',
-    detail:
-      '배경색, 글자색, 글자 굵기, 글자 크기, 자간, 정렬, 줄 수, 여백, 테두리 색, 테두리 굵기, 테두리 방향',
+    detail: '배경색, 글자색, 글자 굵기, 글자 크기',
   },
   {
     id: 'image',
@@ -15,8 +14,7 @@ export const CARD_AI_TARGET_SCOPE_OPTIONS = [
   {
     id: 'info',
     label: '상품정보 영역',
-    detail:
-      '배경색, 테두리 색, 여백, 항목 간격, 그룹 간격, 항목 순서, 항목 묶음, 라벨 색, 라벨 크기, 라벨 굵기',
+    detail: '배경색, 항목 순서, 항목 묶음, 라벨 색, 라벨 크기, 라벨 굵기',
   },
   {
     id: 'field',

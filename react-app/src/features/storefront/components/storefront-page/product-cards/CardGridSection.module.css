@@ -107,7 +107,7 @@
   overflow: hidden;
   border: 1px solid var(--card-border-color, var(--corp-line));
   border-radius: 18px;
-  background: var(--card-bg, var(--corp-panel));
+  background: var(--card-bg, #ffffff);
   box-shadow: 0 10px 24px rgba(17, 24, 39, 0.07);
   transition:
     box-shadow 0.25s ease,
@@ -128,25 +128,7 @@
     --card-header-bg,
     color-mix(in srgb, var(--card-accent, var(--corp-primary)) 8%, #ffffff)
   );
-  border-bottom: var(--card-header-border-width, 1px) solid
-    var(--card-header-border, rgba(17, 24, 39, 0.06));
-}
-
-.section[data-header-border-side='all'] .cardHeader {
-  border: var(--card-header-border-width, 1px) solid
-    var(--card-header-border, rgba(17, 24, 39, 0.06));
-}
-
-.section[data-header-border-side='none'] .cardHeader {
-  border-bottom: 0;
-}
-
-.section[data-header-padding='tight'] .cardHeader {
-  padding: 8px 12px 6px;
-}
-
-.section[data-header-padding='relaxed'] .cardHeader {
-  padding: 16px 18px 14px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
 }
 
 .cardName {
@@ -156,8 +138,6 @@
     var(--card-font-size, 0.85rem) - 0.07rem + var(--card-header-title-offset, 0rem)
   );
   font-weight: var(--card-header-title-weight, 700);
-  letter-spacing: var(--card-header-title-letter-spacing, normal);
-  text-align: var(--card-header-title-align, left);
   color: var(--card-header-title-color, var(--corp-text));
   line-height: 1.35;
   word-break: break-word;
@@ -189,27 +169,11 @@
   gap: 8px;
   padding: 10px 14px 14px;
   background: var(--card-info-bg, transparent);
-  border: 1px solid var(--card-info-border, transparent);
-}
-
-.section[data-info-gap='tight'] .cardBody {
-  gap: 6px;
-}
-
-.section[data-info-gap='relaxed'] .cardBody {
-  gap: 12px;
 }
 
 .section[data-content-density='compact'] .cardBody {
   gap: 6px;
-}
-
-.section[data-info-padding='tight'] .cardBody {
   padding: 8px 12px 12px;
-}
-
-.section[data-info-padding='relaxed'] .cardBody {
-  padding: 14px 18px 18px;
 }
 
 .section[data-card-radius='md'] .card {
@@ -299,7 +263,7 @@
 .fieldValue {
   font-size: var(--field-font-size, var(--card-font-size, 0.85rem));
   color: var(--field-text-color, var(--field-default-color, var(--corp-text)));
-  font-weight: var(--field-font-weight, var(--typography-body-weight, 600));
+  font-weight: var(--field-font-weight, var(--card-field-value-weight, 400));
   letter-spacing: var(--field-letter-spacing, normal);
   line-height: 1.45;
   word-break: break-word;

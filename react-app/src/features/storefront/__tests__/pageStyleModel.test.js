@@ -9,7 +9,7 @@ import {
   PAGE_STYLE_CHIP_RADIUS_VALUES,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
   PAGE_STYLE_CHIP_SIZE_VALUES,
-  PAGE_STYLE_CHIP_VARIANT_TOKENS,
+  PAGE_STYLE_CHIP_STYLE_MODE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_VALUES,
   PAGE_STYLE_SCHEMA_VERSION,
@@ -159,7 +159,7 @@ describe('normalizePageStyle', () => {
     const result = normalizePageStyle({
       palette: { backgroundHex: '#0f172a', surfaceHex: '#1e293b', accentHex: '#38bdf8', textHex: '#f8fafc' },
       header: { titleColorHex: '#f8fafc', letterSpacing: '0.02em', fontWeight: 700 },
-      search: { sizeToken: 'lg', borderStrengthToken: 'strong', backgroundHex: '#0f172a', borderColorHex: '#38bdf8', focusBorderColorHex: '#38bdf8' },
+      search: { sizeToken: 'lg', borderStrengthToken: 'strong', backgroundHex: '#0f172a', borderColorHex: '#38bdf8' },
       categoryChips: {
         backgroundHex: '#1e293b',
         textHex: '#f8fafc',
@@ -169,7 +169,7 @@ describe('normalizePageStyle', () => {
       },
     });
 
-    expect(result.schemaVersion).toBe(1);
+    expect(result.schemaVersion).toBe(2);
     expect(result.palette.backgroundHex).toBe('#0f172a');
     expect(result.search.sizeToken).toBe('lg');
     expect(result.search.backgroundHex).toBe('#0f172a');
@@ -209,33 +209,32 @@ describe('deriveCategoryChipsFromPalette', () => {
     expect(chips.activeBackgroundHex).toBe('#1d4a2e');
   });
 
-  it('also derives a readable hover color set', () => {
+  it('derives no hover colors at all, since chips no longer style a hover state', () => {
     const chips = deriveCategoryChipsFromPalette({ backgroundHex: '#ffffff', surfaceHex: '#ffffff', accentHex: '#1d4a2e', textHex: '#173223' });
 
-    expect(contrastRatio(chips.hoverTextHex, chips.hoverBackgroundHex)).toBeGreaterThanOrEqual(4.5);
-    expect(chips.hoverBackgroundHex).not.toBe(chips.backgroundHex);
+    expect(Object.keys(chips).filter((key) => key.startsWith('hover'))).toEqual([]);
   });
 });
 
 describe('normalizePageStyle chip tokens', () => {
-  it('defaults variant/sizeToken/radiusToken/gapToken and rejects invalid tokens', () => {
+  it('defaults styleMode/sizeToken/radiusToken/gapToken and rejects invalid tokens', () => {
     const result = normalizePageStyle({
-      categoryChips: { variant: 'not-a-variant', sizeToken: 'huge', radiusToken: 'circle', gapToken: 'huge' },
+      categoryChips: { styleMode: 'not-a-mode', sizeToken: 'huge', radiusToken: 'circle', gapToken: 'huge' },
     });
 
-    expect(result.categoryChips.variant).toBe(DEFAULT_PAGE_STYLE.categoryChips.variant);
+    expect(result.categoryChips.styleMode).toBe(DEFAULT_PAGE_STYLE.categoryChips.styleMode);
     expect(result.categoryChips.sizeToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.sizeToken);
     expect(result.categoryChips.radiusToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.radiusToken);
     expect(result.categoryChips.gapToken).toBe(DEFAULT_PAGE_STYLE.categoryChips.gapToken);
   });
 
-  it('keeps valid chip tokens and hover colors, letting categoryChips and productCategoryChips be set identically', () => {
+  it('keeps valid chip tokens and drops saved hover colors, letting categoryChips and productCategoryChips be set identically', () => {
     const sharedChips = {
       backgroundHex: '#f4f7f5',
       hoverBackgroundHex: '#e4ece6',
       hoverTextHex: '#173223',
       hoverBorderHex: '#a9c2af',
-      variant: 'outline',
+      styleMode: 'tab',
       sizeToken: 'lg',
       radiusToken: 'square',
       gapToken: 'tight',
@@ -243,10 +242,10 @@ describe('normalizePageStyle chip tokens', () => {
 
     const result = normalizePageStyle({ categoryChips: sharedChips, productCategoryChips: sharedChips });
 
-    expect(result.categoryChips.variant).toBe('outline');
-    expect(result.categoryChips.hoverBackgroundHex).toBe('#e4ece6');
-    expect(result.productCategoryChips.variant).toBe('outline');
-    expect(result.productCategoryChips.hoverBackgroundHex).toBe('#e4ece6');
+    expect(result.categoryChips.styleMode).toBe('tab');
+    expect(result.productCategoryChips.styleMode).toBe('tab');
+    expect(Object.keys(result.categoryChips).filter((key) => key.startsWith('hover'))).toEqual([]);
+    expect(Object.keys(result.productCategoryChips).filter((key) => key.startsWith('hover'))).toEqual([]);
   });
 
   it('defaults categoryChips activeBorderHex/borderStrengthToken/fontWeight without moving from the hardcoded 1px/600 look', () => {
@@ -275,15 +274,29 @@ describe('normalizePageStyle chip tokens', () => {
     expect(fallback.categoryChips.fontWeight).toBe(DEFAULT_PAGE_STYLE.categoryChips.fontWeight);
   });
 
-  it('defaults chip borderSides to "all" and keeps a custom side, rejecting invalid values', () => {
-    expect(DEFAULT_PAGE_STYLE.categoryChips.borderSides).toBe('all');
-    expect(DEFAULT_PAGE_STYLE.productCategoryChips.borderSides).toBe('all');
+  it('defaults each chip scope to its own styleMode: 중분류는 칩, 대분류탭은 탭', () => {
+    expect(DEFAULT_PAGE_STYLE.categoryChips.styleMode).toBe('chip');
+    expect(DEFAULT_PAGE_STYLE.productCategoryChips.styleMode).toBe('tab');
 
-    const result = normalizePageStyle({ categoryChips: { borderSides: 'bottom' } });
-    expect(result.categoryChips.borderSides).toBe('bottom');
+    const result = normalizePageStyle({ categoryChips: { styleMode: 'tab' } });
+    expect(result.categoryChips.styleMode).toBe('tab');
 
-    const fallback = normalizePageStyle({ categoryChips: { borderSides: 'diagonal' } });
-    expect(fallback.categoryChips.borderSides).toBe('all');
+    const fallback = normalizePageStyle({ categoryChips: { styleMode: 'underline' } });
+    expect(fallback.categoryChips.styleMode).toBe('chip');
+  });
+
+  it('migrates a schemaVersion 1 chip: bottom-only borders become tab, every other variant becomes chip', () => {
+    const tabbed = normalizePageStyle({
+      categoryChips: { variant: 'outline', borderSides: 'bottom' },
+      productCategoryChips: { variant: 'soft', borderSides: 'all' },
+    });
+
+    expect(tabbed.categoryChips.styleMode).toBe('tab');
+    expect(tabbed.productCategoryChips.styleMode).toBe('chip');
+    expect(tabbed.schemaVersion).toBe(2);
+
+    // variant만 저장된 예전 행도 칩으로 내려앉는다.
+    expect(normalizePageStyle({ categoryChips: { variant: 'filled' } }).categoryChips.styleMode).toBe('chip');
   });
 });
 
@@ -293,6 +306,6 @@ describe('deriveSearchDefaultsFromPalette', () => {
 
     expect(search.sizeToken).toBe('md');
     expect(search.borderStrengthToken).toBe('normal');
-    expect(search.focusBorderColorHex).toBe('#1d4a2e');
+    expect(search.focusBorderColorHex).toBeUndefined();
   });
 });

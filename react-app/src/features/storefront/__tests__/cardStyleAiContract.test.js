@@ -70,7 +70,7 @@ describe('CARD_STYLE_AI_SCHEMA', () => {
       CARD_STYLE_AI_SCHEMA.properties.header.properties.backgroundColor.type,
     ).toContain('null');
     expect(
-      CARD_STYLE_AI_SCHEMA.properties.layout.properties.titleClamp.type,
+      CARD_STYLE_AI_SCHEMA.properties.layout.properties.imagePlacement.type,
     ).toContain('null');
     expect(
       CARD_STYLE_AI_SCHEMA.properties.info.properties.requestedFieldOrder.type,
@@ -84,9 +84,9 @@ describe('normalizeOpenAiCardIntent', () => {
       {
         structuralPresetRequest: 'image-left',
         titleModeRequest: 'inline',
-        layout: { cardsPerRow: 2, sectionOrder: ['header', 'image'], imagePlacement: null, titleClamp: null, contentDensity: null, emphasis: null, groupingHint: null },
+        layout: { cardsPerRow: 2, sectionOrder: ['header', 'image'], imagePlacement: null, contentDensity: null, emphasis: null, groupingHint: null },
         shell: { backgroundColor: null, borderColor: null, shadow: 'strong', radius: null, spacing: null },
-        header: { backgroundColor: null, titleColorHex: '#111827', letterSpacing: null, fontWeight: null },
+        header: { backgroundColor: null, titleColorHex: '#111827', fontWeight: null },
         image: null,
         info: {
           backgroundColor: null,
@@ -294,19 +294,15 @@ describe('buildCardStyleOpenAiRequestBody history threading', () => {
 });
 
 describe('header appearance tokens in the AI contract', () => {
-  it('lets the top level header carry the new appearance tokens', () => {
+  it('keeps the top level header down to colour, weight and size step', () => {
     const headerSchema = CARD_STYLE_AI_SCHEMA.properties.header;
 
-    expect(Object.keys(headerSchema.properties)).toEqual(
-      expect.arrayContaining([
-        'titleSizeToken',
-        'borderColor',
-        'borderStrengthToken',
-        'borderSide',
-        'padding',
-        'textAlign',
-      ]),
-    );
+    expect(Object.keys(headerSchema.properties)).toEqual([
+      'backgroundColor',
+      'titleColorHex',
+      'fontWeight',
+      'titleSizeToken',
+    ]);
   });
 
   it('keeps conditional rule headers on the narrower legacy shape', () => {
@@ -316,16 +312,26 @@ describe('header appearance tokens in the AI contract', () => {
     expect(Object.keys(conditionalHeaderSchema.properties)).toEqual([
       'backgroundColor',
       'titleColorHex',
-      'letterSpacing',
       'fontWeight',
     ]);
   });
 
   it('normalizes the new header appearance tokens and drops unknown ones', () => {
+    const intent = normalizeOpenAiCardIntent({ header: { titleSizeToken: 'xl' } }, '');
+
+    expect(intent.header).toEqual({ titleSizeToken: 'xl' });
+
+    expect(
+      normalizeOpenAiCardIntent({ header: { titleSizeToken: 'huge' } }, '').header,
+    ).toBeNull();
+  });
+
+  it('drops the retired header knobs and the title line count off an AI payload', () => {
     const intent = normalizeOpenAiCardIntent(
       {
+        layout: { titleClamp: 1 },
         header: {
-          titleSizeToken: 'xl',
+          letterSpacing: '0.02em',
           borderColor: '#94a3b8',
           borderStrengthToken: 'strong',
           borderSide: 'all',
@@ -336,29 +342,8 @@ describe('header appearance tokens in the AI contract', () => {
       '',
     );
 
-    expect(intent.header).toEqual({
-      titleSizeToken: 'xl',
-      borderColor: '#94a3b8',
-      borderStrengthToken: 'strong',
-      borderSide: 'all',
-      padding: 'relaxed',
-      textAlign: 'center',
-    });
-
-    expect(
-      normalizeOpenAiCardIntent(
-        {
-          header: {
-            titleSizeToken: 'huge',
-            borderStrengthToken: 'chunky',
-            borderSide: 'diagonal',
-            padding: 'airy',
-            textAlign: 'justify',
-          },
-        },
-        '',
-      ).header,
-    ).toBeNull();
+    expect(intent.header).toBeNull();
+    expect(intent.layout).toBeNull();
   });
 });
 

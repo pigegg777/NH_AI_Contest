@@ -1,10 +1,9 @@
 import {
   PAGE_STYLE_BORDER_STRENGTH_TOKENS,
-  PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS,
   PAGE_STYLE_CHIP_GAP_TOKENS,
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
-  PAGE_STYLE_CHIP_VARIANT_TOKENS,
+  PAGE_STYLE_CHIP_STYLE_MODE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../style/pageStyleModel';
@@ -51,15 +50,11 @@ function buildNullableChipsSchema() {
     activeBackgroundHex: nullableHex(),
     activeTextHex: nullableHex(),
     activeBorderHex: nullableHex(),
-    hoverBackgroundHex: nullableHex(),
-    hoverTextHex: nullableHex(),
-    hoverBorderHex: nullableHex(),
-    variant: nullableToken(PAGE_STYLE_CHIP_VARIANT_TOKENS),
+    styleMode: nullableToken(PAGE_STYLE_CHIP_STYLE_MODE_TOKENS),
     sizeToken: nullableToken(PAGE_STYLE_CHIP_SIZE_TOKENS),
     radiusToken: nullableToken(PAGE_STYLE_CHIP_RADIUS_TOKENS),
     gapToken: nullableToken(PAGE_STYLE_CHIP_GAP_TOKENS),
     borderStrengthToken: nullableToken(PAGE_STYLE_BORDER_STRENGTH_TOKENS),
-    borderSides: nullableToken(PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS),
     fontWeight: {
       type: ['number', 'null'],
       enum: [...FONT_WEIGHT_TOKENS, null],
@@ -72,7 +67,6 @@ const NULLABLE_SEARCH_SCHEMA = nullableObject({
   borderStrengthToken: nullableToken(PAGE_STYLE_BORDER_STRENGTH_TOKENS),
   backgroundHex: nullableHex(),
   borderColorHex: nullableHex(),
-  focusBorderColorHex: nullableHex(),
 });
 
 const NULLABLE_PALETTE_SCHEMA = nullableObject({

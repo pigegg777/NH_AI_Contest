@@ -31,10 +31,12 @@ export function migrateLegacyCategoryConfigToCardStyle(categoryConfig) {
   const legacyStyle = categoryConfig?.cardDesign?.style ?? {};
   const legacyElementConfig = categoryConfig?.cardDesign?.elementConfig ?? {};
   const isCompactDensity = legacyStyle.layout === 'compact' || legacyElementConfig.metaDensity === 'compact';
-  const spacingToken = isCompactDensity ? 'tight' : 'normal';
 
   return normalizeCardStyle({
     cardsPerRow: legacyStyle.cardsPerRow,
+    // Legacy density used to land on the info spacing tokens; those are gone, so it
+    // rides on the layout plan instead, which is what actually renders the density.
+    layoutPlan: isCompactDensity ? { contentDensity: 'compact' } : undefined,
     structuralPreset: LEGACY_TEMPLATE_TO_STRUCTURAL_PRESET[categoryConfig?.layoutStyle?.variant] || 'header-top',
     titleMode: 'header',
     shell: {
@@ -45,10 +47,6 @@ export function migrateLegacyCategoryConfigToCardStyle(categoryConfig) {
     image: {
       fit: legacyStyle.imageFit,
       sizePx: LEGACY_IMAGE_SIZE_TO_PX[legacyStyle.imageSize],
-    },
-    info: {
-      padding: spacingToken,
-      fieldGap: spacingToken,
     },
     field: {
       defaultFontSize: legacyStyle.fontSize,

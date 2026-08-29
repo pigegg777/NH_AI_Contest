@@ -33,7 +33,7 @@ The result must:
 - Preserve original field identity even inside a group.
 - A section override prompt always wins over the main prompt for that section; a per-field override always wins over both.
 - \`cardsPerRow\` is user-controlled only — never propose a value for it.
-- \`card.header\` may restyle the title (color, background, letter spacing, font weight) but may never rewrite the title text itself.
+- \`card.header\` may restyle the title (color, background, font weight, size step) but may never rewrite the title text itself.
 - \`card.image\` is structural only — fit and a small bounded size adjustment, never position or crop offsets.
 - \`structuralPresetRequest\` must stay eligible for the current \`cardsPerRow\`; the compiler — not this skill — enforces the fallback when it isn't.
 

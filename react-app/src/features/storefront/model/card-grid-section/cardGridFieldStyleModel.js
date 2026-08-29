@@ -1,5 +1,4 @@
 import {
-  CARD_HEADER_BORDER_WIDTH_VALUES,
   CARD_HEADER_TITLE_SIZE_OFFSET_REM,
   DEFAULT_CARD_STYLE,
   normalizeFieldFontSizeToken,
@@ -110,45 +109,31 @@ export function buildShellCssVars(cardStyle) {
       cardStyle.header.titleColorHex,
     ),
     '--card-header-title-weight': cardStyle.header.fontWeight,
-    '--card-header-title-letter-spacing': cardStyle.header.letterSpacing,
     '--card-header-title-offset':
       CARD_HEADER_TITLE_SIZE_OFFSET_REM[cardStyle.header.titleSizeToken],
-    '--card-header-title-align': cardStyle.header.textAlign,
-    '--card-header-border-width':
-      CARD_HEADER_BORDER_WIDTH_VALUES[cardStyle.header.borderStrengthToken],
     // Always emitted: the muted role resolves to the same #6b7280 the admin --corp-muted
     // token holds, so this is a visual no-op that drops the admin dependency.
     '--card-field-label-color': resolveFieldColorRoleValue(
       cardStyle.info.labelColorRole,
     ),
     '--card-image-size': `${cardStyle.image.sizePx}px`,
-    '--info-field-group-gap':
-      cardStyle.info.fieldGroupGap === 'tight'
-        ? '6px'
-        : cardStyle.info.fieldGroupGap === 'relaxed'
-          ? '14px'
-          : '10px',
     '--price-text-color': resolveFieldColorRoleValue(
       cardStyle.field.priceColorRole,
     ),
     '--field-default-color': resolveFieldColorRoleValue(
       cardStyle.field.defaultColorRole,
     ),
+    // 정보영역 데이터 글자 굵기의 기본값. 개별 필드 스타일(--field-font-weight)이 있으면 그쪽이 이긴다.
+    '--card-field-value-weight': cardStyle.field.defaultFontWeight,
   };
-  const shellBackground = resolveCssColor(cardStyle.shell.backgroundColor);
   const shellBorder = resolveCssColor(cardStyle.shell.borderColor);
   const infoBackground = resolveCssColor(cardStyle.info.backgroundColor);
-  const infoBorder = resolveCssColor(cardStyle.info.borderColor);
-  const headerBorder = resolveCssColor(cardStyle.header.borderColor);
   const isSideImage =
     cardStyle.layoutPlan.imagePlacement === 'left' ||
     cardStyle.layoutPlan.imagePlacement === 'right';
 
-  if (shellBackground) cssVars['--card-bg'] = shellBackground;
   if (shellBorder) cssVars['--card-border-color'] = shellBorder;
   if (infoBackground) cssVars['--card-info-bg'] = infoBackground;
-  if (infoBorder) cssVars['--card-info-border'] = infoBorder;
-  if (headerBorder) cssVars['--card-header-border'] = headerBorder;
 
   // Left unset at the default step so .fieldLabel and .groupFieldLabel keep their own
   // fallbacks (0.68/600 vs 0.72/700); once chosen, both labels follow the one token.

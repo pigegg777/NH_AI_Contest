@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import DesignScopeGuideTable from '../components/builder-workspace/composer/DesignScopeGuideTable';
 import DesignTargetChipsBubble from '../components/builder-workspace/composer/DesignTargetChipsBubble';
 import { CARD_DESIGN_LAYOUT_OPTIONS } from '../model/card-design/ai-request/cardDesignLayoutOptions';
 import { getCardDesignScopeGuide } from '../model/card-design/ai-request/cardDesignScopeGuide';
@@ -20,6 +21,11 @@ function layoutLabelOf(id) {
 function guideTitleOf(scopeId) {
   return `${getCardDesignScopeGuide(scopeId).title}에서 바꿀 수 있는 것`;
 }
+
+const PAGE_TARGET_OPTIONS = [
+  { id: 'header', label: '상단 제목 글자', detail: '글자색, 굵기, 글자 간격' },
+  { id: 'search', label: '상품 검색창', detail: '배경색, 테두리색, 크기' },
+];
 
 function renderBubble(overrides = {}) {
   const props = {
@@ -101,18 +107,31 @@ describe('DesignTargetChipsBubble', () => {
     ).toBeInTheDocument();
   });
 
+  // Every shipped guide happens to hold an even row count today, so the odd case is
+  // driven straight through the table rather than through a scope that may change.
   it('leaves the trailing half empty when the guide has an odd row count', () => {
-    renderBubble({ selectedTargetId: '' });
+    render(
+      <DesignScopeGuideTable
+        guide={{
+          title: '테스트 영역',
+          rows: [
+            { element: '첫째', example: '첫째 예시' },
+            { element: '둘째', example: '둘째 예시' },
+            { element: '셋째', example: '셋째 예시' },
+          ],
+        }}
+      />,
+    );
 
     const guide = screen.getByTestId('storefront-design-scope-guide');
     const bodyRows = within(guide)
       .getAllByRole('row')
       .filter((row) => within(row).queryAllByRole('rowheader').length > 0);
 
-    expect(bodyRows).toHaveLength(4);
-    expect(within(bodyRows[2]).getByText('제목 위치')).toBeInTheDocument();
-    expect(within(bodyRows[3]).getByText('모서리 둥글기')).toBeInTheDocument();
-    expect(within(bodyRows[3]).queryAllByRole('rowheader')).toHaveLength(1);
+    expect(bodyRows).toHaveLength(2);
+    expect(within(bodyRows[0]).getByText('첫째')).toBeInTheDocument();
+    expect(within(bodyRows[0]).getByText('셋째')).toBeInTheDocument();
+    expect(within(bodyRows[1]).queryAllByRole('rowheader')).toHaveLength(1);
   });
 
   it('offers the cards-per-row control first while 전체 is selected', async () => {
@@ -221,5 +240,59 @@ describe('DesignTargetChipsBubble', () => {
     expect(
       screen.queryByTestId('storefront-design-scope-guide'),
     ).not.toBeInTheDocument();
+  });
+
+  // 페이지 제목은 AI가 쓰는 값이 아니라 상인이 직접 적는 문구라, 그 글자를 다루는
+  // 상단 제목 글자 칩에서만 손으로 편집한다.
+  it('shows the page title input only on the 상단 제목 글자 chip', async () => {
+    const user = userEvent.setup();
+    const onChangePageTitle = vi.fn();
+
+    const { rerender } = render(
+      <DesignTargetChipsBubble
+        label="수정 영역"
+        options={PAGE_TARGET_OPTIONS}
+        selectedTargetId=""
+        onSelectTarget={vi.fn()}
+        pageTitleDraft=""
+        onChangePageTitle={onChangePageTitle}
+        pageTitlePlaceholder="발안농협 영농센터 농자재 정보"
+      />,
+    );
+
+    expect(screen.queryByLabelText('페이지 제목')).not.toBeInTheDocument();
+
+    rerender(
+      <DesignTargetChipsBubble
+        label="수정 영역"
+        options={PAGE_TARGET_OPTIONS}
+        selectedTargetId="header"
+        onSelectTarget={vi.fn()}
+        pageTitleDraft=""
+        onChangePageTitle={onChangePageTitle}
+        pageTitlePlaceholder="발안농협 영농센터 농자재 정보"
+      />,
+    );
+
+    const input = screen.getByLabelText('페이지 제목');
+
+    expect(input).toHaveAttribute('placeholder', '발안농협 영농센터 농자재 정보');
+
+    await user.type(input, '봄');
+
+    expect(onChangePageTitle).toHaveBeenCalledWith('봄');
+  });
+
+  it('leaves the page title out when the scope carries no title handler', () => {
+    render(
+      <DesignTargetChipsBubble
+        label="수정 영역"
+        options={PAGE_TARGET_OPTIONS}
+        selectedTargetId="header"
+        onSelectTarget={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByLabelText('페이지 제목')).not.toBeInTheDocument();
   });
 });

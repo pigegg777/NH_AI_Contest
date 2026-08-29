@@ -79,10 +79,10 @@ export function deriveLegacyCardLayoutPlan({
   cardsPerRow = DEFAULT_CARD_LAYOUT_PLAN.cardsPerRow,
   structuralPreset = 'header-top',
   titleMode = 'header',
-  info = {},
 } = {}) {
-  const contentDensity =
-    info?.padding === 'tight' || info?.fieldGap === 'tight' ? 'compact' : 'comfortable';
+  // Density used to be read back off the info spacing tokens. Those are gone, so
+  // only the preset decides it now, and an explicit layout plan can override it.
+  const contentDensity = DEFAULT_CARD_LAYOUT_PLAN.contentDensity;
 
   switch (structuralPreset) {
     case 'image-left':

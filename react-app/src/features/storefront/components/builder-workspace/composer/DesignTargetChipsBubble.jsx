@@ -1,8 +1,12 @@
 import styles from "./ChatComposerDock.module.css";
 import CardChoiceRow from "./CardChoiceRow";
 import DesignScopeGuideTable from "./DesignScopeGuideTable";
+import { StorefrontTextFields } from "../field-selection/StorefrontTextFields";
 
 const ALL_TARGET_CHIP = { id: "", label: "전체" };
+// The page title is merchant-authored copy, not something the AI writes, so it is
+// edited by hand on the one chip whose styling it belongs to.
+const PAGE_TITLE_SCOPE_ID = "header";
 const CARDS_PER_ROW_OPTIONS = [
   { value: 1, label: "1개" },
   { value: 2, label: "2개" },
@@ -19,6 +23,9 @@ export default function DesignTargetChipsBubble({
   layoutOptions,
   selectedLayoutId,
   onChangeLayout,
+  pageTitleDraft,
+  onChangePageTitle,
+  pageTitlePlaceholder,
 }) {
   if (!Array.isArray(options) || options.length === 0) {
     return null;
@@ -35,6 +42,8 @@ export default function DesignTargetChipsBubble({
     Boolean(onChangeLayout) &&
     Array.isArray(layoutOptions) &&
     layoutOptions.length > 0;
+  const showPageTitle =
+    selectedChipId === PAGE_TITLE_SCOPE_ID && Boolean(onChangePageTitle);
 
   return (
     <div
@@ -92,6 +101,21 @@ export default function DesignTargetChipsBubble({
             />
           ) : null}
         </div>
+      ) : null}
+
+      {showPageTitle ? (
+        <StorefrontTextFields
+          fields={[
+            {
+              id: "pageTitle",
+              label: "페이지 제목",
+              value: pageTitleDraft ?? "",
+              placeholder: pageTitlePlaceholder,
+              hint: "비워두면 기본 제목이 그대로 표시됩니다.",
+            },
+          ]}
+          onChange={(fieldId, value) => onChangePageTitle(value)}
+        />
       ) : null}
 
       {selectedGuide ? <DesignScopeGuideTable guide={selectedGuide} /> : null}

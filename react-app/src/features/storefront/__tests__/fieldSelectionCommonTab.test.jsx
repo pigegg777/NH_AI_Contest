@@ -20,9 +20,6 @@ function buildDataMode(overrides = {}) {
     toggleField: vi.fn(),
     hasPendingChanges: false,
     goBack: vi.fn(),
-    derivedPageTitle: '발안농협 영농센터 농자재 정보',
-    textDraft: { pageTitle: '' },
-    setTextDraft: vi.fn(),
     officeInfoEntries: [],
     setOfficeInfoEntries: vi.fn(),
     categoryInfoEntries: [],
@@ -43,23 +40,31 @@ describe('field selection common tab', () => {
     );
   });
 
-  it('shows page title and the office entries on the common tab, not field tables', () => {
+  it('shows the office entries on the common tab, not field tables', () => {
     render(<FieldSelectionDock dataMode={buildDataMode()} onApply={vi.fn()} />);
 
-    expect(screen.getByLabelText('페이지 제목')).toBeInTheDocument();
     expect(screen.getByText('사무소 안내')).toBeInTheDocument();
     expect(
       screen.queryByTestId('data-field-table-description'),
     ).not.toBeInTheDocument();
   });
 
-  it('shows the derived title as the page title placeholder', () => {
-    render(<FieldSelectionDock dataMode={buildDataMode()} onApply={vi.fn()} />);
-
-    expect(screen.getByLabelText('페이지 제목')).toHaveAttribute(
-      'placeholder',
-      '발안농협 영농센터 농자재 정보',
+  // The page title moved to the page-design composer, under the 상단 제목 글자 chip.
+  it('no longer carries the page title on either tab', () => {
+    const { rerender } = render(
+      <FieldSelectionDock dataMode={buildDataMode()} onApply={vi.fn()} />,
     );
+
+    expect(screen.queryByLabelText('페이지 제목')).not.toBeInTheDocument();
+
+    rerender(
+      <FieldSelectionDock
+        dataMode={buildDataMode({ selectedCategoryId: '비료' })}
+        onApply={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByLabelText('페이지 제목')).not.toBeInTheDocument();
   });
 
   it('shows the category entries and the field tables on a category tab', () => {
@@ -72,17 +77,6 @@ describe('field selection common tab', () => {
 
     expect(screen.getByText('분류 안내')).toBeInTheDocument();
     expect(screen.getByTestId('data-field-table-description')).toBeInTheDocument();
-    expect(screen.queryByLabelText('페이지 제목')).not.toBeInTheDocument();
-  });
-
-  it('reports text edits back to the builder', async () => {
-    const user = userEvent.setup();
-    const dataMode = buildDataMode();
-
-    render(<FieldSelectionDock dataMode={dataMode} onApply={vi.fn()} />);
-    await user.type(screen.getByLabelText('페이지 제목'), '봄');
-
-    expect(dataMode.setTextDraft).toHaveBeenCalledWith('pageTitle', '봄');
   });
 
   it('edits the office entries on the common tab', async () => {

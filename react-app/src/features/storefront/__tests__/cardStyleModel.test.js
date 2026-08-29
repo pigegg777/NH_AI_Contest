@@ -3,8 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
-  CARD_HEADER_BORDER_STRENGTH_TOKENS,
-  CARD_HEADER_BORDER_WIDTH_VALUES,
   CARD_HEADER_TITLE_SIZE_OFFSET_REM,
   CARD_HEADER_TITLE_SIZE_TOKENS,
   collectConditionFieldValueSamples,
@@ -23,21 +21,15 @@ describe('normalizeCardStyle', () => {
         cardsPerRow: 1,
         structuralPreset: 'image-left',
         titleMode: 'inline',
-        shell: { backgroundColor: '#fff7ed', borderColor: '#fdba74', shadow: 'strong', radius: 'xl', spacing: 'tight' },
+        shell: { borderColor: '#fdba74', shadow: 'strong', radius: 'xl', spacing: 'tight' },
         header: {
           backgroundColor: '#1f2937',
-          borderColor: '#374151',
-          padding: 'relaxed',
           titleColorHex: '#ffffff',
-          letterSpacing: '0.02em',
           fontWeight: 800,
           titleSizeToken: 'xl',
-          borderStrengthToken: 'strong',
-          borderSide: 'all',
-          textAlign: 'center',
         },
         image: { fit: 'cover', sizePx: 160 },
-        info: { padding: 'tight', fieldGap: 'tight', fieldGroupGap: 'tight' },
+        info: { labelColorRole: 'blue' },
         field: { defaultColorRole: 'muted', defaultFontWeight: 900, defaultFontSize: 'xl', priceColorRole: 'red' },
       }),
     ).toEqual({
@@ -50,31 +42,21 @@ describe('normalizeCardStyle', () => {
         sectionOrder: ['image', 'info'],
         imagePlacement: 'left',
         titleClamp: 2,
-        contentDensity: 'compact',
+        contentDensity: 'comfortable',
         emphasis: 'image',
         groupingHint: 'default',
       },
-      shell: { backgroundColor: '#fff7ed', borderColor: '#fdba74', shadow: 'strong', radius: 'xl', spacing: 'tight' },
+      shell: { borderColor: '#fdba74', shadow: 'strong', radius: 'xl', spacing: 'tight' },
       header: {
         backgroundColor: '#1f2937',
-        borderColor: '#374151',
-        padding: 'relaxed',
         titleColorHex: '#ffffff',
-        letterSpacing: '0.02em',
         fontWeight: 800,
         titleSizeToken: 'xl',
-        borderStrengthToken: 'strong',
-        borderSide: 'all',
-        textAlign: 'center',
       },
       image: { fit: 'cover', sizePx: 160 },
       info: {
         backgroundColor: '',
-        borderColor: '',
-        padding: 'tight',
-        fieldGap: 'tight',
-        fieldGroupGap: 'tight',
-        labelColorRole: 'muted',
+        labelColorRole: 'blue',
         labelFontSizeToken: 'md',
         labelFontWeight: 600,
         requestedGroups: [],
@@ -134,9 +116,10 @@ describe('normalizeCardStyle', () => {
     expect(style.header.titleColorHex).toBe('#1f2937');
   });
 
-  it('defaults the header background independently of the shell background', () => {
+  it('drops a saved shell background — only a conditional rule can paint a card', () => {
     const style = normalizeCardStyle({ shell: { backgroundColor: '#0f172a' } });
 
+    expect(style.shell.backgroundColor).toBeUndefined();
     expect(style.header.backgroundColor).toBe(DEFAULT_CARD_STYLE.header.backgroundColor);
   });
 });
@@ -245,41 +228,38 @@ describe('normalizeCardStyle header appearance tokens', () => {
     const header = normalizeCardStyle({}).header;
 
     expect(header.titleSizeToken).toBe('md');
-    expect(header.borderStrengthToken).toBe('soft');
-    expect(header.borderSide).toBe('bottom');
-    expect(header.textAlign).toBe('left');
   });
 
   it('keeps allowed header appearance tokens', () => {
+    const header = normalizeCardStyle({ header: { titleSizeToken: 'xxl' } }).header;
+
+    expect(header.titleSizeToken).toBe('xxl');
+  });
+
+  it('falls back to defaults for unknown header appearance tokens', () => {
+    const header = normalizeCardStyle({ header: { titleSizeToken: 'huge' } }).header;
+
+    expect(header.titleSizeToken).toBe('md');
+  });
+
+  it('drops the retired border, spacing and alignment knobs from a saved header', () => {
     const header = normalizeCardStyle({
       header: {
-        titleSizeToken: 'xxl',
+        borderColor: '#374151',
+        padding: 'relaxed',
+        letterSpacing: '0.02em',
         borderStrengthToken: 'bold',
         borderSide: 'all',
         textAlign: 'center',
       },
     }).header;
 
-    expect(header.titleSizeToken).toBe('xxl');
-    expect(header.borderStrengthToken).toBe('bold');
-    expect(header.borderSide).toBe('all');
-    expect(header.textAlign).toBe('center');
-  });
-
-  it('falls back to defaults for unknown header appearance tokens', () => {
-    const header = normalizeCardStyle({
-      header: {
-        titleSizeToken: 'huge',
-        borderStrengthToken: 'chunky',
-        borderSide: 'diagonal',
-        textAlign: 'justify',
-      },
-    }).header;
-
-    expect(header.titleSizeToken).toBe('md');
-    expect(header.borderStrengthToken).toBe('soft');
-    expect(header.borderSide).toBe('bottom');
-    expect(header.textAlign).toBe('left');
+    expect(Object.keys(header)).toEqual([
+      'backgroundColor',
+      'titleColorHex',
+      'fontWeight',
+      'titleSizeToken',
+    ]);
   });
 
   it('exposes a six step title size scale whose md step is a no-op offset', () => {
@@ -288,20 +268,6 @@ describe('normalizeCardStyle header appearance tokens', () => {
     expect(Object.keys(CARD_HEADER_TITLE_SIZE_OFFSET_REM)).toEqual(CARD_HEADER_TITLE_SIZE_TOKENS);
   });
 
-  it('exposes a six step border strength scale whose soft step is the pre-existing 1px', () => {
-    expect(CARD_HEADER_BORDER_STRENGTH_TOKENS).toEqual([
-      'none',
-      'hairline',
-      'soft',
-      'normal',
-      'strong',
-      'bold',
-    ]);
-    expect(CARD_HEADER_BORDER_WIDTH_VALUES.soft).toBe('1px');
-    expect(Object.keys(CARD_HEADER_BORDER_WIDTH_VALUES)).toEqual(
-      CARD_HEADER_BORDER_STRENGTH_TOKENS,
-    );
-  });
 });
 
 describe('field typography tokens', () => {

@@ -4,7 +4,6 @@ export const CARD_STYLE_EDITABLE_REGIONS_PROMPT = `
 
 ## \`card.shell\`
 
-- background color
 - border color
 - shadow
 - radius
@@ -14,8 +13,8 @@ export const CARD_STYLE_EDITABLE_REGIONS_PROMPT = `
 
 - background color
 - title color
-- letter spacing
 - font weight
+- title size step
 
 Never the title text itself — that stays user-authored content.
 
@@ -33,11 +32,6 @@ Not allowed:
 ## \`card.info\`
 
 - background color
-- border color
-- padding
-- radius
-- field gap
-- field-group gap
 - field order (\`requestedFieldOrder\`)
 - field grouping (\`requestedGroups\`, inline or stacked)
 

@@ -14,9 +14,6 @@ import {
   CARD_FIELD_EMPHASIS_OPTIONS,
   CARD_FIELD_FONT_SIZE_OPTIONS,
   CARD_FIELD_FONT_WEIGHT_OPTIONS,
-  CARD_HEADER_BORDER_SIDE_TOKENS,
-  CARD_HEADER_BORDER_STRENGTH_TOKENS,
-  CARD_HEADER_TEXT_ALIGN_TOKENS,
   CARD_HEADER_TITLE_SIZE_TOKENS,
   CARD_IMAGE_FIT_OPTIONS,
   CARD_RADIUS_OPTIONS,
@@ -36,7 +33,6 @@ import {
 } from '../../../services/card-design/cardStyleSkillPromptService';
 
 const HEX_COLOR_SCHEMA_PATTERN = '^#[0-9a-fA-F]{6}$';
-const LETTER_SPACING_SCHEMA_PATTERN = '^normal$|^-?\\d+(\\.\\d+)?(em|rem|px)$';
 const EXPLANATION_SCHEMA_PATTERN = '^[\\s\\S]{1,200}$';
 const SUGGESTION_SCHEMA_PATTERN = '^[\\s\\S]{1,120}$';
 const HEADER_FONT_WEIGHT_TOKENS = [400, 500, 600, 700, 800, 900];
@@ -47,11 +43,6 @@ const NULLABLE_SHELL_SCHEMA = {
   type: ['object', 'null'],
   additionalProperties: false,
   properties: {
-    backgroundColor: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '카드 바깥 배경색 hex 코드.',
-    },
     borderColor: {
       type: ['string', 'null'],
       pattern: HEX_COLOR_SCHEMA_PATTERN,
@@ -73,7 +64,7 @@ const NULLABLE_SHELL_SCHEMA = {
       description: '카드 내부 여백 토큰.',
     },
   },
-  required: ['backgroundColor', 'borderColor', 'shadow', 'radius', 'spacing'],
+  required: ['borderColor', 'shadow', 'radius', 'spacing'],
 };
 
 const NULLABLE_HEADER_SCHEMA = {
@@ -91,12 +82,6 @@ const NULLABLE_HEADER_SCHEMA = {
       description:
         '카드 제목 글자색 hex 코드. backgroundColor와 대비되게 선택.',
     },
-    letterSpacing: {
-      type: ['string', 'null'],
-      pattern: LETTER_SPACING_SCHEMA_PATTERN,
-      description:
-        "제목 자간 CSS 값. 'normal' 또는 '0.02em'/'-0.01em'/'1px' 형태의 숫자+단위 문자열만 허용.",
-    },
     fontWeight: {
       type: ['number', 'null'],
       enum: [...HEADER_FONT_WEIGHT_TOKENS, null],
@@ -109,60 +94,21 @@ const NULLABLE_HEADER_SCHEMA = {
       description:
         "제목 글자 크기 단계. 'xs'(가장 작게)~'xxl'(가장 크게) 6단계이며 'md'가 기본. 카드 본문 글자 크기에 더해지는 상대 단계입니다.",
     },
-    borderColor: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '카드 제목 영역 테두리색 hex 코드.',
-    },
-    borderStrengthToken: {
-      type: ['string', 'null'],
-      enum: [...CARD_HEADER_BORDER_STRENGTH_TOKENS, null],
-      description:
-        "제목 영역 테두리 굵기 단계. 'none'(없음)~'bold'(가장 굵게) 6단계이며 'soft'가 기본(1px).",
-    },
-    borderSide: {
-      type: ['string', 'null'],
-      enum: [...CARD_HEADER_BORDER_SIDE_TOKENS, null],
-      description:
-        "제목 영역 테두리 방향. 'bottom'(아래쪽만, 기본)/'all'(사방)/'none'(없음).",
-    },
-    padding: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '제목 영역 안쪽 여백 토큰.',
-    },
-    textAlign: {
-      type: ['string', 'null'],
-      enum: [...CARD_HEADER_TEXT_ALIGN_TOKENS, null],
-      description: "제목 정렬. 'left'(기본)/'center'/'right'.",
-    },
   },
-  required: [
-    'backgroundColor',
-    'titleColorHex',
-    'letterSpacing',
-    'fontWeight',
-    'titleSizeToken',
-    'borderColor',
-    'borderStrengthToken',
-    'borderSide',
-    'padding',
-    'textAlign',
-  ],
+  required: ['backgroundColor', 'titleColorHex', 'fontWeight', 'titleSizeToken'],
 };
 
 // Conditional rules stay on the narrower legacy header shape: their overrides are
-// applied as inline CSS vars per card, which only covers colour/letterSpacing/weight.
+// applied as inline CSS vars per card, which only covers colour and weight.
 const CONDITIONAL_HEADER_STYLE_SCHEMA = {
   type: ['object', 'null'],
   additionalProperties: false,
   properties: {
     backgroundColor: NULLABLE_HEADER_SCHEMA.properties.backgroundColor,
     titleColorHex: NULLABLE_HEADER_SCHEMA.properties.titleColorHex,
-    letterSpacing: NULLABLE_HEADER_SCHEMA.properties.letterSpacing,
     fontWeight: NULLABLE_HEADER_SCHEMA.properties.fontWeight,
   },
-  required: ['backgroundColor', 'titleColorHex', 'letterSpacing', 'fontWeight'],
+  required: ['backgroundColor', 'titleColorHex', 'fontWeight'],
 };
 
 const NULLABLE_IMAGE_SCHEMA = {
@@ -205,26 +151,6 @@ const NULLABLE_INFO_SCHEMA = {
       pattern: HEX_COLOR_SCHEMA_PATTERN,
       description: '상세정보 영역 배경색 hex 코드.',
     },
-    borderColor: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '상세정보 영역 테두리색 hex 코드.',
-    },
-    padding: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '상세정보 영역 내부 여백 토큰.',
-    },
-    fieldGap: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '필드 간 간격 토큰.',
-    },
-    fieldGroupGap: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '필드 그룹 간 간격 토큰.',
-    },
     requestedGroups: {
       type: ['array', 'null'],
       items: INFO_GROUP_SCHEMA,
@@ -261,10 +187,6 @@ const NULLABLE_INFO_SCHEMA = {
   },
   required: [
     'backgroundColor',
-    'borderColor',
-    'padding',
-    'fieldGap',
-    'fieldGroupGap',
     'labelColorRole',
     'labelFontSizeToken',
     'labelFontWeight',
@@ -344,11 +266,6 @@ const NULLABLE_LAYOUT_SCHEMA = {
       enum: [...CARD_LAYOUT_IMAGE_PLACEMENT_OPTIONS, null],
       description: '이미지 배치 위치 토큰.',
     },
-    titleClamp: {
-      type: ['number', 'null'],
-      enum: [1, 2, null],
-      description: '상품명 최대 표시 줄 수(1 또는 2).',
-    },
     contentDensity: {
       type: ['string', 'null'],
       enum: [...CARD_LAYOUT_CONTENT_DENSITY_OPTIONS, null],
@@ -365,14 +282,7 @@ const NULLABLE_LAYOUT_SCHEMA = {
       description: '필드 그룹핑 방식 힌트 토큰.',
     },
   },
-  required: [
-    'sectionOrder',
-    'imagePlacement',
-    'titleClamp',
-    'contentDensity',
-    'emphasis',
-    'groupingHint',
-  ],
+  required: ['sectionOrder', 'imagePlacement', 'contentDensity', 'emphasis', 'groupingHint'],
 };
 
 const CONDITIONAL_SHELL_STYLE_SCHEMA = {
@@ -425,23 +335,8 @@ const CONDITIONAL_INFO_STYLE_SCHEMA = {
       pattern: HEX_COLOR_SCHEMA_PATTERN,
       description: '조건에 맞는 카드만 적용할 상세정보 영역 배경색 hex 코드.',
     },
-    borderColor: {
-      type: ['string', 'null'],
-      pattern: HEX_COLOR_SCHEMA_PATTERN,
-      description: '조건에 맞는 카드만 적용할 상세정보 영역 테두리색 hex 코드.',
-    },
-    padding: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '조건에 맞는 카드만 적용할 상세정보 영역 내부 여백 토큰.',
-    },
-    fieldGap: {
-      type: ['string', 'null'],
-      enum: [...CARD_SPACING_OPTIONS, null],
-      description: '조건에 맞는 카드만 적용할 필드 간 간격 토큰.',
-    },
   },
-  required: ['backgroundColor', 'borderColor', 'padding', 'fieldGap'],
+  required: ['backgroundColor'],
 };
 
 const CONDITIONAL_FIELD_STYLE_SCHEMA = {

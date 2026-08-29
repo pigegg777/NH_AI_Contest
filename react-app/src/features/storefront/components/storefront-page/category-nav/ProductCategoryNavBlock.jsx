@@ -1,52 +1,44 @@
 import styles from './CategoryNav.module.css';
 
-const PRODUCT_CHIP_VARIANT_CLASS_NAMES = {
-  filled: styles.productCategoryWrapFilled,
-  outline: styles.productCategoryWrapOutline,
-  soft: styles.productCategoryWrapSoft,
+const PRODUCT_CHIP_STYLE_MODE_CLASS_NAMES = {
+  chip: styles.productCategoryWrapChip,
+  tab: styles.productCategoryWrapTab,
 };
 
 export default function ProductCategoryNavBlock({ view, elementKey }) {
-  if (
-    view.catalogSectionEntries.length === 0 &&
-    view.informationNavigationItems.length === 0
-  ) {
+  if (view.catalogSectionEntries.length === 0 && !view.hasInformationContent) {
     return null;
   }
 
-  const productCategoryChipVariant = view.pageStyle.productCategoryChips.variant;
-  const informationChip = view.canRenderInformationNavigation
-    ? [
-        {
-          sectionId: view.officeInformationItemId,
-          sectionName: view.officeInformationItemId,
-          label: '안내',
-        },
-      ]
-    : [];
+  const productCategoryChipStyleMode = view.pageStyle.productCategoryChips.styleMode;
   const chipEntries = [
-    ...informationChip,
-    ...view.catalogSectionEntries.map(({ sectionId, sectionName }) => ({
+    ...(view.hasInformationContent
+      ? [{ sectionId: 'information', sectionName: '', label: '안내' }]
+      : []),
+    ...view.catalogSectionEntries.map(
+    ({ sectionId, sectionName }) => ({
       sectionId,
       sectionName,
       label: sectionName,
-    })),
+    }),
+    ),
   ];
 
   return (
     <div className={styles.productCategorySection}>
       <div
-        className={`${styles.productCategoryWrap} ${PRODUCT_CHIP_VARIANT_CLASS_NAMES[productCategoryChipVariant] || ''}`}
+        className={`${styles.productCategoryWrap} ${PRODUCT_CHIP_STYLE_MODE_CLASS_NAMES[productCategoryChipStyleMode] || ''}`}
         data-testid="storefront-product-category-chips"
-        data-chip-variant={productCategoryChipVariant}
+        data-chip-style-mode={productCategoryChipStyleMode}
         role="group"
         aria-label="상품 분류"
       >
         {chipEntries.map(({ sectionId, sectionName, label }) => {
           const isActive =
-            sectionName === view.officeInformationItemId
-              ? view.isInformationNavigationActive
-              : !view.isInformationNavigationActive &&
+            sectionId === 'information'
+              ? view.isGuideNavigationActive
+              : !view.isGuideNavigationActive &&
+                !view.isOfficeInformationIntroActive &&
                 view.activeSectionTitle === sectionName;
 
           return (
@@ -55,9 +47,14 @@ export default function ProductCategoryNavBlock({ view, elementKey }) {
               type="button"
               className={`${styles.productCategoryChip} ${isActive ? styles.productCategoryChipActive : ''}`}
               aria-pressed={isActive}
-              onClick={() =>
-                view.handleCategoryRailSectionSelect(sectionName, sectionId)
-              }
+              onClick={() => {
+                if (sectionId === 'information') {
+                  view.handleGuideNavigationSelect();
+                  return;
+                }
+
+                view.handleCategoryRailSectionSelect(sectionName, sectionId);
+              }}
             >
               {label}
             </button>

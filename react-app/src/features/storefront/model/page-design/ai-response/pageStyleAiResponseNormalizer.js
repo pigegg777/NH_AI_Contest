@@ -2,11 +2,10 @@ import { toTrimmedString } from '../../../../../common/utils/text';
 import { isHexColor, mixHexColors, normalizeHexColor } from '../../shared/pageStyleColor';
 import {
   PAGE_STYLE_BORDER_STRENGTH_TOKENS,
-  PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS,
   PAGE_STYLE_CHIP_GAP_TOKENS,
   PAGE_STYLE_CHIP_RADIUS_TOKENS,
   PAGE_STYLE_CHIP_SIZE_TOKENS,
-  PAGE_STYLE_CHIP_VARIANT_TOKENS,
+  PAGE_STYLE_CHIP_STYLE_MODE_TOKENS,
   PAGE_STYLE_HEADER_TITLE_SIZE_TOKENS,
   PAGE_STYLE_SEARCH_SIZE_TOKENS,
 } from '../style/pageStyleModel';
@@ -20,9 +19,6 @@ const CHIP_INTENT_HEX_KEYS = [
   'activeBackgroundHex',
   'activeTextHex',
   'activeBorderHex',
-  'hoverBackgroundHex',
-  'hoverTextHex',
-  'hoverBorderHex',
 ];
 
 function toRecognizedObject(source, keys) {
@@ -77,12 +73,11 @@ function normalizeChipsIntent(rawChips) {
   const intent = toRecognizedObject(rawChips, CHIP_INTENT_HEX_KEYS);
 
   [
-    ['variant', PAGE_STYLE_CHIP_VARIANT_TOKENS],
+    ['styleMode', PAGE_STYLE_CHIP_STYLE_MODE_TOKENS],
     ['sizeToken', PAGE_STYLE_CHIP_SIZE_TOKENS],
     ['radiusToken', PAGE_STYLE_CHIP_RADIUS_TOKENS],
     ['gapToken', PAGE_STYLE_CHIP_GAP_TOKENS],
     ['borderStrengthToken', PAGE_STYLE_BORDER_STRENGTH_TOKENS],
-    ['borderSides', PAGE_STYLE_CHIP_BORDER_SIDE_TOKENS],
   ].forEach(([key, tokens]) => {
     if (tokens.includes(rawChips[key])) intent[key] = rawChips[key];
   });
@@ -100,7 +95,7 @@ export function normalizeProductCategoryChipsIntent(rawChips) {
   return normalizeChipsIntent(rawChips);
 }
 
-const SEARCH_INTENT_HEX_KEYS = ['backgroundHex', 'borderColorHex', 'focusBorderColorHex'];
+const SEARCH_INTENT_HEX_KEYS = ['backgroundHex', 'borderColorHex'];
 
 export function normalizeSearchIntent(rawSearch) {
   if (!rawSearch) return null;

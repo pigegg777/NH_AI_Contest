@@ -37,17 +37,17 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
     rows: [
       { element: '색상', example: '중분류 칩을 흰 배경에 초록 글씨로 해줘' },
       {
-        element: '마우스 올렸을 때',
-        example: '마우스를 올리면 연한 초록이 되게 해줘',
+        element: '칩 / 탭',
+        example: '중분류를 밑줄 탭 스타일로 바꿔줘',
       },
       {
         element: '선택된 칩',
         example: '선택된 중분류 칩을 진한 초록으로 해줘',
       },
-      { element: '모양', example: '중분류 칩을 알약 모양으로 해줘' },
+      { element: '모서리', example: '중분류 칩을 알약 모양으로 해줘' },
       { element: '크기', example: '중분류 칩을 조금 크게 해줘' },
       { element: '칩 간격', example: '중분류 칩 사이를 좁혀줘' },
-      { element: '테두리', example: '중분류 칩은 아래쪽 밑줄만 남겨줘' },
+      { element: '테두리 두께', example: '중분류 칩 테두리를 얇게 해줘' },
       { element: '글자 굵기', example: '중분류 칩 글씨를 굵게 해줘' },
     ],
     note: '상단 카테고리 버튼과 하단 세부카테고리 버튼은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
@@ -58,17 +58,17 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
     rows: [
       { element: '색상', example: '대분류 칩을 흰 배경에 초록 글씨로 해줘' },
       {
-        element: '마우스 올렸을 때',
-        example: '마우스를 올리면 연한 초록이 되게 해줘',
+        element: '칩 / 탭',
+        example: '대분류를 칩 버튼 스타일로 바꿔줘',
       },
       {
-        element: '선택된 칩',
-        example: '선택된 대분류 칩을 진한 초록으로 해줘',
+        element: '선택된 탭',
+        example: '선택된 대분류 탭을 진한 초록으로 해줘',
       },
-      { element: '모양', example: '대분류 칩 모서리를 각지게 해줘' },
+      { element: '모서리', example: '대분류 칩 모서리를 각지게 해줘' },
       { element: '크기', example: '대분류 칩을 조금 크게 해줘' },
       { element: '칩 간격', example: '대분류 칩 사이를 넓혀줘' },
-      { element: '테두리', example: '대분류 칩 테두리를 없애줘' },
+      { element: '밑줄 두께', example: '대분류 탭 밑줄을 두껍게 해줘' },
       { element: '글자 굵기', example: '대분류 칩 글씨를 굵게 해줘' },
     ],
     note: '상단 카테고리 버튼과 하단 세부카테고리 버튼은 따로 움직입니다. 둘 다 바꾸려면 각각 요청하세요.',
@@ -79,10 +79,6 @@ export const PAGE_DESIGN_SCOPE_GUIDES = [
     rows: [
       { element: '배경색', example: '검색창 배경을 흰색으로 해줘' },
       { element: '테두리 색', example: '검색창 테두리를 연한 회색으로 해줘' },
-      {
-        element: '클릭했을 때 테두리',
-        example: '검색창을 클릭하면 테두리가 초록이 되게 해줘',
-      },
       { element: '테두리 두께', example: '검색창 테두리를 얇게 해줘' },
       { element: '크기', example: '검색창을 조금 크게 해줘' },
     ],

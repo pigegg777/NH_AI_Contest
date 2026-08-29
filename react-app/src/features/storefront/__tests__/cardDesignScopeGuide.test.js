@@ -75,15 +75,8 @@ describe('CARD_DESIGN_SCOPE_GUIDES', () => {
       (row) => row.element,
     );
 
-    expect(headerElements).toEqual(
-      expect.arrayContaining([
-        '글자 크기',
-        '테두리 색',
-        '테두리 굵기',
-        '테두리 방향',
-        '정렬',
-        '줄 수',
-      ]),
-    );
+    // The header frame is fixed now: only colour, weight and size step are reachable,
+    // so the table must not advertise a border, spacing, alignment or line control.
+    expect(headerElements).toEqual(['배경색', '글자색', '글자 굵기', '글자 크기']);
   });
 });

@@ -23,7 +23,7 @@ are general: they may be set regardless of the target scope.
 
 ### \`card.shell\`
 
-The outer card frame and overall mood: background, border, shadow, radius, spacing.
+The outer card frame and overall mood: border, shadow, radius, spacing. A card background can only be set per condition, through a conditional style rule.
 
 ### \`card.header\`
 
@@ -35,7 +35,7 @@ Structural image behavior only: fit and a bounded size adjustment. Never positio
 
 ### \`card.info\`
 
-The data area holding every visible field other than the header title: background, border, padding, radius, field gap, field-group gap, plus field order and grouping.
+The data area holding every visible field other than the header title: background, label styling, plus field order and grouping.
 
 ### \`card.field\`
 

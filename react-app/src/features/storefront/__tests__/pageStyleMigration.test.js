@@ -25,7 +25,7 @@ describe('migrateLegacyPageConfigToPageStyle', () => {
       searchSection: { variant: 'pill' },
     });
 
-    expect(pageStyle.schemaVersion).toBe(1);
+    expect(pageStyle.schemaVersion).toBe(2);
     expect(pageStyle.palette.accentHex).toBe('#2563eb');
     expect(contrastRatio(pageStyle.palette.backgroundHex, '#ffffff')).toBeLessThan(1.2);
   });

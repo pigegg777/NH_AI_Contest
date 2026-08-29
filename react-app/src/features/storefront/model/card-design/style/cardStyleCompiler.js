@@ -200,7 +200,7 @@ function composeCardBodySlots({
   });
 }
 
-function buildLegacyLayoutPatch(structuralPresetRequest, cardsPerRow, titleMode, previousInfo) {
+function buildLegacyLayoutPatch(structuralPresetRequest, cardsPerRow, titleMode) {
   if (!structuralPresetRequest) {
     return null;
   }
@@ -209,7 +209,6 @@ function buildLegacyLayoutPatch(structuralPresetRequest, cardsPerRow, titleMode,
     cardsPerRow,
     structuralPreset: structuralPresetRequest,
     titleMode,
-    info: previousInfo,
   });
 
   return {
@@ -220,27 +219,6 @@ function buildLegacyLayoutPatch(structuralPresetRequest, cardsPerRow, titleMode,
     emphasis: legacyPlan.emphasis,
     groupingHint: legacyPlan.groupingHint,
   };
-}
-
-function buildInfoDensityPatch(contentDensity, previousInfo) {
-  if (contentDensity === 'compact') {
-    return {
-      padding: 'tight',
-      fieldGap: 'tight',
-      fieldGroupGap: 'tight',
-    };
-  }
-
-  if (contentDensity === 'comfortable') {
-    return {
-      padding: previousInfo.padding === 'tight' ? 'normal' : previousInfo.padding,
-      fieldGap: previousInfo.fieldGap === 'tight' ? 'normal' : previousInfo.fieldGap,
-      fieldGroupGap:
-        previousInfo.fieldGroupGap === 'tight' ? 'normal' : previousInfo.fieldGroupGap,
-    };
-  }
-
-  return {};
 }
 
 function buildRequestedGroupsFromLayoutPlan(layoutPlan, visibleFields) {
@@ -348,7 +326,6 @@ export function compileCardStyle({
     intent?.structuralPresetRequest,
     resolvedCardsPerRow,
     titleMode,
-    previous.info,
   );
   const layoutPlan = normalizeCardLayoutPlan(
     {
@@ -361,7 +338,6 @@ export function compileCardStyle({
       cardsPerRow: resolvedCardsPerRow,
       structuralPreset: previous.structuralPreset,
       titleMode,
-      info: previous.info,
     }),
   );
   const structuralPreset = resolveStructuralPresetFromLayoutPlan(
@@ -370,7 +346,6 @@ export function compileCardStyle({
   );
 
   const shell = {
-    backgroundColor: intent?.shell?.backgroundColor ?? previous.shell.backgroundColor,
     borderColor: intent?.shell?.borderColor ?? previous.shell.borderColor,
     shadow: intent?.shell?.shadow ?? previous.shell.shadow,
     radius: intent?.shell?.radius ?? previous.shell.radius,
@@ -391,15 +366,8 @@ export function compileCardStyle({
 
   const header = {
     ...previous.header,
-    letterSpacing: intent?.header?.letterSpacing ?? previous.header.letterSpacing,
     fontWeight: intent?.header?.fontWeight ?? previous.header.fontWeight,
     titleSizeToken: intent?.header?.titleSizeToken ?? previous.header.titleSizeToken,
-    borderColor: intent?.header?.borderColor ?? previous.header.borderColor,
-    borderStrengthToken:
-      intent?.header?.borderStrengthToken ?? previous.header.borderStrengthToken,
-    borderSide: intent?.header?.borderSide ?? previous.header.borderSide,
-    padding: intent?.header?.padding ?? previous.header.padding,
-    textAlign: intent?.header?.textAlign ?? previous.header.textAlign,
     backgroundColor: headerContrast.backgroundColor,
     titleColorHex: headerContrast.titleColorHex,
   };
@@ -419,12 +387,6 @@ export function compileCardStyle({
       : clampImageSizePx(previous.image.sizePx, imageRange),
   };
 
-  const shouldApplyDensityPatch = Boolean(
-    intent?.layout?.contentDensity || legacyLayoutPatch?.contentDensity,
-  );
-  const densityPatch = shouldApplyDensityPatch
-    ? buildInfoDensityPatch(layoutPlan.contentDensity, previous.info)
-    : {};
   // Designs saved before grouping became persistent only carry their groups on
   // the rendered slots, so seed from there when the style has none yet.
   const previousGroups =
@@ -445,18 +407,10 @@ export function compileCardStyle({
 
   const info = {
     backgroundColor: intent?.info?.backgroundColor ?? previous.info.backgroundColor,
-    borderColor: intent?.info?.borderColor ?? previous.info.borderColor,
-    padding: intent?.info?.padding ?? densityPatch.padding ?? previous.info.padding,
-    radius: intent?.info?.radius ?? previous.info.radius,
-    fieldGap: intent?.info?.fieldGap ?? densityPatch.fieldGap ?? previous.info.fieldGap,
     labelColorRole: intent?.info?.labelColorRole ?? previous.info.labelColorRole,
     labelFontSizeToken:
       intent?.info?.labelFontSizeToken ?? previous.info.labelFontSizeToken,
     labelFontWeight: intent?.info?.labelFontWeight ?? previous.info.labelFontWeight,
-    fieldGroupGap:
-      intent?.info?.fieldGroupGap ??
-      densityPatch.fieldGroupGap ??
-      previous.info.fieldGroupGap,
     requestedGroups: mergeInfoGroups(
       previousGroups,
       intent?.info?.requestedGroups ??
