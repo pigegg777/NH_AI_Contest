@@ -14,7 +14,7 @@ export async function saveOfficeProductData({
 }) {
   const officeCode = toTrimmedString(user?.office_code);
   const officeName = toTrimmedString(user?.office_name);
-  const updatedWho = user?.id;
+  const updatedWho = user?.employee_id;
   const normalizedCategoryName = toTrimmedString(categoryName);
   const normalizedRows = removeProductUsageFromRows(
     JSON.parse(JSON.stringify(Array.isArray(rows) ? rows : [])),
@@ -63,7 +63,7 @@ export async function saveOfficeProductData({
         onConflict: 'office_code',
       },
     )
-    .select('id, updated_at')
+    .select('office_code, updated_at')
     .single();
 
   if (error || !data) {
@@ -71,7 +71,6 @@ export async function saveOfficeProductData({
   }
 
   return {
-    id: data.id,
     updated_at: updatedAt,
     row_count: normalizedRows.length,
   };

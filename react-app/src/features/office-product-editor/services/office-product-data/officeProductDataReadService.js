@@ -10,7 +10,6 @@ import { fetchOfficeProductDataRow } from './officeProductDataRowService';
 
 function buildOfficeProductDataSummary(row, productData) {
   return {
-    id: row?.id ?? null,
     officeCode: row?.office_code ?? '',
     officeName: row?.office_name ?? '',
     categoryName: productData?.category_name ?? '',

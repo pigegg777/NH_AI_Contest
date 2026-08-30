@@ -16,6 +16,7 @@ import {
   withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
+import { resolveOpenAiModel } from '../../lib/openAiModel.js';
 
 const PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
@@ -23,6 +24,7 @@ const PAGE_STYLE_AI_REQUEST_BODY_ALLOWED_KEYS = [
   'currentPageStyle',
   'history',
 ];
+const PAGE_STYLE_AI_OPENAI_MODEL_ENV_KEY = 'OPENAI_MODEL_PAGE_STYLE';
 const PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL = 'gpt-5.6-terra';
 export const onRequestPost = withRequestErrorHandling(
   async ({ request, env }) => {
@@ -44,7 +46,11 @@ export const onRequestPost = withRequestErrorHandling(
 
     const requestBody = buildPageStyleOpenAiRequestBody({
       pageAiDesign,
-      openAiModel: PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
+      openAiModel: resolveOpenAiModel(
+        env,
+        PAGE_STYLE_AI_OPENAI_MODEL_ENV_KEY,
+        PAGE_STYLE_AI_DEFAULT_OPENAI_MODEL,
+      ),
       currentPageStyle,
       history,
     });

@@ -97,6 +97,7 @@ export function useOfficeProductEditorState(user) {
     tableNameMode,
     updateNote: tableState.updateNote,
     updatePrice: tableState.updatePrice,
+    setShadowForRows: tableState.setShadowForRows,
     appendRows: tableState.appendRows,
     patchRows: tableState.patchRows,
   });

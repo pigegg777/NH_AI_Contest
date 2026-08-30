@@ -30,7 +30,7 @@ export function useWorkbookSave({
     customTableName,
   );
   const canSave = Boolean(
-    user?.id &&
+    user?.employee_id &&
       user?.office_code &&
       user?.office_name &&
       Array.isArray(rowsToSave) &&

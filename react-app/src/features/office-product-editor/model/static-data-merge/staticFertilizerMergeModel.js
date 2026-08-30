@@ -34,7 +34,18 @@ export function mergeRowsWithStaticFertilizer(rows, lookup) {
         : EMPTY_STATIC_FERTILIZER_FIELDS;
 
     const ownImgUrl = toTrimmedString(row?.img_url);
-    const effectiveImgUrl = ownImgUrl || staticFertilizerRow.img_url || null;
+    const staticImgUrl = toTrimmedString(staticFertilizerRow.img_url);
+    const hadPersistedStaticImg = row?.img_url_is_static === true;
+    const effectiveImgUrl = hadPersistedStaticImg
+      ? staticImgUrl || null
+      : ownImgUrl || staticImgUrl || null;
+    // Saving persists the merged img_url onto the row itself, so on the next
+    // load a static image is no longer distinguishable by an empty
+    // row.img_url alone — an own URL equal to the registry's counts as
+    // static too, or the lock would fall off after the first save.
+    const isStaticImgUrl =
+      staticImgUrl !== '' &&
+      (hadPersistedStaticImg || ownImgUrl === '' || ownImgUrl === staticImgUrl);
 
     return {
       ...row,
@@ -44,9 +55,10 @@ export function mergeRowsWithStaticFertilizer(rows, lookup) {
       // registry's value. The other static fields have no such live
       // override path, so they keep being unconditionally refreshed.
       img_url: effectiveImgUrl,
-      // Fertilizer images must remain editable regardless of whether the
-      // effective URL came from the static lookup.
-      img_url_is_static: false,
+      // An image the merchant never supplied belongs to the static registry:
+      // the cell hides its delete and picker buttons, and ai-image-apply
+      // skips the row.
+      img_url_is_static: isStaticImgUrl,
       product_url: staticFertilizerRow.product_url ?? null,
       nutrient: staticFertilizerRow.nutrient ?? null,
       price_subsidy: staticFertilizerRow.price_subsidy ?? null,

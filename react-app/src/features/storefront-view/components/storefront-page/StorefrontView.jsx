@@ -192,6 +192,10 @@ export default function StorefrontView({
       <CartPanel
         cartItemRefs={cartRefs}
         productRows={productRows}
+        // 어떤 가격을 보여줄지는 분류 설정이 정한다. 걸러진 목록(view)이 아니라
+        // 원본을 넘기는 것이 중요하다 — 지금 고른 분류에 따라 장바구니 가격이
+        // 나타났다 사라지면 안 된다.
+        categoryConfigs={config?.categoryConfigs}
         onRemoveCartItems={onRemoveCartItems}
         onClose={() => setIsCartOpen(false)}
       />
