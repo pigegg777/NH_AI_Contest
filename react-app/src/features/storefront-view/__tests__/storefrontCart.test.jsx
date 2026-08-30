@@ -286,3 +286,126 @@ describe('storefront cart — 선택 삭제', () => {
     expect(within(dialog).getByRole('button', { name: /선택 삭제/ })).toBeEnabled();
   });
 });
+
+describe('장바구니는 카드가 감춘 가격을 보여주지 않는다', () => {
+  // 모델만 고치고 화면에 이어 붙이지 않으면 버그가 그대로 남는다. 이 테스트는
+  // StorefrontView -> CartPanel 배선이 끊기는 순간 실패한다.
+  const ROW = {
+    product_category_name: '농약',
+    product_code: 'P-100',
+    product_name: '프레바톤',
+    spec: '500ml',
+    large_category: '농약',
+    medium_category: '살충제',
+    tax_price: 32000,
+    exempt_tax_price: 29000,
+  };
+
+  async function openCart(visibleFields) {
+    const user = userEvent.setup();
+
+    render(
+      <StorefrontView
+        config={{
+          ...CONFIG,
+          categoryConfigs: [
+            {
+              productCategoryName: '농약',
+              categoryConfig: {
+                displayName: '농약',
+                sourceCategoryName: '농약',
+                cardDesign: { visibleFields },
+              },
+            },
+          ],
+        }}
+        productRows={[ROW]}
+        {...cartProps({
+          cartItemRefs: [{ product_code: 'P-100', product_name: '프레바톤', spec: '500ml' }],
+        })}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /장바구니 열기/ }));
+
+    return screen.getByRole('dialog', { name: '장바구니' });
+  }
+
+  it('hides a price the merchant turned off, even though the data has it', async () => {
+    const panel = await openCart(['product_name', 'spec', 'tax_price']);
+
+    expect(within(panel).getByText('과세가격')).toBeInTheDocument();
+    expect(within(panel).queryByText('면세가격')).not.toBeInTheDocument();
+  });
+
+  it('shows a price once the merchant turns it on', async () => {
+    const panel = await openCart(['product_name', 'spec', 'tax_price', 'exempt_tax_price']);
+
+    expect(within(panel).getByText('과세가격')).toBeInTheDocument();
+    expect(within(panel).getByText('면세가격')).toBeInTheDocument();
+  });
+});
+
+describe('장바구니 가격은 지금 보고 있는 분류에 흔들리지 않는다', () => {
+  // 원래 증상: 비료를 담아 둔 채 농약 탭으로 옮기면 비료의 가격이 사라졌다.
+  // 노출 정보를 '화면에 지금 보이는 상품'에서 뽑았기 때문이다.
+  const FERTILIZER = {
+    product_category_name: '비료',
+    product_code: 'F-100',
+    product_name: '복합비료',
+    spec: '20kg',
+    large_category: '비료',
+    medium_category: '복합',
+    zero_tax_price: 18000,
+  };
+  const PESTICIDE = {
+    product_category_name: '농약',
+    product_code: 'P-100',
+    product_name: '프레바톤',
+    spec: '500ml',
+    large_category: '농약',
+    medium_category: '살충제',
+    tax_price: 32000,
+  };
+
+  const withPrices = (name, visibleFields) => ({
+    productCategoryName: name,
+    categoryConfig: {
+      displayName: name,
+      sourceCategoryName: name,
+      cardDesign: { visibleFields },
+    },
+  });
+
+  it('keeps the fertilizer price visible while the shopper browses pesticides', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <StorefrontView
+        config={{
+          ...CONFIG,
+          categoryConfigs: [
+            withPrices('비료', ['product_name', 'spec', 'zero_tax_price']),
+            withPrices('농약', ['product_name', 'spec', 'tax_price']),
+          ],
+        }}
+        productRows={[FERTILIZER, PESTICIDE]}
+        {...cartProps({
+          cartItemRefs: [{ product_code: 'F-100', product_name: '복합비료', spec: '20kg' }],
+        })}
+      />,
+    );
+
+    // 손님이 농약 분류로 옮긴다 — 비료는 더 이상 화면에 없다.
+    const chips = screen.getByTestId('storefront-product-category-chips');
+    await user.click(within(chips).getByRole('button', { name: '농약' }));
+    expect(screen.queryByText('복합비료')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /장바구니 열기/ }));
+    const panel = screen.getByRole('dialog', { name: '장바구니' });
+
+    // 그래도 장바구니 속 비료의 영세가격은 그대로 보여야 한다.
+    expect(within(panel).getByText('복합비료')).toBeInTheDocument();
+    expect(within(panel).getByText('영세가격')).toBeInTheDocument();
+  });
+});

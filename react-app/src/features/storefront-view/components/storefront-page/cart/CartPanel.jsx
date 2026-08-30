@@ -1,15 +1,32 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { buildCartDisplayItems } from '../../../model/cart/cartItemModel';
+import {
+  buildCartDisplayItems,
+  buildVisibleFieldsByCartKey,
+} from '../../../model/cart/cartItemModel';
 import styles from './CartPanel.module.css';
 
 /**
  * 담아둔 목록. 합계를 내지 않는다 — 과세/면세/영세가 행마다 달라서 더한 값이
  * 어떤 손님에게도 맞지 않는다. 가격은 행이 가진 것을 그대로 나열한다.
  */
-export default function CartPanel({ cartItemRefs, productRows, onRemoveCartItems, onClose }) {
+export default function CartPanel({
+  cartItemRefs,
+  productRows,
+  // 분류마다 어떤 가격을 노출하는지 여기서 정한다. 이것이 없으면 장바구니가
+  // 사장님이 끈 가격까지 보여준다.
+  categoryConfigs,
+  onRemoveCartItems,
+  onClose,
+}) {
   const [selectedKeys, setSelectedKeys] = useState(() => new Set());
-  const items = buildCartDisplayItems(cartItemRefs, productRows);
+  // 전체 상품을 훑는 계산이라 장바구니를 열었을 때만, 그리고 재료가 바뀔
+  // 때만 한다. 이 패널은 열려 있는 동안에만 붙어 있다.
+  const visibleFieldsByCartKey = useMemo(
+    () => buildVisibleFieldsByCartKey(categoryConfigs, productRows),
+    [categoryConfigs, productRows],
+  );
+  const items = buildCartDisplayItems(cartItemRefs, productRows, visibleFieldsByCartKey);
   const selectedCount = items.filter((item) => selectedKeys.has(item.key)).length;
 
   function toggleKey(key) {
