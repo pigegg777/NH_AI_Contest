@@ -45,14 +45,14 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     supabase.from.mockReturnValue({ select: readSelect, upsert });
 
     await saveOfficeProductData({
-      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
+      user: { employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' },
       rows: [{ row_id: 'A100__01', product_code: 'A100', note: 'memo', shadow: true }],
       categoryName: '농약',
       sourceFileName: 'demo.xlsx',
     });
 
     expect(supabase.from).toHaveBeenCalledWith('office_product_datas');
-    expect(readSelect).toHaveBeenCalledWith('id, office_code, office_name, product_data');
+    expect(readSelect).toHaveBeenCalledWith('office_code, office_name, product_data');
     expect(upsert).toHaveBeenCalledWith(
       {
         office_code: 'OFF-1',
@@ -73,7 +73,7 @@ describe('officeProductDataService.saveOfficeProductData', () => {
             ],
           }),
         ],
-        updated_who: 7,
+        updated_who: 'EMP-7',
       },
       { onConflict: 'office_code' },
     );
@@ -99,7 +99,7 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     supabase.from.mockReturnValue({ select: readSelect, upsert });
 
     await saveOfficeProductData({
-      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
+      user: { employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' },
       rows,
       categoryName: '농약',
       sourceFileName: 'pesticide.xlsx',
@@ -133,7 +133,7 @@ describe('officeProductDataService.saveOfficeProductData', () => {
     supabase.from.mockReturnValue({ select: readSelect, upsert });
 
     await saveOfficeProductData({
-      user: { id: 7, office_code: 'OFF-1', office_name: '본점' },
+      user: { employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' },
       rows: [{ row_id: 'P2' }],
       categoryName: '농약',
       sourceFileName: 'new.xlsx',
@@ -159,7 +159,6 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
 
   it('loads and normalizes catalog entries for the office, newest first', async () => {
     const { select } = mockOfficeProductDataRow({
-      id: 11,
       office_code: 'OFF-1',
       office_name: '본점',
       product_data: [
@@ -173,10 +172,9 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
     const result = await fetchOfficeProductDataCatalog({ officeCode: ' OFF-1 ' });
 
     expect(supabase.from).toHaveBeenCalledWith('office_product_datas');
-    expect(select).toHaveBeenCalledWith('id, office_code, office_name, product_data');
+    expect(select).toHaveBeenCalledWith('office_code, office_name, product_data');
     expect(result).toEqual([
       {
-        id: 11,
         officeCode: 'OFF-1',
         officeName: '본점',
         categoryName: '농약',
@@ -185,7 +183,6 @@ describe('officeProductDataService.fetchOfficeProductDataCatalog', () => {
         updatedAt: '2026-06-08T03:00:00Z',
       },
       {
-        id: 11,
         officeCode: 'OFF-1',
         officeName: '본점',
         categoryName: '비료',
@@ -214,7 +211,6 @@ describe('officeProductDataService.fetchOfficeProductDataEntries', () => {
 
   it('returns normalized product-category entries with their rows for the builder wizard', async () => {
     const { select } = mockOfficeProductDataRow({
-      id: 11,
       office_code: 'OFF-1',
       office_name: 'Demo Office',
       product_data: [
@@ -234,7 +230,6 @@ describe('officeProductDataService.fetchOfficeProductDataEntries', () => {
 
     expect(result).toEqual([
       {
-        id: 11,
         officeCode: 'OFF-1',
         officeName: 'Demo Office',
         categoryName: 'Fertilizer Upload',
@@ -248,7 +243,6 @@ describe('officeProductDataService.fetchOfficeProductDataEntries', () => {
 
   it('removes legacy product_usage from saved rows while reading entries', async () => {
     const { select } = mockOfficeProductDataRow({
-      id: 11,
       office_code: 'OFF-1',
       office_name: '본점',
       product_data: [
@@ -286,7 +280,6 @@ describe('officeProductDataService.fetchOfficeProductData', () => {
 
   it('returns the rows for the matching category entry', async () => {
     const { select } = mockOfficeProductDataRow({
-      id: 11,
       office_code: 'OFF-1',
       office_name: '본점',
       product_data: [
@@ -308,7 +301,6 @@ describe('officeProductDataService.fetchOfficeProductData', () => {
 
   it('returns null when the category has not been saved', async () => {
     const { select } = mockOfficeProductDataRow({
-      id: 11,
       office_code: 'OFF-1',
       office_name: '본점',
       product_data: [],
@@ -402,7 +394,6 @@ describe('officeProductDataService.deleteOfficeProductData', () => {
 
   it('removes only the matching category entry and updates the row', async () => {
     const existingRow = {
-      id: 11,
       office_code: 'OFF-1',
       office_name: '본점',
       product_data: [

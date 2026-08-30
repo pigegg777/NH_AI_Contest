@@ -10,7 +10,7 @@ export async function fetchOfficeProductDataRow(officeCode) {
 
   const { data, error } = await supabase
     .from('office_product_datas')
-    .select('id, office_code, office_name, product_data')
+    .select('office_code, office_name, product_data')
     .eq('office_code', normalizedOfficeCode)
     .maybeSingle();
 

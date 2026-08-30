@@ -173,7 +173,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -187,7 +187,7 @@ describe('OfficeProductEditorPage', () => {
       expect(saveOfficeProductData).toHaveBeenCalledWith(
         expect.objectContaining({
           user: expect.objectContaining({
-            id: 7,
+            employee_id: 'EMP-7',
             office_code: 'OFF-1',
             office_name: '본점',
           }),
@@ -206,7 +206,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -230,7 +230,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -265,7 +265,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -296,7 +296,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -340,7 +340,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -369,7 +369,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -413,7 +413,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -530,7 +530,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 
@@ -595,7 +595,7 @@ describe('OfficeProductEditorPage', () => {
 
     render(
       <OfficeProductEditorPage
-        user={{ id: 7, office_code: 'OFF-1', office_name: '본점' }}
+        user={{ employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' }}
       />,
     );
 

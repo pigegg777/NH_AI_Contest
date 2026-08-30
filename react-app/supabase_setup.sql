@@ -2,13 +2,12 @@
 -- This version assumes Supabase Auth handles passwords directly.
 
 create table if not exists public.login_users (
-  id bigint generated always as identity primary key,
+  employee_id text primary key,
   auth_user_id uuid references auth.users (id) on delete set null,
   nh_name text not null,
   office_name text not null,
   office_code text not null,
   name text not null,
-  employee_id text not null,
   created_at timestamptz not null default now()
 );
 
@@ -37,23 +36,14 @@ declare
   metadata_employee_id text := nullif(trim(new.raw_user_meta_data ->> 'employee_id'), '');
 begin
   if metadata_employee_id is not null then
-    with reusable_login_user as (
-      select id
-      from public.login_users
-      where employee_id = metadata_employee_id
-        and auth_user_id is null
-      order by id desc
-      limit 1
-    )
     update public.login_users as login_user
        set auth_user_id = new.id,
            nh_name = coalesce(nullif(trim(new.raw_user_meta_data ->> 'nh_name'), ''), login_user.nh_name),
            office_name = coalesce(nullif(trim(new.raw_user_meta_data ->> 'office_name'), ''), login_user.office_name),
            office_code = coalesce(nullif(trim(new.raw_user_meta_data ->> 'office_code'), ''), login_user.office_code),
-           name = coalesce(nullif(trim(new.raw_user_meta_data ->> 'name'), ''), login_user.name),
-           employee_id = metadata_employee_id
-      from reusable_login_user
-     where login_user.id = reusable_login_user.id;
+           name = coalesce(nullif(trim(new.raw_user_meta_data ->> 'name'), ''), login_user.name)
+     where login_user.employee_id = metadata_employee_id
+       and login_user.auth_user_id is null;
 
     if found then
       return new;
@@ -109,21 +99,18 @@ end;
 $$;
 
 create table if not exists public.office_product_datas (
-  id bigint generated always as identity primary key,
-  office_code text not null,
+  office_code text primary key,
   office_name text not null,
   product_data jsonb not null default '[]'::jsonb,
-  updated_who bigint not null references public.login_users(id),
+  updated_who text not null references public.login_users(employee_id),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint office_product_datas_office_code_key unique (office_code)
+  updated_at timestamptz not null default now()
 );
 
 alter table public.office_product_datas enable row level security;
 
 revoke all on public.office_product_datas from anon;
 grant select, insert, update on public.office_product_datas to authenticated;
-grant usage, select on sequence public.office_product_datas_id_seq to authenticated;
 
 drop policy if exists "office_product_datas_select_own_office" on public.office_product_datas;
 drop policy if exists "office_product_datas_insert_own_office" on public.office_product_datas;
@@ -147,7 +134,7 @@ create policy "office_product_datas_insert_own_office" on public.office_product_
       select 1
       from public.login_users
       where auth_user_id = (select auth.uid())
-        and id = public.office_product_datas.updated_who
+        and employee_id = public.office_product_datas.updated_who
         and office_code = public.office_product_datas.office_code
     )
   );
@@ -167,7 +154,7 @@ create policy "office_product_datas_update_own_office" on public.office_product_
       select 1
       from public.login_users
       where auth_user_id = (select auth.uid())
-        and id = public.office_product_datas.updated_who
+        and employee_id = public.office_product_datas.updated_who
         and office_code = public.office_product_datas.office_code
     )
   );

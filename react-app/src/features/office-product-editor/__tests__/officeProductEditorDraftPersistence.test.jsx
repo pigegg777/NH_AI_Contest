@@ -16,7 +16,7 @@ vi.mock('../services/staticProductLookupService', () => ({
 
 import OfficeProductEditorPage from '../pages/OfficeProductEditorPage';
 
-const USER = { id: 7, office_code: 'OFF-1', office_name: '본점' };
+const USER = { employee_id: 'EMP-7', office_code: 'OFF-1', office_name: '본점' };
 const DRAFT_STORAGE_KEY = 'office-product-editor:draft:OFF-1';
 const SAMPLE_ROWS = [
   {

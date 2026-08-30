@@ -1,7 +1,8 @@
 import { toLowerTrimmedString, toTrimmedString } from '../../../common/utils/text';
 import supabase from '../../../lib/supabaseClient';
 
-const LOGIN_USER_PROFILE_SELECT = 'id, auth_user_id, name, nh_name, office_name, office_code';
+const LOGIN_USER_PROFILE_SELECT =
+  'employee_id, auth_user_id, name, nh_name, office_name, office_code';
 const AUTH_EMAIL_DOMAIN = 'auth.nh-agri.local';
 
 export function buildAuthEmail(employeeId) {

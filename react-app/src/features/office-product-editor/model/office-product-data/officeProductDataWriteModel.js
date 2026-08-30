@@ -26,7 +26,6 @@ export async function saveOfficeProductWorkbook({
   return {
     rowCount,
     catalogEntry: {
-      id: savedData?.id ?? null,
       officeCode: toTrimmedString(user?.office_code),
       officeName: toTrimmedString(user?.office_name),
       categoryName,

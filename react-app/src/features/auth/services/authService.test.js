@@ -47,7 +47,7 @@ describe('authService', () => {
 
     const maybeSingle = vi.fn().mockResolvedValue({
       data: {
-        id: 7,
+        employee_id: 'EMP-7',
         auth_user_id: 'auth-user-1',
         name: 'User One',
         nh_name: 'NH',
@@ -71,12 +71,12 @@ describe('authService', () => {
       password: 'secret',
     });
     expect(select).toHaveBeenCalledWith(
-      'id, auth_user_id, name, nh_name, office_name, office_code',
+      'employee_id, auth_user_id, name, nh_name, office_name, office_code',
     );
     expect(eq).toHaveBeenCalledWith('auth_user_id', 'auth-user-1');
     expect(result).toEqual(
       expect.objectContaining({
-        id: 7,
+        employee_id: 'EMP-7',
         office_code: 'A001',
       }),
     );
