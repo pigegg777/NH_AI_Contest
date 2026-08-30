@@ -78,13 +78,13 @@ describe('static fertilizer merge model', () => {
     expect(result[0].img_url).toBe('https://example.com/static-a100.png');
   });
 
-  it('keeps img_url_is_static false when the effective img_url came from the static lookup', () => {
+  it('flags img_url_is_static when the effective img_url came from the static lookup', () => {
     const result = mergeRowsWithStaticFertilizer(
       [{ row_id: 'A100__01', product_code: 'A100', img_url: '' }],
       { A100: { product_code: 'A100', img_url: 'https://example.com/static-a100.png' } },
     );
 
-    expect(result[0].img_url_is_static).toBe(false);
+    expect(result[0].img_url_is_static).toBe(true);
   });
 
   it('does not flag img_url_is_static when the row already has its own img_url', () => {
@@ -102,7 +102,7 @@ describe('static fertilizer merge model', () => {
     expect(result[0].img_url_is_static).toBe(false);
   });
 
-  it('keeps img_url_is_static false after the static value was previously saved onto the row itself', () => {
+  it('keeps img_url_is_static true after the static value was previously saved onto the row itself', () => {
     // Once a row is saved, the merged img_url gets persisted as the row's
     // own field — on the next load, row.img_url is no longer empty, it now
     // literally equals the static registry's current value.
@@ -111,7 +111,49 @@ describe('static fertilizer merge model', () => {
       { A100: { product_code: 'A100', img_url: 'https://example.com/static-a100.png' } },
     );
 
-    expect(result[0].img_url_is_static).toBe(false);
+    expect(result[0].img_url_is_static).toBe(true);
+  });
+
+  it('refreshes a previously persisted static image when the registry URL changes', () => {
+    const result = mergeRowsWithStaticFertilizer(
+      [
+        {
+          row_id: 'A100__01',
+          product_code: 'A100',
+          img_url: 'https://example.com/old-static-a100.png',
+          img_url_is_static: true,
+        },
+      ],
+      { A100: { product_code: 'A100', img_url: 'https://example.com/new-static-a100.png' } },
+    );
+
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        img_url: 'https://example.com/new-static-a100.png',
+        img_url_is_static: true,
+      }),
+    );
+  });
+
+  it('clears a previously persisted static image when the registry image is removed', () => {
+    const result = mergeRowsWithStaticFertilizer(
+      [
+        {
+          row_id: 'A100__01',
+          product_code: 'A100',
+          img_url: 'https://example.com/old-static-a100.png',
+          img_url_is_static: true,
+        },
+      ],
+      { A100: { product_code: 'A100', img_url: null } },
+    );
+
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        img_url: null,
+        img_url_is_static: false,
+      }),
+    );
   });
 
   it('does not flag img_url_is_static when neither the row nor the static lookup has an image', () => {
