@@ -38,6 +38,13 @@ export function AiBulkNoteMatchList({ matches, rows }) {
             {match.note !== undefined ? (
               <AiBulkNoteFieldDiff label="비고" oldValue={row?.note} newValue={match.note} />
             ) : null}
+            {match.shadow !== undefined ? (
+              <AiBulkNoteFieldDiff
+                label="숨길 상품 표시"
+                oldValue={row?.shadow === true ? '숨김' : '표시'}
+                newValue={match.shadow ? '숨김' : '표시'}
+              />
+            ) : null}
             {AI_BULK_NOTE_PRICE_FIELD_KEYS.map((key) =>
               match[key] !== undefined ? (
                 <AiBulkNoteFieldDiff

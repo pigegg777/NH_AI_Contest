@@ -319,4 +319,66 @@ describe('useAiBulkNoteWriterState', () => {
       }),
     );
   });
+
+  it('applies the hide flag in one bulk call per value', async () => {
+    analyzeAiBulkNoteMatches.mockResolvedValue({
+      mode: 'openai',
+      action: 'edit_rows',
+      matches: [
+        { rowId: 'A100__01', shadow: true },
+        { rowId: 'B200__01', shadow: true },
+        { rowId: 'C300__01', shadow: false },
+      ],
+      unmatchedReason: null,
+    });
+    const setShadowForRows = vi.fn();
+    const { result } = renderHook(() =>
+      useAiBulkNoteWriterState({
+        officeCode: 'OFF-1',
+        rows: [],
+        tableNameMode: 'fertilizer',
+        setShadowForRows,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handlePreview('가축분퇴비 상품은 숨겨줘');
+    });
+    act(() => {
+      result.current.handleApply();
+    });
+
+    expect(setShadowForRows).toHaveBeenCalledTimes(2);
+    expect(setShadowForRows).toHaveBeenCalledWith(['A100__01', 'B200__01'], true);
+    expect(setShadowForRows).toHaveBeenCalledWith(['C300__01'], false);
+    expect(result.current.appliedCount).toBe(3);
+  });
+
+  it('leaves the hide flag alone when no match targets it', async () => {
+    analyzeAiBulkNoteMatches.mockResolvedValue({
+      mode: 'openai',
+      action: 'edit_rows',
+      matches: [{ rowId: 'A100__01', note: '보조 1500원' }],
+      unmatchedReason: null,
+    });
+    const setShadowForRows = vi.fn();
+    const { result } = renderHook(() =>
+      useAiBulkNoteWriterState({
+        officeCode: 'OFF-1',
+        rows: [],
+        tableNameMode: 'fertilizer',
+        updateNote: vi.fn(),
+        setShadowForRows,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handlePreview('조건');
+    });
+    act(() => {
+      result.current.handleApply();
+    });
+
+    expect(setShadowForRows).not.toHaveBeenCalled();
+  });
 });

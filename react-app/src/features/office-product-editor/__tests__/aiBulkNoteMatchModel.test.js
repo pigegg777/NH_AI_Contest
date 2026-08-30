@@ -87,6 +87,45 @@ describe('sanitizeAiBulkNoteMatches', () => {
     ]);
   });
 
+  it('includes the hide flag on its own when the instruction only targets hiding', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      {
+        matches: [
+          {
+            row_id: 'A100__01',
+            note: null,
+            shadow: true,
+            zero_tax_price: null,
+            tax_price: null,
+            exempt_tax_price: null,
+          },
+        ],
+        unmatched_reason: null,
+      },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([{ rowId: 'A100__01', shadow: true }]);
+  });
+
+  it('keeps a false hide flag, which unhides the row', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      { matches: [{ row_id: 'A100__01', note: null, shadow: false }], unmatched_reason: null },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([{ rowId: 'A100__01', shadow: false }]);
+  });
+
+  it('ignores a non-boolean hide flag', () => {
+    const result = sanitizeAiBulkNoteMatches(
+      { matches: [{ row_id: 'A100__01', note: null, shadow: 'true' }], unmatched_reason: null },
+      ['A100__01'],
+    );
+
+    expect(result.matches).toEqual([]);
+  });
+
   it('drops a match with a row_id but no note and no price field set', () => {
     const result = sanitizeAiBulkNoteMatches(
       {

@@ -40,6 +40,7 @@ describe('analyzeAiBulkNoteMatches', () => {
           detail_category: '',
           product_category: '',
           note: '',
+          shadow: false,
           tax_price: null,
           zero_tax_price: null,
           exempt_tax_price: null,

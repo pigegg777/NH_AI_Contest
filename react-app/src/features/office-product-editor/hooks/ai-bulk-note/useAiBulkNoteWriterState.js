@@ -40,6 +40,7 @@ export function useAiBulkNoteWriterState(
     tableNameMode,
     updateNote = () => {},
     updatePrice = () => {},
+    setShadowForRows = () => {},
     appendRows = () => {},
     patchRows = () => {},
   } = normalizeWriterOptions(
@@ -134,6 +135,9 @@ export function useAiBulkNoteWriterState(
   }
 
   function handleApply() {
+    const rowIdsToHide = [];
+    const rowIdsToShow = [];
+
     matches.forEach((match) => {
       if (match.note !== undefined) {
         updateNote(match.rowId, match.note);
@@ -144,7 +148,22 @@ export function useAiBulkNoteWriterState(
           updatePrice(match.rowId, key, match[key]);
         }
       });
+
+      if (match.shadow !== undefined) {
+        (match.shadow ? rowIdsToHide : rowIdsToShow).push(match.rowId);
+      }
     });
+
+    // Collected first, then written in one call per value: every annotation
+    // setter rewrites the whole annotation map, so a per-row call would
+    // rebuild it once per match.
+    if (rowIdsToHide.length > 0) {
+      setShadowForRows(rowIdsToHide, true);
+    }
+    if (rowIdsToShow.length > 0) {
+      setShadowForRows(rowIdsToShow, false);
+    }
+
     setAppliedCount(matches.length);
     setMatches([]);
     setUnmatchedReason(null);

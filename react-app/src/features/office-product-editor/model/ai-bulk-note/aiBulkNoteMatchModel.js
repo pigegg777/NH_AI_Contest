@@ -19,6 +19,10 @@ function normalizeMatch(rawMatch, sentRowIdSet) {
     match.note = trimmedNote.slice(0, MAX_NOTE_LENGTH);
   }
 
+  if (typeof rawMatch?.shadow === 'boolean') {
+    match.shadow = rawMatch.shadow;
+  }
+
   for (const key of PRICE_FIELD_KEYS) {
     const value = toNumberOrNull(rawMatch?.[key]);
 
@@ -28,8 +32,8 @@ function normalizeMatch(rawMatch, sentRowIdSet) {
   }
 
   // A match must actually change something — the AI's instruction may only
-  // target a price field, only the note, or several fields at once, but
-  // never nothing.
+  // target a price field, only the note, only the hide flag, or several
+  // fields at once, but never nothing.
   return Object.keys(match).length > 1 ? match : null;
 }
 

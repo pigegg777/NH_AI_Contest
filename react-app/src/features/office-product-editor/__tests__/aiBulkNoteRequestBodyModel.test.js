@@ -21,6 +21,7 @@ describe('serializeRowsForAiBulkNoteReview', () => {
         detail_category: '',
         product_category: '',
         note: '기존 비고',
+        shadow: true,
         tax_price: 15000,
         zero_tax_price: null,
         exempt_tax_price: null,
@@ -38,11 +39,16 @@ describe('serializeRowsForAiBulkNoteReview', () => {
         detail_category: '',
         product_category: '',
         note: '기존 비고',
+        shadow: true,
         tax_price: 15000,
         zero_tax_price: null,
         exempt_tax_price: null,
       },
     ]);
+  });
+
+  it('sends shadow as false for a row that carries no hide flag', () => {
+    expect(serializeRowsForAiBulkNoteReview([{ row_id: 'A100__01' }])[0].shadow).toBe(false);
   });
 
   it('caps the row count at MAX_WORKBOOK_AI_ROWS', () => {
@@ -129,6 +135,7 @@ describe('buildAiBulkNoteRequestBody', () => {
         detail_category: '',
         product_category: '',
         note: '',
+        shadow: false,
         tax_price: null,
         zero_tax_price: null,
         exempt_tax_price: null,
@@ -147,6 +154,7 @@ describe('buildAiBulkNoteRequestBody', () => {
     expect(requestBody.text.format.schema.properties.matches.items.required).toEqual([
       'row_id',
       'note',
+      'shadow',
       'zero_tax_price',
       'tax_price',
       'exempt_tax_price',
