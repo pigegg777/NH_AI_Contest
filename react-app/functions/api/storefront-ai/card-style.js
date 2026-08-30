@@ -16,7 +16,9 @@ import {
   withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
+import { resolveOpenAiModel } from '../../lib/openAiModel.js';
 
+const OPENAI_MODEL_ENV_KEY = 'OPENAI_MODEL_CARD_STYLE';
 const DEFAULT_OPENAI_MODEL = 'gpt-5.6-terra';
 const REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
@@ -60,7 +62,7 @@ export const onRequestPost = withRequestErrorHandling(
       visibleFields,
       productCategoryName,
       conditionFieldValueSamples,
-      openAiModel: env.OPENAI_MODEL || DEFAULT_OPENAI_MODEL,
+      openAiModel: resolveOpenAiModel(env, OPENAI_MODEL_ENV_KEY, DEFAULT_OPENAI_MODEL),
       currentCardStyle,
       history,
     });

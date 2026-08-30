@@ -10,7 +10,9 @@ import {
   withRequestErrorHandling,
 } from '../../lib/requestValidation.js';
 import { requireOwnedOffice } from '../../lib/officeOwnershipGuard.js';
+import { resolveOpenAiModel } from '../../lib/openAiModel.js';
 
+const OPENAI_MODEL_ENV_KEY = 'OPENAI_MODEL_SIMILARITY_EXTRACTION';
 const DEFAULT_OPENAI_MODEL = 'gpt-5.6-luna';
 const REQUEST_BODY_ALLOWED_KEYS = [
   'officeCode',
@@ -49,7 +51,7 @@ export const onRequestPost = withRequestErrorHandling(async ({ request, env }) =
   const requestBody = buildAiSimilarityExtractionRequestBody({
     rows,
     tableNameMode,
-    openAiModel: DEFAULT_OPENAI_MODEL,
+    openAiModel: resolveOpenAiModel(env, OPENAI_MODEL_ENV_KEY, DEFAULT_OPENAI_MODEL),
     userHint,
   });
 

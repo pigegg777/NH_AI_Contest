@@ -1,7 +1,7 @@
 import { toTrimmedString } from '../../src/common/utils/text.js';
 
 const OPENAI_IMAGES_API_URL = 'https://api.openai.com/v1/images/generations';
-const DEFAULT_IMAGE_MODEL = 'gpt-image-2';
+export const DEFAULT_OPENAI_IMAGE_MODEL = 'gpt-image-2';
 
 async function readOpenAiImageError(response) {
   try {
@@ -22,7 +22,11 @@ async function readOpenAiImageError(response) {
   }
 }
 
-export async function requestOpenAiImage(prompt, apiKey, { model = DEFAULT_IMAGE_MODEL } = {}) {
+export async function requestOpenAiImage(
+  prompt,
+  apiKey,
+  { model = DEFAULT_OPENAI_IMAGE_MODEL } = {},
+) {
   const response = await fetch(OPENAI_IMAGES_API_URL, {
     method: 'POST',
     headers: {
