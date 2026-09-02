@@ -47,3 +47,19 @@ tmp_pdf_pages/
 tmp_proposal_pages2/
 tmp_proposal_pages3/
 .gstack.bak*/
+
+# Local scratch: agent temp dirs, generated diagrams, PDF/PPT exports.
+# Kept on disk, out of the repo.
+.codex-temp/
+diagrams/
+output/
+tmp/
+excel-to-data
+react-app/docs/
+
+# Binary deliverables (기획서, 발표자료). Source of truth lives outside git.
+*.pptx
+*.pptx.inspect.ndjson
+*.docx
+*.pdf
+/*.png
