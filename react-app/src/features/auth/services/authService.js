@@ -1,4 +1,7 @@
-import { toLowerTrimmedString, toTrimmedString } from '../../../common/utils/text';
+import {
+  toLowerTrimmedString,
+  toTrimmedString,
+} from '../../../common/utils/text';
 import supabase from '../../../lib/supabaseClient';
 
 const LOGIN_USER_PROFILE_SELECT =
@@ -118,7 +121,8 @@ export async function register(form) {
   });
 
   if (
-    (Array.isArray(data?.user?.identities) && data.user.identities.length === 0) ||
+    (Array.isArray(data?.user?.identities) &&
+      data.user.identities.length === 0) ||
     /already registered/i.test(toLowerTrimmedString(error?.message))
   ) {
     return { status: 'duplicate' };
