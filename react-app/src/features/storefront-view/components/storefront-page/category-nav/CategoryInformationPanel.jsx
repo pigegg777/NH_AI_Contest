@@ -38,6 +38,14 @@ export default function CategoryInformationPanel({
           </div>
         ))}
       </dl>
+
+      <p
+        className={styles.productHint}
+        role="note"
+        aria-label="상품정보를 보려면 위의 전체를 선택하세요."
+      >
+        상품정보를 보려면 위의 <strong>전체</strong>를 선택하세요.
+      </p>
     </section>
   );
 }

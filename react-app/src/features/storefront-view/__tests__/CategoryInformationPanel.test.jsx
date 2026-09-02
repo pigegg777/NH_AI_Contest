@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import CategoryInformationPanel from '../components/storefront-page/category-nav/CategoryInformationPanel';
@@ -18,6 +18,23 @@ describe('CategoryInformationPanel', () => {
     expect(screen.getByText('비료 안내')).toBeInTheDocument();
     expect(screen.getByText('봄철 밑거름')).toBeInTheDocument();
     expect(screen.getByText('보관 방법')).toBeInTheDocument();
+  });
+
+  it('directs customers to the 전체 chip to view product information', () => {
+    render(
+      <CategoryInformationPanel
+        categoryName="비료"
+        entries={[{ id: 'a', label: '', description: '안내 문구' }]}
+      />,
+    );
+
+    const productHint = screen.getByRole('note', {
+      name: '상품정보를 보려면 위의 전체를 선택하세요.',
+    });
+
+    expect(productHint).toBeInTheDocument();
+    expect(within(productHint).getByText('전체', { selector: 'strong' }))
+      .toBeInTheDocument();
   });
 
   it('renders an entry with no label as description only', () => {
