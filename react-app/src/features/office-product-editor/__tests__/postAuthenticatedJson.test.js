@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { postAuthenticatedJson } from '../services/postAuthenticatedJson';
+import { postAuthenticatedJson } from '../../../common/services/postAuthenticatedJson';
 
 vi.mock('../../../lib/supabaseClient', () => ({
   default: {

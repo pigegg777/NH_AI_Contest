@@ -1,5 +1,5 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { postAuthenticatedJson } from '../postAuthenticatedJson';
+import { postAuthenticatedJson } from '../../../../common/services/postAuthenticatedJson';
 
 const AI_MARKET_RESEARCH_ENDPOINT = '/api/ai-market-research/analyze';
 
