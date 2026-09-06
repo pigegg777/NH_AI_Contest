@@ -17,7 +17,7 @@ function createStorage(initial = {}) {
   };
 }
 
-const REFS = [{ product_code: 'P-1', product_name: '프레바톤', spec: '500ml' }];
+const REFS = [{ product_code: 'P-1', product_name: '프레바톤', spec: '500ml', quantity: 2 }];
 
 describe('readStoredCart', () => {
   it('reads back what writeStoredCart wrote', () => {
@@ -42,7 +42,7 @@ describe('readStoredCart', () => {
       'nh-storefront-cart': JSON.stringify([{ product_name: '가', spec: '1' }, { junk: true }]),
     });
 
-    expect(readStoredCart(storage)).toEqual([{ product_name: '가', spec: '1' }]);
+    expect(readStoredCart(storage)).toEqual([{ product_name: '가', spec: '1', quantity: 1 }]);
   });
 
   it('returns an empty cart when the stored value is not an array', () => {

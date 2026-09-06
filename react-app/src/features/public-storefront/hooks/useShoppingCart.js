@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   addCartItemRef,
   removeCartItemKeys,
+  setCartItemQuantity,
 } from '../../storefront-view/model/cart/cartItemModel';
 import { readStoredCart, writeStoredCart } from '../model/cartStorageModel';
 
@@ -31,5 +32,7 @@ export function useShoppingCart() {
     cartItemRefs,
     addToCart: (product) => setCartItemRefs((current) => addCartItemRef(current, product)),
     removeCartItems: (keys) => setCartItemRefs((current) => removeCartItemKeys(current, keys)),
+    changeCartItemQuantity: (key, quantity) =>
+      setCartItemRefs((current) => setCartItemQuantity(current, key, quantity)),
   };
 }

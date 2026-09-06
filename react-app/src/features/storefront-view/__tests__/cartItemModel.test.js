@@ -7,7 +7,10 @@ import {
   isProductInCart,
   normalizeCartItemRefs,
   removeCartItemKeys,
+  setCartItemQuantity,
   buildVisibleFieldsByCartKey,
+  MAX_CART_QUANTITY,
+  MIN_CART_QUANTITY,
 } from '../model/cart/cartItemModel';
 
 const PREVATON = {
@@ -59,7 +62,7 @@ describe('normalizeCartItemRefs', () => {
         null,
         '문자열',
       ]),
-    ).toEqual([{ product_code: 'P-1', product_name: '가', spec: '1' }]);
+    ).toEqual([{ product_code: 'P-1', product_name: '가', spec: '1', quantity: 1 }]);
   });
 
   it('drops duplicates that resolve to the same key', () => {
@@ -80,7 +83,7 @@ describe('normalizeCartItemRefs', () => {
 describe('addCartItemRef', () => {
   it('appends the minimum a ref needs to be found again', () => {
     expect(addCartItemRef([], PREVATON)).toEqual([
-      { product_code: 'P-100', product_name: '프레바톤', spec: '500ml' },
+      { product_code: 'P-100', product_name: '프레바톤', spec: '500ml', quantity: 1 },
     ]);
   });
 
@@ -112,7 +115,7 @@ describe('removeCartItemKeys', () => {
   it('removes every selected key at once', () => {
     const refs = addCartItemRef(addCartItemRef([], PREVATON), NO_CODE_ROW);
     expect(removeCartItemKeys(refs, [buildCartItemKey(PREVATON)])).toEqual([
-      { product_name: '복합비료', spec: '20kg' },
+      { product_name: '복합비료', spec: '20kg', quantity: 1 },
     ]);
   });
 
@@ -303,5 +306,69 @@ describe('노출하지 않기로 한 가격은 장바구니에도 나오지 않�
     expect(pricesFor(refs, ALL_ROWS, lookupFromEverything)).toEqual(
       pricesFor(refs, ALL_ROWS, buildVisibleFieldsByCartKey(CATEGORY_CONFIGS, [FERTILIZER])),
     );
+  });
+});
+
+describe('수량', () => {
+  // 수량은 담긴 개수일 뿐이다. 합계도, 단가 곱셈도 하지 않는다 — 과세/면세가
+  // 행마다 달라 더한 값이 어떤 손님에게도 맞지 않는다는 규칙은 그대로다.
+  it('starts every added product at one', () => {
+    expect(addCartItemRef([], PREVATON).at(0).quantity).toBe(MIN_CART_QUANTITY);
+  });
+
+  it('keeps a saved quantity when the cart comes back from storage', () => {
+    expect(
+      normalizeCartItemRefs([{ product_code: 'P-1', product_name: '가', spec: '1', quantity: 4 }]),
+    ).toEqual([{ product_code: 'P-1', product_name: '가', spec: '1', quantity: 4 }]);
+  });
+
+  it('repairs a saved quantity that is missing, junk, or out of range', () => {
+    const quantities = normalizeCartItemRefs([
+      { product_code: 'P-1', product_name: '가' },
+      { product_code: 'P-2', product_name: '나', quantity: '3' },
+      { product_code: 'P-3', product_name: '다', quantity: 2.7 },
+      { product_code: 'P-4', product_name: '라', quantity: 0 },
+      { product_code: 'P-5', product_name: '마', quantity: -8 },
+      { product_code: 'P-6', product_name: '바', quantity: 9999 },
+      { product_code: 'P-7', product_name: '사', quantity: '넷' },
+    ]).map((ref) => ref.quantity);
+
+    expect(quantities).toEqual([1, 3, 2, 1, 1, MAX_CART_QUANTITY, 1]);
+  });
+
+  it('changes only the addressed row', () => {
+    const refs = addCartItemRef(addCartItemRef([], PREVATON), NO_CODE_ROW);
+    const next = setCartItemQuantity(refs, buildCartItemKey(PREVATON), 5);
+
+    expect(next.map((ref) => ref.quantity)).toEqual([5, 1]);
+    // 이름·규격은 그대로다 — 수량만 바뀐다
+    expect(next.at(0)).toMatchObject({ product_code: 'P-100', spec: '500ml' });
+  });
+
+  it('clamps what the caller asks for', () => {
+    const refs = addCartItemRef([], PREVATON);
+    const key = buildCartItemKey(PREVATON);
+
+    expect(setCartItemQuantity(refs, key, 0).at(0).quantity).toBe(MIN_CART_QUANTITY);
+    expect(setCartItemQuantity(refs, key, 500).at(0).quantity).toBe(MAX_CART_QUANTITY);
+  });
+
+  it('returns the same array when nothing would change', () => {
+    const refs = addCartItemRef([], PREVATON);
+
+    expect(setCartItemQuantity(refs, buildCartItemKey(PREVATON), 1)).toBe(refs);
+    expect(setCartItemQuantity(refs, 'code:없는상품', 3)).toBe(refs);
+    expect(setCartItemQuantity(refs, '', 3)).toBe(refs);
+  });
+
+  it('carries the quantity into the display items, sold-out rows included', () => {
+    const refs = setCartItemQuantity(addCartItemRef([], PREVATON), buildCartItemKey(PREVATON), 6);
+
+    expect(buildCartDisplayItems(refs, [PREVATON]).at(0).quantity).toBe(6);
+    expect(buildCartDisplayItems(refs, []).at(0).quantity).toBe(6);
+  });
+
+  it('shows a repaired quantity for a ref that never had one', () => {
+    expect(buildCartDisplayItems([{ product_code: 'P-100' }], [PREVATON]).at(0).quantity).toBe(1);
   });
 });

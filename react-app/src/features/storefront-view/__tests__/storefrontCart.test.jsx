@@ -41,6 +41,7 @@ function cartProps(overrides = {}) {
     cartItemRefs: [],
     onAddToCart: vi.fn(),
     onRemoveCartItems: vi.fn(),
+    onChangeCartItemQuantity: vi.fn(),
     ...overrides,
   };
 }
@@ -407,5 +408,77 @@ describe('장바구니 가격은 지금 보고 있는 분류에 흔들리지 않
     // 그래도 장바구니 속 비료의 영세가격은 그대로 보여야 한다.
     expect(within(panel).getByText('복합비료')).toBeInTheDocument();
     expect(within(panel).getByText('영세가격')).toBeInTheDocument();
+  });
+});
+
+describe('storefront cart — 수량', () => {
+  const PREVATON_REF = { product_code: 'P-100', product_name: '프레바톤', spec: '500ml' };
+
+  async function openPanel(overrides = {}) {
+    const user = userEvent.setup();
+    renderStorefront(cartProps({ cartItemRefs: [{ ...PREVATON_REF, quantity: 3 }], ...overrides }));
+
+    await user.click(screen.getByTestId('storefront-cart-open'));
+
+    return { user, panel: screen.getByRole('dialog', { name: '장바구니' }) };
+  }
+
+  it('shows the quantity the ref carries', async () => {
+    const { panel } = await openPanel();
+
+    expect(within(panel).getByTestId('storefront-cart-quantity-value')).toHaveTextContent('3');
+  });
+
+  it('asks the owner to raise and lower it — the panel keeps no quantity of its own', async () => {
+    const onChangeCartItemQuantity = vi.fn();
+    const { user, panel } = await openPanel({ onChangeCartItemQuantity });
+
+    await user.click(within(panel).getByRole('button', { name: '프레바톤 수량 늘리기' }));
+    expect(onChangeCartItemQuantity).toHaveBeenLastCalledWith('code:P-100', 4);
+
+    await user.click(within(panel).getByRole('button', { name: '프레바톤 수량 줄이기' }));
+    expect(onChangeCartItemQuantity).toHaveBeenLastCalledWith('code:P-100', 2);
+  });
+
+  it('does not toggle the row checkbox when the shopper taps a stepper button', async () => {
+    // 수량 버튼이 행 전체를 감싼 <label> 안에 있으면 누를 때마다 선택이 켜졌다.
+    const { user, panel } = await openPanel();
+
+    await user.click(within(panel).getByRole('button', { name: '프레바톤 수량 늘리기' }));
+
+    expect(within(panel).getByRole('checkbox')).not.toBeChecked();
+    expect(within(panel).getByRole('button', { name: /선택 삭제/ })).toBeDisabled();
+  });
+
+  it('cannot go below one — 0개 담긴 줄은 삭제로 해야 한다', async () => {
+    const { panel } = await openPanel({ cartItemRefs: [{ ...PREVATON_REF, quantity: 1 }] });
+
+    expect(within(panel).getByRole('button', { name: '프레바톤 수량 줄이기' })).toBeDisabled();
+    expect(within(panel).getByRole('button', { name: '프레바톤 수량 늘리기' })).toBeEnabled();
+  });
+
+  it('cannot go above the ceiling', async () => {
+    const { panel } = await openPanel({ cartItemRefs: [{ ...PREVATON_REF, quantity: 99 }] });
+
+    expect(within(panel).getByRole('button', { name: '프레바톤 수량 늘리기' })).toBeDisabled();
+    expect(within(panel).getByRole('button', { name: '프레바톤 수량 줄이기' })).toBeEnabled();
+  });
+
+  it('offers no stepper for a product that is gone', async () => {
+    const { panel } = await openPanel({
+      cartItemRefs: [{ product_code: 'P-999', product_name: '단종된 약', spec: '2L', quantity: 2 }],
+    });
+
+    expect(within(panel).getByText('판매 종료')).toBeInTheDocument();
+    expect(within(panel).queryByTestId('storefront-cart-quantity-value')).not.toBeInTheDocument();
+  });
+
+  it('adds no total — quantity never multiplies a price', async () => {
+    const { panel } = await openPanel();
+
+    expect(within(panel).getByText('32,000원')).toBeInTheDocument();
+    // 3 x 32,000 이 어디에도 나오지 않는다
+    expect(within(panel).queryByText(/96,000/)).not.toBeInTheDocument();
+    expect(within(panel).queryByText(/합계/)).not.toBeInTheDocument();
   });
 });

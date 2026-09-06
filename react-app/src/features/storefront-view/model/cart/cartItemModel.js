@@ -29,13 +29,36 @@ export function buildCartItemKey(product) {
   return `name:${productName}|${toTrimmedString(product?.spec)}`;
 }
 
-function toCartItemRef(product) {
+export const MIN_CART_QUANTITY = 1;
+export const MAX_CART_QUANTITY = 99;
+
+/**
+ * 수량은 손님이 몇 개를 담았는지일 뿐이다. 이 값으로 단가를 곱하지도, 합계를
+ * 내지도 않는다 — 과세/면세/영세가 행마다 다르다는 이유는 수량이 생겨도
+ * 그대로다.
+ *
+ * 저장소에서 돌아온 값은 손님이 콘솔로 고쳤을 수도, 예전 버전이 남긴 것일
+ * 수도 있어 믿지 않는다. 못 읽는 값은 버리지 말고 1로 고친다 — 담아둔 상품을
+ * 수량 하나 때문에 없애는 것이 더 나쁘다.
+ */
+function toCartQuantity(value) {
+  const number = Math.trunc(Number(value));
+
+  if (!Number.isFinite(number) || number < MIN_CART_QUANTITY) {
+    return MIN_CART_QUANTITY;
+  }
+
+  return Math.min(number, MAX_CART_QUANTITY);
+}
+
+function toCartItemRef(product, quantity = MIN_CART_QUANTITY) {
   const productCode = toTrimmedString(product?.product_code);
   const productName = toTrimmedString(product?.product_name);
+  const base = { product_name: productName, spec: toTrimmedString(product?.spec) };
 
   return productCode
-    ? { product_code: productCode, product_name: productName, spec: toTrimmedString(product?.spec) }
-    : { product_name: productName, spec: toTrimmedString(product?.spec) };
+    ? { product_code: productCode, ...base, quantity: toCartQuantity(quantity) }
+    : { ...base, quantity: toCartQuantity(quantity) };
 }
 
 export function normalizeCartItemRefs(value) {
@@ -54,7 +77,7 @@ export function normalizeCartItemRefs(value) {
     }
 
     seen.add(key);
-    refs.push(toCartItemRef(entry));
+    refs.push(toCartItemRef(entry, entry.quantity));
   }
 
   return refs;
@@ -79,6 +102,32 @@ export function addCartItemRef(refs, product) {
   }
 
   return [...current, toCartItemRef(product)];
+}
+
+/**
+ * 한 줄의 수량만 바꾼다. 바뀔 것이 없으면 받은 배열을 그대로 돌려줘서, 버튼을
+ * 끝값에서 눌러도 저장소에 쓰기가 일어나지 않는다.
+ */
+export function setCartItemQuantity(refs, key, quantity) {
+  const current = Array.isArray(refs) ? refs : [];
+
+  if (!key) {
+    return current;
+  }
+
+  const next = toCartQuantity(quantity);
+  let changed = false;
+
+  const updated = current.map((ref) => {
+    if (buildCartItemKey(ref) !== key || ref?.quantity === next) {
+      return ref;
+    }
+
+    changed = true;
+    return { ...ref, quantity: next };
+  });
+
+  return changed ? updated : current;
 }
 
 export function removeCartItemKeys(refs, keys) {
@@ -172,6 +221,8 @@ export function buildCartDisplayItems(refs, productRows, visibleFieldsByCartKey)
     return {
       key,
       isUnavailable: row === null,
+      // 수량은 ref 가 유일한 출처다. 판매 종료된 줄도 손님이 정한 수를 잃지 않는다.
+      quantity: toCartQuantity(ref?.quantity),
       productName: toTrimmedString(row?.product_name || ref?.product_name),
       spec: toTrimmedString(row?.spec ?? ref?.spec),
       largeCategory: toTrimmedString(row?.large_category),
