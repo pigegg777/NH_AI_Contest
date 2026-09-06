@@ -121,4 +121,37 @@ describe('worksheet rows model', () => {
       }),
     ]);
   });
+
+  it('flags a 영세 price that sits above the 과세 price', () => {
+    const rows = buildAggregatedWorksheetRows(
+      [
+        ['조합원정상가', '01', 'P-004', '테스트비료', '중본-과세-수탁매취', '20kg', 13100],
+        ['조합원정상가', '01', 'P-004', '테스트비료', '중본-영세-수탁매취', '20kg', 14410],
+      ],
+      { columnMap: COLUMN_MAP, dataStartRowIndex: 0, dataEndRowIndex: 1 },
+    );
+
+    expect(rows).toEqual([
+      expect.objectContaining({
+        row_id: 'P-004__01',
+        tax_price: 13100,
+        zero_tax_price: 14410,
+        warnings: expect.arrayContaining([
+          '영세 매출단가가 14410원으로 과세 매출단가 13100원보다 높습니다. 두 단가가 서로 뒤바뀌지 않았는지 확인이 필요합니다.',
+        ]),
+      }),
+    ]);
+  });
+
+  it('keeps a 영세 price below the 과세 price warning-free', () => {
+    const rows = buildAggregatedWorksheetRows(
+      [
+        ['조합원정상가', '01', 'P-005', '테스트비료', '중본-과세-수탁매취', '20kg', 14410],
+        ['조합원정상가', '01', 'P-005', '테스트비료', '중본-영세-수탁매취', '20kg', 13100],
+      ],
+      { columnMap: COLUMN_MAP, dataStartRowIndex: 0, dataEndRowIndex: 1 },
+    );
+
+    expect(rows[0].warnings).toEqual([]);
+  });
 });

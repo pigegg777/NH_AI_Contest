@@ -141,6 +141,21 @@ function collectSalePriceCandidates(target, row) {
   }
 }
 
+function warnInvertedZeroTaxPrice(target) {
+  if (target.zero_tax_price == null || target.tax_price == null) {
+    return;
+  }
+
+  if (target.zero_tax_price <= target.tax_price) {
+    return;
+  }
+
+  const warning = `영세 매출단가가 ${target.zero_tax_price}원으로 과세 매출단가 ${target.tax_price}원보다 높습니다. 두 단가가 서로 뒤바뀌지 않았는지 확인이 필요합니다.`;
+  if (!target.warnings.includes(warning)) {
+    target.warnings.push(warning);
+  }
+}
+
 function finalizeAggregatedWorksheetRow(target) {
   for (const { candidatesField, priceField, label } of PRICE_SLOT_DEFINITIONS) {
     const uniqueCandidates = [...new Set(target[candidatesField])];
@@ -156,6 +171,8 @@ function finalizeAggregatedWorksheetRow(target) {
 
     delete target[candidatesField];
   }
+
+  warnInvertedZeroTaxPrice(target);
 
   target.manufacturer_list =
     target._manufacturers.size > 0 ? [...target._manufacturers.values()] : null;
