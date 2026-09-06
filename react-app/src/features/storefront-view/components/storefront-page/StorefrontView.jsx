@@ -33,6 +33,7 @@ export default function StorefrontView({
   cartItemRefs,
   onAddToCart,
   onRemoveCartItems,
+  onChangeCartItemQuantity,
   // 빌더 미리보기는 핸들러 없이 이것만 켠다. 버튼이 실제와 똑같이 보이되
   // 눌리지 않는다 — 사장님이 카드 우하단이 가려지는 것을 보면서 디자인하되,
   // 사장님 브라우저에 손님 장바구니가 쌓이지는 않게.
@@ -197,6 +198,7 @@ export default function StorefrontView({
         // 나타났다 사라지면 안 된다.
         categoryConfigs={config?.categoryConfigs}
         onRemoveCartItems={onRemoveCartItems}
+        onChangeCartItemQuantity={onChangeCartItemQuantity}
         onClose={() => setIsCartOpen(false)}
       />
     ) : null}

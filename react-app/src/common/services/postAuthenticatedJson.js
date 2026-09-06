@@ -1,5 +1,5 @@
-import supabase from '../../../lib/supabaseClient';
-import { toTrimmedString } from '../../../common/utils/text';
+import supabase from '../../lib/supabaseClient';
+import { toTrimmedString } from '../utils/text';
 
 const SESSION_EXPIRED_ERROR_MESSAGE =
   '로그인 정보가 만료되었습니다. 다시 로그인해 주세요.';

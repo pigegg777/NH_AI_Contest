@@ -1,11 +1,19 @@
 import { toTrimmedString } from '../../../../common/utils/text';
 
 /**
- * The only columns a re-upload may inherit from the previous save. Everything
- * else — the three price columns above all — comes from the new workbook, since
- * refreshing prices is the whole point of re-uploading.
+ * The only text columns a re-upload may inherit from the previous save. The hide
+ * flag is inherited too, but separately — see SHADOW_FIELD. Everything else — the
+ * three price columns above all — comes from the new workbook, since refreshing
+ * prices is the whole point of re-uploading.
  */
 export const CARRY_OVER_FIELDS = ['img_url', 'note'];
+
+/**
+ * 숨길 상품 표시. A boolean has no "blank", so it cannot ride along with the text
+ * fields: `hasValue(false)` is true, which would read every unhidden row as one
+ * the new workbook already filled in.
+ */
+export const SHADOW_FIELD = 'shadow';
 
 function hasValue(value) {
   return toTrimmedString(value) !== '';
@@ -55,21 +63,52 @@ function resolvePreviousValue(candidates, salePriceTypeCode, field) {
 }
 
 /**
- * Fill img_url and note on freshly extracted workbook rows from the previously
- * saved rows of the same category, matched on product_code.
+ * Resolve the hide flag the same way, but reading "set" as "is a boolean" rather
+ * than "is non-empty text". A previous row saved before the flag existed holds
+ * null, which counts as unset and lets the fallback keep looking.
+ */
+function resolvePreviousShadow(candidates, salePriceTypeCode) {
+  const exactMatch = candidates.find(
+    (candidate) =>
+      toTrimmedString(candidate?.sale_price_type_code) === salePriceTypeCode &&
+      typeof candidate?.[SHADOW_FIELD] === 'boolean',
+  );
+
+  if (exactMatch) {
+    return exactMatch[SHADOW_FIELD];
+  }
+
+  const fallback = candidates.find(
+    (candidate) => typeof candidate?.[SHADOW_FIELD] === 'boolean',
+  );
+
+  return fallback ? fallback[SHADOW_FIELD] : null;
+}
+
+/**
+ * Fill img_url, note and the hide flag on freshly extracted workbook rows from
+ * the previously saved rows of the same category, matched on product_code.
  *
  * A value the new workbook already carries always wins — carrying over is for
  * filling blanks, not for overwriting what the merchant just uploaded.
+ *
+ * Only a flag that was on gets carried: writing false onto a row that is already
+ * shown changes nothing, and counting it would inflate the dialog's tally.
  */
 export function carryOverPreviousRows(newRows, previousRows) {
   const rows = Array.isArray(newRows) ? newRows : [];
   const byProductCode = indexPreviousRows(previousRows);
 
   if (byProductCode.size === 0) {
-    return { rows, carriedImageCount: 0, carriedNoteCount: 0 };
+    return {
+      rows,
+      carriedImageCount: 0,
+      carriedNoteCount: 0,
+      carriedShadowCount: 0,
+    };
   }
 
-  const carriedCounts = { img_url: 0, note: 0 };
+  const carriedCounts = { img_url: 0, note: 0, shadow: 0 };
   const nextRows = rows.map((newRow) => {
     const productCode = toTrimmedString(newRow?.product_code);
     const candidates = productCode ? byProductCode.get(productCode) : null;
@@ -100,6 +139,14 @@ export function carryOverPreviousRows(newRows, previousRows) {
       carriedCounts[field] += 1;
     }
 
+    if (
+      typeof newRow?.[SHADOW_FIELD] !== 'boolean' &&
+      resolvePreviousShadow(candidates, salePriceTypeCode) === true
+    ) {
+      carried[SHADOW_FIELD] = true;
+      carriedCounts.shadow += 1;
+    }
+
     return Object.keys(carried).length > 0 ? { ...newRow, ...carried } : newRow;
   });
 
@@ -107,5 +154,6 @@ export function carryOverPreviousRows(newRows, previousRows) {
     rows: nextRows,
     carriedImageCount: carriedCounts.img_url,
     carriedNoteCount: carriedCounts.note,
+    carriedShadowCount: carriedCounts.shadow,
   };
 }

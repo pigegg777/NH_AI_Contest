@@ -14,6 +14,7 @@ export default function PublicStorefrontScreen({
   cartItemRefs,
   onAddToCart,
   onRemoveCartItems,
+  onChangeCartItemQuantity,
   isCartPreview = false,
   onActiveCategoryChange,
 }) {
@@ -28,6 +29,7 @@ export default function PublicStorefrontScreen({
       cartItemRefs={cartItemRefs}
       onAddToCart={onAddToCart}
       onRemoveCartItems={onRemoveCartItems}
+      onChangeCartItemQuantity={onChangeCartItemQuantity}
       isCartPreview={isCartPreview}
       onActiveCategoryChange={onActiveCategoryChange}
     />

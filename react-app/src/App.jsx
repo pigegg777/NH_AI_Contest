@@ -5,12 +5,14 @@ import DashboardPage from './common/pages/DashboardPage';
 import LoginPage from './features/auth/pages/LoginPage';
 import RegisterPage from './features/auth/pages/RegisterPage';
 import { useAppAuthState } from './features/auth/hooks/useAppAuthState';
+import NongyakPage from './features/nongyak/pages/NongyakPage';
 import OfficeProductEditorPage from './features/office-product-editor/pages/OfficeProductEditorPage';
 import PublicStorefrontPage from './features/public-storefront/pages/PublicStorefrontPage';
 import StorefrontBuilderPage from './features/storefront-builder/pages/StorefrontBuilderPage';
 
 const OFFICE_PRODUCT_EDITOR_PAGE_KEY = 'office-product-editor';
 const STOREFRONT_BUILDER_PAGE_KEY = 'storefront-builder';
+const NONGYAK_PAGE_KEY = 'nongyak';
 const LEGACY_EXCEL_EXTRACT_TOOL_KEY = 'excel-extract';
 
 const PUBLIC_TOOL_USER = {
@@ -155,6 +157,7 @@ export default function App() {
         <OfficeProductEditorPage
           user={user}
           onGoHome={() => setActivePage('dashboard')}
+          onOpenNongyak={() => setActivePage(NONGYAK_PAGE_KEY)}
         />
       </Activity>
       {activePage === STOREFRONT_BUILDER_PAGE_KEY && (
@@ -163,6 +166,9 @@ export default function App() {
           nhName={user?.nh_name ?? ''}
           onGoHome={() => setActivePage('dashboard')}
         />
+      )}
+      {activePage === NONGYAK_PAGE_KEY && (
+        <NongyakPage officeCode={user?.office_code ?? ''} />
       )}
     </AppLayout>
   );

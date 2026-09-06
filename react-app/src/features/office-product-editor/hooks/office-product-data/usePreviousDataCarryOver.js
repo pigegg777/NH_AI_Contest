@@ -8,8 +8,8 @@ export const CARRY_OVER_MODES = {
 };
 
 /**
- * Lets the merchant decide whether a re-uploaded workbook inherits the img_url
- * and note it had before, or starts clean. The question is asked once, in a
+ * Lets the merchant decide whether a re-uploaded workbook inherits the img_url,
+ * note and hide flag it had before, or starts clean. The question is asked once, in a
  * dialog, as soon as a new workbook is parsed over a category that already has
  * saved rows — there is nothing to ask about otherwise.
  */
@@ -114,5 +114,6 @@ export function usePreviousDataCarryOver({
     rows: shouldCarry ? carryOver.rows : newRows,
     carriedImageCount: carryOver?.carriedImageCount ?? 0,
     carriedNoteCount: carryOver?.carriedNoteCount ?? 0,
+    carriedShadowCount: carryOver?.carriedShadowCount ?? 0,
   };
 }

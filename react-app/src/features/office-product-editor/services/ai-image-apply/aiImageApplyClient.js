@@ -1,5 +1,5 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { postAuthenticatedJson } from '../postAuthenticatedJson';
+import { postAuthenticatedJson } from '../../../../common/services/postAuthenticatedJson';
 
 const GENERATE_ENDPOINT = '/api/ai-image-apply/generate';
 const UPLOAD_ENDPOINT = '/api/ai-image-apply/upload';

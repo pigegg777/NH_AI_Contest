@@ -71,11 +71,13 @@ function EditorLayout() {
   );
 }
 
-export default function OfficeProductEditorPage({ user }) {
+// onOpenNongyak은 로그인 세션에서만 넘어온다. 공개 도구 모드(tool=…)에는
+// 농약 정보 페이지로 갈 인증이 없으므로 링크 자체가 뜨지 않는다.
+export default function OfficeProductEditorPage({ user, onOpenNongyak }) {
   return (
     <OfficeProductEditorProvider user={user}>
       <main className={styles.page}>
-        <HeaderSection />
+        <HeaderSection onOpenNongyak={onOpenNongyak} />
         <EditorLayout />
       </main>
     </OfficeProductEditorProvider>

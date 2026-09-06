@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 import {
   buildCartDisplayItems,
   buildVisibleFieldsByCartKey,
+  MAX_CART_QUANTITY,
+  MIN_CART_QUANTITY,
 } from '../../../model/cart/cartItemModel';
 import styles from './CartPanel.module.css';
 
@@ -17,6 +19,9 @@ export default function CartPanel({
   // 사장님이 끈 가격까지 보여준다.
   categoryConfigs,
   onRemoveCartItems,
+  // 수량은 이 패널이 들고 있지 않다. 장바구니를 가진 쪽에 부탁하고 결과를
+  // 다시 받아 그린다 — 닫았다 열어도, 새로고침해도 손님이 정한 수가 남는다.
+  onChangeCartItemQuantity,
   onClose,
 }) {
   const [selectedKeys, setSelectedKeys] = useState(() => new Set());
@@ -28,6 +33,7 @@ export default function CartPanel({
   );
   const items = buildCartDisplayItems(cartItemRefs, productRows, visibleFieldsByCartKey);
   const selectedCount = items.filter((item) => selectedKeys.has(item.key)).length;
+  const canChangeQuantity = typeof onChangeCartItemQuantity === 'function';
 
   function toggleKey(key) {
     setSelectedKeys((current) => {
@@ -107,6 +113,38 @@ export default function CartPanel({
                       )}
                     </span>
                   </label>
+
+                  {/* 수량 조절은 <label> 밖에 둔다. 안에 있으면 버튼을 누를
+                      때마다 행의 체크박스가 함께 토글된다. */}
+                  {canChangeQuantity && !item.isUnavailable ? (
+                    <div className={styles.quantity}>
+                      <button
+                        type="button"
+                        className={styles.quantityButton}
+                        aria-label={`${item.productName} 수량 줄이기`}
+                        disabled={item.quantity <= MIN_CART_QUANTITY}
+                        onClick={() => onChangeCartItemQuantity(item.key, item.quantity - 1)}
+                      >
+                        −
+                      </button>
+                      <span
+                        className={styles.quantityValue}
+                        data-testid="storefront-cart-quantity-value"
+                        aria-live="polite"
+                      >
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        className={styles.quantityButton}
+                        aria-label={`${item.productName} 수량 늘리기`}
+                        disabled={item.quantity >= MAX_CART_QUANTITY}
+                        onClick={() => onChangeCartItemQuantity(item.key, item.quantity + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : null}
                 </li>
               ))}
             </ul>

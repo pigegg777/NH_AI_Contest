@@ -113,6 +113,7 @@ export default function PublicStorefrontPage({ officeCode }) {
         cartItemRefs={cart.cartItemRefs}
         onAddToCart={cart.addToCart}
         onRemoveCartItems={cart.removeCartItems}
+        onChangeCartItemQuantity={cart.changeCartItemQuantity}
       />
     </div>
   );

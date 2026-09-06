@@ -1,0 +1,36 @@
+.wrap {
+  position: relative;
+}
+
+.listbox {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  box-shadow: var(--corp-shadow-md);
+}
+
+.option {
+  padding: 7px 10px;
+  border-radius: var(--corp-radius-sm, 6px);
+  font-size: 13px;
+  color: var(--corp-text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.optionActive {
+  background: var(--corp-primary-soft);
+  color: var(--corp-primary-hover);
+}

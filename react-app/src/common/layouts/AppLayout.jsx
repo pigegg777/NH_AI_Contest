@@ -7,6 +7,7 @@ const ORG_SEPARATOR = ' · ';
 const NAV_ITEMS = [
   { key: 'office-product-editor', label: '데이터 설정/수정' },
   { key: 'storefront-builder', label: 'AI 페이지 만들기' },
+  { key: 'nongyak', label: '농약 정보' },
 ];
 
 function BrandContent() {

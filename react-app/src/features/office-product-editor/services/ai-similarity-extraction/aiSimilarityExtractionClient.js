@@ -1,5 +1,5 @@
 import { toTrimmedString } from '../../../../common/utils/text';
-import { postAuthenticatedJson } from '../postAuthenticatedJson';
+import { postAuthenticatedJson } from '../../../../common/services/postAuthenticatedJson';
 
 const AI_SIMILARITY_EXTRACTION_ENDPOINT = '/api/ai-similarity-extraction/analyze';
 

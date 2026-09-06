@@ -1,0 +1,253 @@
+.wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--corp-line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  /* background: transparent; */
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #e8edf3;
+  padding: 14px 16px;
+  font-size: 14px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.table th:first-child {
+  border-top-left-radius: 14px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 14px;
+}
+
+.table tbody tr {
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.table tbody tr:nth-child(even) td {
+  background: #fcfdff;
+}
+
+.table tbody tr:hover td {
+  background: #f6faff;
+}
+
+.cellText {
+  min-width: 140px;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  color: #1f2937;
+}
+
+.table th:first-child,
+.table td:first-child {
+  min-width: 170px;
+}
+
+.table td:first-child {
+  font-weight: 700;
+  color: #0b5cab;
+  /* background: #f7fbff; */
+  box-shadow: inset -1px 0 0 #d9e7f4;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table th:last-child,
+.table td:last-child {
+  min-width: 260px;
+}
+
+.table td:nth-child(2) {
+  min-width: 200px;
+  color: #111827;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table td:last-child {
+  color: #475569;
+}
+
+.wrapCompact {
+  overflow-x: hidden;
+  border-color: #dbe6ef;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.tableCompact {
+  table-layout: fixed;
+}
+
+.tableCompact th,
+.tableCompact td {
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tableCompact th {
+  font-size: 11px;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  color: #526173;
+  background: #f6f9fc;
+}
+
+.tableCompact .cellText {
+  min-width: 0;
+}
+
+.cellTextCompact {
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.compactHeader:first-child,
+.tableCompact th:first-child,
+.tableCompact td:first-child {
+  min-width: 0;
+  width: 18%;
+}
+
+.tableCompact td:first-child {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f4c81;
+  background: #f5f9ff;
+  box-shadow: inset -1px 0 0 #dde8f2;
+}
+
+.tableCompact td:nth-child(2) {
+  min-width: 0;
+  width: 24%;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tableCompact th:last-child,
+.tableCompact td:last-child {
+  min-width: 0;
+}
+
+.tableCompact tbody tr:nth-child(even) td {
+  background: #fbfdff;
+}
+
+.tableCompact tbody tr:hover td {
+  background: #f2f7fc;
+}
+
+@media (max-width: 768px) {
+  .wrap {
+    border-radius: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .table th {
+    font-size: 12px;
+  }
+
+  .cellText {
+    min-width: 118px;
+  }
+
+  .table th:first-child,
+  .table td:first-child {
+    min-width: 118px;
+  }
+
+  .table td:nth-child(2) {
+    min-width: 156px;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    min-width: 180px;
+  }
+
+  .tableCompact th,
+  .tableCompact td {
+    padding: 8px 8px;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .tableCompact th {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .table th,
+  .table td {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .cellText {
+    min-width: 104px;
+  }
+
+  .table th:first-child,
+  .table td:first-child {
+    min-width: 104px;
+  }
+
+  .table td:nth-child(2) {
+    min-width: 138px;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    min-width: 160px;
+  }
+
+  .tableCompact th,
+  .tableCompact td {
+    padding: 7px 7px;
+    font-size: 10px;
+  }
+}

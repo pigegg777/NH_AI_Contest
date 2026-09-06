@@ -1,0 +1,244 @@
+/* width: 100%가 있어야 한다. 이 요소는 AppLayout .main(세로 flex)의 아이템이고,
+   가로축 margin auto는 flex의 stretch를 꺼 버린다. 그러면 폭이 내용 크기로
+   정해져서, 검색 결과가 줄면 카드 그리드를 따라 페이지 전체가 좁아진다. */
+.page {
+  width: 100%;
+  max-width: 2400px;
+  margin: 0 auto;
+  padding: 4px clamp(16px, 4vw, 40px) 60px;
+  display: grid;
+  gap: 16px;
+}
+
+/* ── Hero ── */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.heroIconBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: var(--corp-radius-lg);
+  background: var(--corp-primary-soft);
+}
+
+.heroIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 700;
+  color: var(--corp-text);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--corp-muted);
+}
+
+/* ── 탭+검색창 상단 고정. AppLayout 헤더(54px) 바로 아래에 붙는다. ── */
+.stickyHeader {
+  position: sticky;
+  top: 57px;
+  z-index: 10;
+  display: grid;
+  gap: 16px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  background: var(--corp-bg);
+}
+
+/* ── Tabs (methods 페이지와 동일한 언더라인 톤) ── */
+.tabRow {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--corp-line);
+}
+
+.tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 10px 4px;
+  margin-right: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--corp-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--corp-transition),
+    border-color var(--corp-transition);
+}
+
+.tab:hover {
+  color: var(--corp-primary-hover);
+}
+
+.tabActive {
+  color: var(--corp-primary-hover);
+  border-bottom-color: var(--corp-primary-hover);
+}
+
+/* ── Filter panel ── */
+.filterPanel {
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  box-shadow: var(--corp-shadow-sm);
+  padding: 18px 20px;
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.searchField {
+  display: grid;
+  gap: 6px;
+}
+
+.searchLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--corp-muted);
+}
+
+.searchInput {
+  padding: 6px 10px;
+}
+
+.searchInput input {
+  font-size: 13px;
+}
+
+.searchInput img {
+  width: 16px;
+  height: 16px;
+}
+
+.categorySelect {
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid var(--corp-line-strong);
+  border-radius: var(--corp-radius);
+  background: var(--corp-panel);
+  color: var(--corp-text);
+  cursor: pointer;
+  transition:
+    border-color var(--corp-transition),
+    box-shadow var(--corp-transition);
+}
+
+.categorySelect:focus-visible {
+  outline: none;
+  border-color: var(--corp-primary);
+  box-shadow: var(--corp-focus-ring);
+}
+
+/* ── Result layout ── */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.resultMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--corp-muted);
+}
+
+.resultCount {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--corp-text);
+}
+
+/* 사용법 표(6열 compact)는 520px면 충분하다. 600px이면 1440px 화면에서
+   카드 3열이 한 장당 220px 밑으로 눌린다. */
+.sidebar {
+  width: 520px;
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--nongyak-sidebar-top, 190px);
+  max-height: calc(100vh - var(--nongyak-sidebar-top, 190px) - 16px);
+  overflow-y: auto;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  /* 모바일에서는 선택된 카드 바로 아래(NongyakCardGrid의 .mobilePanelSlot)에
+     사용법 패널이 이어져 나오므로, 데스크탑용 오른쪽 sticky 사이드바는 숨긴다. */
+  .sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    gap: 10px;
+  }
+
+  .heroIconBadge {
+    width: 40px;
+    height: 40px;
+  }
+
+  .heroIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .filterPanel {
+    padding: 14px;
+  }
+
+  .searchGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .searchLabel {
+    font-size: 11px;
+  }
+
+  .searchInput {
+    padding: 5px 8px;
+  }
+
+  .searchInput input {
+    font-size: 12px;
+  }
+
+  .categorySelect {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+}
