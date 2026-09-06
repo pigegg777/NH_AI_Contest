@@ -2,10 +2,16 @@ import { useEditorMeta, useSaveCtx } from '../../contexts/editorContexts';
 import { SaveControlPanel } from './SaveControlPanel';
 import styles from './HeaderSection.module.css';
 
-export function HeaderSection() {
-  const { activeCategoryName, bannerStatusLabel, bannerStatusVariant } =
-    useEditorMeta();
+export function HeaderSection({ onOpenNongyak }) {
+  const {
+    activeCategoryName,
+    bannerStatusLabel,
+    bannerStatusVariant,
+    tableNameMode,
+  } = useEditorMeta();
   const save = useSaveCtx();
+  const canOpenNongyak =
+    tableNameMode === 'pesticide' && typeof onOpenNongyak === 'function';
 
   return (
     <div className={styles.banner}>
@@ -15,6 +21,7 @@ export function HeaderSection() {
             {activeCategoryName ||
               '새 테이블을 등록하거나 왼쪽에서 데이터를 선택해 주세요'}
           </h1>
+
           {activeCategoryName && (
             <span
               className={[
@@ -27,6 +34,15 @@ export function HeaderSection() {
               {bannerStatusLabel}
             </span>
           )}
+          {canOpenNongyak ? (
+            <button
+              type="button"
+              className={styles.nongyakShortcut}
+              onClick={onOpenNongyak}
+            >
+              농약 정보 검색 바로가기
+            </button>
+          ) : null}
         </div>
       </div>
       {save?.handleSave && (

@@ -1,0 +1,78 @@
+.status {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 0.875rem;
+  color: var(--corp-muted);
+}
+
+.detailLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  color: var(--corp-primary);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.detailLink:hover {
+  color: var(--corp-primary-hover);
+}
+
+.detailLink:focus-visible {
+  outline: none;
+  border-radius: 2px;
+  box-shadow: var(--corp-focus-ring);
+}
+
+.infoList {
+  margin: 0 0 14px;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius);
+  background: var(--corp-primary-soft);
+}
+
+.infoRow {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.infoLabel {
+  flex-shrink: 0;
+  width: 52px;
+  margin: 0;
+  color: var(--corp-muted);
+  font-weight: 600;
+}
+
+.infoValue {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--corp-text);
+  font-weight: 500;
+}
+
+.cropSearch {
+  margin-bottom: 10px;
+  padding: 6px 10px;
+}
+
+.cropSearch input {
+  font-size: 13px;
+}
+
+.cropSearch img {
+  width: 16px;
+  height: 16px;
+}

@@ -1,0 +1,34 @@
+.section {
+  background: var(--corp-panel);
+  border: 1px solid var(--corp-line);
+  border-radius: var(--corp-radius-lg);
+  padding: 20px 22px;
+  box-shadow: var(--corp-shadow-sm);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--corp-text);
+}
+
+.description {
+  margin: 6px 0 0;
+  color: var(--corp-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.right {
+  flex-shrink: 0;
+}

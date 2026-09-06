@@ -1,0 +1,37 @@
+/* 열 개수를 폭에 맡기면(auto-fill) 검색 결과나 창 크기에 따라 한 줄에 2~4개가
+   오락가락한다. 탭을 오갈 때도 카드 폭이 달라 보이므로 열 수를 고정한다. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+/* 오른쪽 사용법 사이드바가 폭을 크게 가져가서, 이 아래로는 3열이면
+   카드 하나가 200px 밑으로 눌린다. */
+@media (max-width: 1280px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 모바일 전용: 선택된 카드 바로 아래에 이어지는 사용법 패널. 데스크탑에서는
+   오른쪽 sticky 사이드바(NongyakPage.module.css .sidebar)로 대신 보여준다. */
+.mobilePanelSlot {
+  display: none;
+  grid-column: 1 / -1;
+  list-style: none;
+}
+
+@media (max-width: 960px) {
+  .mobilePanelSlot {
+    display: block;
+  }
+}

@@ -744,6 +744,30 @@ describe('OfficeProductEditorPage', () => {
     expect(screen.queryByText('직접 추가한 테이블 이름입니다')).not.toBeInTheDocument();
   });
 
+  it('renders the pesticide search shortcut beside the pesticide header title', async () => {
+    const user = userEvent.setup();
+    const onOpenNongyak = vi.fn();
+
+    render(<OfficeProductEditorPage onOpenNongyak={onOpenNongyak} />);
+
+    const sidebar = screen.getByRole('complementary', {
+      name: '등록 데이터 현황',
+    });
+    await user.click(within(sidebar).getByRole('button', { name: /농약/i }));
+
+    const title = screen.getByRole('heading', { name: '농약' });
+    const shortcut = within(title.parentElement).getByRole('button', {
+      name: '농약 정보 검색 바로가기',
+    });
+
+    expect(within(sidebar).queryByRole('button', {
+      name: '농약 정보 검색 바로가기',
+    })).not.toBeInTheDocument();
+
+    await user.click(shortcut);
+    expect(onOpenNongyak).toHaveBeenCalledOnce();
+  });
+
   it('clears the input after creating a table so the draft is not reused', async () => {
     const user = userEvent.setup();
 
