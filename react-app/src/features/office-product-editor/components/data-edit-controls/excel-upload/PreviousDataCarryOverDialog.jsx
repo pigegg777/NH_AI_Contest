@@ -3,7 +3,11 @@ import { useEffect } from 'react';
 import { CARRY_OVER_MODES } from '../../../hooks/office-product-data/usePreviousDataCarryOver';
 import styles from './ExcelUploadSection.module.css';
 
-function buildCarriedSummary(carriedImageCount, carriedNoteCount) {
+function buildCarriedSummary(
+  carriedImageCount,
+  carriedNoteCount,
+  carriedShadowCount,
+) {
   const parts = [];
 
   if (carriedImageCount > 0) {
@@ -12,6 +16,10 @@ function buildCarriedSummary(carriedImageCount, carriedNoteCount) {
 
   if (carriedNoteCount > 0) {
     parts.push(`비고 ${carriedNoteCount}건`);
+  }
+
+  if (carriedShadowCount > 0) {
+    parts.push(`숨길 상품 표시 ${carriedShadowCount}건`);
   }
 
   return parts.length > 0 ? parts.join(' · ') : null;
@@ -27,6 +35,7 @@ export function PreviousDataCarryOverDialog({
   categoryName,
   carriedImageCount,
   carriedNoteCount,
+  carriedShadowCount = 0,
   onChoose,
   onDismiss,
 }) {
@@ -50,7 +59,11 @@ export function PreviousDataCarryOverDialog({
     return null;
   }
 
-  const carriedSummary = buildCarriedSummary(carriedImageCount, carriedNoteCount);
+  const carriedSummary = buildCarriedSummary(
+    carriedImageCount,
+    carriedNoteCount,
+    carriedShadowCount,
+  );
 
   return (
     <div
@@ -67,7 +80,7 @@ export function PreviousDataCarryOverDialog({
         onClick={(event) => event.stopPropagation()}
       >
         <h2 className={styles.carryOverDialogTitle} id="carry-over-dialog-title">
-          기존 사진·비고를 이어받을까요?
+          기존 사진·비고·숨길 상품 표시를 이어받을까요?
         </h2>
 
         <p className={styles.carryOverDialogBody}>
@@ -75,7 +88,7 @@ export function PreviousDataCarryOverDialog({
           있습니다.
           {carriedSummary
             ? ` 상품코드가 같은 상품의 ${carriedSummary}을 새 데이터로 옮깁니다.`
-            : ' 다만 새 엑셀이 이미 값을 채우고 있어 옮길 사진이나 비고가 없습니다.'}
+            : ' 다만 새 엑셀이 이미 값을 채우고 있어 옮길 사진·비고·숨길 상품 표시가 없습니다.'}
         </p>
 
         <p className={styles.carryOverDialogNote}>

@@ -141,11 +141,13 @@ describe('carryOverPreviousRows', () => {
       rows: newRows,
       carriedImageCount: 0,
       carriedNoteCount: 0,
+      carriedShadowCount: 0,
     });
     expect(carryOverPreviousRows(newRows, null)).toEqual({
       rows: newRows,
       carriedImageCount: 0,
       carriedNoteCount: 0,
+      carriedShadowCount: 0,
     });
   });
 
@@ -158,5 +160,95 @@ describe('carryOverPreviousRows', () => {
     expect(result.rows[0].note).toBe('');
     expect(result.rows[1].note).toBe('');
     expect(result.carriedNoteCount).toBe(0);
+  });
+
+  it('carries the hide flag that was on before', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1' })],
+      [row({ product_code: 'P1', shadow: true })],
+    );
+
+    expect(result.rows[0].shadow).toBe(true);
+    expect(result.carriedShadowCount).toBe(1);
+  });
+
+  it('leaves a row that was not hidden before alone', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1' })],
+      [row({ product_code: 'P1', shadow: false })],
+    );
+
+    expect(result.rows[0].shadow).toBeUndefined();
+    expect(result.carriedShadowCount).toBe(0);
+  });
+
+  it('treats a previous row without a hide flag as not hidden', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1' })],
+      [row({ product_code: 'P1', shadow: null })],
+    );
+
+    expect(result.rows[0].shadow).toBeUndefined();
+    expect(result.carriedShadowCount).toBe(0);
+  });
+
+  it('keeps a hide flag the new rows already decided', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1', shadow: false })],
+      [row({ product_code: 'P1', shadow: true })],
+    );
+
+    expect(result.rows[0].shadow).toBe(false);
+    expect(result.carriedShadowCount).toBe(0);
+  });
+
+  it('prefers the row with the same sale price type for the hide flag too', () => {
+    const result = carryOverPreviousRows(
+      [
+        row({ product_code: 'P1', sale_price_type_code: '01' }),
+        row({ product_code: 'P1', sale_price_type_code: '02' }),
+      ],
+      [
+        row({ product_code: 'P1', sale_price_type_code: '01', shadow: false }),
+        row({ product_code: 'P1', sale_price_type_code: '02', shadow: true }),
+      ],
+    );
+
+    expect(result.rows[0].shadow).toBeUndefined();
+    expect(result.rows[1].shadow).toBe(true);
+    expect(result.carriedShadowCount).toBe(1);
+  });
+
+  it('falls back to the product code for the hide flag when the price type no longer matches', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1', sale_price_type_code: '09' })],
+      [row({ product_code: 'P1', sale_price_type_code: '01', shadow: true })],
+    );
+
+    expect(result.rows[0].shadow).toBe(true);
+    expect(result.carriedShadowCount).toBe(1);
+  });
+
+  it('carries the hide flag alongside the photo and the note', () => {
+    const result = carryOverPreviousRows(
+      [row({ product_code: 'P1' })],
+      [
+        row({
+          product_code: 'P1',
+          img_url: 'https://img/p1.png',
+          note: '비고',
+          shadow: true,
+        }),
+      ],
+    );
+
+    expect(result.rows[0]).toMatchObject({
+      img_url: 'https://img/p1.png',
+      note: '비고',
+      shadow: true,
+    });
+    expect(result.carriedImageCount).toBe(1);
+    expect(result.carriedNoteCount).toBe(1);
+    expect(result.carriedShadowCount).toBe(1);
   });
 });

@@ -10,6 +10,7 @@ function renderDialog(overrides = {}) {
     categoryName: '비료',
     carriedImageCount: 21,
     carriedNoteCount: 8,
+    carriedShadowCount: 3,
     onChoose: vi.fn(),
     onDismiss: vi.fn(),
     ...overrides,
@@ -35,14 +36,34 @@ describe('PreviousDataCarryOverDialog', () => {
     expect(
       screen.getByText(/비료에 이미 저장된 데이터가 있습니다/),
     ).toBeInTheDocument();
-    expect(screen.getByText(/사진 21건 · 비고 8건/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/사진 21건 · 비고 8건 · 숨길 상품 표시 3건/),
+    ).toBeInTheDocument();
   });
 
-  it('says so when the new workbook leaves nothing to carry', () => {
+  it('leaves out a field that has nothing to carry', () => {
+    renderDialog({ carriedNoteCount: 0, carriedShadowCount: 0 });
+
+    expect(screen.getByText(/사진 21건을 새 데이터로 옮깁니다/)).toBeInTheDocument();
+  });
+
+  it('names the hide flag on its own when only it was carried', () => {
     renderDialog({ carriedImageCount: 0, carriedNoteCount: 0 });
 
     expect(
-      screen.getByText(/옮길 사진이나 비고가 없습니다/),
+      screen.getByText(/숨길 상품 표시 3건을 새 데이터로 옮깁니다/),
+    ).toBeInTheDocument();
+  });
+
+  it('says so when the new workbook leaves nothing to carry', () => {
+    renderDialog({
+      carriedImageCount: 0,
+      carriedNoteCount: 0,
+      carriedShadowCount: 0,
+    });
+
+    expect(
+      screen.getByText(/옮길 사진·비고·숨길 상품 표시가 없습니다/),
     ).toBeInTheDocument();
   });
 
